@@ -1,0 +1,34 @@
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+/* Seek motion system */
+@keyframes seek-fade-up { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes seek-float { 0%, 100% { transform: translateY(0); } 50% { transform: translateY(-5px); } }
+@keyframes seek-shimmer { from { transform: translateX(-120%); } to { transform: translateX(120%); } }
+
+.seek-reveal { opacity: 0; transform: translateY(22px); transition: opacity .7s ease, transform .7s cubic-bezier(.22,1,.36,1); }
+.seek-reveal.is-visible { opacity: 1; transform: translateY(0); }
+.seek-reveal-stagger > * { opacity: 0; transform: translateY(18px); transition: opacity .6s ease, transform .6s cubic-bezier(.22,1,.36,1); }
+.seek-reveal-stagger.is-visible > * { opacity: 1; transform: translateY(0); }
+.seek-reveal-stagger.is-visible > *:nth-child(2) { transition-delay: .06s; }
+.seek-reveal-stagger.is-visible > *:nth-child(3) { transition-delay: .12s; }
+.seek-reveal-stagger.is-visible > *:nth-child(4) { transition-delay: .18s; }
+.seek-reveal-stagger.is-visible > *:nth-child(5) { transition-delay: .24s; }
+.seek-reveal-stagger.is-visible > *:nth-child(6) { transition-delay: .30s; }
+.seek-reveal-stagger.is-visible > *:nth-child(7) { transition-delay: .36s; }
+.seek-reveal-stagger.is-visible > *:nth-child(8) { transition-delay: .42s; }
+.seek-reveal-stagger.is-visible > *:nth-child(9) { transition-delay: .48s; }
+.seek-float { animation: seek-float 4s ease-in-out infinite; }
+.seek-shimmer { position: relative; overflow: hidden; }
+.seek-shimmer::after { content: ""; position: absolute; inset: 0; width: 45%; background: linear-gradient(90deg, transparent, rgba(255,255,255,.18), transparent); transform: translateX(-120%); animation: seek-shimmer 3.8s ease-in-out infinite; pointer-events: none; }
+
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
+  .seek-reveal, .seek-reveal-stagger > * { opacity: 1 !important; transform: none !important; }
+}
