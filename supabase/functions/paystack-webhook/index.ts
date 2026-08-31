@@ -20,6 +20,7 @@ Deno.serve(async (req) => {
     if (!donation) return new Response('Donation not found', { status: 404 });
     if (donation.status === 'successful') return new Response('ok');
 
+  
     const paidAmount = Number(event.data.amount) / 100;
     if (Math.abs(paidAmount - Number(donation.amount)) > 0.01) return new Response('Amount mismatch', { status: 400 });
 
