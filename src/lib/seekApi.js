@@ -48,7 +48,7 @@ export function mapRequestRow(row) {
   };
 }
 
-export export async function initializeDonation({
+export async function initializeDonation({
   amount,
   email,
   requestId = null,
