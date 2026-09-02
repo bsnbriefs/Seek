@@ -28,7 +28,24 @@ export async function submitVolunteer(payload) {
 
 export async function listPublishedRequests() {
   if (!supabaseConfigured) return [];
-  return supabaseFetch('requests?select=*&is_public=eq.true&status=eq.published&order=created_at.desc');
+  return supabaseFetch('requests?select=*&is_public=eq.true&status=eq.published&order=created_at.desc&limit=12');
+}
+
+// Adapts a raw requests row (snake_case DB columns) to the shape <RequestCard>
+// already renders (camelCase) — no markup changes needed to consume real data.
+export function mapRequestRow(row) {
+  return {
+    id: row.id,
+    title: row.title,
+    category: row.category,
+    location: row.location,
+    description: row.description,
+    amountNeeded: row.amount_needed,
+    amountRaised: row.amount_raised,
+    urgency: row.urgency,
+    verification: row.verification_status,
+    type: (row.assistance_type || '').toLowerCase().includes('item') ? 'item' : 'money',
+  };
 }
 
 export async function initializeDonation({ amount, email, requestId = null, anonymous = false }) {
