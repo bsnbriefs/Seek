@@ -59,3 +59,32 @@ export async function initializeDonation({ amount, email, requestId = null, anon
   if (!response.ok || !data?.authorization_url) throw new Error(data?.error || 'Payment could not be initialized.');
   return data;
 }
+export async function verifyDonation(reference) {
+  if (!supabaseConfigured) {
+    throw new Error('Seek backend is not configured yet.');
+  }
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paystack-verify`,
+    {
+      method: 'POST',
+      headers: {
+        'Content-Type': 'application/json',
+        apikey:
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+          import.meta.env.VITE_SUPABASE_ANON_KEY,
+      },
+      body: JSON.stringify({ reference }),
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.error || 'Payment verification failed.'
+    );
+  }
+
+  return data;
+      }
