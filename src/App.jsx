@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from "react";
-import { submitRequest, submitOffer, submitVolunteer, initializeDonation } from "./lib/seekApi";
+import { submitRequest, submitOffer, submitVolunteer, initializeDonation, listPublishedRequests, mapRequestRow } from "./lib/seekApi";
 import {
   Menu, X, ArrowRight, HandHeart, HeartHandshake, Search, ShoppingBag,
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
@@ -59,54 +59,6 @@ const CATEGORIES = [
   { id: "emergency", label: "Emergency", icon: AlertTriangle },
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "other", label: "Other", icon: MoreHorizontal },
-];
-
-// DEMO REQUESTS — illustrative only, not real people or real cases.
-const DEMO_REQUESTS = [
-  {
-    id: 1,
-    title: "School fees assistance needed",
-    category: "Education",
-    location: "Lagos, Nigeria",
-    description: "A new term is starting and two children need their fees settled to stay enrolled.",
-    amountNeeded: 85000,
-    amountRaised: 35000,
-    verification: "verified",
-    urgency: "urgent",
-    type: "money",
-  },
-  {
-    id: 2,
-    title: "Food assistance for a family",
-    category: "Food",
-    location: "Abuja, Nigeria",
-    description: "A household is seeking ongoing monthly food support while work is being re-established.",
-    verification: "verified",
-    urgency: "normal",
-    type: "item",
-  },
-  {
-    id: 3,
-    title: "Children's clothing needed",
-    category: "Clothing",
-    location: "Port Harcourt, Nigeria",
-    description: "Growing children, ages 4–10, need seasonal clothing. Any size or condition welcome.",
-    verification: "pending",
-    urgency: "normal",
-    type: "item",
-  },
-  {
-    id: 4,
-    title: "Medical assistance needed",
-    category: "Medical",
-    location: "Benin City, Nigeria",
-    description: "Ongoing treatment support is needed following a recent hospital admission.",
-    verification: "verified",
-    urgency: "emergency",
-    type: "money",
-    amountNeeded: 210000,
-    amountRaised: 60000,
-  },
 ];
 
 const IMPACT_STATS = [
@@ -208,7 +160,7 @@ function CategoryCard({ cat, onClick }) {
   );
 }
 
-function RequestCard({ req }) {
+function RequestCard({ req, onHelp }) {
   return (
     <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md transition-shadow duration-200">
       <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -229,7 +181,11 @@ function RequestCard({ req }) {
       )}
       <div className="mt-auto flex items-center justify-between">
         <VerificationBadge status={req.verification} />
-        <button className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors">
+        <button
+          type="button"
+          onClick={onHelp ? () => onHelp(req) : undefined}
+          className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors"
+        >
           Help <ChevronRight size={15} />
         </button>
       </div>
@@ -368,6 +324,25 @@ function Connector() {
 
 function HomePage({ setPage }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublishedRequests();
+        if (!cancelled) setRequests(rows.map(mapRequestRow));
+      } catch (err) {
+        if (!cancelled) setRequestsError(err.message);
+      } finally {
+        if (!cancelled) setRequestsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
   return (
     <>
       {/* HERO */}
@@ -452,19 +427,24 @@ function HomePage({ setPage }) {
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
           <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
             <div>
-              <SectionLabel>Open requests · Demo data</SectionLabel>
+              <SectionLabel>Open requests</SectionLabel>
               <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B] max-w-lg">Someone out there needs what you can give.</h2>
             </div>
-            <button className="inline-flex items-center gap-1 font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C]">
+            <button onClick={() => go("give")} className="inline-flex items-center gap-1 font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C]">
               View all requests <ArrowRight size={16} />
             </button>
           </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {DEMO_REQUESTS.map((r) => <RequestCard key={r.id} req={r} />)}
-          </div>
-          <p className="mt-6 text-xs text-[#0D3B3B]/40 font-body">
-            The requests above are illustrative demo content used to preview the Seek experience — not real people or active cases.
-          </p>
+          {requestsLoading ? (
+            <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
+          ) : requestsError ? (
+            <p className="font-body text-sm text-red-600">{requestsError}</p>
+          ) : requests.length === 0 ? (
+            <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={() => go("give")} />)}
+            </div>
+          )}
         </div>
       </section>
 
@@ -516,7 +496,6 @@ const GIVE_OPTIONS = [
 ];
 
 function GivePage({ setPage }) {
-  const [showForm, setShowForm] = useState(false);
   const [offer, setOffer] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [offerError, setOfferError] = useState("");
@@ -526,9 +505,43 @@ function GivePage({ setPage }) {
   const [paymentError, setPaymentError] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
 
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublishedRequests();
+        if (!cancelled) setRequests(rows.map(mapRequestRow));
+      } catch (err) {
+        if (!cancelled) setRequestsError(err.message);
+      } finally {
+        if (!cancelled) setRequestsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  function selectRequest(req) {
+    setSelectedRequest(req);
+    setDonating(true);
+    document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
   async function startDonation(e) {
     e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
-    try { const result = await initializeDonation({ amount: Number(payment.amount), email: payment.email, anonymous: payment.anonymous }); window.location.href = result.authorization_url; }
+    try {
+      const result = await initializeDonation({
+        amount: Number(payment.amount),
+        email: payment.email,
+        requestId: selectedRequest?.id || null,
+        anonymous: payment.anonymous,
+      });
+      window.location.href = result.authorization_url;
+    }
     catch (err) { setPaymentError(err.message); } finally { setPaymentLoading(false); }
   }
   async function sendOffer() {
@@ -546,23 +559,51 @@ function GivePage({ setPage }) {
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Time, items, skills and small acts of generosity go just as far.</p>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
         <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
           <div className="max-w-2xl">
             <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#8DE3C5]">Support a need</p>
             <h2 className="font-display font-extrabold text-3xl mt-2">Give directly to the Seek community.</h2>
-            <p className="font-body mt-3 text-white/70">Donations are processed securely through Paystack. Specific requests will be added here as the matching system goes live.</p>
-            {!donating ? <Button variant="primary" className="mt-6 !bg-[#63C167] !text-[#0D3B3B]" onClick={() => setDonating(true)}>Donate now <ArrowRight size={16} /></Button> : (
+            <p className="font-body mt-3 text-white/70">
+              {selectedRequest
+                ? <>Donating toward <span className="font-semibold text-white">{selectedRequest.title}</span> ({selectedRequest.location}).</>
+                : "Choose a request below to support it directly, or give a general donation to the wider Seek community."}
+            </p>
+            {!donating ? (
+              <Button variant="primary" className="mt-6 !bg-[#63C167] !text-[#0D3B3B]" onClick={() => { setSelectedRequest(null); setDonating(true); }}>
+                Give a general donation <ArrowRight size={16} />
+              </Button>
+            ) : (
               <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
                 <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
                 <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
+                {selectedRequest && (
+                  <button type="button" onClick={() => { setSelectedRequest(null); }} className="sm:col-span-3 text-left text-sm text-white/70 underline underline-offset-2 hover:text-white">
+                    Give a general donation instead
+                  </button>
+                )}
                 {paymentError && <p className="sm:col-span-3 text-sm text-red-200">{paymentError}</p>}
               </form>
             )}
           </div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-6">Open requests</h2>
+        {requestsLoading ? (
+          <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
+        ) : requestsError ? (
+          <p className="font-body text-sm text-red-600">{requestsError}</p>
+        ) : requests.length === 0 ? (
+          <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
+        ) : (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} />)}
+          </div>
+        )}
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
@@ -606,13 +647,13 @@ function GivePage({ setPage }) {
                 {offerLoading ? "Submitting…" : "Submit offer"} <ArrowRight size={16} />
               </Button>
               {offerError && <p className="mt-3 text-sm text-red-600 font-body">{offerError}</p>}
-              <p className="mt-3 text-xs text-[#0D3B3B]/40 font-body">Offers are reviewed before they are published or matched.</p>
+              <p className="mt-3 text-xs text-[#0D3B3B]/40 font-body">Offers are reviewed by the team before they're published and connected with a request in need.</p>
             </div>
           ) : (
             <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center" style={{ background: C.bg }}>
               <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
               <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you — your offer has been received.</h2>
-              <p className="font-body text-sm text-[#0D3B3B]/60">A volunteer or the BSN Foundation team will help match it to someone who needs it.</p>
+              <p className="font-body text-sm text-[#0D3B3B]/60">A volunteer or the BSN Foundation team will help connect it with someone who needs it.</p>
             </div>
           )}
         </div>
