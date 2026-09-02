@@ -87,7 +87,6 @@ export async function initializeDonation({
 
   return data;
 }
-}
 export async function verifyDonation(reference) {
   if (!supabaseConfigured) {
     throw new Error('Seek backend is not configured yet.');
