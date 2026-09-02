@@ -9,38 +9,23 @@ export async function submitRequest(payload) {
     ? Number(String(payload.amount).replace(/[^0-9.]/g, '')) || null
     : null;
 
-  const rows = await supabaseFetch('requests', {
+  const rows = await supabaseFetch('rpc/submit_seek_request', {
     method: 'POST',
     body: JSON.stringify({
-      title: payload.need,
-      category: payload.category,
-      location: payload.location,
-      description: payload.description,
-      amount_needed: amount,
-      urgency: payload.urgency.toLowerCase(),
-      assistance_type: payload.type,
-      status: 'pending_review',
-      is_public: false
+      p_title: payload.need,
+      p_category: payload.category,
+      p_location: payload.location,
+      p_description: payload.description,
+      p_amount_needed: amount,
+      p_urgency: payload.urgency.toLowerCase(),
+      p_assistance_type: payload.type,
+      p_full_name: payload.name,
+      p_email: payload.email,
+      p_phone: payload.phone
     })
   });
 
-  const request = rows[0];
-
-  try {
-    await supabaseFetch('request_private', {
-      method: 'POST',
-      body: JSON.stringify({
-        request_id: request.id,
-        full_name: payload.name,
-        email: payload.email,
-        phone: payload.phone
-      })
-    });
-  } catch (error) {
-    throw error;
-  }
-
-  return request;
+  return Array.isArray(rows) ? rows[0] : rows;
 }
 
 export async function submitOffer(payload) {
