@@ -17,13 +17,20 @@ export async function supabaseFetch(path, options = {}) {
     ...options,
     headers: {
       apikey: key,
+      Authorization: `Bearer ${key}`,
       'Content-Type': 'application/json',
       ...(options.headers || {}),
     },
   });
 
   const text = await response.text();
-  const data = text ? JSON.parse(text) : null;
+
+  let data = null;
+  try {
+    data = text ? JSON.parse(text) : null;
+  } catch {
+    data = text;
+  }
 
   if (!response.ok) {
     throw new Error(
