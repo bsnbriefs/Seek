@@ -48,16 +48,45 @@ export function mapRequestRow(row) {
   };
 }
 
-export async function initializeDonation({ amount, email, requestId = null, anonymous = false }) {
-  if (!supabaseConfigured) throw new Error('Seek backend is not configured yet.');
-  const response = await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paystack-initialize`, {
-    method: 'POST',
-    headers: { 'Content-Type': 'application/json', apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY },
-    body: JSON.stringify({ amount, email, request_id: requestId, anonymous }),
-  });
+export export async function initializeDonation({
+  amount,
+  email,
+  requestId = null,
+  anonymous = false,
+  callbackUrl = window.location.origin,
+}) {
+  if (!supabaseConfigured) {
+    throw new Error("Seek backend is not configured yet.");
+  }
+
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/paystack-initialize`,
+    {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
+      },
+      body: JSON.stringify({
+        amount,
+        email,
+        request_id: requestId,
+        anonymous,
+        callback_url: callbackUrl,
+      }),
+    }
+  );
+
   const data = await response.json();
-  if (!response.ok || !data?.authorization_url) throw new Error(data?.error || 'Payment could not be initialized.');
+
+  if (!response.ok || !data?.authorization_url) {
+    throw new Error(
+      data?.error || "Payment could not be initialized."
+    );
+  }
+
   return data;
+}
 }
 export async function verifyDonation(reference) {
   if (!supabaseConfigured) {
