@@ -1,16 +1,45 @@
 import { supabaseConfigured, supabaseFetch } from './supabase';
 
 export async function submitRequest(payload) {
-  if (!supabaseConfigured) throw new Error('Seek backend is not configured yet.');
-  const amount = payload.amount ? Number(String(payload.amount).replace(/[^0-9.]/g, '')) || null : null;
-  const rows = await supabaseFetch('requests', { method: 'POST', body: JSON.stringify({ title: payload.need, category: payload.category, location: payload.location, description: payload.description, amount_needed: amount, urgency: payload.urgency.toLowerCase(), assistance_type: payload.type, status: 'pending_review', is_public: false }) });
+  if (!supabaseConfigured) {
+    throw new Error('Seek backend is not configured yet.');
+  }
+
+  const amount = payload.amount
+    ? Number(String(payload.amount).replace(/[^0-9.]/g, '')) || null
+    : null;
+
+  const rows = await supabaseFetch('requests', {
+    method: 'POST',
+    body: JSON.stringify({
+      title: payload.need,
+      category: payload.category,
+      location: payload.location,
+      description: payload.description,
+      amount_needed: amount,
+      urgency: payload.urgency.toLowerCase(),
+      assistance_type: payload.type,
+      status: 'pending_review',
+      is_public: false
+    })
+  });
+
   const request = rows[0];
+
   try {
-    await supabaseFetch('request_private', { method: 'POST', body: JSON.stringify({ request_id: request.id, full_name: payload.name, email: payload.email, phone: payload.phone }) });
+    await supabaseFetch('request_private', {
+      method: 'POST',
+      body: JSON.stringify({
+        request_id: request.id,
+        full_name: payload.name,
+        email: payload.email,
+        phone: payload.phone
+      })
+    });
   } catch (error) {
-    // The request is already safely pending; admins can remove incomplete records if needed.
     throw error;
   }
+
   return request;
 }
 
