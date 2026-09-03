@@ -113,7 +113,7 @@ function VerificationBadge({ status }) {
   identity: { label: "Identity verified", icon: ShieldCheck, cls: "bg-[#63C167]/15 text-[#0D3B3B]" },
   partner: { label: "Partner verified", icon: Handshake, cls: "bg-slate-100 text-slate-700" },
 };
-  const m = map[status] || map.pending;
+  const m = map[status] || map.pending_review;
   const Icon = m.icon;
   return (
     <span className={`inline-flex items-center gap-1.5 rounded-full px-3 py-1 text-xs font-semibold font-body ${m.cls}`}>
