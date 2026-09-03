@@ -877,7 +877,9 @@ function AboutPage({ setPage }) {
 /* ---------------- App ---------------- */
 
 export default function App() {
-  const [page, setPage] = useState("home");
+  const [page, setPage] = useState(
+  window.location.pathname === "/admin" ? "admin" : "home"
+);
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
   useEffect(() => {
