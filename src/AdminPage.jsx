@@ -233,7 +233,30 @@ export default function AdminPage() {
                       ₦{raised.toLocaleString()}
                     </p>
                   </div>
+              <div className="mt-4">
+                <button
+                  onClick={() => loadEvidence(req.id)}
+                  className="rounded-xl border border-[#0D3B3B] px-4 py-2 text-sm font-semibold text-[#0D3B3B]"
+                >
+                  View supporting evidence
+                </button>
 
+                {evidence[req.id]?.length > 0 && (
+                  <div className="mt-3 space-y-2">
+                    {evidence[req.id].map((file) => (
+                      <a
+                        key={file.storage_path}
+                        href={file.signed_url}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="block text-sm font-medium text-[#1BAA9C] underline"
+                      >
+                        📎 {file.file_name}
+                      </a>
+                    ))}
+                  </div>
+                )}
+              </div>
                   <div className="mt-4 h-2 overflow-hidden rounded-full bg-slate-100">
                     <div
                       className="h-full rounded-full bg-[#1BAA9C]"
