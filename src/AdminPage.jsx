@@ -145,8 +145,36 @@ export default function AdminPage() {
                       {req.location}
                     </p>
                     <p className="mt-3 text-sm">{req.description}</p>
+                    <div className="mt-4 grid gap-2 text-sm text-[#0D3B3B]/70 sm:grid-cols-3">
+  <p>
+    <span className="font-semibold">Reference:</span>{" "}
+    {req.public_reference || req.id}
+  </p>
+  <p>
+    <span className="font-semibold">Needed:</span>{" "}
+    ₦{Number(req.amount_needed || 0).toLocaleString()}
+  </p>
+  <p>
+    <span className="font-semibold">Raised:</span>{" "}
+    ₦{Number(req.amount_raised || 0).toLocaleString()}
+  </p>
+</div>
                   </div>
-
+<div className="mt-3 h-2 overflow-hidden rounded-full bg-slate-100">
+  <div
+    className="h-full rounded-full bg-[#1BAA9C]"
+    style={{
+      width: `${Math.min(
+        100,
+        Math.round(
+          (Number(req.amount_raised || 0) /
+            Math.max(Number(req.amount_needed || 0), 1)) *
+            100
+        )
+      )}%`,
+    }}
+  />
+</div>
                   <span className="h-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
                     {req.status}
                   </span>
