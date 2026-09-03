@@ -65,6 +65,16 @@ export default function AdminPage() {
     } catch (err) {
       setError(err.message);
     }
+    async function loadEvidence(requestId) {
+  try {
+    const files = await getAdminEvidence(requestId);
+    setEvidence((prev) => ({
+      ...prev,
+      [requestId]: files,
+    }));
+  } catch (err) {
+    setError(err.message);
+  }
   }
 
   useEffect(() => {
