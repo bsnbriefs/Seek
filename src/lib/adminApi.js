@@ -169,3 +169,56 @@ export async function verifyAdminRequest(id, notes = "") {
 
   return data;
 }
+export async function getAdminEvidence(requestId) {
+  const session = getAdminSession();
+
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/request_evidence?request_id=eq.${requestId}&select=id,file_name,storage_path,mime_type,file_size,created_at&order=created_at.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load request evidence.");
+  }
+
+  const evidence = [];
+
+  for (const file of data) {
+    const signResponse = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/sign/seek-evidence/${file.storage_path}`,
+      {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          expiresIn: 600,
+        }),
+      }
+    );
+
+    const signed = await signResponse.json().catch(() => ({}));
+
+    if (signResponse.ok && signed?.signedURL) {
+      evidence.push({
+        ...file,
+        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedURL}`,
+      });
+    }
+  }
+
+  return evidence;
+}
