@@ -976,7 +976,7 @@ export default function App() {
   if (window.location.pathname === "/admin") {
     setPage("admin");
   }
-}}, []);
+}, []);
 
 useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
