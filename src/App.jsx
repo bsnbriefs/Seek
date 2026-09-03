@@ -1,3 +1,4 @@
+import AdminPage from "./AdminPage";
 import React, { useEffect, useState } from "react";
 import { submitRequest, submitOffer, submitVolunteer, initializeDonation, verifyDonation, listPublishedRequests, mapRequestRow } from "./lib/seekApi";
 import {
@@ -925,6 +926,7 @@ export default function App() {
   const pages = {
     home: <HomePage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
+    admin: <AdminPage />,
     "seek-help": <SeekHelpPage />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
