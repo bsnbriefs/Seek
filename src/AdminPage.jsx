@@ -177,14 +177,22 @@ export default function AdminPage() {
     </button>
   </>
 )}
-
 {req.status === "verification_required" && (
-  <button
-    onClick={() => changeStatus(req.id, "rejected")}
-    className="rounded-xl border px-4 py-2 text-sm"
-  >
-    Reject
-  </button>
+  <>
+    <button
+      onClick={() => changeStatus(req.id, "published")}
+      className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
+    >
+      Approve verification
+    </button>
+
+    <button
+      onClick={() => changeStatus(req.id, "rejected")}
+      className="rounded-xl border px-4 py-2 text-sm"
+    >
+      Reject
+    </button>
+  </>
 )}
 
 {(req.status === "published" || req.status === "partially_funded") && (
