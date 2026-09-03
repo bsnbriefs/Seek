@@ -973,6 +973,12 @@ export default function App() {
   }, []);
 
   useEffect(() => {
+  if (window.location.pathname === "/admin") {
+    setPage("admin");
+  }
+}}, []);
+
+useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
     const nodes = document.querySelectorAll("section, footer > div, .rounded-3xl");
