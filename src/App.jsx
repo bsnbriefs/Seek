@@ -794,9 +794,13 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             </Field>
           </div>
           <Field label="Supporting images or documents (optional)">
-  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/70">
+  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm hover:bg-[#0D3B3B]/5">
     <Upload size={18} />
-    <span>Choose a file to upload</span>
+    <span>
+      {form.evidenceFile
+        ? form.evidenceFile.name
+        : "Choose a file to upload"}
+    </span>
 
     <input
       type="file"
@@ -811,6 +815,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
     />
   </label>
 </Field>
+      
           
           <p className="text-xs font-body text-[#0D3B3B]/45 leading-relaxed">
             Your privacy matters. Please only share sensitive information — like full addresses or medical details — where it's genuinely necessary. Seek and BSN Foundation never display this publicly.
