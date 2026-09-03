@@ -177,13 +177,13 @@ export default function AdminPage() {
 </div> 
                   <p className="mt-2 text-xs font-semibold text-[#0D3B3B]/60">
   {Math.min(
-    100,
-    Math.round(
-      (Number(req.amount_raised || 0) /
-        Math.max(Number(req.amount_needed || 0), 1)) *
-        100
-    )
-  )}% funded        
+  100,
+  Math.round(
+    (Number(req.amount_raised || 0) /
+      Math.max(Number(req.amount_needed || 0), 1)) *
+      1000
+  ) / 10
+)}% funded        
 </p>
                   <span className="h-fit rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
                     {req.status}
