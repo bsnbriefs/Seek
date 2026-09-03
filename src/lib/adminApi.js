@@ -138,3 +138,34 @@ export async function updateAdminRequestStatus(id, status) {
 
   return data;
         }
+export async function verifyAdminRequest(id, notes = "") {
+  const session = getAdminSession();
+
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/rpc/verify_seek_request`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        p_request_id: id,
+        p_notes: notes,
+      }),
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not verify request.");
+  }
+
+  return data;
+}
