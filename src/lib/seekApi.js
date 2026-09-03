@@ -42,7 +42,7 @@ export async function submitVolunteer(payload) {
 
 export async function listPublishedRequests() {
   if (!supabaseConfigured) return [];
-  return supabaseFetch('requests?select=*&is_public=eq.true&status=eq.published&order=created_at.desc&limit=12');
+  return supabaseFetch('requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=12');
 }
 
 // Adapts a raw requests row (snake_case DB columns) to the shape <RequestCard>
