@@ -25,25 +25,28 @@ export async function adminLogin(email, password) {
   }
 
   const profileResponse = await fetch(
-    `${SUPABASE_URL}/rest/v1/profiles?id=eq.${data.user.id}&select=id,full_name,role`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${data.access_token}`,
-      },
-    }
-  );
+  `${SUPABASE_URL}/rest/v1/rpc/get_my_admin_profile`,
+  {
+    method: 'POST',
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${data.access_token}`,
+      'Content-Type': 'application/json',
+    },
+  }
+);
 
-  const profiles = await profileResponse.json().catch(() => []);
 if (!profileResponse.ok) {
   const details = await profileResponse.text();
-  throw new Error(`Profile lookup failed (${profileResponse.status}): ${details}`);
+  throw new Error(`Admin profile lookup failed (${profileResponse.status}): ${details}`);
 }
 
-if (!profiles.length) {
-  throw new Error('Admin profile was not found.');
+const profile = await profileResponse.json();
+const profiles = [profile];
+
+if (profile.role !== 'admin') {
+  throw new Error('This account does not have administrator access.');
 }
-  }
 
   if (profiles[0].role !== 'admin') {
     throw new Error('This account does not have administrator access.');
