@@ -4,7 +4,8 @@ import {
   getAdminSession,
   adminLogout,
   getAdminRequests,
-  updateAdminRequestStatus
+  updateAdminRequestStatus,
+  verifyAdminRequest
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -47,6 +48,15 @@ export default function AdminPage() {
     } catch (err) {
       setError(err.message);
     }
+  }
+      async function verifyRequest(id) {
+    try {
+      await verifyAdminRequest(id, "Verified by BSN admin");
+      await loadRequests();
+    } catch (err) {
+      setError(err.message);
+    }
+      }
   }
 
   useEffect(() => {
@@ -218,7 +228,7 @@ export default function AdminPage() {
 {req.status === "verification_required" && (
   <>
     <button
-      onClick={() => changeStatus(req.id, "published")}
+      onClick={() => verifyRequest(req.id)}
       className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
     >
       Approve verification
