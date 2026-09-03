@@ -189,7 +189,7 @@ function RequestCard({ req, onHelp }) {
         </p>
       )}
       <div className="mt-auto flex items-center justify-between">
-        <VerificationBadge status={req.verification} />
+        <VerificationBadge status={req.status} />
         <button
           type="button"
           onClick={onHelp ? () => onHelp(req) : undefined}
