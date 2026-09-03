@@ -1,6 +1,5 @@
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim();
-import { submitRequest, submitOffer, submitVolunteer, initializeDonation, verifyDonation, listPublishedRequests, mapRequestRow } from "./lib/seekApi";
-import { adminLogin, getAdminSession, adminLogout, getAdminRequests, updateAdminRequestStatus } from "./lib/adminApi";
+const SUPABASE_KEY = (
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   ''
