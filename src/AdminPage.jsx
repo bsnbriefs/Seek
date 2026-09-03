@@ -153,28 +153,57 @@ export default function AdminPage() {
                 </div>
 
                 <div className="mt-5 flex flex-wrap gap-2">
-                  <button
-                    onClick={() => changeStatus(req.id, "published")}
-                    className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
-                  >
-                    Publish
-                  </button>
+                  {req.status === "pending_review" && (
+  <>
+    <button
+      onClick={() => changeStatus(req.id, "published")}
+      className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
+    >
+      Publish
+    </button>
 
-                  <button
-                    onClick={() =>
-                      changeStatus(req.id, "verification_required")
-                    }
-                    className="rounded-xl border px-4 py-2 text-sm"
-                  >
-                    Request verification
-                  </button>
+    <button
+      onClick={() => changeStatus(req.id, "verification_required")}
+      className="rounded-xl border px-4 py-2 text-sm"
+    >
+      Request verification
+    </button>
 
-                  <button
-                    onClick={() => changeStatus(req.id, "rejected")}
-                    className="rounded-xl border px-4 py-2 text-sm"
-                  >
-                    Reject
-                  </button>
+    <button
+      onClick={() => changeStatus(req.id, "rejected")}
+      className="rounded-xl border px-4 py-2 text-sm"
+    >
+      Reject
+    </button>
+  </>
+)}
+
+{req.status === "verification_required" && (
+  <button
+    onClick={() => changeStatus(req.id, "rejected")}
+    className="rounded-xl border px-4 py-2 text-sm"
+  >
+    Reject
+  </button>
+)}
+
+{(req.status === "published" || req.status === "partially_funded") && (
+  <>
+    <button
+      onClick={() => changeStatus(req.id, "verification_required")}
+      className="rounded-xl border px-4 py-2 text-sm"
+    >
+      Request verification
+    </button>
+
+    <button
+      onClick={() => changeStatus(req.id, "rejected")}
+      className="rounded-xl border px-4 py-2 text-sm"
+    >
+      Reject
+    </button>
+  </>
+)}
                 </div>
               </div>
             ))}
