@@ -58,6 +58,7 @@ export function mapRequestRow(row) {
     amountRaised: row.amount_raised,
     urgency: row.urgency,
     verification: row.verification_status,
+    status: row.status,
     type: (row.assistance_type || '').toLowerCase().includes('item') ? 'item' : 'money',
   };
 }
