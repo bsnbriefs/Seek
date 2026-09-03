@@ -105,7 +105,6 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 function VerificationBadge({ status }) {
   const map = {
-    const map = {
   published: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
   partially_funded: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
   pending_review: { label: "Verification pending", icon: Clock, cls: "bg-amber-100 text-amber-800" },
