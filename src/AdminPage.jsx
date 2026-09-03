@@ -39,7 +39,7 @@ export default function AdminPage() {
       setLoading(false);
     }
   }
-
+  
   async function changeStatus(id, status) {
     try {
       await updateAdminRequestStatus(id, status);
