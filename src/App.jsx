@@ -721,9 +721,20 @@ function SeekHelpPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", location: "", category: "", need: "", amount: "", description: "", urgency: "Normal", type: "Any form of help" });
-  const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
-
+  const [form, setForm] = useState({
+  name: "",
+  email: "",
+  phone: "",
+  location: "",
+  category: "",
+  need: "",
+  amount: "",
+  description: "",
+  type: "",
+  urgency: "",
+  evidenceFile: null,
+});
+const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   if (submitted) {
     return (
       <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
@@ -783,10 +794,24 @@ function SeekHelpPage() {
             </Field>
           </div>
           <Field label="Supporting images or documents (optional)">
-            <div className="flex items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
-              <Upload size={18} /> Drag files here, or click to upload
-            </div>
-          </Field>
+  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/70">
+    <Upload size={18} />
+    <span>Choose a file to upload</span>
+
+    <input
+      type="file"
+      accept="image/*,.pdf"
+      className="hidden"
+      onChange={(e) =>
+        setForm((prev) => ({
+          ...prev,
+          evidenceFile: e.target.files?.[0] || null,
+        }))
+      }
+    />
+  </label>
+</Field>
+          
           <p className="text-xs font-body text-[#0D3B3B]/45 leading-relaxed">
             Your privacy matters. Please only share sensitive information — like full addresses or medical details — where it's genuinely necessary. Seek and BSN Foundation never display this publicly.
           </p>
