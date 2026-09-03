@@ -35,9 +35,14 @@ export async function adminLogin(email, password) {
   );
 
   const profiles = await profileResponse.json().catch(() => []);
+if (!profileResponse.ok) {
+  const details = await profileResponse.text();
+  throw new Error(`Profile lookup failed (${profileResponse.status}): ${details}`);
+}
 
-  if (!profileResponse.ok || !profiles?.length) {
-    throw new Error('Admin profile was not found.');
+if (!profiles.length) {
+  throw new Error('Admin profile was not found.');
+}
   }
 
   if (profiles[0].role !== 'admin') {
