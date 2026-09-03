@@ -105,11 +105,15 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 function VerificationBadge({ status }) {
   const map = {
-    verified: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
-    pending: { label: "Verification pending", icon: Clock, cls: "bg-amber-100 text-amber-800" },
-    identity: { label: "Identity verified", icon: ShieldCheck, cls: "bg-[#63C167]/15 text-[#0D3B3B]" },
-    partner: { label: "Partner verified", icon: Handshake, cls: "bg-slate-100 text-slate-700" },
-  };
+    const map = {
+  published: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
+  partially_funded: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
+  pending_review: { label: "Verification pending", icon: Clock, cls: "bg-amber-100 text-amber-800" },
+  verification_required: { label: "Verification pending", icon: Clock, cls: "bg-amber-100 text-amber-800" },
+  verified: { label: "BSN Verified", icon: BadgeCheck, cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]" },
+  identity: { label: "Identity verified", icon: ShieldCheck, cls: "bg-[#63C167]/15 text-[#0D3B3B]" },
+  partner: { label: "Partner verified", icon: Handshake, cls: "bg-slate-100 text-slate-700" },
+};
   const m = map[status] || map.pending;
   const Icon = m.icon;
   return (
