@@ -244,15 +244,34 @@ export default function AdminPage() {
                 {evidence[req.id]?.length > 0 && (
                   <div className="mt-3 space-y-2">
                     {evidence[req.id].map((file) => (
-                      <a
-                        key={file.storage_path}
-                        href={file.signed_url}
-                        target="_blank"
-                        rel="noreferrer"
-                        className="block text-sm font-medium text-[#1BAA9C] underline"
-                      >
-                        📎 {file.file_name}
-                      </a>
+                      <div key={file.storage_path} className="space-y-2">
+  <p className="text-sm font-medium text-[#0D3B3B]">
+    {file.file_name}
+  </p>
+
+  {file.mime_type?.startsWith("image/") ? (
+    <img
+      src={file.signed_url}
+      alt={file.file_name}
+      className="w-full max-h-96 rounded-xl border object-contain"
+    />
+  ) : file.mime_type === "application/pdf" ? (
+    <iframe
+      src={file.signed_url}
+      title={file.file_name}
+      className="h-96 w-full rounded-xl border"
+    />
+  ) : (
+    <a
+      href={file.signed_url}
+      target="_blank"
+      rel="noreferrer"
+      className="inline-block text-sm font-medium text-[#1BAA9C] underline"
+    >
+      Open {file.file_name}
+    </a>
+  )}
+</div>
                     ))}
                   </div>
                 )}
