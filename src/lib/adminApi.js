@@ -4,7 +4,7 @@ const SUPABASE_KEY = (
   import.meta.env.VITE_SUPABASE_ANON_KEY
   
 ).trim();
-).trim();
+
 
 export async function adminLogin(email, password) {
   const response = await fetch(
