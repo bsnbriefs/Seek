@@ -1020,9 +1020,7 @@ useEffect(() => {
       {pages[page] || pages.home}
             {paymentReturn.status === "checking" ? "Payment confirmation" : paymentReturn.status === "success" ? "Donation confirmed" : "Payment update"}
           </p>
-          <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">{paymentReturn.message}</p>
-           {window.location.pathname.replace(/\/+$/, "") === "/admin" ? <AdminPage /> : window.location.pathname.replace(/\/+$/, "") === "/volunteer" ? <VolunteerPage /> : (pages[page] || pages.home)}
-        </div>
+          
       )}
       <Navbar page={page} setPage={setPage} />
       
