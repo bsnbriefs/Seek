@@ -4,6 +4,7 @@ const SUPABASE_KEY = (
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
   ''
 ).trim();
+).trim();
 
 export async function adminLogin(email, password) {
   const response = await fetch(
@@ -214,7 +215,7 @@ export async function getAdminEvidence(requestId) {
     if (signResponse.ok && signed?.signedURL) {
       evidence.push({
         ...file,
-        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedURL}`,
+        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedUrl}`,
       });
     }
   }
