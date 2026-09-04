@@ -100,7 +100,8 @@ export async function submitVolunteer(payload) {
       full_name: payload.name,
       email: payload.email,
       phone: payload.phone,
-    }),
+    location: payload.location,
+interests: payload.interests,
   });
 
   return rows?.[0] || rows;
