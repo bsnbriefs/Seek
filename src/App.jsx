@@ -939,9 +939,15 @@ function AboutPage({ setPage }) {
 /* ---------------- App ---------------- */
 
 export default function App() {
-  const [page, setPage] = useState(
-  window.location.pathname === "/admin"
-    ? "admin"
+  const [page, setPage] = useState(() => {
+  const path = window.location.pathname.replace(/\/+$/, "") || "/";
+  if (path === "/admin") return "admin";
+  if (path === "/volunteer") return "volunteer";
+  if (path === "/give") return "give";
+  if (path === "/seek-help") return "seek-help";
+  if (path === "/about") return "about";
+  return "home";
+});
     : window.location.pathname === "/volunteer"
       ? "volunteer"
       : "home"
