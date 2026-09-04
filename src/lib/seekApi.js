@@ -102,6 +102,7 @@ export async function submitVolunteer(payload) {
       phone: payload.phone,
     location: payload.location,
 interests: payload.interests,
+      }),
   });
 
   return rows?.[0] || rows;
