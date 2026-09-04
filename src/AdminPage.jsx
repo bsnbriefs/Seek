@@ -12,6 +12,7 @@ getAdminEvidence,
 export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
   const [requests, setRequests] = useState([]);
+  const [offers, setOffers] = useState([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
