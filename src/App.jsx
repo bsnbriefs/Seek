@@ -940,7 +940,11 @@ function AboutPage({ setPage }) {
 
 export default function App() {
   const [page, setPage] = useState(
-  window.location.pathname === "/admin" ? "admin" : "home"
+  window.location.pathname === "/admin"
+    ? "admin"
+    : window.location.pathname === "/volunteer"
+      ? "volunteer"
+      : "home"
 );
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
