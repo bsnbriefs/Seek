@@ -1017,7 +1017,7 @@ useEffect(() => {
             {paymentReturn.status === "checking" ? "Payment confirmation" : paymentReturn.status === "success" ? "Donation confirmed" : "Payment update"}
           </p>
           <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">{paymentReturn.message}</p>
-          <button type="button" className="mt-2 text-xs font-semibold text-[#1BAA9C]" onClick={() => setPaymentReturn({ status: "idle", message: "" })}>Dismiss</button>
+           {window.location.pathname.replace(/\/+$/, "") === "/admin" ? <AdminPage /> : window.location.pathname.replace(/\/+$/, "") === "/volunteer" ? <VolunteerPage /> : (pages[page] || pages.home)}
         </div>
       )}
       <Navbar page={page} setPage={setPage} />
