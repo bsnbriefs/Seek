@@ -948,10 +948,7 @@ export default function App() {
   if (path === "/about") return "about";
   return "home";
 });
-    : window.location.pathname === "/volunteer"
-      ? "volunteer"
-      : "home"
-);
+    
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
   useEffect(() => {
