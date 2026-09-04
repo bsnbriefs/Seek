@@ -1017,9 +1017,7 @@ useEffect(() => {
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
-      {paymentReturn.status !== "idle" && (
-        <div className="fixed top-4 left-1/2 z-[100] w-[min(92vw,640px)] -translate-x-1/2 rounded-2xl border border-[#0D3B3B]/10 bg-white px-5 py-4 shadow-xl">
-          <p className="font-body text-sm font-semibold text-[#0D3B3B]">
+      {pages[page] || pages.home}
             {paymentReturn.status === "checking" ? "Payment confirmation" : paymentReturn.status === "success" ? "Donation confirmed" : "Payment update"}
           </p>
           <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">{paymentReturn.message}</p>
