@@ -1017,7 +1017,7 @@ useEffect(() => {
         </div>
       )}
       <Navbar page={page} setPage={setPage} />
-      {window.location.pathname.replace(/\/+$/, "") === "/admin" ? <AdminPage /> : (pages[page] || pages.home)}
+      window.location.pathname === "/admin"
       <Footer setPage={setPage} />
     </div>
   );
