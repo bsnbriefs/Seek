@@ -106,7 +106,31 @@ export async function getAdminRequests() {
 
   return data;
 }
+export async function getAdminOffers() {
+  const session = getAdminSession();
 
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/offers?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not load offers.");
+  }
+
+  return data;
+}
 export async function updateAdminRequestStatus(id, status) {
   const session = getAdminSession();
 
