@@ -239,7 +239,7 @@ export async function getAdminEvidence(requestId) {
     if (signResponse.ok && signed?.signedURL) {
       evidence.push({
         ...file,
-        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedUrl}`,
+        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedURL}`,
       });
     }
   }
