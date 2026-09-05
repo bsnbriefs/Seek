@@ -431,7 +431,11 @@ export default function AdminPage() {
                   <h3 className="text-xl font-semibold">
                     {offer.title || offer.description || "Offer"}
                   </h3>
-
+                  {offer.request_id && (
+                    <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
+                      For request: {requests.find((r) => r.id === offer.request_id)?.title || offer.request_id}
+                    </p>
+                  )}
                   <p className="mt-2 text-slate-600">
                     {offer.amount ? `Amount: ${offer.amount}` : ""}
                   </p>
