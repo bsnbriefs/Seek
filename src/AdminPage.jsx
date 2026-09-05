@@ -404,7 +404,7 @@ async function updateOfferStatus(id, status) {
                       </span>
                     )}
                   </div>
-                  )}
+                  ))
                 </div>
               {/* OFFERS */}
 <div className="mt-10">
