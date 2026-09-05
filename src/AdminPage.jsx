@@ -86,7 +86,15 @@ export default function AdminPage() {
     setError(err.message);
   }
   }
-
+async function updateOfferStatus(id, status) {
+  try {
+    setError("");
+    await updateAdminOfferStatus(id, status);
+    await loadRequests();
+  } catch (err) {
+    setError(err.message);
+  }
+}
   useEffect(() => {
     if (session?.accessToken) {
       loadRequests();
@@ -397,7 +405,60 @@ export default function AdminPage() {
                     )}
                   </div>
                 </div>
-              );
+              {/* OFFERS */}
+<div className="mt-10">
+  <h2 className="text-2xl font-semibold mb-4">Offers</h2>
+
+  {offers.length === 0 ? (
+    <p className="text-slate-500">No offers yet.</p>
+  ) : (
+    <div className="space-y-4">
+      {offers.map((offer) => (
+        <div
+          key={offer.id}
+          className="rounded-xl border p-5 bg-white"
+        >
+          <h3 className="text-xl font-semibold">
+            {offer.title || offer.description || "Offer"}
+          </h3>
+
+          <p className="mt-2 text-slate-600">
+            {offer.amount ? `Amount: ${offer.amount}` : ""}
+          </p>
+
+          <p className="mt-2">
+            Status:{" "}
+            <span className="font-semibold">
+              {offer.status || "pending"}
+            </span>
+          </p>
+
+          {offer.status === "pending" && (
+            <div className="flex gap-3 mt-4">
+              <button
+                onClick={() =>
+                  updateOfferStatus(offer.id, "accepted")
+                }
+                className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm text-white"
+              >
+                Accept
+              </button>
+
+              <button
+                onClick={() =>
+                  updateOfferStatus(offer.id, "rejected")
+                }
+                className="rounded-xl border px-4 py-2 text-sm"
+              >
+                Reject
+              </button>
+            </div>
+          )}
+        </div>
+      ))}
+    </div>
+  )}
+</div>
             })}
           </div>
         )}
