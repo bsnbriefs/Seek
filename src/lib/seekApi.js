@@ -118,7 +118,17 @@ export async function listPublishedRequests() {
     "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=12"
   );
 }
+export async function listMatchedOfferRequestIds() {
+  if (!supabaseConfigured) {
+    return [];
+  }
 
+  const rows = await supabaseFetch(
+    "offers?select=request_id&status=eq.matched&request_id=not.is.null"
+  );
+
+  return rows.map((row) => row.request_id);
+}
 export function mapRequestRow(row) {
   return {
     id: row.id,
