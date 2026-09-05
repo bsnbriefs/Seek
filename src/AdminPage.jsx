@@ -447,7 +447,7 @@ export default function AdminPage() {
                     <div className="flex gap-3 mt-4">
                       <button
                         onClick={() =>
-                          updateOfferStatus(offer.id, "accepted")
+                          updateOfferStatus(offer.id, "matched")
                         }
                         className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm text-white"
                       >
