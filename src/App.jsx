@@ -567,8 +567,14 @@ function GivePage({ setPage }) {
     let cancelled = false;
     (async () => {
       try {
-        const rows = await listPublishedRequests();
-        if (!cancelled) setRequests(rows.map(mapRequestRow));
+        const [rows, matchedIds] = await Promise.all([
+  listPublishedRequests(),
+  listMatchedOfferRequestIds(),
+]);
+const matchedSet = new Set(matchedIds);
+if (!cancelled) {
+  setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
+}
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
       } finally {
