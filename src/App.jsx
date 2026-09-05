@@ -538,6 +538,7 @@ const GIVE_OPTIONS = [
 
 function GivePage({ setPage }) {
   const [offer, setOffer] = useState("");
+  const [offerRequestId, setOfferRequestId] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [offerError, setOfferError] = useState("");
   const [offerLoading, setOfferLoading] = useState(false);
@@ -588,7 +589,7 @@ function GivePage({ setPage }) {
   }
   async function sendOffer() {
     setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer }); setSubmitted(true); }
+    try { await submitOffer({ description: offer, requestId: offerRequestId || null }); setSubmitted(true); }
     catch (err) { setOfferError(err.message); }
     finally { setOfferLoading(false); }
   }
@@ -673,6 +674,16 @@ function GivePage({ setPage }) {
               <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">
                 Describe what you can offer — for example, "I have children's clothes to give," or "I can sponsor school fees up to ₦100,000."
               </p>
+              <select
+  value={offerRequestId}
+  onChange={(e) => setOfferRequestId(e.target.value)}
+  className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]"
+>
+  <option value="">General offer (not tied to a specific request)</option>
+  {requests.map((r) => (
+    <option key={r.id} value={r.id}>{r.title}</option>
+  ))}
+</select>
               <textarea
                 value={offer}
                 onChange={(e) => setOffer(e.target.value)}
