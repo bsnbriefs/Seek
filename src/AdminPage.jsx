@@ -443,7 +443,7 @@ export default function AdminPage() {
                     </span>
                   </p>
 
-                  {offer.status === "pending" && (
+{offer.status === "pending_review" && (
                     <div className="flex gap-3 mt-4">
                       <button
                         onClick={() =>
