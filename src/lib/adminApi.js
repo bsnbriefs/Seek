@@ -63,11 +63,10 @@ if (profile.role !== 'admin') {
   );
 
   return {
-    66  access_token: data.access_token,
-67  refresh_token: data.refresh_token,
-68  user: data.user,
-69  profile: profiles[0],
-  };
+  accessToken: data.access_token,
+  user: data.user,
+  profile: profiles[0],
+};
 }
 
 export function getAdminSession() {
