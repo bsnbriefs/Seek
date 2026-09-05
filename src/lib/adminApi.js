@@ -246,3 +246,34 @@ export async function getAdminEvidence(requestId) {
 
   return evidence;
 }
+export async function updateAdminOfferStatus(id, status) {
+  const session = await getAdminSession();
+
+  if (!session.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/offers?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({
+        status,
+      }),
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data.message || "Could not update offer status.");
+  }
+
+  return data;
+}
