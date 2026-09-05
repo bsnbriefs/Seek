@@ -4,8 +4,10 @@ import {
   getAdminSession,
   adminLogout,
   getAdminRequests,
-  updateAdminRequestStatus,
-  verifyAdminRequest,
+getAdminOffers,
+updateAdminRequestStatus,
+updateAdminOfferStatus,
+verifyAdminRequest,
 getAdminEvidence,
 } from "./lib/adminApi";
 
