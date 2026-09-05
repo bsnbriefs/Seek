@@ -83,6 +83,7 @@ export async function submitOffer(payload) {
     body: JSON.stringify({
       description: payload.description,
       category: payload.category,
+      request_id: payload.requestId || null,
     }),
   });
 
