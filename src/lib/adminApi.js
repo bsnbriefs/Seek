@@ -249,7 +249,6 @@ export async function getAdminEvidence(requestId) {
   });
 }
     }
-  }
 
   return evidence;
 }
