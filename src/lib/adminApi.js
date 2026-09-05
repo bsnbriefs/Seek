@@ -201,14 +201,14 @@ export async function getAdminEvidence(requestId) {
   }
 
   const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/request_evidence?request_id=eq.${requestId}&select=id,file_name,storage_path,mime_type,file_size,created_at&order=created_at.desc`,
-    {
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    }
-  );
+  `${SUPABASE_URL}/rest/v1/request_evidence?request_id=eq.${requestId}&select=id,file_name,storage_path,mime_type,file_size,created_at&order=created_at.desc`,
+  {
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+    },
+  }
+);
 
   const data = await response.json().catch(() => []);
 
@@ -237,10 +237,17 @@ export async function getAdminEvidence(requestId) {
     const signed = await signResponse.json().catch(() => ({}));
 
     if (signResponse.ok && signed?.signedURL) {
-      evidence.push({
-        ...file,
-        signed_url: `${SUPABASE_URL}/storage/v1${signed.signedURL}`,
-      });
+  const signedUrl = signed.signedURL.startsWith("http")
+    ? signed.signedURL
+    : signed.signedURL.startsWith("/storage/v1")
+      ? `${SUPABASE_URL}${signed.signedURL}`
+      : `${SUPABASE_URL}/storage/v1${signed.signedURL}`;
+
+  evidence.push({
+    ...file,
+    signed_url: signedUrl,
+  });
+}
     }
   }
 
