@@ -406,7 +406,7 @@ async function updateOfferStatus(id, status) {
                   </div>
                   ))}
                 </div>
-                )}
+                )
               {/* OFFERS */}
 <div className="mt-10">
   <h2 className="text-2xl font-semibold mb-4">Offers</h2>
