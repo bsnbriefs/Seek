@@ -1,6 +1,6 @@
 import AdminPage from "./AdminPage";
 import React, { useEffect, useState } from "react";
-import { submitRequest, submitOffer, submitVolunteer, initializeDonation, verifyDonation, listPublishedRequests, mapRequestRow } from "./lib/seekApi";
+import { submitRequest, submitOffer, submitVolunteer, initializeDonation, verifyDonation, listPublishedRequests, listMatchedOfferRequestIds, mapRequestRow } from "./lib/seekApi";
 
 import {
   adminLogin,
@@ -221,6 +221,11 @@ function RequestCard({ req, onHelp }) {
         </p>
       )}
       <div className="mt-auto flex items-center justify-between">
+        {req.helped && (
+  <p className="text-xs font-semibold text-[#1BAA9C] mb-2 w-full">
+    Help has been offered for this request
+  </p>
+)}
         <VerificationBadge status={req.status} />
         <button
           type="button"
@@ -369,12 +374,18 @@ function HomePage({ setPage }) {
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
 
-  useEffect(() => {
+    useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const rows = await listPublishedRequests();
-        if (!cancelled) setRequests(rows.map(mapRequestRow));
+        const [rows, matchedIds] = await Promise.all([
+          listPublishedRequests(),
+          listMatchedOfferRequestIds(),
+        ]);
+        const matchedSet = new Set(matchedIds);
+        if (!cancelled) {
+          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
+        }
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
       } finally {
