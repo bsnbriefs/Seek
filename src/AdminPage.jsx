@@ -20,16 +20,23 @@ export default function AdminPage() {
   const [loading, setLoading] = useState(false);
 
   async function loadRequests() {
-    try {
-      setLoading(true);
-      setError("");
-      const data = await getAdminRequests();
-      setRequests(data);
-    } catch (err) {
-      setError(err.message);
-    } finally {
-      setLoading(false);
-    }
+  try {
+    setLoading(true);
+    setError("");
+
+    const [requestData, offerData] = await Promise.all([
+      getAdminRequests(),
+      getAdminOffers(),
+    ]);
+
+    setRequests(requestData);
+    setOffers(offerData);
+  } catch (err) {
+    setError(err.message);
+  } finally {
+    setLoading(false);
+  }
+}
   }
 
   async function login(e) {
