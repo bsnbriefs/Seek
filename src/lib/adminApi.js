@@ -181,6 +181,35 @@ export async function getAdminRequestPrivate() {
 
   return data;
 }
+}
+
+export async function getAdminDonations() {
+  const session = getAdminSession();
+
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/donations?select=*&order=paid_at.desc.nullslast`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load donations.");
+  }
+
+  return data;
+}
+
+export async function updateAdminRequestStatus(id, status) {
 export async function updateAdminRequestStatus(id, status) {
   const session = getAdminSession();
 
