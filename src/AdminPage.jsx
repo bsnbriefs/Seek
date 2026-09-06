@@ -532,45 +532,45 @@ setDonations(donationData);
         </div>
       </div>
           {/* DONATIONS */}
-    <div className="mt-10">
-      <h2 className="text-2xl font-semibold mb-4">Donations</h2>
+<div className="mt-10">
+  <h2 className="text-2xl font-semibold mb-4">Donations</h2>
 
-      {donations.length === 0 ? (
-        <p className="text-slate-500">No donations yet.</p>
-      ) : (
-        <div className="space-y-4">
-          {donations.map((donation) => (
-            <div
-              key={donation.id}
-              className="rounded-xl border p-5 bg-white"
-            >
-              <h3 className="text-xl font-semibold">
-                {donation.donor_name || "Anonymous donor"}
-              </h3>
+  {donations.length === 0 ? (
+    <p className="text-slate-500">No donations yet.</p>
+  ) : (
+    <div className="space-y-4">
+      {donations.map((donation) => (
+        <div
+          key={donation.id}
+          className="rounded-xl border p-5 bg-white"
+        >
+          <h3 className="text-xl font-semibold">
+            {donation.donor_name || "Anonymous donor"}
+          </h3>
 
-              <p className="mt-1 text-slate-600">
-                Amount: ₦{Number(donation.amount || 0).toLocaleString()}
-              </p>
+          <p className="mt-1 text-slate-600">
+            Amount: ₦{Number(donation.amount || 0).toLocaleString()}
+          </p>
 
-              <p className="mt-1 text-slate-600">
-                Request:{" "}
-                {donation.request_id
-                  ? requests.find((r) => r.id === donation.request_id)?.title ||
-                    donation.request_id
-                  : "General donation"}
-              </p>
+          <p className="mt-1 text-slate-600">
+            Request:{" "}
+            {donation.request_id
+              ? requests.find((r) => r.id === donation.request_id)?.title ||
+                donation.request_id
+              : "General donation"}
+          </p>
 
-              <p className="mt-1 text-sm text-slate-500">
-                Paid:{" "}
-                {donation.paid_at
-                  ? new Date(donation.paid_at).toLocaleString()
-                  : "—"}
-              </p>
-            </div>
-          ))}
+          <p className="mt-1 text-sm text-slate-500">
+            Paid:{" "}
+            {donation.paid_at
+              ? new Date(donation.paid_at).toLocaleString()
+              : "-"}
+          </p>
         </div>
-      )}
+      ))}
     </div>
+  )}
+</div>
     </main>
   );
 }
