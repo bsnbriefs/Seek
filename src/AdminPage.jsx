@@ -262,6 +262,16 @@ setRequestPrivate(privateData);
                       ₦{raised.toLocaleString()}
                     </p>
                   </div>
+                                    {(() => {
+                    const contact = requestPrivate.find((p) => p.request_id === req.id);
+                    return contact ? (
+                      <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-[#0D3B3B]/80">
+                        <span className="font-semibold">Contact:</span>{" "}
+                        {contact.full_name || "—"} • {contact.email || "—"}
+                        {contact.phone ? ` • ${contact.phone}` : ""}
+                      </div>
+                    ) : null;
+                  })()}
 
                   <div className="mt-4">
                     <button
