@@ -461,7 +461,17 @@ setDonations(donationData);
                   <p className="mt-2 text-slate-600">
                     {offer.amount ? `Amount: ${offer.amount}` : ""}
                   </p>
+              {offer.contact_email && (
+                <p className="mt-2 text-sm text-slate-600">
+                  Email: {offer.contact_email}
+                </p>
+              )}
 
+              {offer.contact_phone && (
+                <p className="mt-1 text-sm text-slate-600">
+                  Phone: {offer.contact_phone}
+                </p>
+              )}
                   <p className="mt-2">
                     Status:{" "}
                     <span className="font-semibold">
