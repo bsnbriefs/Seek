@@ -156,6 +156,31 @@ export async function getAdminVolunteers() {
 
   return data;
 }
+export async function getAdminRequestPrivate() {
+  const session = getAdminSession();
+
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/request_private?select=*`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load contact details.");
+  }
+
+  return data;
+}
 export async function updateAdminRequestStatus(id, status) {
   const session = getAdminSession();
 
