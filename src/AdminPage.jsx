@@ -456,12 +456,18 @@ setDonations(donationData);
                   className="rounded-xl border p-5 bg-white"
                 >
                   <h3 className="text-xl font-semibold">
-                    {offer.title || offer.description || "Offer"}
-                  </h3>
-                  {offer.request_id && (
-                    <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
-                      For request: {requests.find((r) => r.id === offer.request_id)?.title || offer.request_id}
-                    </p>
+  {offer.title || offer.description || "Offer"}
+</h3>
+
+<p className="mt-1 text-xs text-[#0D3B3B]/50">
+  Posted {new Date(offer.created_at).toLocaleDateString()}
+</p>
+
+{offer.request_id && (
+  <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
+    For request: {requests.find(r => r.id === offer.request_id)?.title || offer.request_id}
+  </p>
+)}
                   )}
                   <p className="mt-2 text-slate-600">
                     {offer.amount ? `Amount: ${offer.amount}` : ""}
