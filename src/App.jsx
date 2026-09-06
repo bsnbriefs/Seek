@@ -550,6 +550,8 @@ const GIVE_OPTIONS = [
 function GivePage({ setPage }) {
   const [offer, setOffer] = useState("");
   const [offerRequestId, setOfferRequestId] = useState("");
+  const [offerContactEmail, setOfferContactEmail] = useState("");
+const [offerContactPhone, setOfferContactPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [offerError, setOfferError] = useState("");
   const [offerLoading, setOfferLoading] = useState(false);
@@ -606,7 +608,7 @@ if (!cancelled) {
   }
   async function sendOffer() {
     setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer, requestId: offerRequestId || null }); setSubmitted(true); }
+    try { await submitOffer({ description: offer, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null }); setSubmitted(true); }
     catch (err) { setOfferError(err.message); }
     finally { setOfferLoading(false); }
   }
@@ -707,6 +709,22 @@ if (!cancelled) {
                 rows={4}
                 placeholder="I can provide..."
                 className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]"
+              />
+                            <input
+                type="email"
+                required
+                value={offerContactEmail}
+                onChange={(e) => setOfferContactEmail(e.target.value)}
+                placeholder="Your email"
+                className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mt-3 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]"
+              />
+
+              <input
+                type="tel"
+                value={offerContactPhone}
+                onChange={(e) => setOfferContactPhone(e.target.value)}
+                placeholder="Phone number (optional)"
+                className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mt-3 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]"
               />
               <Button
                 variant="primary"
