@@ -6,6 +6,7 @@ import {
   getAdminRequests,
 getAdminOffers,
   getAdminVolunteers,
+  getAdminRequestPrivate,
 updateAdminRequestStatus,
 updateAdminOfferStatus,
 verifyAdminRequest,
@@ -17,6 +18,7 @@ export default function AdminPage() {
   const [requests, setRequests] = useState([]);
   const [offers, setOffers] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
+  const [requestPrivate, setRequestPrivate] = useState([]);
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
@@ -28,15 +30,17 @@ export default function AdminPage() {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData] = await Promise.all([
   getAdminRequests(),
   getAdminOffers(),
   getAdminVolunteers(),
+  getAdminRequestPrivate(),
 ]);
 
 setRequests(requestData);
 setOffers(offerData);
 setVolunteers(volunteerData);
+setRequestPrivate(privateData);
     } catch (err) {
       setError(err.message);
     } finally {
