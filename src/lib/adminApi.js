@@ -181,7 +181,7 @@ export async function getAdminRequestPrivate() {
 
   return data;
 }
-}
+
 
 export async function getAdminDonations() {
   const session = getAdminSession();
@@ -209,7 +209,6 @@ export async function getAdminDonations() {
   return data;
 }
 
-export async function updateAdminRequestStatus(id, status) {
 export async function updateAdminRequestStatus(id, status) {
   const session = getAdminSession();
 
