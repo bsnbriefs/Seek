@@ -241,10 +241,15 @@ setDonations(donationData);
                       </p>
                     </div>
 
-                    <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
-                      {funded}% funded
-                    </span>
-                  </div>
+                    <div>
+  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+    {funded}% funded
+  </span>
+
+  <span className="mt-1 block text-xs text-[#0D3B3B]/50">
+    Posted {new Date(req.created_at).toLocaleDateString()}
+  </span>
+</div>
 
                   <p className="mt-4 text-sm text-[#0D3B3B]/80">
                     {req.description}
