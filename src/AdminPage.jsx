@@ -477,6 +477,41 @@ setVolunteers(volunteerData);
             </div>
           )}
         </div>
+                {/* VOLUNTEERS */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Volunteers</h2>
+
+          {volunteers.length === 0 ? (
+            <p className="text-slate-500">No volunteer applications yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {volunteers.map((v) => (
+                <div
+                  key={v.id}
+                  className="rounded-xl border p-5 bg-white"
+                >
+                  <h3 className="text-xl font-semibold">
+                    {v.full_name || "Volunteer"}
+                  </h3>
+
+                  <p className="mt-1 text-sm text-slate-600">
+                    {v.email} {v.phone ? `• ${v.phone}` : ""}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-600">
+                    {v.location}
+                  </p>
+
+                  {v.interests && (
+                    <p className="mt-2 text-sm text-slate-700">
+                      Interests: {v.interests}
+                    </p>
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
       </div>
     </main>
   );
