@@ -84,6 +84,8 @@ export async function submitOffer(payload) {
       description: payload.description,
       category: payload.category,
       request_id: payload.requestId || null,
+      contact_email: payload.contactEmail || null,
+          contact_phone: payload.contactPhone || null,
     }),
   });
 
