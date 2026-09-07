@@ -998,9 +998,8 @@ if (path.startsWith("/request/")) {
 }
 
 return "home";
-    
+ });   
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
-
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference") || params.get("trxref");
