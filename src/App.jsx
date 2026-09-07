@@ -1090,3 +1090,4 @@ useEffect(() => {
     <Footer setPage={setPage} />
   </div>
 );
+  }
