@@ -221,3 +221,131 @@ export async function verifyDonation(reference) {
 
   return data;
     }
+/* ---------- Requester auth & My Requests ---------- */
+
+const AUTH_URL = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+const AUTH_KEY = (
+  import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+  import.meta.env.VITE_SUPABASE_ANON_KEY ||
+  ""
+).trim();
+
+const USER_SESSION_KEY = "seek_user_session";
+
+export function getUserSession() {
+  try {
+    return JSON.parse(localStorage.getItem(USER_SESSION_KEY) || "null");
+  } catch {
+    return null;
+  }
+}
+
+export function setUserSession(session) {
+  if (!session) {
+    localStorage.removeItem(USER_SESSION_KEY);
+    return;
+  }
+  localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+}
+
+export function userLogout() {
+  setUserSession(null);
+}
+
+export async function userSignUp(email, password) {
+  const response = await fetch(`${AUTH_URL}/auth/v1/signup`, {
+    method: "POST",
+    headers: {
+      apikey: AUTH_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ email, password }),
+  });
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok) {
+    throw new Error(
+      data?.msg || data?.error_description || data?.message || "Sign up failed."
+    );
+  }
+
+  // If email confirmation is disabled, we get a session immediately
+  if (data?.access_token) {
+    const session = {
+      access_token: data.access_token,
+      refresh_token: data.refresh_token,
+      user: data.user,
+    };
+    setUserSession(session);
+    return session;
+  }
+
+  return { needsConfirmation: true, user: data?.user || null };
+}
+
+export async function userSignIn(email, password) {
+  const response = await fetch(
+    `${AUTH_URL}/auth/v1/token?grant_type=password`,
+    {
+      method: "POST",
+      headers: {
+        apikey: AUTH_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ email, password }),
+    }
+  );
+
+  const data = await response.json().catch(() => ({}));
+
+  if (!response.ok || !data?.access_token) {
+    throw new Error(
+      data?.error_description || data?.msg || "Invalid email or password."
+    );
+  }
+
+  const session = {
+    access_token: data.access_token,
+    refresh_token: data.refresh_token,
+    user: data.user,
+  };
+  setUserSession(session);
+  return session;
+}
+
+export async function listMyRequests() {
+  const session = getUserSession();
+  if (!session?.access_token) {
+    throw new Error("Please sign in to view your requests.");
+  }
+
+  if (!supabaseConfigured) {
+    return [];
+  }
+
+  const response = await fetch(
+    `${AUTH_URL}/rest/v1/rpc/list_my_seek_requests`,
+    {
+      method: "POST",
+      headers: {
+        apikey: AUTH_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({}),
+    }
+  );
+
+  const data = await response.json().catch(() => []);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+        data?.hint ||
+        "Could not load your requests. The tracking function may not be set up yet."
+    );
+  }
+
+  return Array.isArray(data) ? data : [];
+}
