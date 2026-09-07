@@ -438,7 +438,7 @@ setDonations(donationData);
                   </div>
                                 </div>
               );
-            })}
+            ))}
           </div>
                    
 {/* OFFERS */}
