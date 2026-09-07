@@ -331,9 +331,9 @@ export async function getAdminEvidence(requestId) {
   return evidence;
 }
 export async function updateAdminOfferStatus(id, status) {
-  const session = await getAdminSession();
+  const session = getAdminSession();
 
-  if (!session.access_token) {
+  if (!session?.access_token) {
     throw new Error("Admin session expired. Please sign in again.");
   }
 
@@ -356,7 +356,36 @@ export async function updateAdminOfferStatus(id, status) {
   const data = await response.json().catch(() => []);
 
   if (!response.ok) {
-    throw new Error(data.message || "Could not update offer status.");
+    throw new Error(data?.message || data?.[0]?.message || "Could not update offer status.");
+  }
+
+  // When an offer is accepted (matched), notify the requester via Edge Function
+  if (status === "matched") {
+    try {
+      const notifyResponse = await fetch(
+        `${SUPABASE_URL}/functions/v1/notify-requester-match`,
+        {
+          method: "POST",
+          headers: {
+            apikey: SUPABASE_KEY,
+            Authorization: `Bearer ${session.access_token}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({ offer_id: id }),
+        }
+      );
+
+      const notifyResult = await notifyResponse.json().catch(() => ({}));
+
+      // "already notified" is treated as success
+      if (!notifyResponse.ok && !notifyResult?.skipped) {
+        console.warn("Offer accepted but notification failed:", notifyResult);
+        // Do not throw — status update already succeeded
+      }
+    } catch (notifyErr) {
+      console.warn("Offer accepted but notification call failed:", notifyErr);
+      // Do not throw — status update already succeeded
+    }
   }
 
   return data;
