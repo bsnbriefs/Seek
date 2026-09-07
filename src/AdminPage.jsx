@@ -27,6 +27,11 @@ export default function AdminPage() {
   const [evidence, setEvidence] = useState({});
   const [loading, setLoading] = useState(false);
 
+  // Filters & search
+  const [requestFilter, setRequestFilter] = useState("all");
+  const [offerFilter, setOfferFilter] = useState("all");
+  const [search, setSearch] = useState("");
+
   async function loadRequests() {
     try {
       setLoading(true);
@@ -116,6 +121,56 @@ export default function AdminPage() {
     }
   }, [session]);
 
+  const searchLower = search.trim().toLowerCase();
+
+  const filteredRequests = requests.filter((req) => {
+    if (requestFilter !== "all" && req.status !== requestFilter) return false;
+    if (!searchLower) return true;
+    const haystack = [
+      req.title,
+      req.description,
+      req.category,
+      req.location,
+      req.public_reference,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(searchLower);
+  });
+
+  const filteredOffers = offers.filter((offer) => {
+    const status = offer.status || "pending_review";
+    if (offerFilter !== "all" && status !== offerFilter) return false;
+    if (!searchLower) return true;
+    const linked = requests.find((r) => r.id === offer.request_id);
+    const haystack = [
+      offer.description,
+      offer.contact_email,
+      offer.contact_phone,
+      linked?.title,
+    ]
+      .filter(Boolean)
+      .join(" ")
+      .toLowerCase();
+    return haystack.includes(searchLower);
+  });
+
+  const requestCounts = {
+    all: requests.length,
+    pending_review: requests.filter((r) => r.status === "pending_review").length,
+    published: requests.filter((r) => r.status === "published").length,
+    verification_required: requests.filter((r) => r.status === "verification_required").length,
+    rejected: requests.filter((r) => r.status === "rejected").length,
+  };
+
+  const offerCounts = {
+    all: offers.length,
+    pending_review: offers.filter((o) => (o.status || "pending_review") === "pending_review").length,
+    matched: offers.filter((o) => o.status === "matched").length,
+    rejected: offers.filter((o) => o.status === "rejected").length,
+  };
+
   if (!session?.accessToken) {
     return (
       <main className="min-h-screen bg-[#F2F5F3] px-5 py-16">
@@ -169,14 +224,13 @@ export default function AdminPage() {
   return (
     <main className="min-h-screen bg-[#F2F5F3] px-5 py-12">
       <div className="mx-auto max-w-6xl">
-        <div className="mb-8 flex items-center justify-between gap-4">
+        <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
             <p className="text-xs font-semibold uppercase tracking-widest text-[#1BAA9C]">
               Seek administration
             </p>
-
             <h1 className="mt-1 font-display text-3xl font-bold text-[#0D3B3B]">
-              Manage requests
+              Admin dashboard
             </h1>
           </div>
 
@@ -185,11 +239,23 @@ export default function AdminPage() {
               adminLogout();
               setSession(null);
               setRequests([]);
+              setOffers([]);
             }}
-            className="rounded-xl border px-4 py-2"
+            className="rounded-xl border px-4 py-2 text-sm"
           >
             Sign out
           </button>
+        </div>
+
+        {/* Search */}
+        <div className="mb-6">
+          <input
+            type="search"
+            placeholder="Search requests or offers…"
+            value={search}
+            onChange={(e) => setSearch(e.target.value)}
+            className="w-full max-w-md rounded-xl border border-[#0D3B3B]/15 bg-white px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]"
+          />
         </div>
 
         {error && (
@@ -198,11 +264,43 @@ export default function AdminPage() {
           </p>
         )}
 
+        {/* REQUESTS */}
+        <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-xl font-semibold text-[#0D3B3B]">
+            Requests{" "}
+            <span className="text-sm font-normal text-[#0D3B3B]/50">
+              ({filteredRequests.length})
+            </span>
+          </h2>
+          <div className="flex flex-wrap gap-2">
+            {[
+              { id: "all", label: "All" },
+              { id: "pending_review", label: "Pending" },
+              { id: "published", label: "Published" },
+              { id: "verification_required", label: "Needs verification" },
+              { id: "rejected", label: "Rejected" },
+            ].map((f) => (
+              <button
+                key={f.id}
+                onClick={() => setRequestFilter(f.id)}
+                className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                  requestFilter === f.id
+                    ? "bg-[#0D3B3B] text-white"
+                    : "bg-white border text-[#0D3B3B]/70 hover:bg-slate-50"
+                }`}
+              >
+                {f.label}
+                {requestCounts[f.id] != null ? ` (${requestCounts[f.id]})` : ""}
+              </button>
+            ))}
+          </div>
+        </div>
+
         {loading ? (
           <p className="text-[#0D3B3B]/60">
             Loading requests...
           </p>
-        ) : requests.length === 0 ? (
+        ) : filteredRequests.length === 0 ? (
           <div className="rounded-2xl bg-white p-8 text-center shadow-sm">
             <p className="text-[#0D3B3B]/60">
               No requests found.
@@ -210,7 +308,7 @@ export default function AdminPage() {
           </div>
         ) : (
           <div className="space-y-5">
-            {requests.map((req) => {
+            {filteredRequests.map((req) => {
               const needed = Number(req.amount_needed || 0);
               const raised = Number(req.amount_raised || 0);
 
@@ -444,14 +542,42 @@ export default function AdminPage() {
         )}
 
         {/* OFFERS */}
-        <div className="mt-10">
-          <h2 className="text-2xl font-semibold mb-4">Offers</h2>
+        <div className="mt-12">
+          <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
+            <h2 className="text-xl font-semibold text-[#0D3B3B]">
+              Offers{" "}
+              <span className="text-sm font-normal text-[#0D3B3B]/50">
+                ({filteredOffers.length})
+              </span>
+            </h2>
+            <div className="flex flex-wrap gap-2">
+              {[
+                { id: "all", label: "All" },
+                { id: "pending_review", label: "Pending" },
+                { id: "matched", label: "Matched" },
+                { id: "rejected", label: "Rejected" },
+              ].map((f) => (
+                <button
+                  key={f.id}
+                  onClick={() => setOfferFilter(f.id)}
+                  className={`rounded-full px-3 py-1 text-xs font-semibold transition-colors ${
+                    offerFilter === f.id
+                      ? "bg-[#0D3B3B] text-white"
+                      : "bg-white border text-[#0D3B3B]/70 hover:bg-slate-50"
+                  }`}
+                >
+                  {f.label}
+                  {offerCounts[f.id] != null ? ` (${offerCounts[f.id]})` : ""}
+                </button>
+              ))}
+            </div>
+          </div>
 
-          {offers.length === 0 ? (
-            <p className="text-slate-500">No offers yet.</p>
+          {filteredOffers.length === 0 ? (
+            <p className="text-slate-500">No offers match this filter.</p>
           ) : (
             <div className="space-y-4">
-              {offers.map((offer) => {
+              {filteredOffers.map((offer) => {
                 const linkedRequest = requests.find((r) => r.id === offer.request_id);
                 const status = offer.status || "pending_review";
                 const isPending = status === "pending_review";
