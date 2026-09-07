@@ -1062,29 +1062,32 @@ useEffect(() => {
   };
 
   return (
-    <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
-      {FONTS}
-      {pages[page] || pages.home}
+    return (
+  <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
+    {FONTS}
 
-{paymentReturn.status !== "idle" && (
-  <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-    <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
-      <p className="font-body text-sm font-semibold text-[#0D3B3B]">
-        {paymentReturn.status === "checking"
-          ? "Payment confirmation"
-          : paymentReturn.status === "success"
-            ? "Donation confirmed"
-            : "Payment verification failed"}
-      </p>
-      <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">
-        {paymentReturn.message}
-      </p>
-    </div>
+    {pages[page] || pages.home}
+
+    {paymentReturn.status !== "idle" && (
+      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
+          <p className="font-body text-sm font-semibold text-[#0D3B3B]">
+            {paymentReturn.status === "checking"
+              ? "Payment confirmation"
+              : paymentReturn.status === "success"
+                ? "Donation confirmed"
+                : "Payment verification failed"}
+          </p>
+
+          <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">
+            {paymentReturn.message}
+          </p>
+        </div>
+      </div>
+    )}
+
+    <Navbar page={page} setPage={setPage} />
+
+    <Footer setPage={setPage} />
   </div>
-)}
-      <Navbar page={page} setPage={setPage} />
-      
-      <Footer setPage={setPage} />
-    </div>
-  );
-}
+);
