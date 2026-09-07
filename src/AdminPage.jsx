@@ -438,8 +438,8 @@ setDonations(donationData);
                   </div>
                 </div>
 </div>
-))}
 )}
+
 </div>
                    
 {/* OFFERS */}
