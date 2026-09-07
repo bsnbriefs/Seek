@@ -436,10 +436,10 @@ setDonations(donationData);
                       </span>
                     )}
                   </div>
-                </div>
-</div>
-))}
-</div>
+                                </div>
+              );
+            })}
+          </div>
                    
 {/* OFFERS */}
 <div className="mt-10">
