@@ -982,24 +982,153 @@ function AboutPage({ setPage }) {
   );
 }
 
+/* ---------------- Public Request Page ---------------- */
+
+function RequestPage({ requestId, setPage }) {
+  const [request, setRequest] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const rows = await listPublishedRequests();
+        const matched = rows
+          .map(mapRequestRow)
+          .find((r) => r.id === requestId);
+        if (!cancelled) {
+          if (!matched) {
+            setError("This request could not be found or is no longer published.");
+            setRequest(null);
+          } else {
+            setRequest(matched);
+          }
+        }
+      } catch (err) {
+        if (!cancelled) {
+          setError(err.message || "Failed to load this request.");
+          setRequest(null);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [requestId]);
+
+  if (loading) {
+    return (
+      <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center justify-center">
+        <p className="font-body text-sm text-[#0D3B3B]/50">Loading request…</p>
+      </div>
+    );
+  }
+
+  if (error || !request) {
+    return (
+      <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
+        <div className="mx-auto max-w-lg px-5 text-center py-24">
+          <AlertTriangle size={40} className="mx-auto text-[#1BAA9C] mb-5" />
+          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">
+            Request not found
+          </h1>
+          <p className="font-body text-[#0D3B3B]/65 mb-8">
+            {error || "This request may have been fulfilled or is no longer public."}
+          </p>
+          <Button variant="primary" onClick={() => setPage("give")}>
+            Browse open requests <ArrowRight size={16} />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
+        <SectionLabel>Public request</SectionLabel>
+        <div className="flex flex-wrap items-center gap-2 mb-4">
+          <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">
+            {request.category}
+          </span>
+          <UrgencyBadge level={request.urgency} />
+          <VerificationBadge status={request.status} />
+        </div>
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-3">
+          {request.title}
+        </h1>
+        <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-6">
+          <MapPin size={16} /> {request.location}
+        </p>
+
+        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-8 shadow-sm">
+          <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
+            {request.description}
+          </p>
+
+          {request.amountNeeded ? (
+            <div className="mt-8">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">
+                Progress
+              </p>
+              <ProgressBar raised={request.amountRaised} needed={request.amountNeeded} />
+            </div>
+          ) : (
+            <p className="mt-6 text-sm font-semibold font-body text-[#0D3B3B]">
+              {request.type === "item"
+                ? "In-kind assistance requested"
+                : "Ongoing support requested"}
+            </p>
+          )}
+
+          <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
+            <Button
+              variant="primary"
+              className="w-full sm:w-auto"
+              onClick={() => {
+                setPage("give");
+                window.scrollTo(0, 0);
+              }}
+            >
+              I Want to Help <HandHeart size={16} />
+            </Button>
+            <p className="font-body text-xs text-[#0D3B3B]/45">
+              You’ll be taken to the Give page where you can make an offer or donate.
+            </p>
+          </div>
+        </div>
+
+        <p className="mt-8 text-center font-body text-xs text-[#0D3B3B]/40">
+          This is a verified public request on Seek · A project of BSN Foundation
+        </p>
+      </section>
+    </div>
+  );
+}
+
 /* ---------------- App ---------------- */
 
 export default function App() {
   const [page, setPage] = useState(() => {
-  const path = window.location.pathname.replace(/\/+$/, "") || "/";
-if (path === "/admin") return "admin";
-if (path === "/volunteer") return "volunteer";
-if (path === "/give") return "give";
-if (path === "/seek-help") return "seek-help";
-if (path === "/about") return "about";
+    const path = window.location.pathname.replace(/\/+$/, "") || "/";
+    if (path === "/admin") return "admin";
+    if (path === "/volunteer") return "volunteer";
+    if (path === "/give") return "give";
+    if (path === "/seek-help") return "seek-help";
+    if (path === "/about") return "about";
+    if (path.startsWith("/request/")) {
+      return `request:${path.split("/")[2]}`;
+    }
+    return "home";
+  });
 
-if (path.startsWith("/request/")) {
-  return `request:${path.split("/")[2]}`;
-}
-
-return "home";
- });   
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
+
   useEffect(() => {
     const params = new URLSearchParams(window.location.search);
     const reference = params.get("reference") || params.get("trxref");
@@ -1060,33 +1189,38 @@ useEffect(() => {
     about: <AboutPage setPage={setPage} />,
   };
 
-    return (
-  <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
-    {FONTS}
+  const isRequestPage = typeof page === "string" && page.startsWith("request:");
+  const requestId = isRequestPage ? page.split(":")[1] : null;
 
-    {pages[page] || pages.home}
+  return (
+    <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
+      {FONTS}
 
-    {paymentReturn.status !== "idle" && (
-      <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
-        <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
-          <p className="font-body text-sm font-semibold text-[#0D3B3B]">
-            {paymentReturn.status === "checking"
-              ? "Payment confirmation"
-              : paymentReturn.status === "success"
-                ? "Donation confirmed"
-                : "Payment verification failed"}
-          </p>
+      {isRequestPage ? (
+        <RequestPage requestId={requestId} setPage={setPage} />
+      ) : (
+        pages[page] || pages.home
+      )}
 
-          <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">
-            {paymentReturn.message}
-          </p>
+      {paymentReturn.status !== "idle" && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+          <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
+            <p className="font-body text-sm font-semibold text-[#0D3B3B]">
+              {paymentReturn.status === "checking"
+                ? "Payment confirmation"
+                : paymentReturn.status === "success"
+                  ? "Donation confirmed"
+                  : "Payment verification failed"}
+            </p>
+            <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">
+              {paymentReturn.message}
+            </p>
+          </div>
         </div>
-      </div>
-    )}
+      )}
 
-    <Navbar page={page} setPage={setPage} />
-
-    <Footer setPage={setPage} />
-  </div>
-);
-  }
+      <Navbar page={page} setPage={setPage} />
+      <Footer setPage={setPage} />
+    </div>
+  );
+}
