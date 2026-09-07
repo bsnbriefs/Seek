@@ -1,6 +1,20 @@
 import AdminPage from "./AdminPage";
 import React, { useEffect, useState } from "react";
-import { submitRequest, submitOffer, submitVolunteer, initializeDonation, verifyDonation, listPublishedRequests, listMatchedOfferRequestIds, mapRequestRow } from "./lib/seekApi";
+import {
+  submitRequest,
+  submitOffer,
+  submitVolunteer,
+  initializeDonation,
+  verifyDonation,
+  listPublishedRequests,
+  listMatchedOfferRequestIds,
+  mapRequestRow,
+  getUserSession,
+  userLogout,
+  userSignUp,
+  userSignIn,
+  listMyRequests,
+} from "./lib/seekApi";
 
 import {
   adminLogin,
@@ -249,13 +263,12 @@ function SectionLabel({ children }) {
 
 /* ---------------- Navbar / Footer ---------------- */
 
-function Navbar({ page, setPage }) {
+function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
   const links = [
     { id: "home", label: "Home" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Help Someone" },
-    { id: "give", label: "Give" },
     { id: "volunteer", label: "Volunteer" },
     { id: "about", label: "About" },
   ];
@@ -275,9 +288,23 @@ function Navbar({ page, setPage }) {
               {l.label}
             </button>
           ))}
+          {userSession?.access_token && (
+            <button
+              onClick={() => go("my-requests")}
+              className={`font-body text-sm font-medium transition-colors ${page === "my-requests" ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+            >
+              My requests
+            </button>
+          )}
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <button
+            onClick={() => go(userSession?.access_token ? "account" : "account")}
+            className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
+          >
+            {userSession?.access_token ? "Account" : "Sign in"}
+          </button>
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
@@ -294,6 +321,14 @@ function Navbar({ page, setPage }) {
               {l.label}
             </button>
           ))}
+          {userSession?.access_token && (
+            <button onClick={() => go("my-requests")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
+              My requests
+            </button>
+          )}
+          <button onClick={() => go("account")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
+            {userSession?.access_token ? "Account" : "Sign in"}
+          </button>
           <div className="flex flex-col gap-2 mt-3">
             <Button variant="secondary" onClick={() => go("seek-help")}>I need help</Button>
             <Button variant="primary" onClick={() => go("give")}>I want to help</Button>
@@ -1111,6 +1146,294 @@ function RequestPage({ requestId, setPage }) {
   );
 }
 
+/* ---------------- Account / Auth Page ---------------- */
+
+function AccountPage({ setPage, userSession, setUserSession }) {
+  const [mode, setMode] = useState("signin"); // signin | signup
+  const [email, setEmail] = useState("");
+  const [password, setPassword] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [message, setMessage] = useState("");
+
+  if (userSession?.access_token) {
+    return (
+      <div style={{ background: C.bg }} className="min-h-[60vh]">
+        <section className="mx-auto max-w-md px-5 py-16 text-center">
+          <SectionLabel>Account</SectionLabel>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B] mb-2">
+            You’re signed in
+          </h1>
+          <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
+            {userSession.user?.email}
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button variant="primary" onClick={() => setPage("my-requests")}>
+              My requests <ArrowRight size={16} />
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                userLogout();
+                setUserSession(null);
+              }}
+            >
+              Sign out
+            </Button>
+          </div>
+        </section>
+      </div>
+    );
+  }
+
+  async function handleSubmit(e) {
+    e.preventDefault();
+    setError("");
+    setMessage("");
+    setLoading(true);
+    try {
+      if (mode === "signup") {
+        const result = await userSignUp(email, password);
+        if (result?.needsConfirmation) {
+          setMessage("Check your email to confirm your account, then sign in.");
+          setMode("signin");
+        } else {
+          setUserSession(result);
+          setPage("my-requests");
+        }
+      } else {
+        const session = await userSignIn(email, password);
+        setUserSession(session);
+        setPage("my-requests");
+      }
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div style={{ background: C.bg }} className="min-h-[60vh]">
+      <section className="mx-auto max-w-md px-5 py-16">
+        <div className="text-center mb-8">
+          <SectionLabel>Account</SectionLabel>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">
+            {mode === "signin" ? "Sign in" : "Create account"}
+          </h1>
+          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
+            Track your requests and see when help is offered.
+          </p>
+        </div>
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
+        >
+          <Field label="Email">
+            <input
+              required
+              type="email"
+              className={inputCls}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+          </Field>
+          <Field label="Password">
+            <input
+              required
+              type="password"
+              minLength={6}
+              className={inputCls}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+            />
+          </Field>
+
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
+
+          <Button disabled={loading} type="submit" variant="primary" className="w-full">
+            {loading
+              ? "Please wait…"
+              : mode === "signin"
+                ? "Sign in"
+                : "Create account"}
+          </Button>
+
+          <p className="text-center text-sm text-[#0D3B3B]/55">
+            {mode === "signin" ? (
+              <>
+                No account?{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-[#1BAA9C]"
+                  onClick={() => {
+                    setMode("signup");
+                    setError("");
+                    setMessage("");
+                  }}
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-[#1BAA9C]"
+                  onClick={() => {
+                    setMode("signin");
+                    setError("");
+                    setMessage("");
+                  }}
+                >
+                  Sign in
+                </button>
+              </>
+            )}
+          </p>
+        </form>
+      </section>
+    </div>
+  );
+}
+
+/* ---------------- My Requests Page ---------------- */
+
+function MyRequestsPage({ setPage, userSession }) {
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    if (!userSession?.access_token) {
+      setLoading(false);
+      return;
+    }
+    let cancelled = false;
+    (async () => {
+      try {
+        setLoading(true);
+        setError("");
+        const rows = await listMyRequests();
+        if (!cancelled) setItems(rows.map(mapRequestRow));
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load your requests.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+  }, [userSession]);
+
+  if (!userSession?.access_token) {
+    return (
+      <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
+        <div className="mx-auto max-w-md px-5 py-16 text-center">
+          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">
+            Sign in to track your requests
+          </h1>
+          <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">
+            Use the same email you used when you submitted a request.
+          </p>
+          <Button variant="primary" onClick={() => setPage("account")}>
+            Sign in <ArrowRight size={16} />
+          </Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
+        <SectionLabel>Your account</SectionLabel>
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-2">
+          My requests
+        </h1>
+        <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
+          Signed in as {userSession.user?.email}
+        </p>
+
+        {loading && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">Loading your requests…</p>
+        )}
+
+        {error && (
+          <div className="rounded-2xl bg-red-50 border border-red-100 p-5 mb-6">
+            <p className="text-sm text-red-700">{error}</p>
+            <p className="mt-2 text-xs text-red-600/80">
+              If this is your first time using tracking, the database function may still need to be created (see setup notes).
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && items.length === 0 && (
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-8 text-center">
+            <p className="font-body text-[#0D3B3B]/60 mb-4">
+              No requests found for this email yet.
+            </p>
+            <p className="font-body text-xs text-[#0D3B3B]/45 mb-6">
+              Submit a request using this same email address, then return here to track it.
+            </p>
+            <Button variant="primary" onClick={() => setPage("seek-help")}>
+              Submit a request <ArrowRight size={16} />
+            </Button>
+          </div>
+        )}
+
+        <div className="space-y-4">
+          {items.map((req) => (
+            <div
+              key={req.id}
+              className="rounded-2xl bg-white border border-[#0D3B3B]/08 p-5 sm:p-6"
+            >
+              <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
+                  {req.category}
+                </span>
+                <span className="text-xs font-semibold text-[#0D3B3B]/50">
+                  {req.status}
+                </span>
+              </div>
+              <h2 className="font-display font-bold text-lg text-[#0D3B3B] mb-1">
+                {req.title}
+              </h2>
+              <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/55 mb-3">
+                <MapPin size={14} /> {req.location}
+              </p>
+              {req.amountNeeded ? (
+                <div className="mb-4">
+                  <ProgressBar raised={req.amountRaised} needed={req.amountNeeded} />
+                </div>
+              ) : null}
+              <div className="flex flex-wrap gap-3">
+                <button
+                  type="button"
+                  onClick={() => {
+                    setPage(`request:${req.id}`);
+                    window.history.pushState({}, "", `/request/${req.id}`);
+                    window.scrollTo(0, 0);
+                  }}
+                  className="text-sm font-semibold text-[#1BAA9C] hover:underline"
+                >
+                  View public page
+                </button>
+              </div>
+            </div>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 /* ---------------- App ---------------- */
 
 export default function App() {
@@ -1121,12 +1444,15 @@ export default function App() {
     if (path === "/give") return "give";
     if (path === "/seek-help") return "seek-help";
     if (path === "/about") return "about";
+    if (path === "/my-requests") return "my-requests";
+    if (path === "/account") return "account";
     if (path.startsWith("/request/")) {
       return `request:${path.split("/")[2]}`;
     }
     return "home";
   });
 
+  const [userSession, setUserSession] = useState(() => getUserSession());
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
   useEffect(() => {
@@ -1187,6 +1513,16 @@ useEffect(() => {
     "seek-help": <SeekHelpPage />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
+    account: (
+      <AccountPage
+        setPage={setPage}
+        userSession={userSession}
+        setUserSession={setUserSession}
+      />
+    ),
+    "my-requests": (
+      <MyRequestsPage setPage={setPage} userSession={userSession} />
+    ),
   };
 
   const isRequestPage = typeof page === "string" && page.startsWith("request:");
@@ -1219,7 +1555,7 @@ useEffect(() => {
         </div>
       )}
 
-      <Navbar page={page} setPage={setPage} />
+      <Navbar page={page} setPage={setPage} userSession={userSession} />
       <Footer setPage={setPage} />
     </div>
   );
