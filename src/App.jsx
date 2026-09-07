@@ -1061,7 +1061,6 @@ useEffect(() => {
     about: <AboutPage setPage={setPage} />,
   };
 
-  return (
     return (
   <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
     {FONTS}
