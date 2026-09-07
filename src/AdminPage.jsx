@@ -4,14 +4,14 @@ import {
   getAdminSession,
   adminLogout,
   getAdminRequests,
-getAdminOffers,
+  getAdminOffers,
   getAdminVolunteers,
   getAdminRequestPrivate,
-    getAdminDonations,
-updateAdminRequestStatus,
-updateAdminOfferStatus,
-verifyAdminRequest,
-getAdminEvidence,
+  getAdminDonations,
+  updateAdminRequestStatus,
+  updateAdminOfferStatus,
+  verifyAdminRequest,
+  getAdminEvidence,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -27,24 +27,24 @@ export default function AdminPage() {
   const [evidence, setEvidence] = useState({});
   const [loading, setLoading] = useState(false);
 
-    async function loadRequests() {
+  async function loadRequests() {
     try {
       setLoading(true);
       setError("");
 
       const [requestData, offerData, volunteerData, privateData, donationData] = await Promise.all([
-  getAdminRequests(),
-  getAdminOffers(),
-  getAdminVolunteers(),
-  getAdminRequestPrivate(),
-  getAdminDonations(),
-]);
+        getAdminRequests(),
+        getAdminOffers(),
+        getAdminVolunteers(),
+        getAdminRequestPrivate(),
+        getAdminDonations(),
+      ]);
 
-setRequests(requestData);
-setOffers(offerData);
-setVolunteers(volunteerData);
-setRequestPrivate(privateData);
-setDonations(donationData);
+      setRequests(requestData);
+      setOffers(offerData);
+      setVolunteers(volunteerData);
+      setRequestPrivate(privateData);
+      setDonations(donationData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -221,6 +221,8 @@ setDonations(donationData);
                 )
               );
 
+              const contact = requestPrivate.find((p) => p.request_id === req.id);
+
               return (
                 <div
                   key={req.id}
@@ -242,14 +244,15 @@ setDonations(donationData);
                     </div>
 
                     <div>
-  <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
-    {funded}% funded
-  </span>
+                      <span className="rounded-full bg-slate-100 px-3 py-1 text-xs font-semibold">
+                        {funded}% funded
+                      </span>
 
-  <span className="mt-1 block text-xs text-[#0D3B3B]/50">
-    Posted {new Date(req.created_at).toLocaleDateString()}
-  </span>
-</div>
+                      <span className="mt-1 block text-xs text-[#0D3B3B]/50">
+                        Posted {new Date(req.created_at).toLocaleDateString()}
+                      </span>
+                    </div>
+                  </div>
 
                   <p className="mt-4 text-sm text-[#0D3B3B]/80">
                     {req.description}
@@ -271,16 +274,14 @@ setDonations(donationData);
                       ₦{raised.toLocaleString()}
                     </p>
                   </div>
-                                    {(() => {
-                    const contact = requestPrivate.find((p) => p.request_id === req.id);
-                    return contact ? (
-                      <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-[#0D3B3B]/80">
-                        <span className="font-semibold">Contact:</span>{" "}
-                        {contact.full_name || "—"} • {contact.email || "—"}
-                        {contact.phone ? ` • ${contact.phone}` : ""}
-                      </div>
-                    ) : null;
-                  })()}
+
+                  {contact && (
+                    <div className="mt-3 rounded-xl bg-slate-50 p-3 text-sm text-[#0D3B3B]/80">
+                      <span className="font-semibold">Contact:</span>{" "}
+                      {contact.full_name || "—"} • {contact.email || "—"}
+                      {contact.phone ? ` • ${contact.phone}` : ""}
+                    </div>
+                  )}
 
                   <div className="mt-4">
                     <button
@@ -456,33 +457,28 @@ setDonations(donationData);
                   className="rounded-xl border p-5 bg-white"
                 >
                   <h3 className="text-xl font-semibold">
-  {offer.title || offer.description || "Offer"}
-</h3>
+                    {offer.title || offer.description || "Offer"}
+                  </h3>
 
-<p className="mt-1 text-xs text-[#0D3B3B]/50">
-  Posted {new Date(offer.created_at).toLocaleDateString()}
-</p>
+                  <p className="mt-1 text-xs text-[#0D3B3B]/50">
+                    Posted {new Date(offer.created_at).toLocaleDateString()}
+                  </p>
 
-{offer.request_id && (
-  <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
-    For request: {requests.find(r => r.id === offer.request_id)?.title || offer.request_id}
-  </p>
-)}
+                  {offer.request_id && (
+                    <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
+                      For request: {requests.find((r) => r.id === offer.request_id)?.title || offer.request_id}
+                    </p>
                   )}
+
                   <p className="mt-2 text-slate-600">
                     {offer.amount ? `Amount: ${offer.amount}` : ""}
                   </p>
-              {offer.contact_email && (
-                <p className="mt-2 text-sm text-slate-600">
-                  Email: {offer.contact_email}
-                </p>
-              )}
 
-              {offer.contact_phone && (
-                <p className="mt-1 text-sm text-slate-600">
-                  Phone: {offer.contact_phone}
-                </p>
-              )}
+                  <p className="mt-2 text-sm text-slate-600">
+                    {offer.contact_email || "—"}
+                    {offer.contact_phone ? ` • ${offer.contact_phone}` : ""}
+                  </p>
+
                   <p className="mt-2">
                     Status:{" "}
                     <span className="font-semibold">
@@ -490,7 +486,7 @@ setDonations(donationData);
                     </span>
                   </p>
 
-{offer.status === "pending_review" && (
+                  {offer.status === "pending_review" && (
                     <div className="flex gap-3 mt-4">
                       <button
                         onClick={() =>
@@ -516,7 +512,8 @@ setDonations(donationData);
             </div>
           )}
         </div>
-                {/* VOLUNTEERS */}
+
+        {/* VOLUNTEERS */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Volunteers</h2>
 
@@ -551,47 +548,48 @@ setDonations(donationData);
             </div>
           )}
         </div>
-      </div>
-          {/* DONATIONS */}
-<div className="mt-10">
-  <h2 className="text-2xl font-semibold mb-4">Donations</h2>
 
-  {donations.length === 0 ? (
-    <p className="text-slate-500">No donations yet.</p>
-  ) : (
-    <div className="space-y-4">
-      {donations.map((donation) => (
-        <div
-          key={donation.id}
-          className="rounded-xl border p-5 bg-white"
-        >
-          <h3 className="text-xl font-semibold">
-            {donation.donor_name || "Anonymous donor"}
-          </h3>
+        {/* DONATIONS */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Donations</h2>
 
-          <p className="mt-1 text-slate-600">
-            Amount: ₦{Number(donation.amount || 0).toLocaleString()}
-          </p>
+          {donations.length === 0 ? (
+            <p className="text-slate-500">No donations yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {donations.map((donation) => (
+                <div
+                  key={donation.id}
+                  className="rounded-xl border p-5 bg-white"
+                >
+                  <h3 className="text-xl font-semibold">
+                    {donation.donor_name || "Anonymous donor"}
+                  </h3>
 
-          <p className="mt-1 text-slate-600">
-            Request:{" "}
-            {donation.request_id
-              ? requests.find((r) => r.id === donation.request_id)?.title ||
-                donation.request_id
-              : "General donation"}
-          </p>
+                  <p className="mt-1 text-slate-600">
+                    Amount: ₦{Number(donation.amount || 0).toLocaleString()}
+                  </p>
 
-          <p className="mt-1 text-sm text-slate-500">
-            Paid:{" "}
-            {donation.paid_at
-              ? new Date(donation.paid_at).toLocaleString()
-              : "-"}
-          </p>
+                  <p className="mt-1 text-slate-600">
+                    Request:{" "}
+                    {donation.request_id
+                      ? requests.find((r) => r.id === donation.request_id)?.title ||
+                        donation.request_id
+                      : "General donation"}
+                  </p>
+
+                  <p className="mt-1 text-sm text-slate-500">
+                    Paid:{" "}
+                    {donation.paid_at
+                      ? new Date(donation.paid_at).toLocaleString()
+                      : "-"}
+                  </p>
+                </div>
+              ))}
+            </div>
+          )}
         </div>
-      ))}
-    </div>
-  )}
-</div>
+      </div>
     </main>
   );
-}
+                            }
