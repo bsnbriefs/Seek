@@ -451,64 +451,88 @@ export default function AdminPage() {
             <p className="text-slate-500">No offers yet.</p>
           ) : (
             <div className="space-y-4">
-              {offers.map((offer) => (
-                <div
-                  key={offer.id}
-                  className="rounded-xl border p-5 bg-white"
-                >
-                  <h3 className="text-xl font-semibold">
-                    {offer.title || offer.description || "Offer"}
-                  </h3>
+              {offers.map((offer) => {
+                const linkedRequest = requests.find((r) => r.id === offer.request_id);
+                const status = offer.status || "pending_review";
+                const isPending = status === "pending_review";
+                const isMatched = status === "matched";
+                const isRejected = status === "rejected";
+                const notified = !!offer.requester_notified_at;
 
-                  <p className="mt-1 text-xs text-[#0D3B3B]/50">
-                    Posted {new Date(offer.created_at).toLocaleDateString()}
-                  </p>
+                return (
+                  <div
+                    key={offer.id}
+                    className="rounded-xl border p-5 bg-white"
+                  >
+                    <div className="flex flex-wrap items-start justify-between gap-3">
+                      <div>
+                        <h3 className="text-lg font-semibold text-[#0D3B3B]">
+                          {offer.description || "Offer to help"}
+                        </h3>
+                        <p className="mt-1 text-xs text-[#0D3B3B]/50">
+                          Posted {new Date(offer.created_at).toLocaleDateString()}
+                        </p>
+                      </div>
 
-                  {offer.request_id && (
-                    <p className="mt-1 text-sm text-[#1BAA9C] font-semibold">
-                      For request: {requests.find((r) => r.id === offer.request_id)?.title || offer.request_id}
-                    </p>
-                  )}
-
-                  <p className="mt-2 text-slate-600">
-                    {offer.amount ? `Amount: ${offer.amount}` : ""}
-                  </p>
-
-                  <p className="mt-2 text-sm text-slate-600">
-                    {offer.contact_email || "—"}
-                    {offer.contact_phone ? ` • ${offer.contact_phone}` : ""}
-                  </p>
-
-                  <p className="mt-2">
-                    Status:{" "}
-                    <span className="font-semibold">
-                      {offer.status || "pending"}
-                    </span>
-                  </p>
-
-                  {offer.status === "pending_review" && (
-                    <div className="flex gap-3 mt-4">
-                      <button
-                        onClick={() =>
-                          updateOfferStatus(offer.id, "matched")
-                        }
-                        className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm text-white"
-                      >
-                        Accept
-                      </button>
-
-                      <button
-                        onClick={() =>
-                          updateOfferStatus(offer.id, "rejected")
-                        }
-                        className="rounded-xl border px-4 py-2 text-sm"
-                      >
-                        Reject
-                      </button>
+                      <div className="flex flex-wrap gap-2">
+                        {isPending && (
+                          <span className="rounded-full bg-amber-50 px-3 py-1 text-xs font-semibold text-amber-700">
+                            Pending review
+                          </span>
+                        )}
+                        {isMatched && (
+                          <span className="rounded-full bg-green-50 px-3 py-1 text-xs font-semibold text-green-700">
+                            Matched
+                          </span>
+                        )}
+                        {isRejected && (
+                          <span className="rounded-full bg-red-50 px-3 py-1 text-xs font-semibold text-red-700">
+                            Rejected
+                          </span>
+                        )}
+                        {isMatched && (
+                          <span className={`rounded-full px-3 py-1 text-xs font-semibold ${
+                            notified
+                              ? "bg-[#1BAA9C]/10 text-[#1BAA9C]"
+                              : "bg-slate-100 text-slate-600"
+                          }`}>
+                            {notified ? "Requester notified" : "Notification pending"}
+                          </span>
+                        )}
+                      </div>
                     </div>
-                  )}
-                </div>
-              ))}
+
+                    {offer.request_id && (
+                      <p className="mt-2 text-sm text-[#1BAA9C] font-semibold">
+                        For request: {linkedRequest?.title || offer.request_id}
+                      </p>
+                    )}
+
+                    <p className="mt-2 text-sm text-slate-600">
+                      {offer.contact_email || "—"}
+                      {offer.contact_phone ? ` • ${offer.contact_phone}` : ""}
+                    </p>
+
+                    {isPending && (
+                      <div className="flex gap-3 mt-4">
+                        <button
+                          onClick={() => updateOfferStatus(offer.id, "matched")}
+                          className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
+                        >
+                          Accept & Notify
+                        </button>
+
+                        <button
+                          onClick={() => updateOfferStatus(offer.id, "rejected")}
+                          className="rounded-xl border px-4 py-2 text-sm"
+                        >
+                          Reject
+                        </button>
+                      </div>
+                    )}
+                  </div>
+                );
+              })}
             </div>
           )}
         </div>
@@ -592,4 +616,4 @@ export default function AdminPage() {
       </div>
     </main>
   );
-                            }
+}
