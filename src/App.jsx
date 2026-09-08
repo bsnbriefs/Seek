@@ -311,9 +311,12 @@ function Navbar({ page, setPage, userSession }) {
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
 
-        <button className="lg:hidden p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
-          {open ? <X size={24} /> : <Menu size={24} />}
-        </button>
+                <div className="flex items-center gap-1 lg:hidden">
+          <NotificationBell userSession={userSession} setPage={setPage} />
+          <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
+            {open ? <X size={24} /> : <Menu size={24} />}
+          </button>
+        </div>
       </div>
 
       {open && (
