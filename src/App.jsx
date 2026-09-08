@@ -14,9 +14,9 @@ import {
   userSignUp,
   userSignIn,
   listMyRequests,
-  import NotificationBell from "./NotificationBell";
 } from "./lib/seekApi";
 
+import NotificationBell from "./NotificationBell";
 import {
   adminLogin,
   getAdminSession,
