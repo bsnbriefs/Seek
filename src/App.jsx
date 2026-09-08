@@ -840,7 +840,19 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
         <form
-          onSubmit={async (e) => { e.preventDefault(); setError(""); setLoading(true); try { await submitRequest(form); setSubmitted(true); } catch (err) { setError(err.message); } finally { setLoading(false); } }}
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setError("");
+            setLoading(true);
+            try {
+              await submitRequest(form);
+              setSubmitted(true);
+            } catch (err) {
+              setError(err?.message || "Could not submit your request.");
+            } finally {
+              setLoading(false);
+            }
+          }}
           className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-10 space-y-5"
         >
           <div className="grid sm:grid-cols-2 gap-5">
