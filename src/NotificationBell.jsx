@@ -81,8 +81,6 @@ export default function NotificationBell({ userSession, setPage }) {
     let cancelled = false;
 
     (async () => {
-      // Authenticate the shared client with THIS user's session so RLS
-      // and Realtime both enforce per-user access correctly.
       await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken });
       if (cancelled) return;
 
@@ -110,8 +108,6 @@ export default function NotificationBell({ userSession, setPage }) {
       channelRef.current = channel;
     })();
 
-    // Resilience fallback only: if the tab was backgrounded and realtime
-    // silently dropped, reconcile on refocus rather than trusting a blind timer.
     function handleVisibility() {
       if (document.visibilityState === "visible") {
         loadNotifications();
@@ -190,67 +186,3 @@ export default function NotificationBell({ userSession, setPage }) {
     </div>
   );
 }
-    return () => {
-      if (channel) channel.close();
-      clearInterval(poll);
-    };
-  }, [userSession?.access_token]);
-
-  if (!userSession?.access_token) return null;
-
-  const unreadCount = items.filter((n) => !n.read_at).length;
-
-  return (
-    <div className="relative">
-      <button
-        onClick={() => setOpen((o) => !o)}
-        className="relative p-2 text-[#0D3B3B]/70 hover:text-[#0D3B3B]"
-        aria-label="Notifications"
-      >
-        <Bell size={22} />
-        {unreadCount > 0 && (
-          <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
-            {unreadCount > 9 ? "9+" : unreadCount}
-          </span>
-        )}
-      </button>
-
-      {open && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-white border border-[#0D3B3B]/10 shadow-lg z-50">
-          <div className="flex items-center justify-between px-4 py-3 border-b border-[#0D3B3B]/8">
-            <p className="font-display font-bold text-sm text-[#0D3B3B]">Notifications</p>
-            {unreadCount > 0 && (
-              <button onClick={markAllRead} className="text-xs font-semibold text-[#1BAA9C]">
-                Mark all as read
-              </button>
-            )}
-          </div>
-
-          {loading ? (
-            <p className="p-4 text-sm text-[#0D3B3B]/50">Loading…</p>
-          ) : error ? (
-            <p className="p-4 text-sm text-red-600">{error}</p>
-          ) : items.length === 0 ? (
-            <p className="p-4 text-sm text-[#0D3B3B]/50">No notifications yet.</p>
-          ) : (
-            <ul>
-              {items.map((n) => (
-                <li
-                  key={n.id}
-                  onClick={() => !n.read_at && markRead(n.id)}
-                  className={`px-4 py-3 border-b border-[#0D3B3B]/5 cursor-pointer ${!n.read_at ? "bg-[#1BAA9C]/5" : ""}`}
-                >
-                  <p className="text-sm font-semibold text-[#0D3B3B]">{n.title}</p>
-                  {n.body && <p className="text-xs text-[#0D3B3B]/60 mt-0.5">{n.body}</p>}
-                  <p className="text-[10px] text-[#0D3B3B]/40 mt-1">
-                    {new Date(n.created_at).toLocaleString()}
-                  </p>
-                </li>
-              ))}
-            </ul>
-          )}
-        </div>
-      )}
-    </div>
-  );
-          }
