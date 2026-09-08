@@ -16,7 +16,6 @@ import {
   listMyRequests,
 } from "./lib/seekApi";
 
-import NotificationBell from "./NotificationBell";
 import {
   adminLogin,
   getAdminSession,
@@ -300,7 +299,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <NotificationBell userSession={userSession} setPage={setPage} />
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -311,12 +309,9 @@ function Navbar({ page, setPage, userSession }) {
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
 
-                <div className="flex items-center gap-1 lg:hidden">
-          <NotificationBell userSession={userSession} setPage={setPage} />
-          <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
-            {open ? <X size={24} /> : <Menu size={24} />}
-          </button>
-        </div>
+        <button className="lg:hidden p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
+          {open ? <X size={24} /> : <Menu size={24} />}
+        </button>
       </div>
 
       {open && (
@@ -879,18 +874,18 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
               </select>
             </Field>
           </div>
-          <Field label="Supporting images or documents (optional)">
+          <Field label="Supporting image, video, or PDF (optional)">
   <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm hover:bg-[#0D3B3B]/5">
     <Upload size={18} />
     <span>
       {form.evidenceFile
         ? form.evidenceFile.name
-        : "Choose a file to upload"}
+        : "Choose an image, video, or PDF"}
     </span>
 
     <input
       type="file"
-      accept="image/*,.pdf"
+      accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf"
       className="hidden"
       onChange={(e) =>
         setForm((prev) => ({
