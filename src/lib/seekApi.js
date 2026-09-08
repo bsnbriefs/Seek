@@ -418,3 +418,66 @@ export async function listMyRequests() {
 
   return Array.isArray(data) ? data : [];
     }
+/* =========================================================
+   SEEK EVIDENCE VIEWING
+   ========================================================= */
+
+const EVIDENCE_BUCKET =
+  import.meta.env.VITE_SEEK_EVIDENCE_BUCKET || "seek-evidence";
+
+/**
+ * Get evidence attached to a public request.
+ *
+ * The storage bucket should be public OR the returned storage
+ * path must be accessible through the configured Supabase
+ * storage endpoint.
+ */
+export async function getRequestEvidence(requestId) {
+  if (!supabaseConfigured || !requestId) {
+    return [];
+  }
+
+  const rows = await supabaseFetch(
+    `request_evidence?select=*&request_id=eq.${encodeURIComponent(
+      requestId
+    )}&order=created_at.asc`
+  );
+
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+
+  return rows.map((file) => {
+    const storagePath =
+      file.storage_path ||
+      file.path ||
+      file.file_path ||
+      file.object_path ||
+      "";
+
+    const publicUrl = storagePath
+      ? `${AUTH_URL}/storage/v1/object/public/${encodeURIComponent(
+          EVIDENCE_BUCKET
+        )}/${storagePath
+          .split("/")
+          .map(encodeURIComponent)
+          .join("/")}`
+      : null;
+
+    return {
+      ...file,
+      storage_path: storagePath,
+      file_name:
+        file.file_name ||
+        file.original_name ||
+        file.name ||
+        "Supporting evidence",
+      mime_type:
+        file.mime_type ||
+        file.content_type ||
+        "application/octet-stream",
+      public_url: publicUrl,
+      signed_url: publicUrl,
+    };
+  });
+}
