@@ -1131,6 +1131,48 @@ function RequestPage({ requestId, setPage }) {
           <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
             {request.description}
           </p>
+          {evidence.length > 0 && (
+  <div className="mt-6 space-y-4">
+    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50">
+      Supporting evidence
+    </p>
+
+    {evidence.map((file) => (
+      <div key={file.id} className="space-y-2">
+        {file.mime_type?.startsWith("image/") ? (
+          <img
+            src={file.public_url}
+            alt={file.file_name}
+            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8 object-contain"
+          />
+        ) : file.mime_type?.startsWith("video/") ? (
+          <video
+            src={file.public_url}
+            controls
+            playsInline
+            preload="metadata"
+            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8"
+          />
+        ) : file.mime_type === "application/pdf" ? (
+          <iframe
+            src={file.public_url}
+            title={file.file_name}
+            className="h-96 w-full rounded-xl border border-[#0D3B3B]/8"
+          />
+        ) : (
+          <a
+            href={file.public_url}
+            target="_blank"
+            rel="noreferrer"
+            className="inline-block text-sm font-medium text-[#1BAA9C] underline"
+          >
+            Open evidence: {file.file_name}
+          </a>
+        )}
+      </div>
+    ))}
+  </div>
+)}
 
           {request.amountNeeded ? (
             <div className="mt-8">
