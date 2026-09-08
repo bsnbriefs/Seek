@@ -80,10 +80,23 @@ export async function submitRequest(payload) {
     const uploadResult = await uploadResponse.json().catch(() => ({}));
 
     if (!uploadResponse.ok || !uploadResult?.success) {
+      const parts = [
+        uploadResult?.error,
+        uploadResult?.details,
+        uploadResult?.hint,
+        uploadResult?.keySource
+          ? "keySource=" + uploadResult.keySource
+          : "",
+        uploadResult?.keyPrefix
+          ? "keyPrefix=" + uploadResult.keyPrefix
+          : "",
+        !uploadResult?.error && !uploadResult?.details
+          ? "HTTP " + uploadResponse.status
+          : "",
+      ].filter(Boolean);
+
       throw new Error(
-        uploadResult?.error ||
-          uploadResult?.details ||
-          "Evidence upload failed."
+        parts.length ? parts.join(" | ") : "Evidence upload failed."
       );
     }
   }
