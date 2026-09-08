@@ -438,6 +438,34 @@ export async function getRequestEvidence(requestId) {
   }
 
   const rows = await supabaseFetch(
+    `request_evidence?request_id=eq.${encodeURIComponent(
+      requestId
+    )}&select=id,request_id,file_name,storage_path,mime_type,file_size,created_at&order=created_at.asc`
+  );
+
+  if (!Array.isArray(rows)) {
+    return [];
+  }
+
+  return rows.map((file) => {
+    const storagePath = file.storage_path || "";
+
+    const publicUrl =
+      `${AUTH_URL}/storage/v1/object/public/seek-evidence/` +
+      storagePath
+        .split("/")
+        .map(encodeURIComponent)
+        .join("/");
+
+    return {
+      ...file,
+      public_url: publicUrl,
+      signed_url: publicUrl,
+    };
+  });
+}
+
+  const rows = await supabaseFetch(
     `request_evidence?select=*&request_id=eq.${encodeURIComponent(
       requestId
     )}&order=created_at.asc`
