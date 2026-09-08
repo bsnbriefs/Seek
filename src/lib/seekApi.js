@@ -32,7 +32,17 @@ export async function submitRequest(payload) {
 
   // Secure server-side evidence upload (images, videos, PDF).
   // Validation of type/size happens in the Edge Function — not the browser.
+  // Requires a real logged-in user access token (not the publishable key).
   if (payload.evidenceFile) {
+    const session = getUserSession();
+    const accessToken = session?.access_token;
+
+    if (!accessToken) {
+      throw new Error(
+        "Sign in to upload supporting evidence. Your request was saved, but the file was not uploaded."
+      );
+    }
+
     const file = payload.evidenceFile;
     const form = new FormData();
     form.append("file", file);
@@ -48,6 +58,7 @@ export async function submitRequest(payload) {
           apikey:
             import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
             import.meta.env.VITE_SUPABASE_ANON_KEY,
+          Authorization: `Bearer ${accessToken}`,
         },
         body: form,
       }
