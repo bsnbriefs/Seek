@@ -403,6 +403,16 @@ export default function AdminPage() {
                                 alt={file.file_name}
                                 className="w-full max-h-96 rounded-xl border object-contain"
                               />
+                            ) : file.mime_type?.startsWith("video/") ? (
+                              <video
+                                src={file.signed_url}
+                                controls
+                                playsInline
+                                preload="metadata"
+                                className="w-full max-h-96 rounded-xl border bg-black"
+                              >
+                                Your browser does not support video playback.
+                              </video>
                             ) : file.mime_type === "application/pdf" ? (
                               <iframe
                                 src={file.signed_url}
