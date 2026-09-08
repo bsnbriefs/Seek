@@ -36,10 +36,23 @@ export async function submitRequest(payload) {
   if (payload.evidenceFile) {
     const session = getUserSession();
     const accessToken = session?.access_token;
+    const sessionEmail = (session?.user?.email || "").trim().toLowerCase();
+    const formEmail = (payload.email || "").trim().toLowerCase();
 
     if (!accessToken) {
       throw new Error(
         "Sign in to upload supporting evidence. Your request was saved, but the file was not uploaded."
+      );
+    }
+
+    // Ownership is verified server-side by matching auth email to request_private.email
+    if (sessionEmail && formEmail && sessionEmail !== formEmail) {
+      throw new Error(
+        "To upload evidence, sign in with the same email you entered on this form (" +
+          formEmail +
+          "). You are signed in as " +
+          sessionEmail +
+          "."
       );
     }
 
