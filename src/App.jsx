@@ -7,6 +7,7 @@ import {
   initializeDonation,
   verifyDonation,
   listPublishedRequests,
+    getRequestEvidence,
   listMatchedOfferRequestIds,
   mapRequestRow,
   getUserSession,
@@ -1035,6 +1036,7 @@ function RequestPage({ requestId, setPage }) {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+    const [evidence, setEvidence] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
@@ -1047,13 +1049,25 @@ function RequestPage({ requestId, setPage }) {
           .map(mapRequestRow)
           .find((r) => r.id === requestId);
         if (!cancelled) {
-          if (!matched) {
-            setError("This request could not be found or is no longer published.");
-            setRequest(null);
-          } else {
-            setRequest(matched);
-          }
+  if (!matched) {
+    setError("This request could not be found or is no longer published.");
+    setRequest(null);
+  } else {
+    setRequest(matched);
+
+    getRequestEvidence(matched.id)
+      .then((files) => {
+        if (!cancelled) {
+          setEvidence(files);
         }
+      })
+      .catch(() => {
+        if (!cancelled) {
+          setEvidence([]);
+        }
+      });
+  }
+}
       } catch (err) {
         if (!cancelled) {
           setError(err.message || "Failed to load this request.");
