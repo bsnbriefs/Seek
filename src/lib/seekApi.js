@@ -30,44 +30,38 @@ export async function submitRequest(payload) {
     throw new Error("Request was submitted but no request ID was returned.");
   }
 
-  // Upload optional evidence to the private bucket.
+  // Secure server-side evidence upload (images, videos, PDF).
+  // Validation of type/size happens in the Edge Function — not the browser.
   if (payload.evidenceFile) {
     const file = payload.evidenceFile;
-
-    const safeName = file.name
-      .replace(/[^a-zA-Z0-9._-]/g, "_")
-      .slice(-120);
-
-    const storagePath =
-      `${request.id}/${crypto.randomUUID()}-${safeName}`;
+    const form = new FormData();
+    form.append("file", file);
+    form.append("purpose", "evidence");
+    form.append("request_id", request.id);
+    form.append("original_name", file.name || "evidence");
 
     const uploadResponse = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/storage/v1/object/seek-evidence/${storagePath}`,
+      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
       {
         method: "POST",
         headers: {
-          apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY,
-          "Content-Type": file.type || "application/octet-stream",
+          apikey:
+            import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+            import.meta.env.VITE_SUPABASE_ANON_KEY,
         },
-        body: file,
+        body: form,
       }
     );
 
-    if (!uploadResponse.ok) {
-      const details = await uploadResponse.text();
-      throw new Error(`Evidence upload failed: ${details}`);
-    }
+    const uploadResult = await uploadResponse.json().catch(() => ({}));
 
-    await supabaseFetch("request_evidence", {
-      method: "POST",
-      body: JSON.stringify({
-        request_id: request.id,
-        storage_path: storagePath,
-        file_name: file.name,
-        mime_type: file.type || null,
-        file_size: file.size || null,
-      }),
-    });
+    if (!uploadResponse.ok || !uploadResult?.success) {
+      throw new Error(
+        uploadResult?.error ||
+          uploadResult?.details ||
+          "Evidence upload failed."
+      );
+    }
   }
 
   return request;
