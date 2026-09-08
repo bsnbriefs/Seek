@@ -5,6 +5,31 @@ export async function submitRequest(payload) {
     throw new Error("Seek backend is not configured yet.");
   }
 
+  // Evidence uploads require an authenticated account. Check this BEFORE
+  // creating the request so we never save a request and only discover later
+  // that its evidence cannot be uploaded.
+  let evidenceSession = null;
+  if (payload.evidenceFile) {
+    evidenceSession = getUserSession();
+    const accessToken = evidenceSession?.access_token;
+    const sessionEmail = (evidenceSession?.user?.email || "").trim().toLowerCase();
+    const formEmail = (payload.email || "").trim().toLowerCase();
+
+    if (!accessToken) {
+      throw new Error(
+        "Please sign in before submitting a request with supporting evidence."
+      );
+    }
+
+    if (sessionEmail && formEmail && sessionEmail !== formEmail) {
+      throw new Error(
+        "Please use the same email for this request as the email on your Seek account (" +
+          sessionEmail +
+          ")."
+      );
+    }
+  }
+
   const amount =
     Number(String(payload.amount || "").replace(/[^0-9.]/g, "")) || null;
 
@@ -34,30 +59,10 @@ export async function submitRequest(payload) {
   // Validation of type/size happens in the Edge Function — not the browser.
   // Requires a real logged-in user access token (not the publishable key).
   if (payload.evidenceFile) {
-    const session = getUserSession();
-    const accessToken = session?.access_token;
-    const sessionEmail = (session?.user?.email || "").trim().toLowerCase();
-    const formEmail = (payload.email || "").trim().toLowerCase();
-
-    if (!accessToken) {
-      throw new Error(
-        "Sign in to upload supporting evidence. Your request was saved, but the file was not uploaded."
-      );
-    }
-
-    // Ownership is verified server-side by matching auth email to request_private.email
-    if (sessionEmail && formEmail && sessionEmail !== formEmail) {
-      throw new Error(
-        "To upload evidence, sign in with the same email you entered on this form (" +
-          formEmail +
-          "). You are signed in as " +
-          sessionEmail +
-          "."
-      );
-    }
-
+    const accessToken = evidenceSession?.access_token;
     const file = payload.evidenceFile;
     const form = new FormData();
+
     form.append("file", file);
     form.append("purpose", "evidence");
     form.append("request_id", request.id);
@@ -116,7 +121,7 @@ export async function submitOffer(payload) {
       category: payload.category,
       request_id: payload.requestId || null,
       contact_email: payload.contactEmail || null,
-          contact_phone: payload.contactPhone || null,
+      contact_phone: payload.contactPhone || null,
     }),
   });
 
@@ -134,9 +139,9 @@ export async function submitVolunteer(payload) {
       full_name: payload.name,
       email: payload.email,
       phone: payload.phone,
-    location: payload.location,
-interests: payload.interests,
-      }),
+      location: payload.location,
+      interests: payload.interests,
+    }),
   });
 
   return rows?.[0] || rows;
@@ -151,6 +156,7 @@ export async function listPublishedRequests() {
     "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=12"
   );
 }
+
 export async function listMatchedOfferRequestIds() {
   if (!supabaseConfigured) {
     return [];
@@ -162,6 +168,7 @@ export async function listMatchedOfferRequestIds() {
 
   return rows.map((row) => row.request_id);
 }
+
 export function mapRequestRow(row) {
   return {
     id: row.id,
@@ -251,10 +258,12 @@ export async function verifyDonation(reference) {
   }
 
   return data;
-    }
+}
+
 /* ---------- Requester auth & My Requests ---------- */
 
 const AUTH_URL = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+
 const AUTH_KEY = (
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
   import.meta.env.VITE_SUPABASE_ANON_KEY ||
@@ -265,7 +274,9 @@ const USER_SESSION_KEY = "seek_user_session";
 
 export function getUserSession() {
   try {
-    return JSON.parse(localStorage.getItem(USER_SESSION_KEY) || "null");
+    return JSON.parse(
+      localStorage.getItem(USER_SESSION_KEY) || "null"
+    );
   } catch {
     return null;
   }
@@ -276,7 +287,11 @@ export function setUserSession(session) {
     localStorage.removeItem(USER_SESSION_KEY);
     return;
   }
-  localStorage.setItem(USER_SESSION_KEY, JSON.stringify(session));
+
+  localStorage.setItem(
+    USER_SESSION_KEY,
+    JSON.stringify(session)
+  );
 }
 
 export function userLogout() {
@@ -284,20 +299,29 @@ export function userLogout() {
 }
 
 export async function userSignUp(email, password) {
-  const response = await fetch(`${AUTH_URL}/auth/v1/signup`, {
-    method: "POST",
-    headers: {
-      apikey: AUTH_KEY,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({ email, password }),
-  });
+  const response = await fetch(
+    `${AUTH_URL}/auth/v1/signup`,
+    {
+      method: "POST",
+      headers: {
+        apikey: AUTH_KEY,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        email,
+        password,
+      }),
+    }
+  );
 
   const data = await response.json().catch(() => ({}));
 
   if (!response.ok) {
     throw new Error(
-      data?.msg || data?.error_description || data?.message || "Sign up failed."
+      data?.msg ||
+        data?.error_description ||
+        data?.message ||
+        "Sign up failed."
     );
   }
 
@@ -308,11 +332,15 @@ export async function userSignUp(email, password) {
       refresh_token: data.refresh_token,
       user: data.user,
     };
+
     setUserSession(session);
     return session;
   }
 
-  return { needsConfirmation: true, user: data?.user || null };
+  return {
+    needsConfirmation: true,
+    user: data?.user || null,
+  };
 }
 
 export async function userSignIn(email, password) {
@@ -324,7 +352,10 @@ export async function userSignIn(email, password) {
         apikey: AUTH_KEY,
         "Content-Type": "application/json",
       },
-      body: JSON.stringify({ email, password }),
+      body: JSON.stringify({
+        email,
+        password,
+      }),
     }
   );
 
@@ -332,7 +363,9 @@ export async function userSignIn(email, password) {
 
   if (!response.ok || !data?.access_token) {
     throw new Error(
-      data?.error_description || data?.msg || "Invalid email or password."
+      data?.error_description ||
+        data?.msg ||
+        "Invalid email or password."
     );
   }
 
@@ -341,14 +374,19 @@ export async function userSignIn(email, password) {
     refresh_token: data.refresh_token,
     user: data.user,
   };
+
   setUserSession(session);
+
   return session;
 }
 
 export async function listMyRequests() {
   const session = getUserSession();
+
   if (!session?.access_token) {
-    throw new Error("Please sign in to view your requests.");
+    throw new Error(
+      "Please sign in to view your requests."
+    );
   }
 
   if (!supabaseConfigured) {
@@ -379,4 +417,4 @@ export async function listMyRequests() {
   }
 
   return Array.isArray(data) ? data : [];
-}
+    }
