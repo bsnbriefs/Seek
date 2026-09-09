@@ -17,6 +17,8 @@ import {
   saveAdminImpactPost,
   updateAdminImpactPost,
   deleteAdminImpactPost,
+  confirmAdminOfferConnected,
+  celebrateAdminRequest,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -534,6 +536,15 @@ export default function AdminPage() {
 
                         <button
                           onClick={() =>
+                            changeStatus(req.id, "fulfilled")
+                          }
+                          className="rounded-xl border px-4 py-2 text-sm"
+                        >
+                          Mark fulfilled
+                        </button>
+
+                        <button
+                          onClick={() =>
                             changeStatus(req.id, "rejected")
                           }
                           className="rounded-xl border px-4 py-2 text-sm"
@@ -544,9 +555,27 @@ export default function AdminPage() {
                     )}
 
                     {req.status === "fulfilled" && (
-                      <span className="rounded-xl bg-green-50 px-4 py-2 text-sm font-semibold text-green-700">
-                        Fulfilled
-                      </span>
+                      <>
+                        <span className="rounded-xl bg-green-50 px-4 py-2 text-sm font-semibold text-green-700">
+                          Fulfilled
+                        </span>
+                        {!req.celebrated_at && (
+                          <button
+                            onClick={async () => {
+                              try {
+                                setError("");
+                                await celebrateAdminRequest(req);
+                                await loadRequests();
+                              } catch (err) {
+                                setError(err.message);
+                              }
+                            }}
+                            className="rounded-xl border px-4 py-2 text-sm"
+                          >
+                            Celebrate this
+                          </button>
+                        )}
+                      </>
                     )}
 
                     {req.status === "closed" && (
@@ -609,6 +638,7 @@ export default function AdminPage() {
                 const isPending = status === "pending_review";
                 const isMatched = status === "matched";
                 const isRejected = status === "rejected";
+                const isConnected = Boolean(offer.connected_at);
                 const notified = !!offer.requester_notified_at;
 
                 return (
@@ -681,6 +711,30 @@ export default function AdminPage() {
                           Reject
                         </button>
                       </div>
+                    )}
+
+                    {isMatched && !isConnected && (
+                      <button
+                        type="button"
+                        className="mt-4 rounded-xl border px-4 py-2 text-sm"
+                        onClick={async () => {
+                          try {
+                            setError("");
+                            await confirmAdminOfferConnected(offer.id);
+                            await loadRequests();
+                          } catch (err) {
+                            setError(err.message);
+                          }
+                        }}
+                      >
+                        Confirm connected
+                      </button>
+                    )}
+
+                    {isMatched && isConnected && (
+                      <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">
+                        Connection confirmed
+                      </p>
                     )}
                   </div>
                 );
