@@ -398,15 +398,13 @@ Deno.serve(async (req) => {
     }
 
     if (purpose === "appreciation") {
-      const { error: updErr } = await supabase
-        .from("requests")
-        .update({
-          appreciation_storage_path: storagePath,
-          appreciation_mime_type: detected.mime,
-          appreciation_kind: detected.kind === "video" ? "video" : "image",
-          appreciation_file_name: safeBase || `appreciation.${detected.ext}`,
-        })
-        .eq("id", requestId);
+      const { error: updErr } = await supabase.from("request_appreciation").insert({
+        request_id: requestId,
+        storage_path: storagePath,
+        mime_type: detected.mime,
+        media_kind: detected.kind === "video" ? "video" : "image",
+        file_name: safeBase || `appreciation.${detected.ext}`,
+      });
       if (updErr) {
         await supabase.storage.from(bucket).remove([storagePath]);
         return jsonResponse(
