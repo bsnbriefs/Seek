@@ -514,3 +514,42 @@ export async function submitSafetyReport(payload) {
   });
   return rows?.[0] || rows;
 }
+
+
+export async function startSupportConversation(email) {
+  if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
+  const rows = await supabaseFetch("support_conversations", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      email: email || null,
+      visitor_key: "web",
+      status: "open",
+    }),
+  });
+  return rows?.[0] || rows;
+}
+
+export async function listSupportMessages(conversationId) {
+  if (!supabaseConfigured || !conversationId) return [];
+  const rows = await supabaseFetch(
+    `support_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=*&order=created_at.asc`
+  );
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function sendSupportMessage(conversationId, sender, body) {
+  if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
+  const text = String(body || "").trim();
+  if (!text) throw new Error("Type a message first.");
+  const rows = await supabaseFetch("support_messages", {
+    method: "POST",
+    headers: { Prefer: "return=representation" },
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      sender,
+      body: text.slice(0, 2000),
+    }),
+  });
+  return rows?.[0] || rows;
+}
