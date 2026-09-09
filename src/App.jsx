@@ -15,6 +15,7 @@ import {
   userSignUp,
   userSignIn,
   listMyRequests,
+  listPublishedImpact,
 } from "./lib/seekApi";
 
 import {
@@ -281,6 +282,7 @@ function Navbar({ page, setPage, userSession }) {
     { id: "home", label: "Home" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Help Someone" },
+    { id: "impact", label: "Impact" },
     { id: "volunteer", label: "Volunteer" },
     { id: "about", label: "About" },
   ];
@@ -1225,6 +1227,68 @@ function RequestPage({ requestId, setPage }) {
   );
 }
 
+
+function ImpactPage({ setPage }) {
+  const [posts, setPosts] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublishedImpact();
+        if (!cancelled) setPosts(rows);
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load impact stories.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
+        <SectionLabel>Community Impact</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Stories from the Seek community</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
+          Moments of help, connection and care — shared without exposing private details.
+        </p>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
+        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
+        {error && <p className="font-body text-sm text-red-600">{error}</p>}
+        {!loading && !error && posts.length === 0 && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">No published stories yet.</p>
+        )}
+        {posts.map((post) => (
+          <article key={post.id} className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-7 shadow-sm space-y-4">
+            <div>
+              <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{post.title}</h2>
+              <p className="mt-1 font-body text-sm text-[#0D3B3B]/55">
+                {[post.location, post.happened_on].filter(Boolean).join(" · ")}
+              </p>
+            </div>
+            {post.story && (
+              <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>
+            )}
+            {post.public_url && post.media_kind === "video" ? (
+              <video src={post.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
+            ) : post.public_url ? (
+              <img src={post.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border border-[#0D3B3B]/8" />
+            ) : null}
+          </article>
+        ))}
+        <div className="text-center pt-4">
+          <Button variant="primary" onClick={() => setPage("give")}>Help someone <ArrowRight size={16} /></Button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
 /* ---------------- Account / Auth Page ---------------- */
 
 function AccountPage({ setPage, userSession, setUserSession }) {
@@ -1523,6 +1587,7 @@ export default function App() {
     if (path === "/give") return "give";
     if (path === "/seek-help") return "seek-help";
     if (path === "/about") return "about";
+    if (path === "/impact") return "impact";
     if (path === "/my-requests") return "my-requests";
     if (path === "/account") return "account";
     if (path.startsWith("/request/")) {
@@ -1592,6 +1657,7 @@ useEffect(() => {
     "seek-help": <SeekHelpPage />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
+    impact: <ImpactPage setPage={setPage} />,
     account: (
       <AccountPage
         setPage={setPage}
