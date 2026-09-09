@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from "react";
 import { Bell } from "lucide-react";
 import { supabase } from "./lib/supabaseClient";
+import { enableSeekPush } from "./lib/seekApi";
 
 export default function NotificationBell({ userSession, setPage }) {
   const [open, setOpen] = useState(false);
@@ -13,6 +14,11 @@ export default function NotificationBell({ userSession, setPage }) {
   const userId = userSession?.user?.id;
   const accessToken = userSession?.access_token;
   const refreshToken = userSession?.refresh_token;
+
+  useEffect(() => {
+    if (!userId) return;
+    enableSeekPush().catch(() => {});
+  }, [userId]);
 
   async function loadNotifications() {
     if (!userId) return;
