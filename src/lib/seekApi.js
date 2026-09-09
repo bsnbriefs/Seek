@@ -520,7 +520,7 @@ export async function getPublishedImpactById(id) {
 export async function getPublicRequestById(requestId) {
   if (!supabaseConfigured || !requestId) return null;
   const rows = await supabaseFetch(
-    `requests?id=eq.${encodeURIComponent(requestId)}&is_public=eq.true&status=in.(published,partially_funded,fulfilled)&select=*&limit=1`
+    `requests?id=eq.${encodeURIComponent(requestId)}&status=in.(published,partially_funded,fulfilled)&select=*&limit=1`
   );
   const row = Array.isArray(rows) ? rows[0] : null;
   return row ? mapRequestRow(row) : null;
@@ -695,10 +695,14 @@ export async function getRequestAppreciation(requestId) {
   const row = Array.isArray(rows) ? rows[0] : null;
   if (!row?.storage_path) return null;
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const path = String(row.storage_path);
+  const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
+  const isVideo = kind.includes("video") || path.endsWith(".mp4") || path.endsWith(".webm") || path.endsWith(".mov");
   return {
     ...row,
+    media_kind: isVideo ? "video" : "image",
     public_url:
       `${base}/storage/v1/object/public/seek-impact/` +
-      String(row.storage_path).split("/").map(encodeURIComponent).join("/"),
+      path.split("/").map(encodeURIComponent).join("/"),
   };
 }
