@@ -152,9 +152,9 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "file is required" }, 400);
     }
 
-    if (purpose !== "evidence" && purpose !== "impact") {
+    if (purpose !== "evidence" && purpose !== "impact" && purpose !== "appreciation") {
       return jsonResponse(
-        { error: "purpose must be evidence or impact" },
+        { error: "purpose must be evidence, impact, or appreciation" },
         400
       );
     }
@@ -245,6 +245,48 @@ Deno.serve(async (req) => {
       }
     }
 
+    if (purpose === "appreciation") {
+      if (!requestId) {
+        return jsonResponse(
+          { error: "request_id is required for appreciation uploads" },
+          400
+        );
+      }
+      const { data: reqRow, error: reqErr } = await supabase
+        .from("requests")
+        .select("id, status")
+        .eq("id", requestId)
+        .maybeSingle();
+      if (reqErr || !reqRow) {
+        return jsonResponse({ error: "Request not found" }, 404);
+      }
+      if (reqRow.status !== "fulfilled") {
+        return jsonResponse(
+          { error: "Appreciation media is only allowed after a request is fulfilled." },
+          403
+        );
+      }
+      if (!isAdmin) {
+        if (!userEmail) {
+          return jsonResponse(
+            { error: "Your account has no email; cannot verify ownership." },
+            403
+          );
+        }
+        const { data: privateRow, error: privateErr } = await supabase
+          .from("request_private")
+          .select("email")
+          .eq("request_id", requestId)
+          .maybeSingle();
+        if (privateErr || !privateRow?.email) {
+          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
+        }
+        if (String(privateRow.email).trim().toLowerCase() !== userEmail) {
+          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
+        }
+      }
+    }
+
     // ---- Size pre-check ----
     if (file.size <= 0 || file.size > MAX_ANY_BYTES) {
       return jsonResponse(
@@ -287,9 +329,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    if (purpose === "impact" && detected.kind === "pdf") {
+    if ((purpose === "impact" || purpose === "appreciation") && detected.kind === "pdf") {
       return jsonResponse(
-        { error: "PDF is not allowed for Community Impact media." },
+        { error: "PDF is not allowed for this media." },
         400
       );
     }
@@ -308,10 +350,13 @@ Deno.serve(async (req) => {
 
     if (purpose === "evidence") {
       bucket = "seek-evidence";
-      storagePath = `\( {requestId}/ \){uuid}.${detected.ext}`;
+      storagePath = requestId + "/" + uuid + "." + detected.ext;
+    } else if (purpose === "appreciation") {
+      bucket = "seek-impact";
+      storagePath = "appreciation/" + requestId + "/" + uuid + "." + detected.ext;
     } else {
       bucket = "seek-impact";
-      storagePath = `\( {uuid}. \){detected.ext}`;
+      storagePath = uuid + "." + detected.ext;
     }
 
     const { error: uploadError } = await supabase.storage
@@ -346,6 +391,28 @@ Deno.serve(async (req) => {
           {
             error: "Failed to save evidence metadata",
             details: metaErr.message,
+          },
+          500
+        );
+      }
+    }
+
+    if (purpose === "appreciation") {
+      const { error: updErr } = await supabase
+        .from("requests")
+        .update({
+          appreciation_storage_path: storagePath,
+          appreciation_mime_type: detected.mime,
+          appreciation_kind: detected.kind === "video" ? "video" : "image",
+          appreciation_file_name: safeBase || `appreciation.${detected.ext}`,
+        })
+        .eq("id", requestId);
+      if (updErr) {
+        await supabase.storage.from(bucket).remove([storagePath]);
+        return jsonResponse(
+          {
+            error: "Failed to save appreciation media",
+            details: updErr.message,
           },
           500
         );
