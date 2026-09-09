@@ -707,3 +707,39 @@ export async function getRequestAppreciation(requestId) {
     };
   });
 }
+
+
+export async function listAppreciationStories() {
+  if (!supabaseConfigured) return [];
+  let rows = [];
+  try {
+    rows = await supabaseFetch(
+      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,requests(title,location,status)&order=created_at.desc"
+    );
+  } catch (_e) {
+    rows = await supabaseFetch(
+      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at&order=created_at.desc"
+    );
+  }
+  const list = Array.isArray(rows) ? rows : [];
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return list
+    .filter((row) => row?.storage_path && (row.requests?.status === "fulfilled" || !row.requests))
+    .map((row) => {
+      const path = String(row.storage_path);
+      const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
+      const isVideo = kind.includes("video") || /\.(mp4|webm|mov)$/i.test(path);
+      return {
+        id: "thanks-" + row.id,
+        title: (row.requests && row.requests.title) || "A thank you from someone Seek helped",
+        story: "Appreciation from a fulfilled Seek request.",
+        location: row.requests?.location || "",
+        media_kind: isVideo ? "video" : "image",
+        public_url:
+          `${base}/storage/v1/object/public/seek-impact/` +
+          path.split("/").map(encodeURIComponent).join("/"),
+        request_id: row.request_id,
+        created_at: row.created_at,
+      };
+    });
+}
