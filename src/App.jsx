@@ -15,6 +15,7 @@ import {
   userSignUp,
   userSignIn,
   listMyRequests,
+  postRequestPublicUpdate,
   listPublishedImpact,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -1291,6 +1292,12 @@ function RequestPage({ requestId, setPage }) {
           <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
             {request.description}
           </p>
+          {request.publicUpdate && (
+            <div className="mt-6 rounded-2xl bg-[#1BAA9C]/8 p-4">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-1">Update from the requester</p>
+              <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
+            </div>
+          )}
           {evidence.length > 0 && (
   <div className="mt-6 space-y-4">
     <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50">
@@ -1942,6 +1949,54 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
 /* ---------------- My Requests Page ---------------- */
 
+
+function RequesterUpdateForm({ requestId, existing, onSaved }) {
+  const [text, setText] = useState(existing || "");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [saved, setSaved] = useState(Boolean(existing));
+
+  return (
+    <form
+      className="mt-4 space-y-2"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        try {
+          setSaving(true);
+          setError("");
+          await postRequestPublicUpdate(requestId, text);
+          setSaved(true);
+          onSaved?.(text.trim());
+        } catch (err) {
+          setError(err.message);
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">
+        Public update
+      </p>
+      <textarea
+        value={text}
+        maxLength={280}
+        rows={3}
+        onChange={(e) => setText(e.target.value)}
+        placeholder="Example: School fees were paid. Thank you."
+        className="w-full rounded-xl border px-3 py-2 text-sm"
+      />
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <button
+        type="submit"
+        disabled={saving || text.trim().length < 3}
+        className="rounded-xl bg-[#0D3B3B] text-white px-3 py-2 text-sm font-semibold"
+      >
+        {saving ? "Saving…" : saved ? "Update message" : "Publish update"}
+      </button>
+    </form>
+  );
+}
+
 function MyRequestsPage({ setPage, userSession }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2064,6 +2119,15 @@ function MyRequestsPage({ setPage, userSession }) {
                   View public page
                 </button>
               </div>
+              {req.status === "fulfilled" && (
+                <RequesterUpdateForm
+                  requestId={req.id}
+                  existing={req.publicUpdate}
+                  onSaved={(text) => {
+                    setItems((prev) => prev.map((item) => item.id === req.id ? { ...item, publicUpdate: text } : item));
+                  }}
+                />
+              )}
             </div>
           ))}
         </div>
