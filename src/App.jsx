@@ -93,10 +93,10 @@ const CATEGORIES = [
 ];
 
 const IMPACT_STATS = [
-  { value: "1,250+", label: "People supported" },
-  { value: "₦8.4M", label: "Assistance coordinated" },
-  { value: "430+", label: "Volunteers" },
-  { value: "18", label: "Communities reached" },
+  { value: "3,000+", label: "Lives supported" },
+  { value: "₦50M+", label: "Public donations before Seek" },
+  { value: "30+", label: "Volunteers" },
+  { value: "18+", label: "Communities across Nigeria" },
 ];
 
 /* ---------------- Small building blocks ---------------- */
@@ -562,8 +562,9 @@ function HomePage({ setPage }) {
       {/* IMPACT */}
       <section className="py-20" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #123f3f)` }}>
         <div className="mx-auto max-w-6xl px-5 sm:px-8 text-center">
-          <SectionLabel>Impact · Demo figures</SectionLabel>
-          <h2 className="font-display font-bold text-3xl sm:text-4xl text-white mb-12">What community help can look like.</h2>
+          <SectionLabel>BSN Foundation impact</SectionLabel>
+          <h2 className="font-display font-bold text-3xl sm:text-4xl text-white mb-4">What community help has already looked like.</h2>
+          <p className="font-body text-sm text-white/70 mb-12">5 years of work before Seek · Enugu, Abuja and Lagos</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {IMPACT_STATS.map((s) => (
               <div key={s.label}>
@@ -572,7 +573,7 @@ function HomePage({ setPage }) {
               </div>
             ))}
           </div>
-          <p className="mt-10 text-xs text-white/35 font-body">Demo figures shown until live data is connected.</p>
+          <p className="mt-10 text-xs text-white/35 font-body">Figures from BSN Foundation public support work before Seek launched.</p>
           {impactPreview.length > 0 && (
             <div className="mt-12 grid sm:grid-cols-3 gap-4 text-left">
               {impactPreview.map((post) => (
@@ -1552,7 +1553,12 @@ function ContactPage() {
         <SectionLabel>Contact</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-4">Talk to Seek</h1>
         <p className="font-body text-[#0D3B3B]/70 leading-relaxed">
-          Seek is a project of BSN Foundation. For a Trust & Safety concern, start a chat below or use Report this request on a public request page.
+          Seek is a project of BSN Foundation. Email us at{" "}
+          <a className="font-semibold text-[#1BAA9C]" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
+          {" "}or start a chat below. You can also use Report this request on a public request page.
+        </p>
+        <p className="mt-3 font-body text-sm text-[#0D3B3B]/55">
+          Active in Enugu, Abuja and Lagos · 5 years of community support
         </p>
         <SupportChat />
       </section>
