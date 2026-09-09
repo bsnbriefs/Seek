@@ -80,7 +80,7 @@ const FONTS = (
   `}</style>
 );
 
-/* ---------------- DEMO DATA ---------------- */
+/* ---------------- APP DATA ---------------- */
 
 const CATEGORIES = [
   { id: "food", label: "Food", icon: Utensils },
@@ -828,23 +828,6 @@ if (!cancelled) {
             );
           })()
         )}
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-          {GIVE_OPTIONS.map((o) => {
-            const Icon = o.icon;
-            return (
-              <div key={o.title} className="rounded-2xl bg-white p-6 border border-[#0D3B3B]/5 shadow-sm hover:shadow-md hover:-translate-y-0.5 transition-all">
-                <span className="flex h-11 w-11 items-center justify-center rounded-xl text-white mb-4" style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>
-                  <Icon size={20} />
-                </span>
-                <p className="font-display font-semibold text-[#0D3B3B]">{o.title}</p>
-                <p className="font-body text-sm text-[#0D3B3B]/55 mt-1">{o.desc}</p>
-              </div>
-            );
-          })}
-        </div>
       </section>
 
       <section className="bg-white py-16">
