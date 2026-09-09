@@ -569,7 +569,7 @@ function HomePage({ setPage }) {
         <div className="mx-auto max-w-6xl px-5 sm:px-8 text-center">
           <SectionLabel>BSN Foundation impact</SectionLabel>
           <h2 className="font-display font-bold text-3xl sm:text-4xl text-white mb-4">What community help has already looked like.</h2>
-          <p className="font-body text-sm text-white/70 mb-12">5 years of work before Seek · Enugu, Abuja and Lagos</p>
+          <p className="font-body text-sm text-white/70 mb-12">5 years of community support, starting in Nigeria and built to travel</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
             {(liveStats
               ? [
@@ -587,7 +587,7 @@ function HomePage({ setPage }) {
             ))}
           </div>
           <p className="mt-10 text-xs text-white/35 font-body">
-            Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities, 5 years in Enugu, Abuja and Lagos.
+            Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities over 5 years — including Enugu, Abuja and Lagos, and not limited to those cities.
           </p>
           {impactPreview.length > 0 && (
             <div className="mt-12 grid sm:grid-cols-3 gap-4 text-left">
@@ -1002,7 +1002,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Phone number (admin only)"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
-            <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, State" /></Field>
+            <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           </div>
           <Field label="Category">
             <select required className={inputCls} value={form.category} onChange={set("category")}>
@@ -1073,7 +1073,7 @@ function VolunteerPage() {
   const roles = [
     { id: "verify", title: "Verify requests", desc: "Help confirm that a published need is real and safely described." },
     { id: "followup", title: "Follow up after a match", desc: "Check that help reached the person and that Seek can mark it fulfilled." },
-    { id: "outreach", title: "Community outreach", desc: "Point people in Enugu, Abuja or Lagos to Seek when they need or can give help." },
+    { id: "outreach", title: "Community outreach", desc: "Point people in your city to Seek when they need help or can give it." },
   ];
 
   return (
@@ -1117,7 +1117,7 @@ function VolunteerPage() {
                 <Field label="Full name"><input required className={inputCls} placeholder="Your name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} /></Field>
                 <Field label="Email"><input required type="email" className={inputCls} placeholder="you@example.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} /></Field>
               </div>
-              <Field label="Location"><input required className={inputCls} placeholder="City, State" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} /></Field>
+              <Field label="Location"><input required className={inputCls} placeholder="City, country" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} /></Field>
               <Field label="Chosen role">
                 <input className={inputCls} value={form.role} onChange={e=>setForm({...form,role:e.target.value})} placeholder="Tap a role above" />
               </Field>
@@ -1614,7 +1614,7 @@ function ContactPage() {
           {" "}or start a chat below. You can also use Report this request on a public request page.
         </p>
         <p className="mt-3 font-body text-sm text-[#0D3B3B]/55">
-          Active in Enugu, Abuja and Lagos · 5 years of community support
+          Seek is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
         </p>
         <SupportChat />
       </section>
