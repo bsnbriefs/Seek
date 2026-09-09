@@ -67,7 +67,17 @@ export async function submitRequest(payload) {
   // Requires a real logged-in user access token (not the publishable key).
   if (evidenceFiles.length) {
     const accessToken = evidenceSession?.access_token;
+    const total = evidenceFiles.length;
+    let index = 0;
     for (const file of evidenceFiles) {
+      index += 1;
+      if (typeof payload.onProgress === "function") {
+        payload.onProgress({
+          index,
+          total,
+          name: file.name || "file",
+        });
+      }
       const form = new FormData();
       form.append("file", file);
       form.append("purpose", "evidence");
