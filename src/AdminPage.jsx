@@ -274,6 +274,11 @@ export default function AdminPage() {
               {" · "}
               {(supportChats || []).length} support chats
             </p>
+            {(supportChats || []).length > 0 && (
+              <p className="mt-1 text-sm font-semibold text-[#1BAA9C]">
+                Open the Trust tab to answer visitor chat.
+              </p>
+            )}
           </div>
 
           <button
@@ -852,6 +857,9 @@ export default function AdminPage() {
         {/* DONATIONS */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Donations</h2>
+          <p className="mb-4 text-sm text-slate-600">
+            Paystack confirms payment into the Seek/BSN settlement path. Seek does not pay requesters from this screen. Record fulfilment on the request after help has actually arrived.
+          </p>
 
           {donations.length === 0 ? (
             <p className="text-slate-500">No donations yet.</p>
@@ -897,6 +905,9 @@ export default function AdminPage() {
         {/* SUPPORT CHAT */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Support chat</h2>
+          <p className="mb-4 text-sm text-slate-600">
+            This inbox is the reliable place to see chats. The public-site bell only rings if you are also signed in on seekbsn.org as an admin profile.
+          </p>
           {supportChats.length === 0 ? (
             <p className="text-slate-500">No visitor chats yet.</p>
           ) : (
