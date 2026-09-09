@@ -199,6 +199,13 @@ export function mapRequestRow(row) {
         ? "item"
         : "money",
     publicUpdate: row.public_update || "",
+    appreciationPath: row.appreciation_storage_path || "",
+    appreciationMime: row.appreciation_mime_type || "",
+    appreciationKind: row.appreciation_kind || "",
+    appreciationUrl: row.appreciation_storage_path
+      ? `${(import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "")}/storage/v1/object/public/seek-impact/` +
+        String(row.appreciation_storage_path).split("/").map(encodeURIComponent).join("/")
+      : "",
   };
 }
 
@@ -648,4 +655,37 @@ export async function postRequestPublicUpdate(requestId, body) {
   if (!response.ok) {
     throw new Error(data?.message || data?.hint || "Could not save your update.");
   }
+}
+
+
+export async function uploadAppreciationMedia(requestId, file, onProgress) {
+  const session = getUserSession();
+  if (!session?.access_token) {
+    throw new Error("Please sign in to upload appreciation media.");
+  }
+  if (!file) throw new Error("Choose a photo or video first.");
+  if (typeof onProgress === "function") onProgress("Uploading appreciation…");
+  const form = new FormData();
+  form.append("file", file);
+  form.append("purpose", "appreciation");
+  form.append("request_id", requestId);
+  form.append("original_name", file.name || "appreciation");
+  const uploadResponse = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
+    {
+      method: "POST",
+      headers: {
+        apikey:
+          import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+          import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: form,
+    }
+  );
+  const uploadResult = await uploadResponse.json().catch(() => ({}));
+  if (!uploadResponse.ok || !uploadResult?.success) {
+    throw new Error(uploadResult?.error || uploadResult?.details || "Appreciation upload failed.");
+  }
+  return uploadResult;
 }
