@@ -566,8 +566,10 @@ export default function AdminPage() {
                                 setError("");
                                 await celebrateAdminRequest(req);
                                 await loadRequests();
+                                window.alert("Celebration draft saved. Scroll to Community Impact and publish it.");
                               } catch (err) {
                                 setError(err.message);
+                                window.alert(err.message);
                               }
                             }}
                             className="rounded-xl border px-4 py-2 text-sm"
