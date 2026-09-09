@@ -1177,6 +1177,7 @@ function RequestPage({ requestId, setPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
     const [evidence, setEvidence] = useState([]);
+    const [helped, setHelped] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -1192,6 +1193,9 @@ function RequestPage({ requestId, setPage }) {
   } else {
     setRequest(matched);
 
+    listMatchedOfferRequestIds()
+      .then((ids) => { if (!cancelled) setHelped((ids || []).includes(matched.id)); })
+      .catch(() => {});
     getRequestEvidence(matched.id)
       .then((files) => {
         if (!cancelled) {
@@ -1352,6 +1356,23 @@ function RequestPage({ requestId, setPage }) {
               <p className="font-body text-sm font-semibold text-[#1BAA9C]">
                 This need has been met. Thank you to everyone who helped.
               </p>
+            ) : helped ? (
+              <>
+                <p className="font-body text-sm font-semibold text-[#1BAA9C]">
+                  Help is in progress for this request.
+                </p>
+                <Button
+                  variant="secondary"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    sessionStorage.setItem("seek_help_request_id", request.id);
+                    window.history.pushState({}, "", "/give");
+                    setPage("give");
+                  }}
+                >
+                  Give anyway
+                </Button>
+              </>
             ) : (
               <>
                 <Button
