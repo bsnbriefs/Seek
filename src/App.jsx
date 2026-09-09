@@ -18,6 +18,9 @@ import {
   listPublishedImpact,
   getPublicRequestById,
   submitSafetyReport,
+  startSupportConversation,
+  listSupportMessages,
+  sendSupportMessage,
 } from "./lib/seekApi";
 
 import {
@@ -1362,6 +1365,93 @@ function ReportRequestForm({ requestId }) {
   );
 }
 
+function SupportChat() {
+  const [conversationId, setConversationId] = useState(() => localStorage.getItem("seek_support_chat_id") || "");
+  const [messages, setMessages] = useState([]);
+  const [text, setText] = useState("");
+  const [email, setEmail] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  useEffect(() => {
+    if (!conversationId) return;
+    let cancelled = false;
+    listSupportMessages(conversationId)
+      .then((rows) => { if (!cancelled) setMessages(rows); })
+      .catch((err) => { if (!cancelled) setError(err.message); });
+    const timer = setInterval(() => {
+      listSupportMessages(conversationId)
+        .then((rows) => { if (!cancelled) setMessages(rows); })
+        .catch(() => {});
+    }, 4000);
+    return () => { cancelled = true; clearInterval(timer); };
+  }, [conversationId]);
+
+  async function ensureConversation() {
+    if (conversationId) return conversationId;
+    const created = await startSupportConversation(email);
+    const id = created?.id;
+    if (!id) throw new Error("Could not start chat.");
+    localStorage.setItem("seek_support_chat_id", id);
+    setConversationId(id);
+    return id;
+  }
+
+  async function send(e) {
+    e.preventDefault();
+    try {
+      setLoading(true);
+      setError("");
+      const id = await ensureConversation();
+      await sendSupportMessage(id, "visitor", text);
+      setText("");
+      setMessages(await listSupportMessages(id));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setLoading(false);
+    }
+  }
+
+  return (
+    <div className="mt-8 rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 space-y-4">
+      <h2 className="font-display font-bold text-xl text-[#0D3B3B]">Live support chat</h2>
+      <p className="font-body text-sm text-[#0D3B3B]/60">
+        Use this to report a concern. Do not send bank PINs, OTPs, or other people’s private files.
+      </p>
+      {!conversationId && (
+        <input
+          type="email"
+          value={email}
+          onChange={(e) => setEmail(e.target.value)}
+          placeholder="Email (optional)"
+          className="w-full rounded-xl border px-3 py-2 text-sm"
+        />
+      )}
+      <div className="max-h-72 overflow-y-auto space-y-2">
+        {messages.map((m) => (
+          <div key={m.id} className={`rounded-2xl px-3 py-2 text-sm ${m.sender === "admin" ? "bg-[#1BAA9C]/10 text-[#0D3B3B]" : "bg-slate-100 text-[#0D3B3B]"}`}>
+            <p className="text-[10px] uppercase tracking-wide text-[#0D3B3B]/45">{m.sender}</p>
+            <p>{m.body}</p>
+          </div>
+        ))}
+      </div>
+      <form onSubmit={send} className="flex gap-2">
+        <input
+          value={text}
+          onChange={(e) => setText(e.target.value)}
+          placeholder="Type a message"
+          className="flex-1 rounded-xl border px-3 py-2 text-sm"
+        />
+        <button disabled={loading} className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold">
+          {loading ? "…" : "Send"}
+        </button>
+      </form>
+      {error && <p className="text-sm text-red-600">{error}</p>}
+    </div>
+  );
+}
+
 function ContactPage() {
   return (
     <div style={{ background: C.bg }}>
@@ -1369,11 +1459,9 @@ function ContactPage() {
         <SectionLabel>Contact</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-4">Talk to Seek</h1>
         <p className="font-body text-[#0D3B3B]/70 leading-relaxed">
-          Seek is a project of BSN Foundation. For partnership, volunteer coordination, or a Trust & Safety concern, use the report tool on a request page or email the foundation team.
+          Seek is a project of BSN Foundation. For a Trust & Safety concern, start a chat below or use Report this request on a public request page.
         </p>
-        <p className="mt-6 font-body text-sm text-[#0D3B3B]/60">
-          Include only what is needed. Do not send other people’s private documents unless Seek has asked for them.
-        </p>
+        <SupportChat />
       </section>
     </div>
   );
