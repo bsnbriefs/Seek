@@ -19,6 +19,7 @@ import {
   uploadAppreciationMedia,
   getRequestAppreciation,
   listPublishedImpact,
+  listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
   getPublicRequestById,
@@ -457,7 +458,10 @@ function HomePage({ setPage }) {
         const [rows, matchedIds, impactRows, stats] = await Promise.all([
           listPublishedRequests(),
           listMatchedOfferRequestIds(),
-          listPublishedImpact().catch(() => []),
+          Promise.all([
+            listPublishedImpact().catch(() => []),
+            listAppreciationStories().catch(() => []),
+          ]).then(([impactRows, thanksRows]) => [...(thanksRows || []).slice(0, 2), ...(impactRows || [])]),
           getSeekLiveStats().catch(() => null),
         ]);
         const matchedSet = new Set(matchedIds);
@@ -574,8 +578,9 @@ function HomePage({ setPage }) {
                   key={post.id}
                   type="button"
                   onClick={() => {
-                    window.history.pushState({}, "", `/impact/${post.id}`);
-                    setPage(`impact:${post.id}`);
+                    const dest = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
+                    window.history.pushState({}, "", dest);
+                    setPage(post.request_id ? `request:${post.request_id}` : `impact:${post.id}`);
                     window.scrollTo(0, 0);
                   }}
                   className="rounded-2xl bg-white/10 p-4 text-left hover:bg-white/15"
@@ -1207,12 +1212,13 @@ function RequestPage({ requestId, setPage }) {
       .catch(() => {});
     getRequestAppreciation(matched.id)
       .then((media) => {
-        if (!cancelled && media && media.length) {
+        const items = Array.isArray(media) ? media : (media ? [media] : []);
+        if (!cancelled && items.length) {
           setRequest((prev) => prev ? {
             ...prev,
-            appreciationItems: media,
-            appreciationUrl: media[media.length - 1].public_url,
-            appreciationKind: media[media.length - 1].media_kind,
+            appreciationItems: items,
+            appreciationUrl: items[items.length - 1].public_url,
+            appreciationKind: items[items.length - 1].media_kind,
           } : prev);
         }
       })
@@ -1778,8 +1784,11 @@ function ImpactPage({ setPage }) {
     let cancelled = false;
     (async () => {
       try {
-        const rows = await listPublishedImpact();
-        if (!cancelled) setPosts(rows);
+        const [rows, thanks] = await Promise.all([
+          listPublishedImpact(),
+          listAppreciationStories().catch(() => []),
+        ]);
+        if (!cancelled) setPosts([...(thanks || []), ...(rows || [])]);
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load impact stories.");
       } finally {
