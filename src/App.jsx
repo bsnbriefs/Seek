@@ -1223,32 +1223,32 @@ function RequestPage({ requestId, setPage }) {
         {file.mime_type?.startsWith("image/") ? (
           <img
             src={file.public_url}
-            alt={file.file_name}
-            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8 object-contain"
+            alt=""
+            draggable="false"
+            onContextMenu={(e) => e.preventDefault()}
+            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8 object-contain select-none"
           />
         ) : file.mime_type?.startsWith("video/") ? (
           <video
             src={file.public_url}
             controls
+            controlsList="nodownload noplaybackrate"
+            disablePictureInPicture
             playsInline
             preload="metadata"
+            onContextMenu={(e) => e.preventDefault()}
             className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8"
           />
         ) : file.mime_type === "application/pdf" ? (
           <iframe
-            src={file.public_url}
-            title={file.file_name}
+            src={`${file.public_url}#toolbar=0&navpanes=0`}
+            title="Supporting evidence"
             className="h-96 w-full rounded-xl border border-[#0D3B3B]/8"
           />
         ) : (
-          <a
-            href={file.public_url}
-            target="_blank"
-            rel="noreferrer"
-            className="inline-block text-sm font-medium text-[#1BAA9C] underline"
-          >
-            Open evidence: {file.file_name}
-          </a>
+          <p className="font-body text-sm text-[#0D3B3B]/60">
+            A supporting file was provided for on-page review.
+          </p>
         )}
       </div>
     ))}
