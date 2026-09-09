@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [adminTab, setAdminTab] = useState("requests");
   const [impactPosts, setImpactPosts] = useState([]);
+  const [impactEditingId, setImpactEditingId] = useState(null);
   const [impactForm, setImpactForm] = useState({
     title: "",
     story: "",
@@ -1066,19 +1067,39 @@ export default function AdminPage() {
                 if (files[0]) {
                   media = await uploadImpactMedia(files[0]);
                 }
-                const saved = await saveAdminImpactPost({
-                  title,
-                  story,
-                  location: impactForm.location.trim() || null,
-                  happened_on: impactForm.happened_on || null,
-                  storage_path: media.storage_path || null,
-                  mime_type: media.mime_type || null,
-                  media_kind: media.media_kind || null,
-                  file_name: media.file_name || null,
-                  status: "draft",
-                });
-                if (files.length > 1 && saved?.id) {
-                  await saveAdminImpactMedia(saved.id, files.slice(1));
+                if (impactEditingId) {
+                  const patch = {
+                    title,
+                    story,
+                    location: impactForm.location.trim() || null,
+                    happened_on: impactForm.happened_on || null,
+                  };
+                  if (media.storage_path) {
+                    patch.storage_path = media.storage_path;
+                    patch.mime_type = media.mime_type || null;
+                    patch.media_kind = media.media_kind || null;
+                    patch.file_name = media.file_name || null;
+                  }
+                  await updateAdminImpactPost(impactEditingId, patch);
+                  if (files.length > 1) {
+                    await saveAdminImpactMedia(impactEditingId, files.slice(media.storage_path ? 1 : 0));
+                  }
+                  setImpactEditingId(null);
+                } else {
+                  const saved = await saveAdminImpactPost({
+                    title,
+                    story,
+                    location: impactForm.location.trim() || null,
+                    happened_on: impactForm.happened_on || null,
+                    storage_path: media.storage_path || null,
+                    mime_type: media.mime_type || null,
+                    media_kind: media.media_kind || null,
+                    file_name: media.file_name || null,
+                    status: "draft",
+                  });
+                  if (files.length > 1 && saved?.id) {
+                    await saveAdminImpactMedia(saved.id, files.slice(1));
+                  }
                 }
                 setImpactForm({ title: "", story: "", location: "", happened_on: "", file: null, files: [] });
                 await loadRequests();
@@ -1131,7 +1152,7 @@ export default function AdminPage() {
               disabled={impactSaving}
               className="rounded-xl bg-[#0D3B3B] text-white px-4 py-3 text-sm font-semibold"
             >
-              {impactSaving ? "Saving…" : "Save draft"}
+              {impactSaving ? "Saving…" : (impactEditingId ? "Save changes" : "Save draft")}
             </button>
           </form>
 
@@ -1155,6 +1176,24 @@ export default function AdminPage() {
                     <img src={post.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain border" />
                   ) : null}
                   <div className="flex flex-wrap gap-2">
+                    <button
+                      type="button"
+                      className="rounded-lg border px-3 py-2 text-sm"
+                      onClick={() => {
+                        setImpactEditingId(post.id);
+                        setImpactForm({
+                          title: post.title || "",
+                          story: post.story || "",
+                          location: post.location || "",
+                          happened_on: post.happened_on || "",
+                          file: null,
+                          files: [],
+                        });
+                        window.scrollTo({ top: 0, behavior: "smooth" });
+                      }}
+                    >
+                      Edit
+                    </button>
                     {post.status !== "published" ? (
                       <button
                         type="button"
