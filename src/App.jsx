@@ -16,6 +16,7 @@ import {
   userSignIn,
   listMyRequests,
   listPublishedImpact,
+  getPublicRequestById,
 } from "./lib/seekApi";
 
 import {
@@ -1057,10 +1058,7 @@ function RequestPage({ requestId, setPage }) {
       try {
         setLoading(true);
         setError("");
-        const rows = await listPublishedRequests();
-        const matched = rows
-          .map(mapRequestRow)
-          .find((r) => r.id === requestId);
+        const matched = await getPublicRequestById(requestId);
         if (!cancelled) {
   if (!matched) {
     setError("This request could not be found or is no longer published.");
@@ -1203,19 +1201,27 @@ function RequestPage({ requestId, setPage }) {
           )}
 
           <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
-            <Button
-              variant="primary"
-              className="w-full sm:w-auto"
-              onClick={() => {
-                setPage("give");
-                window.scrollTo(0, 0);
-              }}
-            >
-              I Want to Help <HandHeart size={16} />
-            </Button>
-            <p className="font-body text-xs text-[#0D3B3B]/45">
-              You’ll be taken to the Give page where you can make an offer or donate.
-            </p>
+            {request.status === "fulfilled" ? (
+              <p className="font-body text-sm font-semibold text-[#1BAA9C]">
+                This need has been met. Thank you to everyone who helped.
+              </p>
+            ) : (
+              <>
+                <Button
+                  variant="primary"
+                  className="w-full sm:w-auto"
+                  onClick={() => {
+                    setPage("give");
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  I Want to Help <HandHeart size={16} />
+                </Button>
+                <p className="font-body text-xs text-[#0D3B3B]/45">
+                  You’ll be taken to the Give page where you can make an offer or donate.
+                </p>
+              </>
+            )}
           </div>
         </div>
 
