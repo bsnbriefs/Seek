@@ -483,37 +483,63 @@ export async function getRequestEvidence(requestId) {
 }
 
 
+
+function mapImpactMedia(row, extra = []) {
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  function urlFor(path) {
+    if (!path) return null;
+    return `${base}/storage/v1/object/public/seek-impact/` + String(path).split("/").map(encodeURIComponent).join("/");
+  }
+  const items = [];
+  if (row.storage_path) {
+    items.push({
+      public_url: urlFor(row.storage_path),
+      media_kind: row.media_kind,
+    });
+  }
+  extra.forEach((m) => {
+    if (!m?.storage_path) return;
+    if (row.storage_path && m.storage_path === row.storage_path) return;
+    items.push({
+      public_url: urlFor(m.storage_path),
+      media_kind: m.media_kind,
+    });
+  });
+  return items;
+}
 export async function listPublishedImpact() {
   if (!supabaseConfigured) return [];
   const rows = await supabaseFetch(
-    "community_impact?select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at&status=eq.published&order=published_at.desc.nullslast&order=created_at.desc"
+    "community_impact?select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at,community_impact_media(storage_path,mime_type,media_kind)&status=eq.published&order=published_at.desc.nullslast&order=created_at.desc"
   );
   const list = Array.isArray(rows) ? rows : [];
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  return list.map((row) => ({
-    ...row,
-    public_url: row.storage_path
-      ? `${base}/storage/v1/object/public/seek-impact/` +
-        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
-      : null,
-  }));
+  return list.map((row) => {
+    const mediaItems = mapImpactMedia(row, row.community_impact_media || []);
+    return {
+      ...row,
+      mediaItems,
+      public_url: mediaItems[0]?.public_url || null,
+      media_kind: mediaItems[0]?.media_kind || row.media_kind,
+    };
+  });
 }
 
 
 export async function getPublishedImpactById(id) {
   if (!supabaseConfigured || !id) return null;
   const rows = await supabaseFetch(
-    `community_impact?id=eq.${encodeURIComponent(id)}&status=eq.published&select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at&limit=1`
+    `community_impact?id=eq.${encodeURIComponent(id)}&status=eq.published&select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at,community_impact_media(storage_path,mime_type,media_kind)&limit=1`
   );
   const row = Array.isArray(rows) ? rows[0] : null;
   if (!row) return null;
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const mediaItems = mapImpactMedia(row, row.community_impact_media || []);
   return {
     ...row,
-    public_url: row.storage_path
-      ? `${base}/storage/v1/object/public/seek-impact/` +
-        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
-      : null,
+    mediaItems,
+    public_url: mediaItems[0]?.public_url || null,
+    media_kind: mediaItems[0]?.media_kind || row.media_kind,
   };
 }
 
