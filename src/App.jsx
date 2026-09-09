@@ -16,6 +16,7 @@ import {
   userSignIn,
   listMyRequests,
   postRequestPublicUpdate,
+  uploadAppreciationMedia,
   listPublishedImpact,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -1314,10 +1315,17 @@ function RequestPage({ requestId, setPage }) {
           <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
             {request.description}
           </p>
-          {request.publicUpdate && (
-            <div className="mt-6 rounded-2xl bg-[#1BAA9C]/8 p-4">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-1">Update from the requester</p>
-              <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
+          {(request.publicUpdate || request.appreciationUrl) && (
+            <div className="mt-6 rounded-2xl bg-[#1BAA9C]/8 p-4 space-y-3">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">Update from the requester</p>
+              {request.publicUpdate && (
+                <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
+              )}
+              {request.appreciationUrl && request.appreciationKind === "video" ? (
+                <video src={request.appreciationUrl} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+              ) : request.appreciationUrl ? (
+                <img src={request.appreciationUrl} alt="" className="w-full max-h-80 rounded-xl object-contain" />
+              ) : null}
             </div>
           )}
           {evidence.length > 0 && (
@@ -1972,11 +1980,12 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 /* ---------------- My Requests Page ---------------- */
 
 
-function RequesterUpdateForm({ requestId, existing, onSaved }) {
+function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
   const [text, setText] = useState(existing || "");
+  const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [saved, setSaved] = useState(Boolean(existing));
+  const [saved, setSaved] = useState(Boolean(existing || existingMedia));
 
   return (
     <form
@@ -1986,7 +1995,15 @@ function RequesterUpdateForm({ requestId, existing, onSaved }) {
         try {
           setSaving(true);
           setError("");
-          await postRequestPublicUpdate(requestId, text);
+          if (text.trim().length >= 3) {
+            await postRequestPublicUpdate(requestId, text);
+          }
+          if (file) {
+            await uploadAppreciationMedia(requestId, file);
+          }
+          if (text.trim().length < 3 && !file) {
+            throw new Error("Add a short thank-you or a photo/video.");
+          }
           setSaved(true);
           onSaved?.(text.trim());
         } catch (err) {
@@ -2007,10 +2024,17 @@ function RequesterUpdateForm({ requestId, existing, onSaved }) {
         placeholder="Example: School fees were paid. Thank you."
         className="w-full rounded-xl border px-3 py-2 text-sm"
       />
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
+        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        className="block w-full text-sm"
+      />
+      <p className="text-xs text-[#0D3B3B]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
-        disabled={saving || text.trim().length < 3}
+        disabled={saving}
         className="rounded-xl bg-[#0D3B3B] text-white px-3 py-2 text-sm font-semibold"
       >
         {saving ? "Saving…" : saved ? "Update message" : "Publish update"}
@@ -2145,6 +2169,7 @@ function MyRequestsPage({ setPage, userSession }) {
                 <RequesterUpdateForm
                   requestId={req.id}
                   existing={req.publicUpdate}
+                  existingMedia={req.appreciationUrl}
                   onSaved={(text) => {
                     setItems((prev) => prev.map((item) => item.id === req.id ? { ...item, publicUpdate: text } : item));
                   }}
