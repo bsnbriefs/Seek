@@ -153,7 +153,7 @@ export async function listPublishedRequests() {
   }
 
   return supabaseFetch(
-    "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=12"
+    "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=48"
   );
 }
 
