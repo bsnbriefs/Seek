@@ -449,14 +449,12 @@ export async function getRequestEvidence(requestId) {
 
   return rows.map((file) => {
     const storagePath = file.storage_path || "";
-
     const publicUrl =
       `${AUTH_URL}/storage/v1/object/public/seek-evidence/` +
       storagePath
         .split("/")
         .map(encodeURIComponent)
         .join("/");
-
     return {
       ...file,
       public_url: publicUrl,
