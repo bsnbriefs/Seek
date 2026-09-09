@@ -8,8 +8,15 @@ export async function submitRequest(payload) {
   // Evidence uploads require an authenticated account. Check this BEFORE
   // creating the request so we never save a request and only discover later
   // that its evidence cannot be uploaded.
+  const evidenceFiles = (payload.evidenceFiles && payload.evidenceFiles.length)
+    ? Array.from(payload.evidenceFiles)
+    : (payload.evidenceFile ? [payload.evidenceFile] : []);
+  if (evidenceFiles.length > 5) {
+    throw new Error("You can attach up to 5 supporting files.");
+  }
+
   let evidenceSession = null;
-  if (payload.evidenceFile) {
+  if (evidenceFiles.length) {
     evidenceSession = getUserSession();
     const accessToken = evidenceSession?.access_token;
     const sessionEmail = (evidenceSession?.user?.email || "").trim().toLowerCase();
@@ -58,51 +65,45 @@ export async function submitRequest(payload) {
   // Secure server-side evidence upload (images, videos, PDF).
   // Validation of type/size happens in the Edge Function — not the browser.
   // Requires a real logged-in user access token (not the publishable key).
-  if (payload.evidenceFile) {
+  if (evidenceFiles.length) {
     const accessToken = evidenceSession?.access_token;
-    const file = payload.evidenceFile;
-    const form = new FormData();
+    for (const file of evidenceFiles) {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("purpose", "evidence");
+      form.append("request_id", request.id);
+      form.append("original_name", file.name || "evidence");
 
-    form.append("file", file);
-    form.append("purpose", "evidence");
-    form.append("request_id", request.id);
-    form.append("original_name", file.name || "evidence");
-
-    const uploadResponse = await fetch(
-      `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
-      {
-        method: "POST",
-        headers: {
-          apikey:
-            import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-            import.meta.env.VITE_SUPABASE_ANON_KEY,
-          Authorization: `Bearer ${accessToken}`,
-        },
-        body: form,
-      }
-    );
-
-    const uploadResult = await uploadResponse.json().catch(() => ({}));
-
-    if (!uploadResponse.ok || !uploadResult?.success) {
-      const parts = [
-        uploadResult?.error,
-        uploadResult?.details,
-        uploadResult?.hint,
-        uploadResult?.keySource
-          ? "keySource=" + uploadResult.keySource
-          : "",
-        uploadResult?.keyPrefix
-          ? "keyPrefix=" + uploadResult.keyPrefix
-          : "",
-        !uploadResult?.error && !uploadResult?.details
-          ? "HTTP " + uploadResponse.status
-          : "",
-      ].filter(Boolean);
-
-      throw new Error(
-        parts.length ? parts.join(" | ") : "Evidence upload failed."
+      const uploadResponse = await fetch(
+        `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
+        {
+          method: "POST",
+          headers: {
+            apikey:
+              import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+              import.meta.env.VITE_SUPABASE_ANON_KEY,
+            Authorization: `Bearer ${accessToken}`,
+          },
+          body: form,
+        }
       );
+
+      const uploadResult = await uploadResponse.json().catch(() => ({}));
+
+      if (!uploadResponse.ok || !uploadResult?.success) {
+        const parts = [
+          uploadResult?.error,
+          uploadResult?.details,
+          uploadResult?.hint,
+          !uploadResult?.error && !uploadResult?.details
+            ? "HTTP " + uploadResponse.status
+            : "",
+        ].filter(Boolean);
+        throw new Error(
+          (parts.length ? parts.join(" | ") : "Evidence upload failed.") +
+          " (" + (file.name || "file") + ")"
+        );
+      }
     }
   }
 
