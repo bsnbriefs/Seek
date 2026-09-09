@@ -491,3 +491,26 @@ export async function getPublicRequestById(requestId) {
   const row = Array.isArray(rows) ? rows[0] : null;
   return row ? mapRequestRow(row) : null;
 }
+
+
+export async function submitSafetyReport(payload) {
+  if (!supabaseConfigured) {
+    throw new Error("Seek backend is not configured yet.");
+  }
+  const reason = String(payload.reason || "").trim();
+  if (reason.length < 3) {
+    throw new Error("Please choose a reason for this report.");
+  }
+  const rows = await supabaseFetch("safety_reports", {
+    method: "POST",
+    body: JSON.stringify({
+      target_type: payload.targetType || "request",
+      target_id: payload.targetId || null,
+      reason,
+      details: payload.details || null,
+      reporter_email: payload.email || null,
+      status: "open",
+    }),
+  });
+  return rows?.[0] || rows;
+}
