@@ -598,3 +598,48 @@ export async function celebrateAdminRequest(req) {
     // ignore
   }
 }
+
+
+export async function getAdminSafetyReports() {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/safety_reports?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load safety reports.");
+  }
+  return Array.isArray(data) ? data : [];
+}
+
+export async function updateAdminSafetyReport(id, status) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/safety_reports?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not update report.");
+  }
+}
