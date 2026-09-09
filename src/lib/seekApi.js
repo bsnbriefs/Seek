@@ -688,21 +688,22 @@ export async function uploadAppreciationMedia(requestId, file, onProgress) {
 
 
 export async function getRequestAppreciation(requestId) {
-  if (!supabaseConfigured || !requestId) return null;
+  if (!supabaseConfigured || !requestId) return [];
   const rows = await supabaseFetch(
-    `request_appreciation?request_id=eq.${encodeURIComponent(requestId)}&select=*&order=created_at.desc&limit=1`
+    `request_appreciation?request_id=eq.${encodeURIComponent(requestId)}&select=*&order=created_at.asc`
   );
-  const row = Array.isArray(rows) ? rows[0] : null;
-  if (!row?.storage_path) return null;
+  const list = Array.isArray(rows) ? rows : [];
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  const path = String(row.storage_path);
-  const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
-  const isVideo = kind.includes("video") || path.endsWith(".mp4") || path.endsWith(".webm") || path.endsWith(".mov");
-  return {
-    ...row,
-    media_kind: isVideo ? "video" : "image",
-    public_url:
-      `${base}/storage/v1/object/public/seek-impact/` +
-      path.split("/").map(encodeURIComponent).join("/"),
-  };
+  return list.filter((row) => row?.storage_path).map((row) => {
+    const path = String(row.storage_path);
+    const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
+    const isVideo = kind.includes("video") || path.endsWith(".mp4") || path.endsWith(".webm") || path.endsWith(".mov");
+    return {
+      ...row,
+      media_kind: isVideo ? "video" : "image",
+      public_url:
+        `${base}/storage/v1/object/public/seek-impact/` +
+        path.split("/").map(encodeURIComponent).join("/"),
+    };
+  });
 }
