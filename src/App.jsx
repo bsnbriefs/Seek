@@ -129,6 +129,21 @@ function Button({ children, variant = "primary", className = "", ...props }) {
   );
 }
 
+
+function formatSeekStatus(status) {
+  const map = {
+    pending_review: "Under review",
+    verification_required: "Needs a check",
+    published: "Open for help",
+    partially_funded: "Partly funded",
+    matched: "Help in progress",
+    fulfilled: "Need met",
+    closed: "Closed",
+    rejected: "Not published",
+  };
+  return map[status] || status || "Under review";
+}
+
 function VerificationBadge({ status }) {
     const map = {
     pending_review: {
@@ -238,7 +253,6 @@ function RequestCard({ req, onHelp, onView }) {
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
         <MapPin size={14} /> {req.location}
       </p>
-      <p className="text-sm text-[#0D3B3B]/70 font-body mb-4 flex-1">{req.description}</p>
       {req.amountNeeded ? (
         <div className="mb-4"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
       ) : (
@@ -682,10 +696,13 @@ if (!cancelled) {
         <SectionLabel>Give</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">You don't have to give money to make a difference.</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Pick a request first. Then give money or offer help.</p>
-        {selectedRequest && (
-          <p className="mt-4 font-display font-semibold text-[#1BAA9C]">Helping: {selectedRequest.title}</p>
-        )}
       </section>
+      {selectedRequest && (
+        <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
+          <p className="font-display font-semibold text-[#0D3B3B]">Helping: {selectedRequest.title}</p>
+          <button type="button" className="text-xs text-[#1BAA9C]" onClick={() => setSelectedRequest(null)}>Choose a different request</button>
+        </div>
+      )}
 
       {(selectedRequest || generalDonation) && <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
         <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
@@ -928,9 +945,14 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
         <div className="mx-auto max-w-lg px-5 text-center py-24">
           <CheckCircle2 size={40} className="mx-auto text-[#1BAA9C] mb-5" />
           <h1 className="font-display font-bold text-3xl text-[#0D3B3B] mb-3">Your request has been received.</h1>
-          <p className="font-body text-[#0D3B3B]/65">
-            Requests are reviewed and, where possible, verified by BSN Foundation or an approved volunteer before appearing publicly — this helps keep Seek trustworthy for everyone.
+          <p className="font-body text-[#0D3B3B]/65 mb-6">
+            What happens next:
           </p>
+          <ol className="text-left font-body text-sm text-[#0D3B3B]/70 space-y-2 max-w-sm mx-auto">
+            <li>1. Seek reviews your request.</li>
+            <li>2. If it is approved, it appears publicly.</li>
+            <li>3. People can give or offer help.</li>
+          </ol>
         </div>
       </div>
     );
@@ -1252,6 +1274,9 @@ function RequestPage({ requestId, setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
         <SectionLabel>Public request</SectionLabel>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-4">
+          Seek reviewed this request. Names, phones and emails stay private.
+        </p>
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">
             {request.category}
@@ -1268,18 +1293,32 @@ function RequestPage({ requestId, setPage }) {
             className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
             onClick={async () => {
               const url = `${window.location.origin}/request/${request.id}`;
+              const amount = request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "";
+              const text = "Seek request: " + request.title + " — " + (request.location || "") + "." + amount + " " + url;
               try {
                 if (navigator.share) {
-                  await navigator.share({ title: request.title, url });
+                  await navigator.share({ title: request.title, text, url });
                 } else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(url);
-                  window.alert("Link copied");
+                  await navigator.clipboard.writeText(text);
+                  window.alert("Share text copied");
                 }
               } catch (_e) {}
             }}
           >
             Share
           </button>
+          <a
+            className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
+            href={`https://wa.me/?text=${encodeURIComponent(
+              "Seek request: " + request.title + " — " + (request.location || "") +
+              (request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "") +
+              " " + window.location.origin + "/request/" + request.id
+            )}`}
+            target="_blank"
+            rel="noreferrer"
+          >
+            WhatsApp
+          </a>
         </div>
         <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-6">
           <MapPin size={16} /> {request.location}
@@ -2112,7 +2151,7 @@ function MyRequestsPage({ setPage, userSession }) {
                   {req.category}
                 </span>
                 <span className="text-xs font-semibold text-[#0D3B3B]/50">
-                  {req.status}
+                  {formatSeekStatus(req.status)}
                 </span>
               </div>
               <h2 className="font-display font-bold text-lg text-[#0D3B3B] mb-1">
