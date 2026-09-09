@@ -52,6 +52,9 @@ export default function NotificationBell({ userSession, setPage }) {
     if (n.link_page === "request" && n.link_id) {
       window.history.pushState({}, "", `/request/${n.link_id}`);
       setPage(`request:${n.link_id}`);
+    } else if (n.link_page === "impact" && n.link_id) {
+      window.history.pushState({}, "", `/impact/${n.link_id}`);
+      setPage(`impact:${n.link_id}`);
     } else if (n.link_page) {
       window.history.pushState({}, "", `/${n.link_page}`);
       setPage(n.link_page);
