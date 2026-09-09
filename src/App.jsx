@@ -1,4 +1,5 @@
 import AdminPage from "./AdminPage";
+import NotificationBell from "./NotificationBell";
 import React, { useEffect, useState } from "react";
 import {
   submitRequest,
@@ -338,6 +339,9 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          {userSession?.access_token && (
+            <NotificationBell userSession={userSession} setPage={setPage} />
+          )}
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -364,6 +368,11 @@ function Navbar({ page, setPage, userSession }) {
             <button onClick={() => go("my-requests")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
               My requests
             </button>
+          )}
+          {userSession?.access_token && (
+            <div className="py-2">
+              <NotificationBell userSession={userSession} setPage={setPage} />
+            </div>
           )}
           <button onClick={() => go("account")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
             {userSession?.access_token ? "Account" : "Sign in"}
@@ -1796,34 +1805,35 @@ function ImpactPage({ setPage }) {
         {!loading && !error && posts.length === 0 && (
           <p className="font-body text-sm text-[#0D3B3B]/50">No published stories yet.</p>
         )}
+        <div className="grid sm:grid-cols-2 gap-4">
         {posts.map((post) => (
-          <article key={post.id} className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-7 shadow-sm space-y-4">
-            <div>
-              <button
-                type="button"
-                className="text-left"
-                onClick={() => {
-                  window.history.pushState({}, "", `/impact/${post.id}`);
-                  setPage(`impact:${post.id}`);
-                  window.scrollTo(0, 0);
-                }}
-              >
-                <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{post.title}</h2>
-              </button>
-              <p className="mt-1 font-body text-sm text-[#0D3B3B]/55">
-                {[post.location, post.happened_on].filter(Boolean).join(" · ")}
+          <button
+            key={post.id}
+            type="button"
+            className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
+            onClick={() => {
+              const dest = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
+              window.history.pushState({}, "", dest);
+              setPage(post.request_id ? `request:${post.request_id}` : `impact:${post.id}`);
+              window.scrollTo(0, 0);
+            }}
+          >
+            {post.public_url && post.media_kind === "video" ? (
+              <video src={post.public_url} muted playsInline preload="metadata" className="h-40 w-full object-cover bg-black" />
+            ) : post.public_url ? (
+              <img src={post.public_url} alt="" className="h-40 w-full object-cover" />
+            ) : (
+              <div className="h-24 bg-[#0D3B3B]/5" />
+            )}
+            <div className="p-4">
+              <h2 className="font-display font-bold text-base text-[#0D3B3B] line-clamp-2">{post.title}</h2>
+              <p className="mt-1 font-body text-xs text-[#0D3B3B]/50 line-clamp-2">
+                {post.story || [post.location, post.happened_on].filter(Boolean).join(" · ")}
               </p>
             </div>
-            {post.story && (
-              <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>
-            )}
-            {post.public_url && post.media_kind === "video" ? (
-              <video src={post.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
-            ) : post.public_url ? (
-              <img src={post.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border border-[#0D3B3B]/8" />
-            ) : null}
-          </article>
+          </button>
         ))}
+        </div>
         <div className="text-center pt-4">
           <Button variant="primary" onClick={() => setPage("give")}>Help someone <ArrowRight size={16} /></Button>
         </div>
