@@ -12,6 +12,11 @@ import {
   updateAdminOfferStatus,
   verifyAdminRequest,
   getAdminEvidence,
+  getAdminImpactPosts,
+  uploadImpactMedia,
+  saveAdminImpactPost,
+  updateAdminImpactPost,
+  deleteAdminImpactPost,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -31,18 +36,28 @@ export default function AdminPage() {
   const [requestFilter, setRequestFilter] = useState("all");
   const [offerFilter, setOfferFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [impactPosts, setImpactPosts] = useState([]);
+  const [impactForm, setImpactForm] = useState({
+    title: "",
+    story: "",
+    location: "",
+    happened_on: "",
+    file: null,
+  });
+  const [impactSaving, setImpactSaving] = useState(false);
 
   async function loadRequests() {
     try {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers(),
         getAdminRequestPrivate(),
         getAdminDonations(),
+        getAdminImpactPosts().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -50,6 +65,7 @@ export default function AdminPage() {
       setVolunteers(volunteerData);
       setRequestPrivate(privateData);
       setDonations(donationData);
+      setImpactPosts(impactData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -744,6 +760,166 @@ export default function AdminPage() {
                       ? new Date(donation.paid_at).toLocaleString()
                       : "-"}
                   </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* COMMUNITY IMPACT */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-2">Community Impact</h2>
+          <p className="text-sm text-slate-500 mb-4">
+            Do not publish full names, phone numbers, emails, addresses, or request IDs.
+          </p>
+
+          <form
+            className="rounded-xl border p-5 bg-white space-y-3 mb-6"
+            onSubmit={async (e) => {
+              e.preventDefault();
+              try {
+                setImpactSaving(true);
+                setError("");
+                const title = impactForm.title.trim();
+                const story = impactForm.story.trim();
+                if (!title) throw new Error("Title is required.");
+                const sensitive = /(\+?\d[\d\s-]{7,}|@|request id|SEEK-)/i.test(title + " " + story);
+                if (sensitive) {
+                  throw new Error("This draft looks like it contains private details. Remove phone, email, or request IDs before saving.");
+                }
+                let media = {};
+                if (impactForm.file) {
+                  media = await uploadImpactMedia(impactForm.file);
+                }
+                await saveAdminImpactPost({
+                  title,
+                  story,
+                  location: impactForm.location.trim() || null,
+                  happened_on: impactForm.happened_on || null,
+                  storage_path: media.storage_path || null,
+                  mime_type: media.mime_type || null,
+                  media_kind: media.media_kind || null,
+                  file_name: media.file_name || null,
+                  status: "draft",
+                });
+                setImpactForm({ title: "", story: "", location: "", happened_on: "", file: null });
+                await loadRequests();
+              } catch (err) {
+                setError(err.message);
+              } finally {
+                setImpactSaving(false);
+              }
+            }}
+          >
+            <input
+              required
+              value={impactForm.title}
+              onChange={(e) => setImpactForm({ ...impactForm, title: e.target.value })}
+              placeholder="Title"
+              className="w-full rounded-xl border px-4 py-3"
+            />
+            <textarea
+              value={impactForm.story}
+              onChange={(e) => setImpactForm({ ...impactForm, story: e.target.value })}
+              placeholder="Story / caption"
+              rows={4}
+              className="w-full rounded-xl border px-4 py-3"
+            />
+            <div className="grid sm:grid-cols-2 gap-3">
+              <input
+                value={impactForm.location}
+                onChange={(e) => setImpactForm({ ...impactForm, location: e.target.value })}
+                placeholder="Location (optional)"
+                className="rounded-xl border px-4 py-3"
+              />
+              <input
+                type="date"
+                value={impactForm.happened_on}
+                onChange={(e) => setImpactForm({ ...impactForm, happened_on: e.target.value })}
+                className="rounded-xl border px-4 py-3"
+              />
+            </div>
+            <input
+              type="file"
+              accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
+              onChange={(e) => setImpactForm({ ...impactForm, file: e.target.files?.[0] || null })}
+            />
+            <button
+              type="submit"
+              disabled={impactSaving}
+              className="rounded-xl bg-[#0D3B3B] text-white px-4 py-3 text-sm font-semibold"
+            >
+              {impactSaving ? "Saving…" : "Save draft"}
+            </button>
+          </form>
+
+          {impactPosts.length === 0 ? (
+            <p className="text-slate-500">No Community Impact posts yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {impactPosts.map((post) => (
+                <div key={post.id} className="rounded-xl border p-5 bg-white space-y-3">
+                  <div className="flex items-start justify-between gap-3">
+                    <div>
+                      <p className="text-xs uppercase tracking-wide text-slate-500">{post.status}</p>
+                      <h3 className="text-xl font-semibold">{post.title}</h3>
+                      {post.location && <p className="text-sm text-slate-600">{post.location}</p>}
+                    </div>
+                  </div>
+                  {post.story && <p className="text-sm text-slate-700 whitespace-pre-wrap">{post.story}</p>}
+                  {post.public_url && post.media_kind === "video" ? (
+                    <video src={post.public_url} controls playsInline preload="metadata" className="w-full max-h-80 rounded-xl bg-black" />
+                  ) : post.public_url ? (
+                    <img src={post.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain border" />
+                  ) : null}
+                  <div className="flex flex-wrap gap-2">
+                    {post.status !== "published" ? (
+                      <button
+                        type="button"
+                        className="rounded-lg border px-3 py-2 text-sm"
+                        onClick={async () => {
+                          try {
+                            await updateAdminImpactPost(post.id, { status: "published" });
+                            await loadRequests();
+                          } catch (err) {
+                            setError(err.message);
+                          }
+                        }}
+                      >
+                        Publish
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        className="rounded-lg border px-3 py-2 text-sm"
+                        onClick={async () => {
+                          try {
+                            await updateAdminImpactPost(post.id, { status: "draft" });
+                            await loadRequests();
+                          } catch (err) {
+                            setError(err.message);
+                          }
+                        }}
+                      >
+                        Unpublish
+                      </button>
+                    )}
+                    <button
+                      type="button"
+                      className="rounded-lg border px-3 py-2 text-sm text-red-700"
+                      onClick={async () => {
+                        if (!window.confirm("Delete this impact post?")) return;
+                        try {
+                          await deleteAdminImpactPost(post.id);
+                          await loadRequests();
+                        } catch (err) {
+                          setError(err.message);
+                        }
+                      }}
+                    >
+                      Delete
+                    </button>
+                  </div>
                 </div>
               ))}
             </div>
