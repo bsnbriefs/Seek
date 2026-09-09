@@ -19,6 +19,8 @@ import {
   deleteAdminImpactPost,
   confirmAdminOfferConnected,
   celebrateAdminRequest,
+  getAdminSafetyReports,
+  updateAdminSafetyReport,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -47,19 +49,21 @@ export default function AdminPage() {
     file: null,
   });
   const [impactSaving, setImpactSaving] = useState(false);
+  const [safetyReports, setSafetyReports] = useState([]);
 
   async function loadRequests() {
     try {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers(),
         getAdminRequestPrivate(),
         getAdminDonations(),
         getAdminImpactPosts().catch(() => []),
+        getAdminSafetyReports().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -68,6 +72,7 @@ export default function AdminPage() {
       setRequestPrivate(privateData);
       setDonations(donationData);
       setImpactPosts(impactData);
+      setSafetyReports(reportData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -829,6 +834,45 @@ export default function AdminPage() {
                       ? new Date(donation.paid_at).toLocaleString()
                       : "-"}
                   </p>
+                </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* TRUST & SAFETY */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Trust & Safety reports</h2>
+          {safetyReports.length === 0 ? (
+            <p className="text-slate-500">No reports yet.</p>
+          ) : (
+            <div className="space-y-4">
+              {safetyReports.map((report) => (
+                <div key={report.id} className="rounded-xl border p-5 bg-white space-y-2">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">
+                    {report.status} · {report.target_type}
+                  </p>
+                  <p className="font-semibold">{report.reason}</p>
+                  {report.details && <p className="text-sm text-slate-600">{report.details}</p>}
+                  <p className="text-xs text-slate-500">
+                    {report.reporter_email || "Anonymous"} · {report.target_id || "no target id"}
+                  </p>
+                  {report.status === "open" && (
+                    <button
+                      type="button"
+                      className="rounded-lg border px-3 py-2 text-sm"
+                      onClick={async () => {
+                        try {
+                          await updateAdminSafetyReport(report.id, "reviewed");
+                          await loadRequests();
+                        } catch (err) {
+                          setError(err.message);
+                        }
+                      }}
+                    >
+                      Mark reviewed
+                    </button>
+                  )}
                 </div>
               ))}
             </div>
