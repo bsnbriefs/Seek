@@ -17,6 +17,7 @@ import {
   listMyRequests,
   listPublishedImpact,
   getPublishedImpactById,
+  getSeekLiveStats,
   getPublicRequestById,
   submitSafetyReport,
   startSupportConversation,
@@ -430,20 +431,23 @@ function HomePage({ setPage }) {
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
   const [impactPreview, setImpactPreview] = useState([]);
+  const [liveStats, setLiveStats] = useState(null);
 
     useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows] = await Promise.all([
+        const [rows, matchedIds, impactRows, stats] = await Promise.all([
           listPublishedRequests(),
           listMatchedOfferRequestIds(),
           listPublishedImpact().catch(() => []),
+          getSeekLiveStats().catch(() => null),
         ]);
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
           setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 8));
           setImpactPreview((impactRows || []).slice(0, 3));
+          if (stats) setLiveStats(stats);
         }
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
@@ -566,14 +570,24 @@ function HomePage({ setPage }) {
           <h2 className="font-display font-bold text-3xl sm:text-4xl text-white mb-4">What community help has already looked like.</h2>
           <p className="font-body text-sm text-white/70 mb-12">5 years of work before Seek · Enugu, Abuja and Lagos</p>
           <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {IMPACT_STATS.map((s) => (
+            {(liveStats
+              ? [
+                  { value: String(liveStats.openRequests), label: "Open requests on Seek" },
+                  { value: String(liveStats.fulfilled), label: "Needs marked fulfilled" },
+                  { value: liveStats.raised > 0 ? `₦${Math.round(liveStats.raised).toLocaleString()}` : "—", label: "Donations through Seek" },
+                  { value: String(liveStats.donationCount), label: "Successful gifts recorded" },
+                ]
+              : IMPACT_STATS
+            ).map((s) => (
               <div key={s.label}>
                 <p className="font-display font-extrabold text-3xl sm:text-4xl text-white">{s.value}</p>
                 <p className="font-body text-sm text-white/55 mt-1">{s.label}</p>
               </div>
             ))}
           </div>
-          <p className="mt-10 text-xs text-white/35 font-body">Figures from BSN Foundation public support work before Seek launched.</p>
+          <p className="mt-10 text-xs text-white/35 font-body">
+            Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities, 5 years in Enugu, Abuja and Lagos.
+          </p>
           {impactPreview.length > 0 && (
             <div className="mt-12 grid sm:grid-cols-3 gap-4 text-left">
               {impactPreview.map((post) => (
