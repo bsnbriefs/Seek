@@ -16,6 +16,7 @@ import {
   userSignIn,
   listMyRequests,
   listPublishedImpact,
+  getPublishedImpactById,
   getPublicRequestById,
   submitSafetyReport,
   startSupportConversation,
@@ -578,7 +579,11 @@ function HomePage({ setPage }) {
                 <button
                   key={post.id}
                   type="button"
-                  onClick={() => go("impact")}
+                  onClick={() => {
+                    window.history.pushState({}, "", `/impact/${post.id}`);
+                    setPage(`impact:${post.id}`);
+                    window.scrollTo(0, 0);
+                  }}
                   className="rounded-2xl bg-white/10 p-4 text-left hover:bg-white/15"
                 >
                   <p className="font-display font-semibold text-white">{post.title}</p>
@@ -1592,6 +1597,81 @@ function LegalPage({ title }) {
   );
 }
 
+
+function ImpactStoryPage({ impactId, setPage }) {
+  const [post, setPost] = useState(null);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const row = await getPublishedImpactById(impactId);
+        if (!cancelled) {
+          if (!row) setError("This story is not published.");
+          setPost(row);
+        }
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load this story.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, [impactId]);
+
+  if (loading) {
+    return <div style={{ background: C.bg }} className="min-h-[40vh] flex items-center justify-center"><p className="font-body text-sm text-[#0D3B3B]/50">Loading story…</p></div>;
+  }
+  if (error || !post) {
+    return (
+      <div style={{ background: C.bg }} className="min-h-[40vh] flex items-center">
+        <div className="mx-auto max-w-lg px-5 py-24 text-center">
+          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">Story not found</h1>
+          <p className="font-body text-[#0D3B3B]/65 mb-6">{error}</p>
+          <Button variant="primary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>Back to Impact</Button>
+        </div>
+      </div>
+    );
+  }
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20 space-y-5">
+        <SectionLabel>Community Impact</SectionLabel>
+        <div className="flex items-start justify-between gap-3">
+          <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{post.title}</h1>
+          <button
+            type="button"
+            className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+            onClick={async () => {
+              const url = `${window.location.origin}/impact/${post.id}`;
+              try {
+                if (navigator.share) await navigator.share({ title: post.title, url });
+                else if (navigator.clipboard) {
+                  await navigator.clipboard.writeText(url);
+                  window.alert("Link copied");
+                }
+              } catch (_e) {}
+            }}
+          >
+            Share
+          </button>
+        </div>
+        <p className="font-body text-sm text-[#0D3B3B]/55">{[post.location, post.happened_on].filter(Boolean).join(" · ")}</p>
+        {post.story && <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
+        {post.public_url && post.media_kind === "video" ? (
+          <video src={post.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
+        ) : post.public_url ? (
+          <img src={post.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
+        ) : null}
+        <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
+      </section>
+    </div>
+  );
+}
+
 function ImpactPage({ setPage }) {
   const [posts, setPosts] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1630,7 +1710,17 @@ function ImpactPage({ setPage }) {
         {posts.map((post) => (
           <article key={post.id} className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-7 shadow-sm space-y-4">
             <div>
-              <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{post.title}</h2>
+              <button
+                type="button"
+                className="text-left"
+                onClick={() => {
+                  window.history.pushState({}, "", `/impact/${post.id}`);
+                  setPage(`impact:${post.id}`);
+                  window.scrollTo(0, 0);
+                }}
+              >
+                <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{post.title}</h2>
+              </button>
               <p className="mt-1 font-body text-sm text-[#0D3B3B]/55">
                 {[post.location, post.happened_on].filter(Boolean).join(" · ")}
               </p>
@@ -1952,6 +2042,7 @@ export default function App() {
     if (path === "/seek-help") return "seek-help";
     if (path === "/about") return "about";
     if (path === "/impact") return "impact";
+    if (path.startsWith("/impact/")) return `impact:${path.split("/")[2]}`;
     if (path === "/privacy") return "privacy";
     if (path === "/terms") return "terms";
     if (path === "/guidelines") return "guidelines";
@@ -2044,6 +2135,8 @@ useEffect(() => {
 
   const isRequestPage = typeof page === "string" && page.startsWith("request:");
   const requestId = isRequestPage ? page.split(":")[1] : null;
+  const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
+  const impactId = isImpactStory ? page.split(":")[1] : null;
 
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
@@ -2051,6 +2144,8 @@ useEffect(() => {
 
       {isRequestPage ? (
         <RequestPage requestId={requestId} setPage={setPage} />
+      ) : isImpactStory ? (
+        <ImpactStoryPage impactId={impactId} setPage={setPage} />
       ) : (
         pages[page] || pages.home
       )}
