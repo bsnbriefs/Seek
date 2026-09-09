@@ -17,6 +17,7 @@ import {
   listMyRequests,
   listPublishedImpact,
   getPublicRequestById,
+  submitSafetyReport,
 } from "./lib/seekApi";
 
 import {
@@ -377,9 +378,9 @@ function Footer({ setPage }) {
           <p className="font-display font-semibold text-white mb-3 text-sm">Organisation</p>
           <ul className="space-y-2 text-sm">
             <li><button onClick={() => go("about")} className="hover:text-white">About</button></li>
-            <li><button className="hover:text-white">Contact</button></li>
-            <li><button className="hover:text-white">Privacy</button></li>
-            <li><button className="hover:text-white">Terms</button></li>
+            <li><button onClick={() => go("guidelines")} className="hover:text-white">Community guidelines</button></li>
+            <li><button onClick={() => go("privacy")} className="hover:text-white">Privacy</button></li>
+            <li><button onClick={() => go("terms")} className="hover:text-white">Terms</button></li>
           </ul>
         </div>
         <div>
@@ -1200,6 +1201,8 @@ function RequestPage({ requestId, setPage }) {
             </p>
           )}
 
+          <ReportRequestForm requestId={request.id} />
+
           <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
             {request.status === "fulfilled" ? (
               <p className="font-body text-sm font-semibold text-[#1BAA9C]">
@@ -1233,6 +1236,133 @@ function RequestPage({ requestId, setPage }) {
   );
 }
 
+
+
+function ReportRequestForm({ requestId }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("inappropriate");
+  const [details, setDetails] = useState("");
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  if (sent) {
+    return (
+      <p className="mt-6 font-body text-sm text-[#1BAA9C]">
+        Thank you. Seek will review this report.
+      </p>
+    );
+  }
+
+  return (
+    <div className="mt-6">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-sm font-semibold text-[#0D3B3B]/45 hover:text-[#0D3B3B]"
+        >
+          Report this request
+        </button>
+      ) : (
+        <form
+          className="rounded-2xl border border-[#0D3B3B]/10 p-4 space-y-3"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            try {
+              setLoading(true);
+              setError("");
+              await submitSafetyReport({
+                targetType: "request",
+                targetId: requestId,
+                reason,
+                details,
+                email,
+              });
+              setSent(true);
+            } catch (err) {
+              setError(err.message);
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <p className="font-display font-semibold text-sm text-[#0D3B3B]">Report this request</p>
+          <select
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="w-full rounded-xl border px-3 py-2 text-sm"
+          >
+            <option value="inappropriate">Inappropriate or harmful content</option>
+            <option value="spam">Spam or scam</option>
+            <option value="privacy">Private information exposed</option>
+            <option value="other">Something else</option>
+          </select>
+          <textarea
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+            placeholder="Optional details"
+            rows={3}
+            className="w-full rounded-xl border px-3 py-2 text-sm"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email (optional)"
+            className="w-full rounded-xl border px-3 py-2 text-sm"
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <button
+            type="submit"
+            disabled={loading}
+            className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold"
+          >
+            {loading ? "Sending…" : "Submit report"}
+          </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+function LegalPage({ title }) {
+  const copy = {
+    Privacy: [
+      "Seek collects only what is needed to operate the platform: request details, contact information for matching, donation references, and account emails.",
+      "Supporting evidence is stored so Seek and BSN Foundation can review a request. Published pages show only what admins have approved as public.",
+      "We do not sell personal information. Access to private contact fields is limited to authorised admins.",
+      "You may ask for your account or request data to be reviewed by contacting BSN Foundation through Seek.",
+    ],
+    Terms: [
+      "Seek is a community assistance platform operated as a project of BSN Foundation.",
+      "Submitting a request, offer, donation or volunteer form does not guarantee funding or a match.",
+      "Users must provide truthful information and must not use Seek to harass, defraud or exploit others.",
+      "Seek may decline, unpublish or remove content that breaks these terms or our community guidelines.",
+    ],
+    Guidelines: [
+      "Share only what is needed. Do not post full home addresses, hospital card numbers, or other people's private details.",
+      "Be honest about the need. Evidence should support the request without exposing sensitive bystanders.",
+      "Treat requesters and helpers with dignity. Hate, threats and scams are not allowed.",
+      "If you see something unsafe, use Report this request. Seek will review it.",
+    ],
+  };
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
+        <SectionLabel>Trust & Safety</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-6">{title}</h1>
+        <div className="space-y-4">
+          {(copy[title] || []).map((para) => (
+            <p key={para} className="font-body text-[#0D3B3B]/75 leading-relaxed">{para}</p>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function ImpactPage({ setPage }) {
   const [posts, setPosts] = useState([]);
@@ -1594,6 +1724,9 @@ export default function App() {
     if (path === "/seek-help") return "seek-help";
     if (path === "/about") return "about";
     if (path === "/impact") return "impact";
+    if (path === "/privacy") return "privacy";
+    if (path === "/terms") return "terms";
+    if (path === "/guidelines") return "guidelines";
     if (path === "/my-requests") return "my-requests";
     if (path === "/account") return "account";
     if (path.startsWith("/request/")) {
@@ -1664,6 +1797,9 @@ useEffect(() => {
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
     impact: <ImpactPage setPage={setPage} />,
+    privacy: <LegalPage title="Privacy" setPage={setPage} />,
+    terms: <LegalPage title="Terms" setPage={setPage} />,
+    guidelines: <LegalPage title="Guidelines" setPage={setPage} />,
     account: (
       <AccountPage
         setPage={setPage}
