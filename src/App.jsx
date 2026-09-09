@@ -933,7 +933,7 @@ function SeekHelpPage() {
   description: "",
   type: "",
   urgency: "",
-  evidenceFile: null,
+  evidenceFiles: [],
 });
 const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   if (submitted) {
@@ -1006,23 +1006,24 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
               </select>
             </Field>
           </div>
-          <Field label="Supporting image, video, or PDF (optional)">
+          <Field label="Supporting files (optional, up to 5)">
   <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm hover:bg-[#0D3B3B]/5">
     <Upload size={18} />
     <span>
-      {form.evidenceFile
-        ? form.evidenceFile.name
-        : "Choose an image, video, or PDF"}
+      {form.evidenceFiles?.length
+        ? form.evidenceFiles.map((f) => f.name).join(", ")
+        : "Choose up to 5 images, videos, or PDFs"}
     </span>
 
     <input
       type="file"
+      multiple
       accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf"
       className="hidden"
       onChange={(e) =>
         setForm((prev) => ({
           ...prev,
-          evidenceFile: e.target.files?.[0] || null,
+          evidenceFiles: Array.from(e.target.files || []).slice(0, 5),
         }))
       }
     />
