@@ -1207,11 +1207,12 @@ function RequestPage({ requestId, setPage }) {
       .catch(() => {});
     getRequestAppreciation(matched.id)
       .then((media) => {
-        if (!cancelled && media) {
+        if (!cancelled && media && media.length) {
           setRequest((prev) => prev ? {
             ...prev,
-            appreciationUrl: media.public_url,
-            appreciationKind: media.media_kind,
+            appreciationItems: media,
+            appreciationUrl: media[media.length - 1].public_url,
+            appreciationKind: media[media.length - 1].media_kind,
           } : prev);
         }
       })
@@ -1334,11 +1335,13 @@ function RequestPage({ requestId, setPage }) {
               {request.publicUpdate && (
                 <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
               )}
-              {request.appreciationUrl && (request.appreciationKind === "video" || String(request.appreciationUrl).match(/\.(mp4|webm|mov)(\?|$)/i)) ? (
-                <video src={request.appreciationUrl} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
-              ) : request.appreciationUrl ? (
-                <img src={request.appreciationUrl} alt="" className="w-full max-h-80 rounded-xl object-contain" />
-              ) : null}
+              {(request.appreciationItems || [{ public_url: request.appreciationUrl, media_kind: request.appreciationKind }].filter((item) => item.public_url)).map((item) => (
+                item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
+                  <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+                ) : (
+                  <img key={item.public_url} src={item.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain" />
+                )
+              ))}
             </div>
           )}
           {evidence.length > 0 && (
