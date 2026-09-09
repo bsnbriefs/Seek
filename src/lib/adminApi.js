@@ -693,3 +693,50 @@ export async function getAdminAuditLogs() {
   }
   return Array.isArray(data) ? data : [];
 }
+
+
+export async function getAdminSupportConversations() {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/support_conversations?select=*&order=updated_at.desc`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) throw new Error(data?.message || "Could not load support chats.");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function getAdminSupportMessages(conversationId) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/support_messages?conversation_id=eq.${conversationId}&select=*&order=created_at.asc`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) throw new Error(data?.message || "Could not load messages.");
+  return Array.isArray(data) ? data : [];
+}
+
+export async function sendAdminSupportMessage(conversationId, body) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/support_messages`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify({
+      conversation_id: conversationId,
+      sender: "admin",
+      body: String(body || "").trim().slice(0, 2000),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data?.message || "Could not send reply.");
+  return data;
+}
