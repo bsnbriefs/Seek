@@ -667,8 +667,19 @@ if (!cancelled) {
   function selectRequest(req) {
     setSelectedRequest(req);
     setDonating(true);
+    setOfferRequestId(req?.id || "");
     document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
   }
+
+  useEffect(() => {
+    const wanted = sessionStorage.getItem("seek_help_request_id");
+    if (!wanted || !requests.length) return;
+    const match = requests.find((r) => r.id === wanted);
+    if (match) {
+      sessionStorage.removeItem("seek_help_request_id");
+      selectRequest(match);
+    }
+  }, [requests]);
 
   async function startDonation(e) {
     e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
@@ -1283,6 +1294,8 @@ function RequestPage({ requestId, setPage }) {
                   variant="primary"
                   className="w-full sm:w-auto"
                   onClick={() => {
+                    sessionStorage.setItem("seek_help_request_id", request.id);
+                    window.history.pushState({}, "", "/give");
                     setPage("give");
                     window.scrollTo(0, 0);
                   }}
