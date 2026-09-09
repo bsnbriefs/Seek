@@ -378,6 +378,7 @@ function Footer({ setPage }) {
           <p className="font-display font-semibold text-white mb-3 text-sm">Organisation</p>
           <ul className="space-y-2 text-sm">
             <li><button onClick={() => go("about")} className="hover:text-white">About</button></li>
+            <li><button onClick={() => go("contact")} className="hover:text-white">Contact</button></li>
             <li><button onClick={() => go("guidelines")} className="hover:text-white">Community guidelines</button></li>
             <li><button onClick={() => go("privacy")} className="hover:text-white">Privacy</button></li>
             <li><button onClick={() => go("terms")} className="hover:text-white">Terms</button></li>
@@ -424,18 +425,21 @@ function HomePage({ setPage }) {
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
+  const [impactPreview, setImpactPreview] = useState([]);
 
     useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [rows, matchedIds] = await Promise.all([
+        const [rows, matchedIds, impactRows] = await Promise.all([
           listPublishedRequests(),
           listMatchedOfferRequestIds(),
+          listPublishedImpact().catch(() => []),
         ]);
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
-          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
+          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 8));
+          setImpactPreview((impactRows || []).slice(0, 3));
         }
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
@@ -565,6 +569,24 @@ function HomePage({ setPage }) {
             ))}
           </div>
           <p className="mt-10 text-xs text-white/35 font-body">Demo figures shown until live data is connected.</p>
+          {impactPreview.length > 0 && (
+            <div className="mt-12 grid sm:grid-cols-3 gap-4 text-left">
+              {impactPreview.map((post) => (
+                <button
+                  key={post.id}
+                  type="button"
+                  onClick={() => go("impact")}
+                  className="rounded-2xl bg-white/10 p-4 text-left hover:bg-white/15"
+                >
+                  <p className="font-display font-semibold text-white">{post.title}</p>
+                  <p className="mt-2 font-body text-xs text-white/70 line-clamp-3">{post.story}</p>
+                </button>
+              ))}
+            </div>
+          )}
+          <button type="button" onClick={() => go("impact")} className="mt-8 font-display font-semibold text-white underline underline-offset-4">
+            See Community Impact
+          </button>
         </div>
       </section>
 
@@ -599,6 +621,7 @@ const GIVE_OPTIONS = [
 ];
 
 function GivePage({ setPage }) {
+  const [categoryFilter, setCategoryFilter] = useState("all");
   const [offer, setOffer] = useState("");
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
@@ -705,7 +728,19 @@ if (!cancelled) {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-6">Open requests</h2>
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategoryFilter(cat)}
+              className={`rounded-full px-3 py-1.5 text-sm ${categoryFilter === cat ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
+            >
+              {cat === "all" ? "All" : cat}
+            </button>
+          ))}
+        </div>
         {requestsLoading ? (
           <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
         ) : requestsError ? (
@@ -714,7 +749,7 @@ if (!cancelled) {
           <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+            {requests.filter((r) => categoryFilter === "all" || r.category === categoryFilter).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
       </section>
@@ -1327,6 +1362,23 @@ function ReportRequestForm({ requestId }) {
   );
 }
 
+function ContactPage() {
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
+        <SectionLabel>Contact</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-4">Talk to Seek</h1>
+        <p className="font-body text-[#0D3B3B]/70 leading-relaxed">
+          Seek is a project of BSN Foundation. For partnership, volunteer coordination, or a Trust & Safety concern, use the report tool on a request page or email the foundation team.
+        </p>
+        <p className="mt-6 font-body text-sm text-[#0D3B3B]/60">
+          Include only what is needed. Do not send other people’s private documents unless Seek has asked for them.
+        </p>
+      </section>
+    </div>
+  );
+}
+
 function LegalPage({ title }) {
   const copy = {
     Privacy: [
@@ -1727,6 +1779,7 @@ export default function App() {
     if (path === "/privacy") return "privacy";
     if (path === "/terms") return "terms";
     if (path === "/guidelines") return "guidelines";
+    if (path === "/contact") return "contact";
     if (path === "/my-requests") return "my-requests";
     if (path === "/account") return "account";
     if (path.startsWith("/request/")) {
@@ -1800,6 +1853,7 @@ useEffect(() => {
     privacy: <LegalPage title="Privacy" setPage={setPage} />,
     terms: <LegalPage title="Terms" setPage={setPage} />,
     guidelines: <LegalPage title="Guidelines" setPage={setPage} />,
+    contact: <ContactPage />,
     account: (
       <AccountPage
         setPage={setPage}
