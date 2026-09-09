@@ -527,3 +527,73 @@ export async function deleteAdminImpactPost(id) {
     throw new Error(data?.message || "Could not delete impact post.");
   }
 }
+
+
+export async function confirmAdminOfferConnected(id) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/offers?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify({ connected_at: new Date().toISOString() }),
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not confirm connection.");
+  }
+  return Array.isArray(data) ? data[0] : data;
+}
+
+export async function celebrateAdminRequest(req) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const title = req.location
+    ? `A need was met in ${req.location}`
+    : "A need was met in the Seek community";
+  const story = [
+    req.category ? `Category: ${req.category}.` : "",
+    "A community member received help through Seek.",
+    "Private details are not shared here.",
+  ].filter(Boolean).join(" ");
+
+  await saveAdminImpactPost({
+    title,
+    story,
+    location: req.location || null,
+    happened_on: new Date().toISOString().slice(0, 10),
+    status: "draft",
+  });
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/requests?id=eq.${req.id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        celebrate_opt_in: true,
+        celebrated_at: new Date().toISOString(),
+      }),
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Celebration draft saved, but request flag failed.");
+  }
+}
