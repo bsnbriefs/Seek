@@ -367,3 +367,163 @@ export async function updateAdminOfferStatus(id, status) {
 
   return data;
 }
+
+
+function impactPublicUrl(storagePath) {
+  if (!storagePath) return null;
+  return (
+    `${SUPABASE_URL}/storage/v1/object/public/seek-impact/` +
+    String(storagePath)
+      .split("/")
+      .map(encodeURIComponent)
+      .join("/")
+  );
+}
+
+export async function getAdminImpactPosts() {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/community_impact?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load Community Impact posts.");
+  }
+  return (Array.isArray(data) ? data : []).map((row) => ({
+    ...row,
+    public_url: impactPublicUrl(row.storage_path),
+  }));
+}
+
+export async function uploadImpactMedia(file) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const form = new FormData();
+  form.append("file", file);
+  form.append("purpose", "impact");
+  form.append("original_name", file.name || "impact");
+
+  const response = await fetch(
+    `${SUPABASE_URL}/functions/v1/secure-media-upload`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: form,
+    }
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.error || result?.details || "Impact media upload failed.");
+  }
+  return result;
+}
+
+export async function saveAdminImpactPost(payload) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const body = {
+    title: payload.title,
+    story: payload.story || null,
+    location: payload.location || null,
+    happened_on: payload.happened_on || null,
+    storage_path: payload.storage_path || null,
+    mime_type: payload.mime_type || null,
+    media_kind: payload.media_kind || null,
+    file_name: payload.file_name || null,
+    status: payload.status || "draft",
+    created_by: session.user?.id || null,
+    published_at: payload.status === "published" ? new Date().toISOString() : null,
+  };
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/community_impact`,
+    {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || "Could not save impact post.");
+  }
+  return Array.isArray(data) ? data[0] : data;
+}
+
+export async function updateAdminImpactPost(id, patch) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+
+  const body = { ...patch, updated_at: new Date().toISOString() };
+  if (patch.status === "published" && !patch.published_at) {
+    body.published_at = new Date().toISOString();
+  }
+  if (patch.status === "draft") {
+    body.published_at = null;
+  }
+
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/community_impact?id=eq.${id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not update impact post.");
+  }
+  return Array.isArray(data) ? data[0] : data;
+}
+
+export async function deleteAdminImpactPost(id) {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/community_impact?id=eq.${id}`,
+    {
+      method: "DELETE",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not delete impact post.");
+  }
+}
