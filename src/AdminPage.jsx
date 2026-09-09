@@ -199,6 +199,8 @@ export default function AdminPage() {
     published: requests.filter((r) => r.status === "published").length,
     verification_required: requests.filter((r) => r.status === "verification_required").length,
     rejected: requests.filter((r) => r.status === "rejected").length,
+    partially_funded: requests.filter((r) => r.status === "partially_funded").length,
+    fulfilled: requests.filter((r) => r.status === "fulfilled").length,
   };
 
   const offerCounts = {
@@ -349,6 +351,8 @@ export default function AdminPage() {
               { id: "published", label: "Published" },
               { id: "verification_required", label: "Needs verification" },
               { id: "rejected", label: "Rejected" },
+              { id: "partially_funded", label: "Partly funded" },
+              { id: "fulfilled", label: "Need met" },
             ].map((f) => (
               <button
                 key={f.id}
