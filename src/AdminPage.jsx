@@ -22,6 +22,9 @@ import {
   getAdminSafetyReports,
   updateAdminSafetyReport,
   getAdminAuditLogs,
+  getAdminSupportConversations,
+  getAdminSupportMessages,
+  sendAdminSupportMessage,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -52,13 +55,17 @@ export default function AdminPage() {
   const [impactSaving, setImpactSaving] = useState(false);
   const [safetyReports, setSafetyReports] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
+  const [supportChats, setSupportChats] = useState([]);
+  const [activeChat, setActiveChat] = useState(null);
+  const [chatMessages, setChatMessages] = useState([]);
+  const [chatReply, setChatReply] = useState("");
 
   async function loadRequests() {
     try {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers(),
@@ -67,6 +74,7 @@ export default function AdminPage() {
         getAdminImpactPosts().catch(() => []),
         getAdminSafetyReports().catch(() => []),
         getAdminAuditLogs().catch(() => []),
+        getAdminSupportConversations().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -77,6 +85,7 @@ export default function AdminPage() {
       setImpactPosts(impactData);
       setSafetyReports(reportData);
       setAuditLogs(auditData);
+      setSupportChats(chatData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -840,6 +849,72 @@ export default function AdminPage() {
                   </p>
                 </div>
               ))}
+            </div>
+          )}
+        </div>
+
+        {/* SUPPORT CHAT */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Support chat</h2>
+          {supportChats.length === 0 ? (
+            <p className="text-slate-500">No visitor chats yet.</p>
+          ) : (
+            <div className="grid md:grid-cols-[220px_1fr] gap-4">
+              <div className="space-y-2">
+                {supportChats.map((c) => (
+                  <button
+                    key={c.id}
+                    type="button"
+                    className="w-full rounded-xl border p-3 text-left text-sm"
+                    onClick={async () => {
+                      setActiveChat(c);
+                      try {
+                        setChatMessages(await getAdminSupportMessages(c.id));
+                      } catch (err) {
+                        setError(err.message);
+                      }
+                    }}
+                  >
+                    {c.email || "Anonymous visitor"}
+                  </button>
+                ))}
+              </div>
+              <div className="rounded-xl border p-4 bg-white">
+                {!activeChat ? (
+                  <p className="text-slate-500 text-sm">Select a chat.</p>
+                ) : (
+                  <>
+                    <div className="max-h-64 overflow-y-auto space-y-2 mb-3">
+                      {chatMessages.map((m) => (
+                        <p key={m.id} className="text-sm">
+                          <span className="font-semibold">{m.sender}:</span> {m.body}
+                        </p>
+                      ))}
+                    </div>
+                    <form
+                      className="flex gap-2"
+                      onSubmit={async (e) => {
+                        e.preventDefault();
+                        try {
+                          await sendAdminSupportMessage(activeChat.id, chatReply);
+                          setChatReply("");
+                          setChatMessages(await getAdminSupportMessages(activeChat.id));
+                        } catch (err) {
+                          setError(err.message);
+                        }
+                      }}
+                    >
+                      <input
+                        value={chatReply}
+                        onChange={(e) => setChatReply(e.target.value)}
+                        className="flex-1 rounded-xl border px-3 py-2 text-sm"
+                        placeholder="Reply"
+                      />
+                      <button className="rounded-xl bg-[#0D3B3B] text-white px-3 py-2 text-sm">Send</button>
+                    </form>
+                  </>
+                )}
+              </div>
             </div>
           )}
         </div>
