@@ -589,6 +589,19 @@ export default function AdminPage() {
                         Rejected
                       </span>
                     )}
+
+                    {req.status !== "fulfilled" &&
+                      req.status !== "closed" &&
+                      req.status !== "rejected" &&
+                      req.status !== "published" &&
+                      req.status !== "partially_funded" && (
+                      <button
+                        onClick={() => changeStatus(req.id, "fulfilled")}
+                        className="rounded-xl bg-[#1BAA9C] px-4 py-2 text-sm font-semibold text-white"
+                      >
+                        Mark fulfilled
+                      </button>
+                    )}
                   </div>
                 </div>
               );
