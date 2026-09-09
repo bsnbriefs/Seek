@@ -19,3 +19,34 @@ self.addEventListener('fetch', (event) => {
     }).catch(() => caches.match('/index.html')))
   );
 });
+
+self.addEventListener('push', (event) => {
+  let payload = { title: 'Seek', body: 'You have a new Seek update.', url: '/' };
+  try {
+    if (event.data) payload = { ...payload, ...event.data.json() };
+  } catch (_e) {}
+  event.waitUntil(
+    self.registration.showNotification(payload.title || 'Seek', {
+      body: payload.body || '',
+      icon: '/pwa-192.png',
+      badge: '/pwa-192.png',
+      data: { url: payload.url || '/' },
+    })
+  );
+});
+
+self.addEventListener('notificationclick', (event) => {
+  event.notification.close();
+  const url = (event.notification.data && event.notification.data.url) || '/';
+  event.waitUntil(
+    self.clients.matchAll({ type: 'window', includeUncontrolled: true }).then((clients) => {
+      for (const client of clients) {
+        if ('focus' in client) {
+          client.navigate(url);
+          return client.focus();
+        }
+      }
+      return self.clients.openWindow(url);
+    })
+  );
+});
