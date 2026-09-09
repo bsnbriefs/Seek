@@ -17,6 +17,7 @@ import {
   listMyRequests,
   postRequestPublicUpdate,
   uploadAppreciationMedia,
+  getRequestAppreciation,
   listPublishedImpact,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -1219,6 +1220,17 @@ function RequestPage({ requestId, setPage }) {
 
     listMatchedOfferRequestIds()
       .then((ids) => { if (!cancelled) setHelped((ids || []).includes(matched.id)); })
+      .catch(() => {});
+    getRequestAppreciation(matched.id)
+      .then((media) => {
+        if (!cancelled && media) {
+          setRequest((prev) => prev ? {
+            ...prev,
+            appreciationUrl: media.public_url,
+            appreciationKind: media.media_kind,
+          } : prev);
+        }
+      })
       .catch(() => {});
     getRequestEvidence(matched.id)
       .then((files) => {
