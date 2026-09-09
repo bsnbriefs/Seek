@@ -1334,7 +1334,7 @@ function RequestPage({ requestId, setPage }) {
               {request.publicUpdate && (
                 <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
               )}
-              {request.appreciationUrl && request.appreciationKind === "video" ? (
+              {request.appreciationUrl && (request.appreciationKind === "video" || String(request.appreciationUrl).match(/\.(mp4|webm|mov)(\?|$)/i)) ? (
                 <video src={request.appreciationUrl} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
               ) : request.appreciationUrl ? (
                 <img src={request.appreciationUrl} alt="" className="w-full max-h-80 rounded-xl object-contain" />
