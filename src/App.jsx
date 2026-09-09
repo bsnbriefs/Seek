@@ -626,6 +626,7 @@ const GIVE_OPTIONS = [
 function GivePage({ setPage }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchFilter, setSearchFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
   const [offer, setOffer] = useState("");
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
@@ -750,7 +751,7 @@ if (!cancelled) {
           placeholder="Search requests"
           className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-sm"
         />
-        <div className="mb-6 flex flex-wrap gap-2">
+        <div className="mb-3 flex flex-wrap gap-2">
           {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
             <button
               key={cat}
@@ -758,7 +759,19 @@ if (!cancelled) {
               onClick={() => setCategoryFilter(cat)}
               className={`rounded-full px-3 py-1.5 text-sm ${categoryFilter === cat ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
             >
-              {cat === "all" ? "All" : cat}
+              {cat === "all" ? "All categories" : cat}
+            </button>
+          ))}
+        </div>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {["all", ...Array.from(new Set(requests.map((r) => r.location).filter(Boolean)))].map((loc) => (
+            <button
+              key={loc}
+              type="button"
+              onClick={() => setLocationFilter(loc)}
+              className={`rounded-full px-3 py-1.5 text-sm ${locationFilter === loc ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
+            >
+              {loc === "all" ? "All locations" : loc}
             </button>
           ))}
         </div>
@@ -773,8 +786,9 @@ if (!cancelled) {
             {requests.filter((r) => {
               const q = searchFilter.trim().toLowerCase();
               const matchesCat = categoryFilter === "all" || r.category === categoryFilter;
+              const matchesLoc = locationFilter === "all" || r.location === locationFilter;
               const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
-              return matchesCat && matchesQ;
+              return matchesCat && matchesLoc && matchesQ;
             }).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
