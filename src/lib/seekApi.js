@@ -464,3 +464,20 @@ export async function getRequestEvidence(requestId) {
     };
   });
 }
+
+
+export async function listPublishedImpact() {
+  if (!supabaseConfigured) return [];
+  const rows = await supabaseFetch(
+    "community_impact?select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at&status=eq.published&order=published_at.desc.nullslast&order=created_at.desc"
+  );
+  const list = Array.isArray(rows) ? rows : [];
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return list.map((row) => ({
+    ...row,
+    public_url: row.storage_path
+      ? `${base}/storage/v1/object/public/seek-impact/` +
+        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
+      : null,
+  }));
+}
