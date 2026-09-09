@@ -9,22 +9,18 @@ function resolveServiceKey(): string {
       const parsed = JSON.parse(secretKeysRaw);
       const key = parsed?.default || Object.values(parsed)[0];
       if (key) return key as string;
-    } catch (_e) {
-      // fall through
-    }
+    } catch (_e) {}
   }
   return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
 }
 
 const SERVICE_KEY = resolveServiceKey();
 
-// ---- Limits (bytes) ----
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB
-const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_ANY_BYTES = MAX_VIDEO_BYTES;
 
-// ---- Magic-byte detection ----
 function bytesMatch(buf: Uint8Array, offset: number, sig: number[]): boolean {
   if (buf.length < offset + sig.length) return false;
   for (let i = 0; i < sig.length; i++) {
@@ -123,7 +119,6 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "Server misconfigured" }, 500);
     }
 
-    // Service client for privileged DB/storage only (never returned to client)
     const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
 
     const contentType = req.headers.get("content-type") || "";
@@ -152,14 +147,17 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "file is required" }, 400);
     }
 
-    if (purpose !== "evidence" && purpose !== "impact" && purpose !== "appreciation") {
+    if (
+      purpose !== "evidence" &&
+      purpose !== "impact" &&
+      purpose !== "appreciation"
+    ) {
       return jsonResponse(
         { error: "purpose must be evidence, impact, or appreciation" },
         400
       );
     }
 
-    // ---- Authenticated user required for ALL uploads ----
     const token = getBearerToken(req);
     if (!token) {
       return jsonResponse(
@@ -186,7 +184,6 @@ Deno.serve(async (req) => {
 
     const isAdmin = profile?.role === "admin";
 
-    // ---- Authorization by purpose ----
     if (purpose === "evidence") {
       if (!requestId) {
         return jsonResponse(
@@ -205,9 +202,7 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Request not found" }, 404);
       }
 
-      // Admins may upload evidence for any request
       if (!isAdmin) {
-        // Requesters: must own the request via request_private.email
         if (!userEmail) {
           return jsonResponse(
             { error: "Your account has no email; cannot verify ownership." },
@@ -239,7 +234,6 @@ Deno.serve(async (req) => {
     }
 
     if (purpose === "impact") {
-      // Community Impact: admin only
       if (!isAdmin) {
         return jsonResponse({ error: "Admin only" }, 403);
       }
@@ -262,7 +256,10 @@ Deno.serve(async (req) => {
       }
       if (reqRow.status !== "fulfilled") {
         return jsonResponse(
-          { error: "Appreciation media is only allowed after a request is fulfilled." },
+          {
+            error:
+              "Appreciation media is only allowed after a request is fulfilled.",
+          },
           403
         );
       }
@@ -279,21 +276,27 @@ Deno.serve(async (req) => {
           .eq("request_id", requestId)
           .maybeSingle();
         if (privateErr || !privateRow?.email) {
-          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
+          return jsonResponse(
+            { error: "Not authorized to upload appreciation media." },
+            403
+          );
         }
         if (String(privateRow.email).trim().toLowerCase() !== userEmail) {
-          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
+          return jsonResponse(
+            { error: "Not authorized to upload appreciation media." },
+            403
+          );
         }
       }
     }
 
-    // ---- Size pre-check ----
     if (file.size <= 0 || file.size > MAX_ANY_BYTES) {
       return jsonResponse(
         {
-          error: `File too large or empty. Max ${Math.round(
-            MAX_ANY_BYTES / (1024 * 1024)
-          )}MB.`,
+          error:
+            "File too large or empty. Max " +
+            Math.round(MAX_ANY_BYTES / (1024 * 1024)) +
+            "MB.",
         },
         400
       );
@@ -321,15 +324,20 @@ Deno.serve(async (req) => {
     if (bytes.length > limit) {
       return jsonResponse(
         {
-          error: `${detected.kind} exceeds maximum size of ${Math.round(
-            limit / (1024 * 1024)
-          )}MB.`,
+          error:
+            detected.kind +
+            " exceeds maximum size of " +
+            Math.round(limit / (1024 * 1024)) +
+            "MB.",
         },
         400
       );
     }
 
-    if ((purpose === "impact" || purpose === "appreciation") && detected.kind === "pdf") {
+    if (
+      (purpose === "impact" || purpose === "appreciation") &&
+      detected.kind === "pdf"
+    ) {
       return jsonResponse(
         { error: "PDF is not allowed for this media." },
         400
@@ -342,8 +350,8 @@ Deno.serve(async (req) => {
       .slice(-80);
 
     const uuid =
-      crypto.randomUUID?.() ||
-      `\( {Date.now()}- \){Math.random().toString(16).slice(2)}`;
+      (crypto.randomUUID && crypto.randomUUID()) ||
+      String(Date.now()) + "-" + Math.random().toString(16).slice(2);
 
     let storagePath: string;
     let bucket: string;
@@ -380,7 +388,7 @@ Deno.serve(async (req) => {
       const { error: metaErr } = await supabase.from("request_evidence").insert({
         request_id: requestId,
         storage_path: storagePath,
-        file_name: safeBase || `evidence.${detected.ext}`,
+        file_name: safeBase || "evidence." + detected.ext,
         mime_type: detected.mime,
         file_size: bytes.length,
       });
@@ -403,7 +411,7 @@ Deno.serve(async (req) => {
         storage_path: storagePath,
         mime_type: detected.mime,
         media_kind: detected.kind === "video" ? "video" : "image",
-        file_name: safeBase || `appreciation.${detected.ext}`,
+        file_name: safeBase || "appreciation." + detected.ext,
       });
       if (updErr) {
         await supabase.storage.from(bucket).remove([storagePath]);
@@ -425,7 +433,7 @@ Deno.serve(async (req) => {
       mime_type: detected.mime,
       media_kind: detected.kind,
       file_size: bytes.length,
-      file_name: safeBase || `upload.${detected.ext}`,
+      file_name: safeBase || "upload." + detected.ext,
     });
   } catch (err) {
     return jsonResponse(
