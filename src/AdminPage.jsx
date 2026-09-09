@@ -268,6 +268,11 @@ export default function AdminPage() {
             <h1 className="mt-1 font-display text-3xl font-bold text-[#0D3B3B]">
               Admin dashboard
             </h1>
+            <p className="mt-2 text-sm text-[#0D3B3B]/60">
+              {(safetyReports || []).filter((r) => r.status === "open").length} open reports
+              {" · "}
+              {(supportChats || []).length} support chats
+            </p>
           </div>
 
           <button
