@@ -743,3 +743,55 @@ export async function listAppreciationStories() {
       };
     });
 }
+
+
+export async function savePushSubscription(subscription) {
+  const session = getUserSession();
+  if (!session?.access_token || !session?.user?.id) return;
+  const json = subscription.toJSON ? subscription.toJSON() : subscription;
+  const endpoint = json.endpoint;
+  const p256dh = json.keys && json.keys.p256dh;
+  const auth = json.keys && json.keys.auth;
+  if (!endpoint || !p256dh || !auth) return;
+  await fetch(`${AUTH_URL}/rest/v1/push_subscriptions`, {
+    method: "POST",
+    headers: {
+      apikey: AUTH_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      Prefer: "resolution=merge-duplicates",
+    },
+    body: JSON.stringify({
+      user_id: session.user.id,
+      endpoint,
+      p256dh,
+      auth,
+    }),
+  });
+}
+
+export async function enableSeekPush() {
+  if (typeof window === "undefined" || !("Notification" in window) || !("serviceWorker" in navigator)) {
+    return false;
+  }
+  const publicKey = import.meta.env.VITE_VAPID_PUBLIC_KEY;
+  if (!publicKey) return false;
+  const permission = await Notification.requestPermission();
+  if (permission !== "granted") return false;
+  const reg = await navigator.serviceWorker.ready;
+  const sub = await reg.pushManager.subscribe({
+    userVisibleOnly: true,
+    applicationServerKey: urlBase64ToUint8Array(publicKey),
+  });
+  await savePushSubscription(sub);
+  return true;
+}
+
+function urlBase64ToUint8Array(base64String) {
+  const padding = "=".repeat((4 - (base64String.length % 4)) % 4);
+  const base64 = (base64String + padding).replace(/-/g, "+").replace(/_/g, "/");
+  const raw = atob(base64);
+  const output = new Uint8Array(raw.length);
+  for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
+  return output;
+}
