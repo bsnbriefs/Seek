@@ -577,23 +577,24 @@ export async function celebrateAdminRequest(req) {
     status: "draft",
   });
 
-  const response = await fetch(
-    `${SUPABASE_URL}/rest/v1/requests?id=eq.${req.id}`,
-    {
-      method: "PATCH",
-      headers: {
-        apikey: SUPABASE_KEY,
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-      },
-      body: JSON.stringify({
-        celebrate_opt_in: true,
-        celebrated_at: new Date().toISOString(),
-      }),
-    }
-  );
-  if (!response.ok) {
-    const data = await response.json().catch(() => ({}));
-    throw new Error(data?.message || "Celebration draft saved, but request flag failed.");
+  // Best-effort flag on the request. Do not fail celebration if this is blocked.
+  try {
+    await fetch(
+      `${SUPABASE_URL}/rest/v1/requests?id=eq.${req.id}`,
+      {
+        method: "PATCH",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          celebrate_opt_in: true,
+          celebrated_at: new Date().toISOString(),
+        }),
+      }
+    );
+  } catch (_e) {
+    // ignore
   }
 }
