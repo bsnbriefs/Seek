@@ -320,17 +320,34 @@ export async function getAdminEvidence(requestId) {
     throw new Error(data?.message || "Could not load request evidence.");
   }
 
-  return data.map((file) => {
-    const publicUrl =
-      `${SUPABASE_URL}/storage/v1/object/public/seek-evidence/` +
-      file.storage_path;
-
-    return {
+  const files = Array.isArray(data) ? data : [];
+  const signed = [];
+  for (const file of files) {
+    const path = String(file.storage_path || "").replace(/^\/+/, "");
+    const signRes = await fetch(
+      `${SUPABASE_URL}/storage/v1/object/sign/seek-evidence/${path}`,
+      {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ expiresIn: 600 }),
+      }
+    );
+    const signData = await signRes.json().catch(() => ({}));
+    const signedPath = signData?.signedURL || signData?.signedUrl || "";
+    const signedUrl = signedPath
+      ? (signedPath.startsWith("http") ? signedPath : `${SUPABASE_URL}/storage/v1${signedPath}`)
+      : "";
+    signed.push({
       ...file,
-      public_url: publicUrl,
-      signed_url: publicUrl,
-    };
-  });
+      public_url: signedUrl,
+      signed_url: signedUrl,
+    });
+  }
+  return signed;
 }
 
 export async function updateAdminOfferStatus(id, status) {
@@ -499,6 +516,38 @@ export async function saveAdminImpactPost(payload) {
     throw new Error(data?.message || data?.hint || "Could not save impact post.");
   }
   return Array.isArray(data) ? data[0] : data;
+}
+
+export async function saveAdminImpactMedia(impactId, files) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const rows = [];
+  for (const file of files || []) {
+    const media = await uploadImpactMedia(file);
+    rows.push({
+      impact_id: impactId,
+      storage_path: media.storage_path,
+      mime_type: media.mime_type || null,
+      media_kind: media.media_kind || null,
+      file_name: media.file_name || null,
+    });
+  }
+  if (!rows.length) return [];
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/community_impact_media`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      Prefer: "return=representation",
+    },
+    body: JSON.stringify(rows),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || "Could not save extra impact photos.");
+  }
+  return data;
 }
 
 export async function updateAdminImpactPost(id, patch) {
