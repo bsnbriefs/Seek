@@ -871,8 +871,13 @@ export default function AdminPage() {
                   className="rounded-xl border p-5 bg-white"
                 >
                   <h3 className="text-xl font-semibold">
-                    {donation.donor_name || "Anonymous donor"}
+                    {donation.anonymous
+                      ? "Anonymous donor"
+                      : (donation.donor_name || donation.donor_email || "Donor")}
                   </h3>
+                  {!donation.anonymous && donation.donor_email && donation.donor_name && (
+                    <p className="text-sm text-slate-500">{donation.donor_email}</p>
+                  )}
 
                   <p className="mt-1 text-slate-600">
                     Amount: ₦{Number(donation.amount || 0).toLocaleString()}
