@@ -548,9 +548,10 @@ export async function startSupportConversation(email) {
 
 export async function listSupportMessages(conversationId) {
   if (!supabaseConfigured || !conversationId) return [];
-  const rows = await supabaseFetch(
-    `support_messages?conversation_id=eq.${encodeURIComponent(conversationId)}&select=*&order=created_at.asc`
-  );
+  const rows = await supabaseFetch("rpc/get_support_messages", {
+    method: "POST",
+    body: JSON.stringify({ p_conversation_id: conversationId }),
+  });
   return Array.isArray(rows) ? rows : [];
 }
 
