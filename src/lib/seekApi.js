@@ -552,16 +552,11 @@ export async function submitSafetyReport(payload) {
 
 export async function startSupportConversation(email) {
   if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
-  const rows = await supabaseFetch("support_conversations", {
+  const id = await supabaseFetch("rpc/start_support_conversation", {
     method: "POST",
-    headers: { Prefer: "return=representation" },
-    body: JSON.stringify({
-      email: email || null,
-      visitor_key: "web",
-      status: "open",
-    }),
+    body: JSON.stringify({ p_email: email || null }),
   });
-  return rows?.[0] || rows;
+  return { id };
 }
 
 export async function listSupportMessages(conversationId) {
@@ -577,16 +572,14 @@ export async function sendSupportMessage(conversationId, sender, body) {
   if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
   const text = String(body || "").trim();
   if (!text) throw new Error("Type a message first.");
-  const rows = await supabaseFetch("support_messages", {
+  await supabaseFetch("rpc/send_support_message", {
     method: "POST",
-    headers: { Prefer: "return=representation" },
     body: JSON.stringify({
-      conversation_id: conversationId,
-      sender,
-      body: text.slice(0, 2000),
+      p_conversation_id: conversationId,
+      p_sender: sender,
+      p_body: text.slice(0, 2000),
     }),
   });
-  return rows?.[0] || rows;
 }
 
 
