@@ -6,6 +6,31 @@ const SUPABASE_KEY = (
 ).trim();
 
 
+
+async function writeAuditLog(action, tableName, recordId, details) {
+  try {
+    const session = getAdminSession();
+    if (!session?.access_token) return;
+    await fetch(`${SUPABASE_URL}/rest/v1/audit_log`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        actor_id: session.user?.id || null,
+        action,
+        table_name: tableName,
+        record_id: recordId || null,
+        details: details || {},
+      }),
+    });
+  } catch (_e) {
+    // audit must never block the admin action
+  }
+}
+
 export async function adminLogin(email, password) {
   const response = await fetch(
     `${SUPABASE_URL}/auth/v1/token?grant_type=password`,
@@ -238,6 +263,7 @@ export async function updateAdminRequestStatus(id, status) {
     throw new Error(data?.message || 'Could not update request status.');
   }
 
+  await writeAuditLog("update_status", "requests", id, { status });
   return data;
         }
 export async function verifyAdminRequest(id, notes = "") {
@@ -335,6 +361,8 @@ export async function updateAdminOfferStatus(id, status) {
   if (!response.ok) {
     throw new Error(data?.message || data?.[0]?.message || "Could not update offer status.");
   }
+
+  await writeAuditLog("update_status", "offers", id, { status });
 
   // When an offer is accepted (matched), notify the requester via Edge Function
   if (status === "matched") {
@@ -642,4 +670,26 @@ export async function updateAdminSafetyReport(id, status) {
     const data = await response.json().catch(() => ({}));
     throw new Error(data?.message || "Could not update report.");
   }
+}
+
+
+export async function getAdminAuditLogs() {
+  const session = getAdminSession();
+  if (!session?.access_token) {
+    throw new Error("Admin session expired. Please sign in again.");
+  }
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/audit_log?select=*&order=created_at.desc&limit=50`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) {
+    throw new Error(data?.message || "Could not load audit log.");
+  }
+  return Array.isArray(data) ? data : [];
 }
