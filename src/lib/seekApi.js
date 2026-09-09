@@ -482,6 +482,23 @@ export async function listPublishedImpact() {
 }
 
 
+export async function getPublishedImpactById(id) {
+  if (!supabaseConfigured || !id) return null;
+  const rows = await supabaseFetch(
+    `community_impact?id=eq.${encodeURIComponent(id)}&status=eq.published&select=id,title,story,location,happened_on,storage_path,mime_type,media_kind,file_name,published_at,created_at&limit=1`
+  );
+  const row = Array.isArray(rows) ? rows[0] : null;
+  if (!row) return null;
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return {
+    ...row,
+    public_url: row.storage_path
+      ? `${base}/storage/v1/object/public/seek-impact/` +
+        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
+      : null,
+  };
+}
+
 export async function getPublicRequestById(requestId) {
   if (!supabaseConfigured || !requestId) return null;
   const rows = await supabaseFetch(
