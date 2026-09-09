@@ -570,3 +570,47 @@ export async function sendSupportMessage(conversationId, sender, body) {
   });
   return rows?.[0] || rows;
 }
+
+
+async function countRows(path) {
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    ""
+  ).trim();
+  if (!url || !key) return 0;
+  const response = await fetch(`${url}/rest/v1/${path}`, {
+    method: "GET",
+    headers: {
+      apikey: key,
+      Authorization: `Bearer ${key}`,
+      Prefer: "count=exact",
+      Range: "0-0",
+    },
+  });
+  const range = response.headers.get("content-range") || "";
+  const total = range.split("/")[1];
+  const n = Number(total);
+  return Number.isFinite(n) ? n : 0;
+}
+
+export async function getSeekLiveStats() {
+  const [openRequests, fulfilled, donationRows] = await Promise.all([
+    countRows("requests?select=id&is_public=eq.true&status=in.(published,partially_funded)"),
+    countRows("requests?select=id&status=eq.fulfilled"),
+    supabaseFetch("donations?select=amount,status&status=eq.success&limit=1000").catch(() =>
+      supabaseFetch("donations?select=amount&limit=1000").catch(() => [])
+    ),
+  ]);
+
+  const donations = Array.isArray(donationRows) ? donationRows : [];
+  const raised = donations.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+
+  return {
+    openRequests,
+    fulfilled,
+    raised,
+    donationCount: donations.length,
+  };
+}
