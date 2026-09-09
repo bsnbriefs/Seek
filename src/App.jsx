@@ -394,10 +394,10 @@ function Footer({ setPage }) {
         </div>
         <div>
           <p className="font-display font-semibold text-white mb-3 text-sm">Stay connected</p>
-          <div className="flex gap-3">
-            {["Instagram", "X", "Facebook"].map((s) => (
-              <span key={s} className="h-9 w-9 rounded-full bg-white/10 flex items-center justify-center text-xs">{s[0]}</span>
-            ))}
+          <div className="flex flex-col gap-2 text-sm">
+            <a href="https://wa.me/447402427408" target="_blank" rel="noreferrer" className="hover:text-white">WhatsApp</a>
+            <a href="https://www.instagram.com/bsnfoundationng" target="_blank" rel="noreferrer" className="hover:text-white">Instagram</a>
+            <a href="https://x.com/BSNFoundation_" target="_blank" rel="noreferrer" className="hover:text-white">X</a>
           </div>
         </div>
       </div>
