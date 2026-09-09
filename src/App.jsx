@@ -1756,11 +1756,13 @@ function ImpactStoryPage({ impactId, setPage }) {
         </div>
         <p className="font-body text-sm text-[#0D3B3B]/55">{[post.location, post.happened_on].filter(Boolean).join(" · ")}</p>
         {post.story && <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
-        {post.public_url && post.media_kind === "video" ? (
-          <video src={post.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
-        ) : post.public_url ? (
-          <img src={post.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
-        ) : null}
+        {(post.mediaItems || [{ public_url: post.public_url, media_kind: post.media_kind }].filter((m) => m.public_url)).map((m) => (
+          m.media_kind === "video" ? (
+            <video key={m.public_url} src={m.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
+          ) : (
+            <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
+          )
+        ))}
         <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
       </section>
     </div>
