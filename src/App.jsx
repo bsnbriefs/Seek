@@ -216,7 +216,7 @@ function CategoryCard({ cat, onClick }) {
   );
 }
 
-function RequestCard({ req, onHelp }) {
+function RequestCard({ req, onHelp, onView }) {
   return (
     <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md transition-shadow duration-200">
       <div className="flex flex-wrap items-center gap-2 mb-3">
@@ -242,13 +242,24 @@ function RequestCard({ req, onHelp }) {
   </p>
 )}
         <VerificationBadge status={req.status} />
-        <button
-          type="button"
-          onClick={onHelp ? () => onHelp(req) : undefined}
-          className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors"
-        >
-          Help <ChevronRight size={15} />
-        </button>
+        <div className="flex items-center gap-3">
+          {onView && (
+            <button
+              type="button"
+              onClick={() => onView(req)}
+              className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#1BAA9C] hover:text-[#0D3B3B] transition-colors"
+            >
+              View
+            </button>
+          )}
+          <button
+            type="button"
+            onClick={onHelp ? () => onHelp(req) : undefined}
+            className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors"
+          >
+            Help <ChevronRight size={15} />
+          </button>
+        </div>
       </div>
     </div>
   );
@@ -530,7 +541,7 @@ function HomePage({ setPage }) {
             <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={() => go("give")} />)}
+              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={() => go("give")} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
             </div>
           )}
         </div>
@@ -699,7 +710,7 @@ if (!cancelled) {
           <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} />)}
+            {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
       </section>
