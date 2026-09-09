@@ -15,6 +15,7 @@ import {
   getAdminImpactPosts,
   uploadImpactMedia,
   saveAdminImpactPost,
+  saveAdminImpactMedia,
   updateAdminImpactPost,
   deleteAdminImpactPost,
   confirmAdminOfferConnected,
@@ -1061,10 +1062,11 @@ export default function AdminPage() {
                   throw new Error("This draft looks like it contains private details. Remove phone, email, or request IDs before saving.");
                 }
                 let media = {};
-                if (impactForm.file) {
-                  media = await uploadImpactMedia(impactForm.file);
+                const files = impactForm.files || (impactForm.file ? [impactForm.file] : []);
+                if (files[0]) {
+                  media = await uploadImpactMedia(files[0]);
                 }
-                await saveAdminImpactPost({
+                const saved = await saveAdminImpactPost({
                   title,
                   story,
                   location: impactForm.location.trim() || null,
@@ -1075,7 +1077,10 @@ export default function AdminPage() {
                   file_name: media.file_name || null,
                   status: "draft",
                 });
-                setImpactForm({ title: "", story: "", location: "", happened_on: "", file: null });
+                if (files.length > 1 && saved?.id) {
+                  await saveAdminImpactMedia(saved.id, files.slice(1));
+                }
+                setImpactForm({ title: "", story: "", location: "", happened_on: "", file: null, files: [] });
                 await loadRequests();
               } catch (err) {
                 setError(err.message);
@@ -1114,8 +1119,12 @@ export default function AdminPage() {
             </div>
             <input
               type="file"
+              multiple
               accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
-              onChange={(e) => setImpactForm({ ...impactForm, file: e.target.files?.[0] || null })}
+              onChange={(e) => {
+                const list = Array.from(e.target.files || []).slice(0, 8);
+                setImpactForm({ ...impactForm, file: list[0] || null, files: list });
+              }}
             />
             <button
               type="submit"
