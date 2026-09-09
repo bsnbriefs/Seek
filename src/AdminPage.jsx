@@ -21,6 +21,7 @@ import {
   celebrateAdminRequest,
   getAdminSafetyReports,
   updateAdminSafetyReport,
+  getAdminAuditLogs,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -50,13 +51,14 @@ export default function AdminPage() {
   });
   const [impactSaving, setImpactSaving] = useState(false);
   const [safetyReports, setSafetyReports] = useState([]);
+  const [auditLogs, setAuditLogs] = useState([]);
 
   async function loadRequests() {
     try {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers(),
@@ -64,6 +66,7 @@ export default function AdminPage() {
         getAdminDonations(),
         getAdminImpactPosts().catch(() => []),
         getAdminSafetyReports().catch(() => []),
+        getAdminAuditLogs().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -73,6 +76,7 @@ export default function AdminPage() {
       setDonations(donationData);
       setImpactPosts(impactData);
       setSafetyReports(reportData);
+      setAuditLogs(auditData);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -835,6 +839,22 @@ export default function AdminPage() {
                       : "-"}
                   </p>
                 </div>
+              ))}
+            </div>
+          )}
+        </div>
+
+        {/* AUDIT LOG */}
+        <div className="mt-10">
+          <h2 className="text-2xl font-semibold mb-4">Audit log</h2>
+          {auditLogs.length === 0 ? (
+            <p className="text-slate-500">No audit events yet.</p>
+          ) : (
+            <div className="space-y-2">
+              {auditLogs.map((row) => (
+                <p key={row.id} className="text-sm text-slate-600">
+                  {new Date(row.created_at).toLocaleString()} · {row.action} · {row.table_name}
+                </p>
               ))}
             </div>
           )}
