@@ -132,27 +132,27 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 function VerificationBadge({ status }) {
     const map = {
     pending_review: {
-      label: "Verification pending",
+      label: "Under review",
       icon: Clock,
       cls: "bg-amber-100 text-amber-800",
     },
     verification_required: {
-      label: "Verification pending",
+      label: "Under review",
       icon: Clock,
       cls: "bg-amber-100 text-amber-800",
     },
     published: {
-      label: "BSN Approved",
+      label: "Open for help",
       icon: BadgeCheck,
       cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]",
     },
     partially_funded: {
-      label: "BSN Approved",
+      label: "Partly funded",
       icon: BadgeCheck,
       cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]",
     },
     fulfilled: {
-      label: "Fulfilled",
+      label: "Need met",
       icon: CheckCircle2,
       cls: "bg-[#63C167]/15 text-[#0D3B3B]",
     },
@@ -448,7 +448,7 @@ function HomePage({ setPage }) {
         ]);
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
-          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 8));
+          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4));
           setImpactPreview((impactRows || []).slice(0, 3));
           if (stats) setLiveStats(stats);
         }
@@ -498,44 +498,6 @@ function HomePage({ setPage }) {
             <h3 className="font-display font-bold text-2xl mb-2 text-[#0D3B3B]">I want to help</h3>
             <p className="font-body text-[#0D3B3B]/60 mb-6">Find people and families who need something you can provide.</p>
             <Button variant="primary" onClick={() => go("give")}>Find someone to help <ArrowRight size={16} /></Button>
-          </div>
-        </div>
-      </section>
-
-      {/* HOW SEEK WORKS */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="text-center mb-14">
-            <SectionLabel>How it works</SectionLabel>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">Three simple steps.</h2>
-          </div>
-          <div className="grid sm:grid-cols-3 gap-8">
-            {[
-              { n: "01", t: "REQUEST", d: "Share a need. Seek reviews it before it appears publicly." },
-              { n: "02", t: "HELP", d: "People give money, items or time to a published request." },
-              { n: "03", t: "FULFILLED", d: "When the need is met, Seek marks it fulfilled and the requester can say thank you." },
-            ].map((s) => (
-              <div key={s.n} className="text-center">
-                <span className="font-display font-extrabold text-5xl bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>{s.n}</span>
-                <h3 className="font-display font-bold text-xl text-[#0D3B3B] mt-3 tracking-wide">{s.t}</h3>
-                <p className="font-body text-[#0D3B3B]/60 mt-1">{s.d}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* EXPLORE NEEDS */}
-      <section className="py-20" style={{ background: C.bg }}>
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="mb-10">
-            <SectionLabel>Categories</SectionLabel>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">What are people seeking?</h2>
-          </div>
-          <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-4">
-            {CATEGORIES.map((c) => (
-              <CategoryCard key={c.id} cat={c} onClick={() => go("seek-help")} />
-            ))}
           </div>
         </div>
       </section>
@@ -616,19 +578,6 @@ function HomePage({ setPage }) {
         </div>
       </section>
 
-      {/* BSN FOUNDATION */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="rounded-3xl p-10 sm:p-14 border border-[#0D3B3B]/8 grid md:grid-cols-[auto_1fr_auto] items-center gap-8" style={{ background: C.bg }}>
-            <Building2 size={40} className="text-[#1BAA9C]" />
-            <div>
-              <p className="font-body text-xs font-semibold uppercase tracking-widest text-[#1BAA9C] mb-2">Powered by BSN Foundation</p>
-              <p className="font-display font-semibold text-xl text-[#0D3B3B]">Seek is the community assistance platform built and supported by BSN Foundation.</p>
-            </div>
-            <Button variant="secondary" onClick={() => go("about")}>Learn about BSN Foundation</Button>
-          </div>
-        </div>
-      </section>
     </>
   );
 }
@@ -666,6 +615,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
+  const [generalDonation, setGeneralDonation] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -731,10 +681,13 @@ if (!cancelled) {
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
         <SectionLabel>Give</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">You don't have to give money to make a difference.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Time, items, skills and small acts of generosity go just as far.</p>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Pick a request first. Then give money or offer help.</p>
+        {selectedRequest && (
+          <p className="mt-4 font-display font-semibold text-[#1BAA9C]">Helping: {selectedRequest.title}</p>
+        )}
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
+      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
         <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
           <div className="max-w-2xl">
             <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#8DE3C5]">Support a need</p>
@@ -764,10 +717,19 @@ if (!cancelled) {
             )}
           </div>
         </div>
-      </section>
+      </section>}
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
         <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
+        {!selectedRequest && !generalDonation && (
+          <button
+            type="button"
+            className="mb-4 text-sm font-semibold text-[#1BAA9C]"
+            onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
+          >
+            Or give a general donation
+          </button>
+        )}
         <input
           value={searchFilter}
           onChange={(e) => setSearchFilter(e.target.value)}
@@ -923,7 +885,7 @@ if (!cancelled) {
             </div>
           )}
         </div>
-      </section>
+      </section>}
     </div>
   );
 }
