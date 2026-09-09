@@ -685,7 +685,10 @@ export async function uploadAppreciationMedia(requestId, file, onProgress) {
   );
   const uploadResult = await uploadResponse.json().catch(() => ({}));
   if (!uploadResponse.ok || !uploadResult?.success) {
-    throw new Error(uploadResult?.error || uploadResult?.details || "Appreciation upload failed.");
+    throw new Error(
+      [uploadResult?.error, uploadResult?.details].filter(Boolean).join(" — ") ||
+        "Appreciation upload failed."
+    );
   }
   return uploadResult;
 }
