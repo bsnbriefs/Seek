@@ -509,9 +509,9 @@ function HomePage({ setPage }) {
           </div>
           <div className="grid sm:grid-cols-3 gap-8">
             {[
-              { n: "01", t: "SEEK", d: "Tell us what you need." },
-              { n: "02", t: "CONNECT", d: "Find someone willing to help." },
-              { n: "03", t: "HELP", d: "Make a real difference." },
+              { n: "01", t: "REQUEST", d: "Share a need. Seek reviews it before it appears publicly." },
+              { n: "02", t: "HELP", d: "People give money, items or time to a published request." },
+              { n: "03", t: "FULFILLED", d: "When the need is met, Seek marks it fulfilled and the requester can say thank you." },
             ].map((s) => (
               <div key={s.n} className="text-center">
                 <span className="font-display font-extrabold text-5xl bg-clip-text text-transparent" style={{ backgroundImage: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>{s.n}</span>
@@ -2174,9 +2174,17 @@ export default function App() {
         if (!cancelled) setPaymentReturn({ status: "checking", message: "Confirming your donation…" });
         const result = await verifyDonation(reference);
         if (!cancelled) {
+          const forRequest = result?.request_id || result?.requestId;
+          const amount = result?.amount;
+          const successMsg = forRequest
+            ? `Your donation${amount ? " of ₦" + Number(amount).toLocaleString() : ""} has been confirmed for that request. Thank you.`
+            : `Your donation${amount ? " of ₦" + Number(amount).toLocaleString() : ""} has been confirmed. Thank you for giving.`;
           setPaymentReturn({
-            status: result?.verified ? "success" : "failed",
-            message: result?.verified ? "Your donation has been confirmed. Thank you for giving." : (result?.error || "Payment has not been confirmed yet."),
+            status: result?.verified ? "success" : "pending",
+            message: result?.verified
+              ? successMsg
+              : (result?.error || "Paystack received this payment, but Seek is still confirming it. You can close this and check back shortly."),
+            requestId: forRequest || null,
           });
         }
       } catch (error) {
@@ -2260,14 +2268,38 @@ useEffect(() => {
           <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
             <p className="font-body text-sm font-semibold text-[#0D3B3B]">
               {paymentReturn.status === "checking"
-                ? "Payment confirmation"
+                ? "Confirming your donation"
                 : paymentReturn.status === "success"
                   ? "Donation confirmed"
-                  : "Payment verification failed"}
+                  : "Still confirming"}
             </p>
-            <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">
+            <p className="mt-2 font-body text-sm text-[#0D3B3B]/70">
               {paymentReturn.message}
             </p>
+            {paymentReturn.status !== "checking" && (
+              <div className="mt-4 flex justify-center gap-3">
+                {paymentReturn.requestId && (
+                  <button
+                    type="button"
+                    className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm"
+                    onClick={() => {
+                      setPaymentReturn({ status: "idle", message: "" });
+                      setPage(`request:${paymentReturn.requestId}`);
+                      window.history.pushState({}, "", `/request/${paymentReturn.requestId}`);
+                    }}
+                  >
+                    View request
+                  </button>
+                )}
+                <button
+                  type="button"
+                  className="rounded-xl border px-4 py-2 text-sm"
+                  onClick={() => setPaymentReturn({ status: "idle", message: "" })}
+                >
+                  Close
+                </button>
+              </div>
+            )}
           </div>
         </div>
       )}
