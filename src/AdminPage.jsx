@@ -44,6 +44,7 @@ export default function AdminPage() {
   const [requestFilter, setRequestFilter] = useState("all");
   const [offerFilter, setOfferFilter] = useState("all");
   const [search, setSearch] = useState("");
+  const [adminTab, setAdminTab] = useState("requests");
   const [impactPosts, setImpactPosts] = useState([]);
   const [impactForm, setImpactForm] = useState({
     title: "",
@@ -305,6 +306,29 @@ export default function AdminPage() {
           </p>
         )}
 
+
+        <div className="mb-6 flex flex-wrap gap-2">
+          {[
+            { id: "requests", label: "Requests" },
+            { id: "offers", label: "Offers" },
+            { id: "money", label: "Money" },
+            { id: "trust", label: "Trust" },
+            { id: "impact", label: "Impact" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setAdminTab(tab.id)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                adminTab === tab.id ? "bg-[#0D3B3B] text-white" : "bg-white border"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+        {adminTab === "requests" && (
+        <div>
         {/* REQUESTS */}
         <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
           <h2 className="text-xl font-semibold text-[#0D3B3B]">
@@ -634,6 +658,10 @@ export default function AdminPage() {
           </div>
         )}
 
+        </div>
+        )}
+        {adminTab === "offers" && (
+        <div>
         {/* OFFERS */}
         <div className="mt-12">
           <div className="mb-4 flex flex-wrap items-center justify-between gap-3">
@@ -817,6 +845,10 @@ export default function AdminPage() {
           )}
         </div>
 
+        </div>
+        )}
+        {adminTab === "money" && (
+        <div>
         {/* DONATIONS */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Donations</h2>
@@ -858,6 +890,10 @@ export default function AdminPage() {
           )}
         </div>
 
+        </div>
+        )}
+        {adminTab === "trust" && (
+        <div>
         {/* SUPPORT CHAT */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-4">Support chat</h2>
@@ -979,6 +1015,10 @@ export default function AdminPage() {
           )}
         </div>
 
+        </div>
+        )}
+        {adminTab === "impact" && (
+        <div>
         {/* COMMUNITY IMPACT */}
         <div className="mt-10">
           <h2 className="text-2xl font-semibold mb-2">Community Impact</h2>
@@ -1138,6 +1178,8 @@ export default function AdminPage() {
             </div>
           )}
         </div>
+        </div>
+        )}
       </div>
     </main>
   );
