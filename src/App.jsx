@@ -625,6 +625,7 @@ const GIVE_OPTIONS = [
 
 function GivePage({ setPage }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchFilter, setSearchFilter] = useState("");
   const [offer, setOffer] = useState("");
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
@@ -732,6 +733,12 @@ if (!cancelled) {
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
         <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
+        <input
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          placeholder="Search requests"
+          className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-sm"
+        />
         <div className="mb-6 flex flex-wrap gap-2">
           {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
             <button
@@ -752,7 +759,12 @@ if (!cancelled) {
           <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {requests.filter((r) => categoryFilter === "all" || r.category === categoryFilter).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+            {requests.filter((r) => {
+              const q = searchFilter.trim().toLowerCase();
+              const matchesCat = categoryFilter === "all" || r.category === categoryFilter;
+              const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
+              return matchesCat && matchesQ;
+            }).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
       </section>
@@ -1170,9 +1182,28 @@ function RequestPage({ requestId, setPage }) {
           <UrgencyBadge level={request.urgency} />
           <VerificationBadge status={request.status} />
         </div>
-        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-3">
-          {request.title}
-        </h1>
+        <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
+          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">
+            {request.title}
+          </h1>
+          <button
+            type="button"
+            className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
+            onClick={async () => {
+              const url = `${window.location.origin}/request/${request.id}`;
+              try {
+                if (navigator.share) {
+                  await navigator.share({ title: request.title, url });
+                } else if (navigator.clipboard) {
+                  await navigator.clipboard.writeText(url);
+                  window.alert("Link copied");
+                }
+              } catch (_e) {}
+            }}
+          >
+            Share
+          </button>
+        </div>
         <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-6">
           <MapPin size={16} /> {request.location}
         </p>
