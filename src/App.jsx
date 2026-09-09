@@ -997,11 +997,11 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-10 space-y-5"
         >
           <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Full name"><input required className={inputCls} value={form.name} onChange={set("name")} placeholder="Your name" /></Field>
+            <Field label="Full name (admin only)"><input required className={inputCls} value={form.name} onChange={set("name")} placeholder="Your name" /></Field>
             <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
+            <Field label="Phone number (admin only)"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
             <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, State" /></Field>
           </div>
           <Field label="Category">
@@ -1069,10 +1069,11 @@ function VolunteerPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({name:"",email:"",location:"",interests:""});
-  const responsibilities = [
-    "Verify requests", "Visit beneficiaries", "Deliver donations", "Support community outreaches",
-    "Identify vulnerable people", "Connect people to services", "Support BSN Foundation initiatives",
+  const [form, setForm] = useState({name:"",email:"",location:"",interests:"",role:""});
+  const roles = [
+    { id: "verify", title: "Verify requests", desc: "Help confirm that a published need is real and safely described." },
+    { id: "followup", title: "Follow up after a match", desc: "Check that help reached the person and that Seek can mark it fulfilled." },
+    { id: "outreach", title: "Community outreach", desc: "Point people in Enugu, Abuja or Lagos to Seek when they need or can give help." },
   ];
 
   return (
@@ -1084,12 +1085,18 @@ function VolunteerPage() {
       </section>
 
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pb-14">
-        <div className="grid sm:grid-cols-2 gap-3">
-          {responsibilities.map((r) => (
-            <div key={r} className="flex items-center gap-3 rounded-xl bg-white border border-[#0D3B3B]/6 p-4">
-              <Users size={16} className="text-[#1BAA9C] shrink-0" />
-              <span className="font-body text-sm text-[#0D3B3B]/80">{r}</span>
-            </div>
+        <div className="grid sm:grid-cols-3 gap-4">
+          {roles.map((r) => (
+            <button
+              key={r.id}
+              type="button"
+              onClick={() => setForm((prev) => ({ ...prev, role: r.title, interests: prev.interests || r.desc }))}
+              className={`rounded-2xl bg-white border p-5 text-left ${form.role === r.title ? "border-[#1BAA9C]" : "border-[#0D3B3B]/6"}`}
+            >
+              <Users size={16} className="text-[#1BAA9C] mb-3" />
+              <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
+              <p className="mt-2 font-body text-sm text-[#0D3B3B]/65">{r.desc}</p>
+            </button>
           ))}
         </div>
       </section>
@@ -1098,7 +1105,10 @@ function VolunteerPage() {
         <div className="mx-auto max-w-xl px-5 sm:px-8">
           {!submitted ? (
             <form
-              onSubmit={async (e) => { e.preventDefault(); setError(""); setLoading(true); try { await submitVolunteer(form); setSubmitted(true); } catch (err) { setError(err.message); } finally { setLoading(false); } }}
+              onSubmit={async (e) => { e.preventDefault(); setError(""); setLoading(true); try { await submitVolunteer({
+                  ...form,
+                  interests: [form.role, form.interests].filter(Boolean).join(" — "),
+                }); setSubmitted(true); } catch (err) { setError(err.message); } finally { setLoading(false); } }}
               className="rounded-3xl p-8 sm:p-10 space-y-5"
               style={{ background: C.bg }}
             >
@@ -1108,9 +1118,13 @@ function VolunteerPage() {
                 <Field label="Email"><input required type="email" className={inputCls} placeholder="you@example.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} /></Field>
               </div>
               <Field label="Location"><input required className={inputCls} placeholder="City, State" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} /></Field>
-              <Field label="How would you like to help?">
-                <textarea required rows={3} className={inputCls} placeholder="Verification visits, deliveries, outreach..." value={form.interests} onChange={e=>setForm({...form,interests:e.target.value})} />
+              <Field label="Chosen role">
+                <input className={inputCls} value={form.role} onChange={e=>setForm({...form,role:e.target.value})} placeholder="Tap a role above" />
               </Field>
+              <Field label="Anything else we should know?">
+                <textarea required rows={3} className={inputCls} placeholder="Availability, language, city..." value={form.interests} onChange={e=>setForm({...form,interests:e.target.value})} />
+              </Field>
+              <p className="text-xs text-[#0D3B3B]/45">Your email and phone stay with Seek admins. They are not published.</p>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? "Submitting…" : "Become a volunteer"}</Button>
             </form>
