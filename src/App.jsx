@@ -943,6 +943,7 @@ function SeekHelpPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
+  const [uploadProgress, setUploadProgress] = useState("");
   const [form, setForm] = useState({
   name: "",
   email: "",
@@ -986,7 +987,13 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             setError("");
             setLoading(true);
             try {
-              await submitRequest(form);
+              setUploadProgress("");
+              await submitRequest({
+                ...form,
+                onProgress: ({ index, total, name }) => {
+                  setUploadProgress(`Uploading file ${index} of ${total}: ${name}`);
+                },
+              });
               setSubmitted(true);
             } catch (err) {
               setError(err?.message || "Could not submit your request.");
@@ -1056,7 +1063,8 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             Your privacy matters. Please only share sensitive information — like full addresses or medical details — where it's genuinely necessary. Seek and BSN Foundation never display this publicly.
           </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? "Submitting…" : "Submit request"}</Button>
+          {uploadProgress && <p className="text-sm text-[#1BAA9C]">{uploadProgress}</p>}
+          <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? (uploadProgress || "Submitting…") : "Submit request"}</Button>
         </form>
       </section>
     </div>
