@@ -188,6 +188,7 @@ export function mapRequestRow(row) {
         .includes("item")
         ? "item"
         : "money",
+    publicUpdate: row.public_update || "",
   };
 }
 
@@ -613,4 +614,28 @@ export async function getSeekLiveStats() {
     raised,
     donationCount: donations.length,
   };
+}
+
+
+export async function postRequestPublicUpdate(requestId, body) {
+  const session = getUserSession();
+  if (!session?.access_token) {
+    throw new Error("Please sign in to post an update.");
+  }
+  const response = await fetch(`${AUTH_URL}/rest/v1/rpc/add_seek_request_update`, {
+    method: "POST",
+    headers: {
+      apikey: AUTH_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      p_request_id: requestId,
+      p_body: String(body || "").trim(),
+    }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || "Could not save your update.");
+  }
 }
