@@ -123,7 +123,7 @@ export async function submitRequest(payload) {
 export async function listPublicOffers() {
   if (!supabaseConfigured) return [];
   const rows = await supabaseFetch(
-    "public_open_offers?select=id,description,created_at,status&order=created_at.desc&limit=48"
+    "public_open_offers?select=id,description,created_at,status,category,city&order=created_at.desc&limit=48"
   );
   const list = Array.isArray(rows) ? rows : [];
   if (!list.length) return [];
@@ -163,8 +163,11 @@ export async function uploadOfferMedia(offerId, file, accessToken) {
     apikey:
       import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
       import.meta.env.VITE_SUPABASE_ANON_KEY,
+    Authorization: `Bearer ${
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      import.meta.env.VITE_SUPABASE_ANON_KEY
+    }`,
   };
-  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
   const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
     { method: "POST", headers, body: form }
@@ -189,18 +192,21 @@ export async function submitOffer(payload) {
       p_request_id: payload.requestId || null,
       p_contact_email: payload.contactEmail || null,
       p_contact_phone: payload.contactPhone || null,
+      p_city: payload.city || null,
     }),
   });
 
   const saved = { id: typeof created === 'string' ? created : (created?.id || created) };
   const files = payload.files || [];
-  if (files.length && !saved?.id) {
-    throw new Error("Offer saved, but Seek could not attach photos. Try again.");
-  }
   if (saved?.id && files.length) {
-    const session = getUserSession();
-    for (const file of files.slice(0, 6)) {
-      await uploadOfferMedia(saved.id, file, session?.access_token);
+    try {
+      for (const file of files.slice(0, 6)) {
+        await uploadOfferMedia(saved.id, file);
+      }
+    } catch (err) {
+      throw new Error(
+        "Offer was saved. Photo upload failed: " + (err.message || "network error")
+      );
     }
   }
   return saved;
