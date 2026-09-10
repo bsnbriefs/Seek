@@ -168,23 +168,30 @@ Deno.serve(async (req) => {
       );
     }
 
-    const { data: userData, error: userErr } = await supabase.auth.getUser(
-      token
-    );
-    if (userErr || !userData?.user) {
-      return jsonResponse({ error: "Invalid or expired session" }, 401);
+    let user = null;
+    if (purpose !== "offer") {
+      const { data: userData, error: userErr } = await supabase.auth.getUser(
+        token
+      );
+      if (userErr || !userData?.user) {
+        return jsonResponse({ error: "Invalid or expired session" }, 401);
+      }
+      user = userData.user;
+    } else if (token) {
+      const { data: userData } = await supabase.auth.getUser(token);
+      user = userData?.user || null;
     }
 
-    const user = userData.user;
-    const userEmail = (user.email || "").trim().toLowerCase();
-
-    const { data: profile } = await supabase
-      .from("profiles")
-      .select("role")
-      .eq("id", user.id)
-      .maybeSingle();
-
-    const isAdmin = profile?.role === "admin";
+    const userEmail = (user?.email || "").trim().toLowerCase();
+    let isAdmin = false;
+    if (user?.id) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("role")
+        .eq("id", user.id)
+        .maybeSingle();
+      isAdmin = profile?.role === "admin";
+    }
 
     // ---- Authorization by purpose ----
     if (purpose === "evidence") {
