@@ -2609,12 +2609,17 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
+  const gatedPages = ["seek-help", "my-requests"];
+  const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
+
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
 
       <div key={page} className="animate-[seekFade_0.45s_ease-out]">
-      {isRequestPage ? (
+      {needsUserGate ? (
+        <AccountPage setPage={setPage} userSession={userSession} setUserSession={setUserSession} />
+      ) : isRequestPage ? (
         <RequestPage requestId={requestId} setPage={setPage} />
       ) : isImpactStory ? (
         <ImpactStoryPage impactId={impactId} setPage={setPage} />
