@@ -770,12 +770,14 @@ export default function AdminPage() {
                     )}
 
                     {offer.media && offer.media.length > 0 && (
-                      <div className="mt-3 grid grid-cols-3 gap-2">
+                      <div className="mt-3 space-y-3">
                         {offer.media.map((m) => (
                           m.media_kind === "video" ? (
-                            <video key={m.public_url} src={m.public_url} controls playsInline className="h-24 w-full rounded-lg bg-black object-cover" />
+                            <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-[28rem] rounded-xl bg-black" />
                           ) : (
-                            <img key={m.public_url} src={m.public_url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                            <a key={m.public_url} href={m.public_url} target="_blank" rel="noreferrer">
+                              <img src={m.public_url} alt="" className="w-full max-h-[28rem] rounded-xl object-contain border bg-slate-50" />
+                            </a>
                           )
                         ))}
                       </div>
