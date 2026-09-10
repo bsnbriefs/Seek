@@ -279,9 +279,7 @@ async function attachAvatars(rows) {
     const map = {};
     (Array.isArray(photos) ? photos : []).forEach((p) => {
       if (!p?.avatar_path) return;
-      map[p.id] =
-        `${base}/storage/v1/object/public/seek-impact/` +
-        String(p.avatar_path).split("/").map(encodeURIComponent).join("/");
+      map[p.id] = seekImageUrl(p.avatar_path, 96);
     });
     return list.map((row) => ({
       ...row,
@@ -1003,9 +1001,7 @@ export async function getMyProfile() {
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
   return {
     ...row,
-    avatar_url: row.avatar_path
-      ? `${base}/storage/v1/object/public/seek-impact/` + String(row.avatar_path).split("/").map(encodeURIComponent).join("/")
-      : null,
+    avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
   };
   if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
   return mapped;
