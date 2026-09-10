@@ -903,7 +903,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [offerError, setOfferError] = useState("");
   const [offerLoading, setOfferLoading] = useState(false);
   const [donating, setDonating] = useState(false);
-  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false });
+  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false, coverFee: true });
   const [paymentError, setPaymentError] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -956,7 +956,7 @@ if (!cancelled) {
     e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
     try {
       const result = await initializeDonation({
-        amount: Number(payment.amount),
+        amount: Math.round(Number(payment.amount) * (payment.coverFee ? 1.05 : 1)),
         email: payment.email,
         requestId: selectedRequest?.id || null,
         anonymous: payment.anonymous,
@@ -1004,12 +1004,26 @@ if (!cancelled) {
               </Button>
             ) : (
               <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-3 flex flex-wrap gap-2">
+                  {[1000, 2000, 5000, 10000].map((n) => (
+                    <button key={n} type="button" className={"rounded-full px-3 py-1.5 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#63C167] text-[#0D3B3B]" : "bg-white/15 text-white")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
+                      ₦{n.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
                 <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 {!payment.anonymous && (
                   <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show publicly" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 )}
                 <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
+                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Cover Seek’s 5% so the request keeps the full amount</label>
+                {payment.amount && (
+                  <p className="sm:col-span-3 text-sm text-white/70">
+                    You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}
+                    {payment.coverFee !== false ? " (includes ₦" + Math.round(Number(payment.amount) * 0.05).toLocaleString() + " for Seek)" : ""}
+                  </p>
+                )}
                 <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
                 {selectedRequest && (
                   <button type="button" onClick={() => { setSelectedRequest(null); }} className="sm:col-span-3 text-left text-sm text-white/70 underline underline-offset-2 hover:text-white">
