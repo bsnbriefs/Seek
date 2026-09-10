@@ -265,6 +265,7 @@ function RequestCard({ req, onHelp, onView }) {
         <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         <UrgencyBadge level={req.urgency} />
       </div>
+      {req.avatarUrl && <img src={req.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover mb-2" />}
       <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title}</h3>
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
         <MapPin size={14} /> {req.location}
