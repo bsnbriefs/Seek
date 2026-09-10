@@ -164,7 +164,6 @@ export async function getOfferMedia(offerId) {
     media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
   })).filter((row) => row.public_url);
 }
-}
 
 export async function uploadOfferMedia(offerId, file, accessToken) {
   const form = new FormData();
