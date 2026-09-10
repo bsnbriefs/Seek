@@ -673,28 +673,34 @@ function OfferCard({ offer }) {
   const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
-      {offer.avatar_url && (
-        <img src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover mb-3" />
-      )}
-      {(offer.category || offer.city) && (
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-1">
-          {[offer.category, offer.city].filter(Boolean).join(" · ")}
-        </p>
-      )}
-      <p className="font-body text-[#0D3B3B]">{offer.description}</p>
-      <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
-      <div className="mt-3 flex flex-wrap gap-2">
+      <div className="flex items-start gap-3">
+        {offer.avatar_url ? (
+          <img src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+        ) : (
+          <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10 shrink-0" />
+        )}
+        <div className="min-w-0">
+          {(offer.category || offer.city) && (
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
+              {[offer.category, offer.city].filter(Boolean).join(" · ")}
+            </p>
+          )}
+          <p className="mt-1 font-body text-[#0D3B3B] leading-relaxed">{offer.description}</p>
+          <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
+        </div>
+      </div>
+      <div className="mt-4 flex items-center gap-4 text-sm font-semibold">
         {offer.media && offer.media.length > 0 && (
-          <button type="button" className="rounded-full border px-3 py-1.5 text-sm font-semibold" onClick={() => setOpen(!open)}>
-            {open ? "Hide photos" : "View photos (" + offer.media.length + ")"}
+          <button type="button" className="text-[#1BAA9C]" onClick={() => setOpen(!open)}>
+            {open ? "Hide photos" : "Photos (" + offer.media.length + ")"}
           </button>
         )}
-        <button type="button" className="rounded-full border px-3 py-1.5 text-sm font-semibold" onClick={() => setApply(!apply)}>
+        <button type="button" className="text-[#0D3B3B]" onClick={() => setApply(!apply)}>
           I am interested
         </button>
         <button
           type="button"
-          className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+          className="text-[#0D3B3B]/50"
           onClick={async () => {
             try {
               if (navigator.share) await navigator.share({ title: "Seek offer", text: shareText });
