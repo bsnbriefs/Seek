@@ -1010,11 +1010,10 @@ export async function getMyProfile() {
 
 export async function listRequestDonors(requestId) {
   if (!supabaseConfigured || !requestId) return [];
-  const rows = await supabaseFetch(
-    "donations?select=amount,anonymous,created_at,status,request_id&request_id=eq." +
-      encodeURIComponent(requestId) +
-      "&status=eq.successful&order=created_at.desc&limit=40"
-  );
+  const rows = await supabaseFetch("rpc/list_request_donors", {
+    method: "POST",
+    body: JSON.stringify({ p_request_id: requestId }),
+  });
   return (Array.isArray(rows) ? rows : []).map((row) => ({
     amount: Number(row.amount) || 0,
     anonymous: Boolean(row.anonymous),
