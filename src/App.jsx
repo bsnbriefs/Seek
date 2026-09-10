@@ -1734,7 +1734,6 @@ function RequestPage({ requestId, setPage }) {
 
 function ReportRequestForm({ requestId }) {
   const [open, setOpen] = useState(false);
-  const [media, setMedia] = useState(offer.media || []);
   const [reason, setReason] = useState("inappropriate");
   const [details, setDetails] = useState("");
   const [email, setEmail] = useState("");
