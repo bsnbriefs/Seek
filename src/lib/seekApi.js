@@ -62,6 +62,16 @@ export async function submitRequest(payload) {
     throw new Error("Request was submitted but no request ID was returned.");
   }
 
+  const owner = getUserSession();
+  if (owner?.user?.id) {
+    try {
+      await supabaseFetch("requests?id=eq." + request.id, {
+        method: "PATCH",
+        body: JSON.stringify({ user_id: owner.user.id }),
+      });
+    } catch (_e) {}
+  }
+
   // Secure server-side evidence upload (images, videos, PDF).
   // Validation of type/size happens in the Edge Function — not the browser.
   // Requires a real logged-in user access token (not the publishable key).
@@ -130,37 +140,30 @@ export async function listPublicOffers() {
     return (Date.now() - new Date(row.created_at).getTime()) / 86400000 <= 21;
   });
   if (!list.length) return [];
-  const ids = list.map((row) => row.id).filter(Boolean);
-  let media = [];
-  try {
-    media = await supabaseFetch(
-      "offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
-    );
-  } catch (_e) {
-    media = [];
-  }
-  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  const byOffer = {};
-  (Array.isArray(media) ? media : []).forEach((row) => {
-    const url = row.storage_path
-      ? `${base}/storage/v1/object/public/seek-impact/` +
-        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
-      : null;
-    if (!url) return;
-    byOffer[row.offer_id] = byOffer[row.offer_id] || [];
-    byOffer[row.offer_id].push({
-      public_url: url,
-      media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
-    });
-  });
   const baseUrl = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
   return list.map((row) => ({
     ...row,
-    media: byOffer[row.id] || [],
+    mediaCount: Number(row.media_count || row.mediaCount || 0),
     avatar_url: row.avatar_path
       ? `${baseUrl}/storage/v1/object/public/seek-impact/` + String(row.avatar_path).split("/").map(encodeURIComponent).join("/")
       : null,
   }));
+}
+
+export async function getOfferMedia(offerId) {
+  if (!supabaseConfigured || !offerId) return [];
+  const rows = await supabaseFetch(
+    "offer_media?select=storage_path,media_kind,mime_type&offer_id=eq." + encodeURIComponent(offerId)
+  );
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return (Array.isArray(rows) ? rows : []).map((row) => ({
+    public_url: row.storage_path
+      ? `${base}/storage/v1/object/public/seek-impact/` +
+        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
+      : null,
+    media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
+  })).filter((row) => row.public_url);
+}
 }
 
 export async function uploadOfferMedia(offerId, file, accessToken) {
@@ -242,13 +245,13 @@ export async function submitVolunteer(payload) {
   return rows?.[0] || rows;
 }
 
-export async function listPublishedRequests() {
+export async function listPublishedRequests(limit = 48) {
   if (!supabaseConfigured) {
     return [];
   }
 
   const rows = await supabaseFetch(
-    "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=48"
+    "requests?select=id,title,category,location,description,amount_needed,amount_raised,urgency,verification_status,status,assistance_type,public_update,user_id,created_by&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=" + limit
   );
   return attachAvatars(Array.isArray(rows) ? rows : []);
 }
