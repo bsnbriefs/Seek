@@ -10,6 +10,7 @@ import {
   getAdminDonations,
   updateAdminRequestStatus,
   updateAdminOfferStatus,
+  getAdminOfferInterests,
   verifyAdminRequest,
   getAdminEvidence,
   getAdminImpactPosts,
@@ -32,6 +33,7 @@ export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
   const [requests, setRequests] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [offerInterests, setOfferInterests] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [requestPrivate, setRequestPrivate] = useState([]);
   const [donations, setDonations] = useState([]);
@@ -799,6 +801,20 @@ export default function AdminPage() {
                             ))}
                           </div>
                         )}
+                      </div>
+                    )}
+                    {(offerInterests || []).filter((i) => i.offer_id === offer.id).length > 0 && (
+                      <div className="mt-3 rounded-lg bg-slate-50 p-3 text-sm">
+                        <p className="font-semibold mb-2">
+                          {(offerInterests || []).filter((i) => i.offer_id === offer.id).length} interested
+                        </p>
+                        {(offerInterests || []).filter((i) => i.offer_id === offer.id).map((i) => (
+                          <p key={i.id} className="mt-2">
+                            {i.name || "Applicant"} · {i.email}
+                            {i.phone ? ` · ${i.phone}` : ""}
+                            {i.message ? ` — ${i.message}` : ""}
+                          </p>
+                        ))}
                       </div>
                     )}
                     <p className="mt-2 text-sm text-slate-600">
