@@ -1,6 +1,26 @@
 import AdminPage from "./AdminPage";
 import NotificationBell from "./NotificationBell";
 import React, { useEffect, useState } from "react";
+
+class ErrorBoundary extends React.Component {
+  constructor(props) {
+    super(props);
+    this.state = { err: null };
+  }
+  static getDerivedStateFromError(err) {
+    return { err };
+  }
+  render() {
+    if (this.state.err) {
+      return (
+        <div className="min-h-[40vh] flex items-center justify-center px-5">
+          <p className="font-body text-sm text-red-700">{String(this.state.err.message || this.state.err)}</p>
+        </div>
+      );
+    }
+    return this.props.children;
+  }
+}
 import {
   submitRequest,
   submitOffer,
@@ -224,7 +244,9 @@ function UrgencyBadge({ level }) {
 }
 
 function ProgressBar({ raised, needed }) {
-  const pct = Math.min(100, Math.round((raised / needed) * 100));
+  const n = Number(needed);
+  if (!n) return null;
+  const pct = Math.min(100, Math.round((Number(raised || 0) / n) * 100));
   return (
     <div>
       <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
@@ -2641,7 +2663,9 @@ useEffect(() => {
       {needsUserGate ? (
         <AccountPage setPage={setPage} userSession={userSession} setUserSession={setUserSession} />
       ) : isRequestPage ? (
+        <ErrorBoundary>
         <RequestPage requestId={requestId} setPage={setPage} />
+        </ErrorBoundary>
       ) : isImpactStory ? (
         <ImpactStoryPage impactId={impactId} setPage={setPage} />
       ) : (
