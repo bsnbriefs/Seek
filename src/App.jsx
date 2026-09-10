@@ -668,7 +668,30 @@ function OffersPage({ setPage }) {
             </p>
           </article>
         ))}
-        <div className="text-center pt-4">
+        <div className="pt-8">
+          <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-left">
+            {[
+              { icon: Wallet, label: "Money" },
+              { icon: Utensils, label: "Food" },
+              { icon: Shirt, label: "Clothing" },
+              { icon: Package, label: "Items" },
+              { icon: HeartHandshake, label: "Time / skills" },
+              { icon: HomeIcon, label: "Shelter / space" },
+            ].map((item) => {
+              const Icon = item.icon;
+              return (
+                <div key={item.label} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white mb-2" style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>
+                    <Icon size={18} />
+                  </span>
+                  <p className="font-display font-semibold text-sm text-[#0D3B3B]">{item.label}</p>
+                </div>
+              );
+            })}
+          </div>
+        </div>
+        <div className="text-center pt-6">
           <Button variant="primary" onClick={() => setPage("give")}>Make an offer</Button>
         </div>
       </section>
