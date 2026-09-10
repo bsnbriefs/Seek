@@ -103,6 +103,25 @@ const FONTS = (
       100% { stroke-dashoffset: -120; }
     }
     .seek-connector path { stroke-dasharray: 6 10; animation: seek-loop 3.2s linear infinite; }
+    @keyframes seekLivePulse {
+      0%, 100% { opacity: 1; transform: scale(1); }
+      50% { opacity: 0.35; transform: scale(0.75); }
+    }
+    .seek-live-dot {
+      width: 10px;
+      height: 10px;
+      border-radius: 999px;
+      background: #E11D48;
+      animation: seekLivePulse 1.1s ease-in-out infinite;
+    }
+    .seek-live-ring {
+      position: absolute;
+      inset: -3px;
+      border-radius: 999px;
+      background: #E11D48;
+      opacity: 0.35;
+      animation: seekLivePulse 1.1s ease-in-out infinite;
+    }
     @media (prefers-reduced-motion: reduce) {
       .seek-connector path { animation: none; }
     }
@@ -1679,11 +1698,11 @@ function RequestPage({ requestId, setPage }) {
 
           <div className="mt-8">
             <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3 inline-flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5">
-                <span className="absolute inline-flex h-full w-full rounded-full bg-[#E11D48] opacity-60 animate-[seekLivePulse_1.2s_ease-in-out_infinite]"></span>
-                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#E11D48]"></span>
+              <span className="relative flex h-2.5 w-2.5 items-center justify-center">
+                <span className="seek-live-ring"></span>
+                <span className="seek-live-dot"></span>
               </span>
-              Live support
+              Live
             </p>
             {donors.length === 0 ? (
               <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
