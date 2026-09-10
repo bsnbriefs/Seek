@@ -153,9 +153,9 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "file is required" }, 400);
     }
 
-    if (purpose !== "evidence" && purpose !== "impact" && purpose !== "appreciation" && purpose !== "offer") {
+    if (purpose !== "evidence" && purpose !== "impact" && purpose !== "appreciation" && purpose !== "offer" && purpose !== "profile") {
       return jsonResponse(
-        { error: "purpose must be evidence, impact, appreciation, or offer" },
+        { error: "purpose must be evidence, impact, appreciation, offer, or profile" },
         400
       );
     }
@@ -249,6 +249,21 @@ Deno.serve(async (req) => {
       // Community Impact: admin only
       if (!isAdmin) {
         return jsonResponse({ error: "Admin only" }, 403);
+      }
+    }
+
+    if (purpose === "profile") {
+      if (!user?.id) {
+        await supabase.storage.from(bucket).remove([storagePath]);
+        return jsonResponse({ error: "Sign in to set a profile photo." }, 401);
+      }
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({ avatar_path: storagePath })
+        .eq("id", user.id);
+      if (profErr) {
+        await supabase.storage.from(bucket).remove([storagePath]);
+        return jsonResponse({ error: "Failed to save profile photo", details: profErr.message }, 500);
       }
     }
 
@@ -364,6 +379,9 @@ Deno.serve(async (req) => {
     } else if (purpose === "offer") {
       bucket = "seek-impact";
       storagePath = "offers/" + offerId + "/" + uuid + "." + detected.ext;
+    } else if (purpose === "profile") {
+      bucket = "seek-impact";
+      storagePath = "profiles/" + (user?.id || "anon") + "/" + uuid + "." + detected.ext;
     } else {
       bucket = "seek-impact";
       storagePath = uuid + "." + detected.ext;
@@ -425,6 +443,21 @@ Deno.serve(async (req) => {
           { error: "Failed to save offer media", details: offErr.message },
           500
         );
+      }
+    }
+
+    if (purpose === "profile") {
+      if (!user?.id) {
+        await supabase.storage.from(bucket).remove([storagePath]);
+        return jsonResponse({ error: "Sign in to set a profile photo." }, 401);
+      }
+      const { error: profErr } = await supabase
+        .from("profiles")
+        .update({ avatar_path: storagePath })
+        .eq("id", user.id);
+      if (profErr) {
+        await supabase.storage.from(bucket).remove([storagePath]);
+        return jsonResponse({ error: "Failed to save profile photo", details: profErr.message }, 500);
       }
     }
 
