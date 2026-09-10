@@ -1006,3 +1006,18 @@ export async function getMyProfile() {
   if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
   return mapped;
 }
+
+
+export async function listRequestDonors(requestId) {
+  if (!supabaseConfigured || !requestId) return [];
+  const rows = await supabaseFetch(
+    "donations?select=amount,anonymous,created_at,status,request_id&request_id=eq." +
+      encodeURIComponent(requestId) +
+      "&status=eq.successful&order=created_at.desc&limit=40"
+  );
+  return (Array.isArray(rows) ? rows : []).map((row) => ({
+    amount: Number(row.amount) || 0,
+    anonymous: Boolean(row.anonymous),
+    created_at: row.created_at,
+  }));
+}
