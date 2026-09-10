@@ -1751,11 +1751,8 @@ function RequestPage({ requestId, setPage }) {
 
           <div className="mt-8">
             <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3 inline-flex items-center gap-2">
-              <span className="relative flex h-2.5 w-2.5 items-center justify-center">
-                <span className="seek-live-ring"></span>
-                <span className="seek-live-dot"></span>
-              </span>
-              Live
+              <span style={{width:10,height:10,borderRadius:999,background:"#E11D48",display:"inline-block",animation:"seekLivePulse 1.1s ease-in-out infinite"}} />
+              Live support
             </p>
             {donors.length === 0 ? (
               <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
