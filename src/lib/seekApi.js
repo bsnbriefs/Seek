@@ -909,3 +909,52 @@ export async function submitOfferInterest(payload) {
     }),
   });
 }
+
+
+export async function uploadProfilePhoto(file) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Sign in to add a photo.");
+  const form = new FormData();
+  form.append("file", file);
+  form.append("purpose", "profile");
+  form.append("original_name", file.name || "avatar");
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
+    {
+      method: "POST",
+      headers: {
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: form,
+    }
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.error || "Could not save profile photo.");
+  }
+  return result;
+}
+
+export async function getMyProfile() {
+  const session = getUserSession();
+  if (!session?.access_token || !session?.user?.id) return null;
+  const rows = await fetch(
+    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path&limit=1`,
+    {
+      headers: {
+        apikey: AUTH_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  ).then((r) => r.json()).catch(() => []);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  if (!row) return null;
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return {
+    ...row,
+    avatar_url: row.avatar_path
+      ? `${base}/storage/v1/object/public/seek-impact/` + String(row.avatar_path).split("/").map(encodeURIComponent).join("/")
+      : null,
+  };
+}
