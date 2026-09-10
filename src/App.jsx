@@ -884,7 +884,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [offerError, setOfferError] = useState("");
   const [offerLoading, setOfferLoading] = useState(false);
   const [donating, setDonating] = useState(false);
-  const [payment, setPayment] = useState({ amount: "", email: "", anonymous: false });
+  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false });
   const [paymentError, setPaymentError] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -941,6 +941,7 @@ if (!cancelled) {
         email: payment.email,
         requestId: selectedRequest?.id || null,
         anonymous: payment.anonymous,
+        donorName: payment.name || "",
         callbackUrl: window.location.origin,
       });
       window.location.href = result.authorization_url;
@@ -985,6 +986,9 @@ if (!cancelled) {
             ) : (
               <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
                 <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
+                {!payment.anonymous && (
+                  <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show publicly" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
+                )}
                 <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
                 <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
                 <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
@@ -1674,14 +1678,20 @@ function RequestPage({ requestId, setPage }) {
 )}
 
           <div className="mt-8">
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">Live support</p>
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3 inline-flex items-center gap-2">
+              <span className="relative flex h-2.5 w-2.5">
+                <span className="absolute inline-flex h-full w-full rounded-full bg-[#E11D48] opacity-60 animate-[seekLivePulse_1.2s_ease-in-out_infinite]"></span>
+                <span className="relative inline-flex h-2.5 w-2.5 rounded-full bg-[#E11D48]"></span>
+              </span>
+              Live support
+            </p>
             {donors.length === 0 ? (
               <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
             ) : (
               <ul className="space-y-2">
                 {donors.map((d, i) => (
-                  <li key={i} className="flex items-center justify-between text-sm font-body">
-                    <span className="text-[#0D3B3B]/70">{d.anonymous ? "Anonymous" : "A supporter"}</span>
+                  <li key={(d.created_at || "") + "-" + i} className="flex items-center justify-between text-sm font-body animate-[seekDonorIn_0.45s_ease-out]">
+                    <span className="text-[#0D3B3B]/70">{d.anonymous || !d.name ? (d.anonymous ? "Anonymous" : "A supporter") : d.name}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
