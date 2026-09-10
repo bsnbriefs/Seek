@@ -1672,7 +1672,7 @@ function RequestPage({ requestId, setPage }) {
             href={`https://wa.me/?text=${encodeURIComponent(
               "Seek request: " + request.title + " — " + (request.location || "") +
               (request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "") +
-              " " + window.location.origin + "/request/" + request.id
+              " " + window.location.origin + "/api/request-meta?id=" + request.id
             )}`}
             target="_blank"
             rel="noreferrer"
