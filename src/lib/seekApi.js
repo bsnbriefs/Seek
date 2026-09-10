@@ -247,9 +247,10 @@ export async function listPublishedRequests() {
     return [];
   }
 
-  return supabaseFetch(
+  const rows = await supabaseFetch(
     "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=48"
   );
+  return attachAvatars(Array.isArray(rows) ? rows : []);
 }
 
 export async function listMatchedOfferRequestIds() {
@@ -264,9 +265,35 @@ export async function listMatchedOfferRequestIds() {
   return rows.map((row) => row.request_id);
 }
 
+async function attachAvatars(rows) {
+  const list = Array.isArray(rows) ? rows : [];
+  const ids = [...new Set(list.map((row) => row.user_id || row.created_by).filter(Boolean))];
+  if (!ids.length) return list;
+  try {
+    const photos = await supabaseFetch(
+      "public_profile_photos?select=id,avatar_path&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
+    );
+    const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+    const map = {};
+    (Array.isArray(photos) ? photos : []).forEach((p) => {
+      if (!p?.avatar_path) return;
+      map[p.id] =
+        `${base}/storage/v1/object/public/seek-impact/` +
+        String(p.avatar_path).split("/").map(encodeURIComponent).join("/");
+    });
+    return list.map((row) => ({
+      ...row,
+      avatar_url: map[row.user_id || row.created_by] || null,
+    }));
+  } catch (_e) {
+    return list;
+  }
+}
+
 export function mapRequestRow(row) {
   return {
     id: row.id,
+    avatarUrl: row.avatar_url || "",
     title: row.title,
     category: row.category,
     location: row.location,
