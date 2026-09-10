@@ -787,7 +787,7 @@ if (!cancelled) {
   }
   async function sendOffer() {
     setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null }); setSubmitted(true); }
+    try { await submitOffer({ description: offer, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, files: offerFiles }); setSubmitted(true); }
     catch (err) { setOfferError(err.message); }
     finally { setOfferLoading(false); }
   }
