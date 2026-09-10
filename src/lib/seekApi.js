@@ -183,6 +183,7 @@ export async function submitOffer(payload) {
 
   const rows = await supabaseFetch("offers", {
     method: "POST",
+    headers: { Prefer: "return=representation" },
     body: JSON.stringify({
       description: payload.description,
       category: payload.category,
@@ -192,8 +193,11 @@ export async function submitOffer(payload) {
     }),
   });
 
-  const saved = rows?.[0] || rows;
+  const saved = Array.isArray(rows) ? rows[0] : rows;
   const files = payload.files || [];
+  if (files.length && !saved?.id) {
+    throw new Error("Offer saved, but Seek could not attach photos. Try again.");
+  }
   if (saved?.id && files.length) {
     const session = getUserSession();
     for (const file of files.slice(0, 6)) {
