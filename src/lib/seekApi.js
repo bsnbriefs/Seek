@@ -123,7 +123,7 @@ export async function submitRequest(payload) {
 export async function listPublicOffers() {
   if (!supabaseConfigured) return [];
   const rows = await supabaseFetch(
-    "public_open_offers?select=id,description,created_at,status,category,city&order=created_at.desc&limit=48"
+    "public_open_offers?select=id,description,created_at,status,category,city,created_by,avatar_path&order=created_at.desc&limit=48"
   );
   const list = Array.isArray(rows) ? rows : [];
   if (!list.length) return [];
@@ -150,7 +150,14 @@ export async function listPublicOffers() {
       media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
     });
   });
-  return list.map((row) => ({ ...row, media: byOffer[row.id] || [] }));
+  const baseUrl = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return list.map((row) => ({
+    ...row,
+    media: byOffer[row.id] || [],
+    avatar_url: row.avatar_path
+      ? `${baseUrl}/storage/v1/object/public/seek-impact/` + String(row.avatar_path).split("/").map(encodeURIComponent).join("/")
+      : null,
+  }));
 }
 
 export async function uploadOfferMedia(offerId, file, accessToken) {
@@ -193,6 +200,7 @@ export async function submitOffer(payload) {
       p_contact_email: payload.contactEmail || null,
       p_contact_phone: payload.contactPhone || null,
       p_city: payload.city || null,
+      p_created_by: getUserSession()?.user?.id || null,
     }),
   });
 
@@ -363,6 +371,16 @@ const AUTH_KEY = (
 ).trim();
 
 const USER_SESSION_KEY = "seek_user_session";
+
+const SEEK_AVATAR_KEY = "seek_avatar_url";
+
+export function cacheAvatarUrl(url) {
+  if (url) localStorage.setItem(SEEK_AVATAR_KEY, url);
+}
+
+export function getCachedAvatarUrl() {
+  return localStorage.getItem(SEEK_AVATAR_KEY) || "";
+}
 
 export function getUserSession() {
   try {
@@ -957,4 +975,6 @@ export async function getMyProfile() {
       ? `${base}/storage/v1/object/public/seek-impact/` + String(row.avatar_path).split("/").map(encodeURIComponent).join("/")
       : null,
   };
+  if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
+  return mapped;
 }
