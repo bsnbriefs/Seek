@@ -47,6 +47,7 @@ export default function AdminPage() {
   const [search, setSearch] = useState("");
   const [adminTab, setAdminTab] = useState("requests");
   const [impactPosts, setImpactPosts] = useState([]);
+  const [openOfferMedia, setOpenOfferMedia] = useState({});
   const [impactEditingId, setImpactEditingId] = useState(null);
   const [impactForm, setImpactForm] = useState({
     title: "",
@@ -713,6 +714,9 @@ export default function AdminPage() {
               {filteredOffers.map((offer) => {
                 const linkedRequest = requests.find((r) => r.id === offer.request_id);
                 const status = offer.status || "pending_review";
+                const postedDays = offer.created_at
+                  ? Math.max(0, Math.floor((Date.now() - new Date(offer.created_at).getTime()) / 86400000))
+                  : null;
                 const isPending = status === "pending_review";
                 const isOpen = status === "open";
                 const isMatched = status === "matched";
@@ -732,6 +736,7 @@ export default function AdminPage() {
                         </h3>
                         <p className="mt-1 text-xs text-[#0D3B3B]/50">
                           Posted {new Date(offer.created_at).toLocaleDateString()}
+                          {postedDays === 0 ? " · today" : postedDays === 1 ? " · 1 day ago" : postedDays != null ? ` · ${postedDays} days ago` : ""}
                         </p>
                       </div>
 
@@ -770,16 +775,30 @@ export default function AdminPage() {
                     )}
 
                     {offer.media && offer.media.length > 0 && (
-                      <div className="mt-3 space-y-3">
-                        {offer.media.map((m) => (
-                          m.media_kind === "video" ? (
-                            <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-[28rem] rounded-xl bg-black" />
-                          ) : (
-                            <a key={m.public_url} href={m.public_url} target="_blank" rel="noreferrer">
-                              <img src={m.public_url} alt="" className="w-full max-h-[28rem] rounded-xl object-contain border bg-slate-50" />
-                            </a>
-                          )
-                        ))}
+                      <div className="mt-3">
+                        <button
+                          type="button"
+                          className="rounded-lg border px-3 py-2 text-sm"
+                          onClick={() => setOpenOfferMedia((prev) => ({ ...prev, [offer.id]: !prev[offer.id] }))}
+                        >
+                          {openOfferMedia[offer.id] ? "Hide photos" : "View photos (" + offer.media.length + ")"}
+                        </button>
+                        {openOfferMedia[offer.id] && (
+                          <div className="mt-3 space-y-3">
+                            {offer.media.map((m, idx) => (
+                              <div key={m.public_url}>
+                                {m.media_kind === "video" ? (
+                                  <video src={m.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+                                ) : (
+                                  <img src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain border bg-slate-50" />
+                                )}
+                                <a className="mt-1 inline-block text-sm text-[#1BAA9C]" href={m.public_url} target="_blank" rel="noreferrer" download>
+                                  Download file {idx + 1}
+                                </a>
+                              </div>
+                            ))}
+                          </div>
+                        )}
                       </div>
                     )}
                     <p className="mt-2 text-sm text-slate-600">
