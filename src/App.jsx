@@ -21,6 +21,7 @@ import {
   getRequestAppreciation,
   listPublishedImpact,
   listPublicOffers,
+  submitOfferInterest,
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -637,6 +638,11 @@ const GIVE_OPTIONS = [
 
 function OfferCard({ offer }) {
   const [open, setOpen] = useState(false);
+  const [apply, setApply] = useState(false);
+  const [applying, setApplying] = useState(false);
+  const [applied, setApplied] = useState(false);
+  const [applyError, setApplyError] = useState("");
+  const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", message: "" });
   const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
@@ -654,6 +660,9 @@ function OfferCard({ offer }) {
           </button>
         )}
         <a className="rounded-full border px-3 py-1.5 text-sm font-semibold" href={"https://wa.me/?text=" + encodeURIComponent(shareText)} target="_blank" rel="noreferrer">WhatsApp</a>
+        <button type="button" className="rounded-full border px-3 py-1.5 text-sm font-semibold" onClick={() => setApply(!apply)}>
+          I am interested
+        </button>
         <button
           type="button"
           className="rounded-full border px-3 py-1.5 text-sm font-semibold"
@@ -667,6 +676,40 @@ function OfferCard({ offer }) {
           Share
         </button>
       </div>
+      {apply && !applied && (
+        <form
+          className="mt-3 space-y-2"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setApplyError("");
+            setApplying(true);
+            try {
+              await submitOfferInterest({
+                offerId: offer.id,
+                name: applyForm.name,
+                email: applyForm.email,
+                phone: applyForm.phone,
+                message: applyForm.message,
+              });
+              setApplied(true);
+            } catch (err) {
+              setApplyError(err.message || "Could not send interest.");
+            } finally {
+              setApplying(false);
+            }
+          }}
+        >
+          <input required value={applyForm.name} onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })} placeholder="Your name" className="w-full rounded-xl border px-3 py-2 text-sm" />
+          <input required type="email" value={applyForm.email} onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })} placeholder="Your email" className="w-full rounded-xl border px-3 py-2 text-sm" />
+          <input value={applyForm.phone} onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })} placeholder="Phone (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
+          <textarea required value={applyForm.message} onChange={(e) => setApplyForm({ ...applyForm, message: e.target.value })} placeholder="Why you are interested / short application" rows={3} className="w-full rounded-xl border px-3 py-2 text-sm" />
+          <button type="submit" disabled={applying} className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold">
+            {applying ? "Sending…" : "Send interest"}
+          </button>
+          {applyError && <p className="text-sm text-red-600">{applyError}</p>}
+        </form>
+      )}
+      {applied && <p className="mt-3 text-sm text-[#1BAA9C]">Your interest was sent. Seek will follow up.</p>}
       {open && offer.media && (
         <div className="mt-3 space-y-3">
           {offer.media.map((m) => (
