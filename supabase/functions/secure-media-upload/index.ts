@@ -252,21 +252,6 @@ Deno.serve(async (req) => {
       }
     }
 
-    if (purpose === "profile") {
-      if (!user?.id) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse({ error: "Sign in to set a profile photo." }, 401);
-      }
-      const { error: profErr } = await supabase
-        .from("profiles")
-        .update({ avatar_path: storagePath })
-        .eq("id", user.id);
-      if (profErr) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse({ error: "Failed to save profile photo", details: profErr.message }, 500);
-      }
-    }
-
     if (purpose === "appreciation") {
       if (!requestId) {
         return jsonResponse(
@@ -451,10 +436,14 @@ Deno.serve(async (req) => {
         await supabase.storage.from(bucket).remove([storagePath]);
         return jsonResponse({ error: "Sign in to set a profile photo." }, 401);
       }
-      const { error: profErr } = await supabase
+      const { data: existing } = await supabase
         .from("profiles")
-        .update({ avatar_path: storagePath })
-        .eq("id", user.id);
+        .select("id")
+        .eq("id", user.id)
+        .maybeSingle();
+      const profErr = existing
+        ? (await supabase.from("profiles").update({ avatar_path: storagePath }).eq("id", user.id)).error
+        : (await supabase.from("profiles").insert({ id: user.id, avatar_path: storagePath })).error;
       if (profErr) {
         await supabase.storage.from(bucket).remove([storagePath]);
         return jsonResponse({ error: "Failed to save profile photo", details: profErr.message }, 500);
