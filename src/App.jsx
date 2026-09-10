@@ -316,6 +316,11 @@ function SectionLabel({ children }) {
 
 function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
+  const [avatar, setAvatar] = useState("");
+  useEffect(() => {
+    if (!userSession?.access_token) { setAvatar(""); return; }
+    getMyProfile().then((p) => { if (p?.avatar_url) setAvatar(p.avatar_url); }).catch(() => {});
+  }, [userSession]);
   const links = [
     { id: "home", label: "Home" },
     { id: "seek-help", label: "Seek Help" },
@@ -359,6 +364,7 @@ function Navbar({ page, setPage, userSession }) {
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
           >
+            {avatar && <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
             {userSession?.access_token ? "Account" : "Sign in"}
           </button>
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
@@ -645,9 +651,24 @@ function OfferCard({ offer }) {
   const [applied, setApplied] = useState(false);
   const [applyError, setApplyError] = useState("");
   const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", message: "" });
+  const [applyAvatar, setApplyAvatar] = useState("");
+  useEffect(() => {
+    const session = getUserSession();
+    if (!session?.access_token) return;
+    getMyProfile().then((p) => {
+      if (p?.avatar_url) setApplyAvatar(p.avatar_url);
+      setApplyForm((prev) => ({
+        ...prev,
+        email: prev.email || session.user?.email || "",
+      }));
+    }).catch(() => {});
+  }, []);
   const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+      {offer.avatar_url && (
+        <img src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover mb-3" />
+      )}
       {(offer.category || offer.city) && (
         <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-1">
           {[offer.category, offer.city].filter(Boolean).join(" · ")}
@@ -701,6 +722,7 @@ function OfferCard({ offer }) {
             }
           }}
         >
+          {applyAvatar && <img src={applyAvatar} alt="" className="h-12 w-12 rounded-full object-cover" />}
           <input required value={applyForm.name} onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })} placeholder="Your name" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <input required type="email" value={applyForm.email} onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })} placeholder="Your email" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <input value={applyForm.phone} onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })} placeholder="Phone (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
@@ -2313,6 +2335,10 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
 }
 
 function MyRequestsPage({ setPage, userSession }) {
+  const [myAvatar, setMyAvatar] = useState("");
+  useEffect(() => {
+    getMyProfile().then((p) => { if (p?.avatar_url) setMyAvatar(p.avatar_url); }).catch(() => {});
+  }, []);
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -2365,9 +2391,11 @@ function MyRequestsPage({ setPage, userSession }) {
         <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-2">
           My requests
         </h1>
-        <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
-          Signed in as {userSession.user?.email}
-        </p>
+        {/* avatar loaded below */}
+        <div className="flex items-center gap-3 mb-8">
+          {myAvatar ? <img src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
+          <p className="font-body text-sm text-[#0D3B3B]/60">Signed in as {userSession.user?.email}</p>
+        </div>
 
         {loading && (
           <p className="font-body text-sm text-[#0D3B3B]/50">Loading your requests…</p>
