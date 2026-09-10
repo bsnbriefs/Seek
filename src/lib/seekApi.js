@@ -125,7 +125,55 @@ export async function listPublicOffers() {
   const rows = await supabaseFetch(
     "public_open_offers?select=id,description,created_at,status&order=created_at.desc&limit=48"
   );
-  return Array.isArray(rows) ? rows : [];
+  const list = Array.isArray(rows) ? rows : [];
+  if (!list.length) return [];
+  const ids = list.map((row) => row.id).filter(Boolean);
+  let media = [];
+  try {
+    media = await supabaseFetch(
+      "offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(" + ids.join(",") + ")"
+    );
+  } catch (_e) {
+    media = [];
+  }
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const byOffer = {};
+  (Array.isArray(media) ? media : []).forEach((row) => {
+    const url = row.storage_path
+      ? `${base}/storage/v1/object/public/seek-impact/` +
+        String(row.storage_path).split("/").map(encodeURIComponent).join("/")
+      : null;
+    if (!url) return;
+    byOffer[row.offer_id] = byOffer[row.offer_id] || [];
+    byOffer[row.offer_id].push({
+      public_url: url,
+      media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
+    });
+  });
+  return list.map((row) => ({ ...row, media: byOffer[row.id] || [] }));
+}
+
+export async function uploadOfferMedia(offerId, file, accessToken) {
+  const form = new FormData();
+  form.append("file", file);
+  form.append("purpose", "offer");
+  form.append("offer_id", offerId);
+  form.append("original_name", file.name || "offer");
+  const headers = {
+    apikey:
+      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+      import.meta.env.VITE_SUPABASE_ANON_KEY,
+  };
+  if (accessToken) headers.Authorization = `Bearer ${accessToken}`;
+  const response = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
+    { method: "POST", headers, body: form }
+  );
+  const result = await response.json().catch(() => ({}));
+  if (!response.ok || !result?.success) {
+    throw new Error(result?.error || "Could not upload offer photo.");
+  }
+  return result;
 }
 
 export async function submitOffer(payload) {
@@ -144,7 +192,15 @@ export async function submitOffer(payload) {
     }),
   });
 
-  return rows?.[0] || rows;
+  const saved = rows?.[0] || rows;
+  const files = payload.files || [];
+  if (saved?.id && files.length) {
+    const session = getUserSession();
+    for (const file of files.slice(0, 6)) {
+      await uploadOfferMedia(saved.id, file, session?.access_token);
+    }
+  }
+  return saved;
 }
 
 export async function submitVolunteer(payload) {
