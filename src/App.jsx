@@ -107,6 +107,19 @@ const FONTS = (
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.35; transform: scale(0.75); }
     }
+    @keyframes seekTicker {
+      0% { transform: translateX(0); }
+      100% { transform: translateX(-50%); }
+    }
+    .seek-ticker-track {
+      display: inline-flex;
+      gap: 2.5rem;
+      animation: seekTicker 28s linear infinite;
+      white-space: nowrap;
+    }
+    @media (prefers-reduced-motion: reduce) {
+      .seek-ticker-track { animation: none; }
+    }
     .seek-live-dot {
       width: 10px;
       height: 10px;
@@ -533,13 +546,14 @@ function HomePage({ setPage }) {
   const [requestsError, setRequestsError] = useState("");
   const [impactPreview, setImpactPreview] = useState([]);
   const [liveStats, setLiveStats] = useState(null);
+  const [ticker, setTicker] = useState([]);
 
     useEffect(() => {
     let cancelled = false;
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, stats] = await Promise.all([
+        const [rows, matchedIds, impactRows, stats, offerRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           Promise.all([
@@ -547,12 +561,19 @@ function HomePage({ setPage }) {
             listAppreciationStories().catch(() => []),
           ]).then(([impactRows, thanksRows]) => [...(thanksRows || []).slice(0, 2), ...(impactRows || [])]),
           getSeekLiveStats().catch(() => null),
+          listPublicOffers().catch(() => []),
         ]);
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
-          setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4));
+          const mapped = rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4);
+          setRequests(mapped);
           setImpactPreview((impactRows || []).slice(0, 3));
           if (stats) setLiveStats(stats);
+          const bits = [
+            ...mapped.map((r) => "REQUEST · " + (r.title || "Open request")),
+            ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 6).map((o) => "OFFER · " + String(o.description || "").slice(0, 72)),
+          ].filter(Boolean);
+          setTicker(bits);
         }
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
@@ -565,6 +586,20 @@ function HomePage({ setPage }) {
 
   return (
     <>
+      {ticker.length > 0 && (
+        <div className="border-b border-[#0D3B3B]/10 bg-[#0D3B3B] text-white overflow-hidden">
+          <div className="flex items-center gap-3 px-3 py-2">
+            <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#E11D48] px-2 py-1 rounded">Live</span>
+            <div className="overflow-hidden flex-1">
+              <div className="seek-ticker-track">
+                {[...ticker, ...ticker].map((item, i) => (
+                  <span key={i} className="text-sm font-body text-white/90">{item}</span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+      )}
       {/* HERO */}
       <section className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${C.bg}, #ffffff)` }}>
         <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
