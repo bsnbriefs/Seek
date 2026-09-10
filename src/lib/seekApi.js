@@ -250,7 +250,7 @@ export async function listPublishedRequests(limit = 48) {
   }
 
   const rows = await supabaseFetch(
-    "requests?select=id,title,category,location,description,amount_needed,amount_raised,urgency,verification_status,status,assistance_type,public_update,user_id,created_by&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=" + limit
+    "requests?select=*&is_public=eq.true&status=in.(published,partially_funded)&order=created_at.desc&limit=" + limit
   );
   return attachAvatars(Array.isArray(rows) ? rows : []);
 }
