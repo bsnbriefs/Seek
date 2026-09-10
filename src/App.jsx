@@ -51,6 +51,7 @@ import {
   getPublishedImpactById,
   getSeekLiveStats,
   getPublicRequestById,
+  listRequestDonors,
   submitSafetyReport,
   startSupportConversation,
   listSupportMessages,
@@ -516,6 +517,7 @@ function HomePage({ setPage }) {
 
     useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const [rows, matchedIds, impactRows, stats] = await Promise.all([
@@ -804,6 +806,7 @@ function OffersPage({ setPage }) {
   const [error, setError] = useState("");
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const rows = await listPublicOffers();
@@ -893,6 +896,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
 
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const [rows, matchedIds] = await Promise.all([
@@ -1457,9 +1461,11 @@ function RequestPage({ requestId, setPage }) {
   const [error, setError] = useState("");
     const [evidence, setEvidence] = useState([]);
     const [helped, setHelped] = useState(false);
+    const [donors, setDonors] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         setLoading(true);
@@ -1488,6 +1494,11 @@ function RequestPage({ requestId, setPage }) {
         }
       })
       .catch(() => {});
+    const loadDonors = () => listRequestDonors(matched.id)
+      .then((rows) => { if (!cancelled) setDonors(Array.isArray(rows) ? rows : []); })
+      .catch(() => {});
+    loadDonors();
+    donorTick = setInterval(loadDonors, 8000);
     getRequestEvidence(matched.id)
       .then((files) => {
         if (!cancelled) {
@@ -1512,6 +1523,7 @@ function RequestPage({ requestId, setPage }) {
     })();
     return () => {
       cancelled = true;
+      if (donorTick) clearInterval(donorTick);
     };
   }, [requestId]);
 
@@ -1661,6 +1673,19 @@ function RequestPage({ requestId, setPage }) {
   </div>
 )}
 
+          {donors.length > 0 && (
+            <div className="mt-8">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">Live support</p>
+              <ul className="space-y-2">
+                {donors.map((d, i) => (
+                  <li key={i} className="flex items-center justify-between text-sm font-body">
+                    <span className="text-[#0D3B3B]/70">{d.anonymous ? "Anonymous" : "A supporter"}</span>
+                    <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           {request.amountNeeded ? (
             <div className="mt-8">
               <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">
@@ -1973,6 +1998,7 @@ function ImpactStoryPage({ impactId, setPage }) {
 
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const row = await getPublishedImpactById(impactId);
@@ -2049,6 +2075,7 @@ function ImpactPage({ setPage }) {
 
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const [rows, thanks] = await Promise.all([
