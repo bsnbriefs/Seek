@@ -158,7 +158,7 @@ export async function getAdminOffers() {
   const ids = list.map((row) => row.id).filter(Boolean);
   if (!ids.length) return list;
   const mediaRes = await fetch(
-    `${SUPABASE_URL}/rest/v1/offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(${ids.join(",")})`,
+    `${SUPABASE_URL}/rest/v1/offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(${ids.map((id) => `"${id}"`).join(",")})`,
     {
       headers: {
         apikey: SUPABASE_KEY,
