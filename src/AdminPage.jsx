@@ -686,6 +686,7 @@ export default function AdminPage() {
               {[
                 { id: "all", label: "All" },
                 { id: "pending_review", label: "Pending" },
+                { id: "open", label: "Open" },
                 { id: "matched", label: "Matched" },
                 { id: "rejected", label: "Rejected" },
               ].map((f) => (
@@ -713,6 +714,7 @@ export default function AdminPage() {
                 const linkedRequest = requests.find((r) => r.id === offer.request_id);
                 const status = offer.status || "pending_review";
                 const isPending = status === "pending_review";
+                const isOpen = status === "open";
                 const isMatched = status === "matched";
                 const isRejected = status === "rejected";
                 const isConnected = Boolean(offer.connected_at);
@@ -772,9 +774,18 @@ export default function AdminPage() {
                       {offer.contact_phone ? ` • ${offer.contact_phone}` : ""}
                     </p>
 
-                    {isPending && (
+                    {(isPending || isOpen) && !isMatched && (
                       <div className="flex gap-3 mt-4">
+                        {isPending && (
                         <button
+                          onClick={() => updateOfferStatus(offer.id, "open")}
+                          className="rounded-lg border px-3 py-2 text-sm"
+                        >
+                          Publish offer
+                        </button>
+                        )}
+                        <button
+                          type="button"
                           onClick={() => updateOfferStatus(offer.id, "matched")}
                           className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
                         >
