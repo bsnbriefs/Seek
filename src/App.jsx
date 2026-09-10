@@ -662,6 +662,17 @@ function OffersPage({ setPage }) {
         )}
         {offers.map((offer) => (
           <article key={offer.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+            {offer.media && offer.media.length > 0 && (
+              <div className="mb-3 grid grid-cols-3 gap-2">
+                {offer.media.map((m) => (
+                  m.media_kind === "video" ? (
+                    <video key={m.public_url} src={m.public_url} className="h-24 w-full rounded-lg object-cover bg-black" muted playsInline />
+                  ) : (
+                    <img key={m.public_url} src={m.public_url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                  )
+                ))}
+              </div>
+            )}
             <p className="font-body text-[#0D3B3B]">{offer.description}</p>
             <p className="mt-2 text-xs text-[#0D3B3B]/45">
               {offer.created_at ? new Date(offer.created_at).toLocaleDateString() : ""}
@@ -704,6 +715,7 @@ function GivePage({ setPage }) {
   const [searchFilter, setSearchFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
   const [offer, setOffer] = useState("");
+  const [offerFiles, setOfferFiles] = useState([]);
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
 const [offerContactPhone, setOfferContactPhone] = useState("");
@@ -956,6 +968,14 @@ if (!cancelled) {
                 placeholder="Phone number (optional)"
                 className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mt-3 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]"
               />
+              <input
+                type="file"
+                multiple
+                accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm"
+                className="mt-3 w-full text-sm"
+                onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))}
+              />
+              <p className="mt-1 text-xs text-[#0D3B3B]/45">Optional photos of the item. Shown only after Seek approves the offer.</p>
               <Button
                 variant="primary"
                 className="mt-4"
