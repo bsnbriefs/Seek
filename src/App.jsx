@@ -133,6 +133,14 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 }
 
 
+function daysPosted(iso) {
+  if (!iso) return "";
+  const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
+  if (days === 0) return "Posted today";
+  if (days === 1) return "Posted 1 day ago";
+  return "Posted " + days + " days ago";
+}
+
 function formatSeekStatus(status) {
   const map = {
     pending_review: "Under review",
@@ -627,6 +635,48 @@ const GIVE_OPTIONS = [
 ];
 
 
+function OfferCard({ offer }) {
+  const [open, setOpen] = useState(false);
+  const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
+  return (
+    <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+      <p className="font-body text-[#0D3B3B]">{offer.description}</p>
+      <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
+      <div className="mt-3 flex flex-wrap gap-2">
+        {offer.media && offer.media.length > 0 && (
+          <button type="button" className="rounded-full border px-3 py-1.5 text-sm font-semibold" onClick={() => setOpen(!open)}>
+            {open ? "Hide photos" : "View photos (" + offer.media.length + ")"}
+          </button>
+        )}
+        <a className="rounded-full border px-3 py-1.5 text-sm font-semibold" href={"https://wa.me/?text=" + encodeURIComponent(shareText)} target="_blank" rel="noreferrer">WhatsApp</a>
+        <button
+          type="button"
+          className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+          onClick={async () => {
+            try {
+              if (navigator.share) await navigator.share({ title: "Seek offer", text: shareText });
+              else if (navigator.clipboard) { await navigator.clipboard.writeText(shareText); window.alert("Copied"); }
+            } catch (_e) {}
+          }}
+        >
+          Share
+        </button>
+      </div>
+      {open && offer.media && (
+        <div className="mt-3 space-y-3">
+          {offer.media.map((m) => (
+            m.media_kind === "video" ? (
+              <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+            ) : (
+              <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[#0D3B3B]/5" />
+            )
+          ))}
+        </div>
+      )}
+    </article>
+  );
+}
+
 function OffersPage({ setPage }) {
   const [offers, setOffers] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -661,23 +711,7 @@ function OffersPage({ setPage }) {
           <p className="font-body text-sm text-[#0D3B3B]/50">No open offers yet.</p>
         )}
         {offers.map((offer) => (
-          <article key={offer.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
-            {offer.media && offer.media.length > 0 && (
-              <div className="mb-3 space-y-3">
-                {offer.media.map((m) => (
-                  m.media_kind === "video" ? (
-                    <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-[28rem] rounded-xl bg-black" />
-                  ) : (
-                    <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-[28rem] rounded-xl object-contain bg-[#0D3B3B]/5" />
-                  )
-                ))}
-              </div>
-            )}
-            <p className="font-body text-[#0D3B3B]">{offer.description}</p>
-            <p className="mt-2 text-xs text-[#0D3B3B]/45">
-              {offer.created_at ? new Date(offer.created_at).toLocaleDateString() : ""}
-            </p>
-          </article>
+          <OfferCard offer={offer} />
         ))}
         <div className="pt-8">
           <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
