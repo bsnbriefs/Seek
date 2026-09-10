@@ -973,7 +973,7 @@ if (!cancelled) {
             )}
           </div>
         </div>
-      </section>}
+      </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
         <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
