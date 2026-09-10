@@ -769,6 +769,17 @@ export default function AdminPage() {
                       </p>
                     )}
 
+                    {offer.media && offer.media.length > 0 && (
+                      <div className="mt-3 grid grid-cols-3 gap-2">
+                        {offer.media.map((m) => (
+                          m.media_kind === "video" ? (
+                            <video key={m.public_url} src={m.public_url} controls playsInline className="h-24 w-full rounded-lg bg-black object-cover" />
+                          ) : (
+                            <img key={m.public_url} src={m.public_url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                          )
+                        ))}
+                      </div>
+                    )}
                     <p className="mt-2 text-sm text-slate-600">
                       {offer.contact_email || "—"}
                       {offer.contact_phone ? ` • ${offer.contact_phone}` : ""}
