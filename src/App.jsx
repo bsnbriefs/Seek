@@ -326,7 +326,6 @@ function SectionLabel({ children }) {
 
 function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
-  const [media, setMedia] = useState(offer.media || []);
   const [avatar, setAvatar] = useState("");
   useEffect(() => {
     if (!userSession?.access_token) { setAvatar(""); return; }
