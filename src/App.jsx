@@ -663,12 +663,12 @@ function OffersPage({ setPage }) {
         {offers.map((offer) => (
           <article key={offer.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
             {offer.media && offer.media.length > 0 && (
-              <div className="mb-3 grid grid-cols-3 gap-2">
+              <div className="mb-3 space-y-3">
                 {offer.media.map((m) => (
                   m.media_kind === "video" ? (
-                    <video key={m.public_url} src={m.public_url} className="h-24 w-full rounded-lg object-cover bg-black" muted playsInline />
+                    <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-[28rem] rounded-xl bg-black" />
                   ) : (
-                    <img key={m.public_url} src={m.public_url} alt="" className="h-24 w-full rounded-lg object-cover" />
+                    <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-[28rem] rounded-xl object-contain bg-[#0D3B3B]/5" />
                   )
                 ))}
               </div>
