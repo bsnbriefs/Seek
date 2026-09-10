@@ -640,6 +640,11 @@ function OfferCard({ offer }) {
   const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+      {(offer.category || offer.city) && (
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-1">
+          {[offer.category, offer.city].filter(Boolean).join(" · ")}
+        </p>
+      )}
       <p className="font-body text-[#0D3B3B]">{offer.description}</p>
       <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
       <div className="mt-3 flex flex-wrap gap-2">
@@ -679,6 +684,7 @@ function OfferCard({ offer }) {
 
 function OffersPage({ setPage }) {
   const [offers, setOffers] = useState([]);
+  const [offerFilter, setOfferFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   useEffect(() => {
@@ -710,28 +716,29 @@ function OffersPage({ setPage }) {
         {!loading && !error && offers.length === 0 && (
           <p className="font-body text-sm text-[#0D3B3B]/50">No open offers yet.</p>
         )}
-        {offers.map((offer) => (
+        {offers.filter((o) => !offerFilter || o.category === offerFilter).map((offer) => (
           <OfferCard offer={offer} />
         ))}
         <div className="pt-8">
           <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
           <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-left">
             {[
-              { icon: Wallet, label: "Money" },
-              { icon: Utensils, label: "Food" },
-              { icon: Shirt, label: "Clothing" },
-              { icon: Package, label: "Items" },
-              { icon: HeartHandshake, label: "Time / skills" },
-              { icon: HomeIcon, label: "Shelter / space" },
+              { icon: Wallet, label: "Money", id: "money" },
+              { icon: Utensils, label: "Food", id: "food" },
+              { icon: Shirt, label: "Clothing", id: "clothing" },
+              { icon: Package, label: "Items", id: "items" },
+              { icon: HeartHandshake, label: "Time / skills", id: "time" },
+              { icon: HomeIcon, label: "Shelter / space", id: "shelter" },
             ].map((item) => {
               const Icon = item.icon;
+              const active = offerFilter === item.id;
               return (
-                <div key={item.label} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                <button key={item.label} type="button" onClick={() => setOfferFilter(active ? "" : item.id)} className={"rounded-2xl bg-white border p-4 text-left " + (active ? "border-[#1BAA9C]" : "border-[#0D3B3B]/8")}>
                   <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white mb-2" style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>
                     <Icon size={18} />
                   </span>
                   <p className="font-display font-semibold text-sm text-[#0D3B3B]">{item.label}</p>
-                </div>
+                </button>
               );
             })}
           </div>
@@ -752,6 +759,8 @@ function GivePage({ setPage }) {
   const [offerFiles, setOfferFiles] = useState([]);
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
+  const [offerCategory, setOfferCategory] = useState("");
+  const [offerCity, setOfferCity] = useState("");
 const [offerContactPhone, setOfferContactPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
   const [offerError, setOfferError] = useState("");
@@ -821,7 +830,7 @@ if (!cancelled) {
   }
   async function sendOffer() {
     setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, files: offerFiles }); setSubmitted(true); }
+    try { await submitOffer({ description: offer, category: offerCategory || null, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles }); setSubmitted(true); }
     catch (err) { setOfferError(err.message); }
     finally { setOfferLoading(false); }
   }
@@ -979,6 +988,25 @@ if (!cancelled) {
     <option key={r.id} value={r.id}>{r.title}</option>
   ))}
 </select>
+              <select
+                value={offerCategory}
+                onChange={(e) => setOfferCategory(e.target.value)}
+                className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]"
+              >
+                <option value="">What are you offering?</option>
+                <option value="money">Money</option>
+                <option value="food">Food</option>
+                <option value="clothing">Clothing</option>
+                <option value="items">Items</option>
+                <option value="time">Time / skills</option>
+                <option value="shelter">Shelter / space</option>
+              </select>
+              <input
+                value={offerCity}
+                onChange={(e) => setOfferCity(e.target.value)}
+                placeholder="City (optional)"
+                className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35"
+              />
               <textarea
                 value={offer}
                 onChange={(e) => setOffer(e.target.value)}
