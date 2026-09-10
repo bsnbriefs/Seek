@@ -290,7 +290,7 @@ function RequestCard({ req, onHelp, onView }) {
       </div>
       <div className="flex items-start gap-3 mb-2">
         {req.avatarUrl ? (
-          <img loading="lazy" decoding="async" src={req.avatarUrl} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" />
+          <img loading="lazy" decoding="async" src={req.avatarUrl} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" fetchpriority="high" />
         ) : (
           <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10 shrink-0" />
         )}
@@ -705,7 +705,7 @@ function OfferCard({ offer }) {
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
       <div className="flex items-start gap-3">
         {offer.avatar_url ? (
-          <img loading="lazy" decoding="async" src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+          <img loading="lazy" decoding="async" src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" fetchpriority="high" />
         ) : (
           <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10 shrink-0" />
         )}
@@ -2657,6 +2657,8 @@ useEffect(() => {
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
+      <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
+      <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
       <div key={page} className="animate-[seekFade_0.45s_ease-out]">
       {needsUserGate ? (
