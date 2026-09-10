@@ -815,3 +815,21 @@ export async function sendAdminSupportMessage(conversationId, body) {
   if (!response.ok) throw new Error(data?.message || "Could not send reply.");
   return data;
 }
+
+
+export async function getAdminOfferInterests() {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/offer_interest?select=*&order=created_at.desc`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) throw new Error(data?.message || "Could not load offer interest.");
+  return Array.isArray(data) ? data : [];
+}
