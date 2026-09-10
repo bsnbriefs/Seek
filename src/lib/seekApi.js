@@ -894,3 +894,18 @@ function urlBase64ToUint8Array(base64String) {
   for (let i = 0; i < raw.length; i += 1) output[i] = raw.charCodeAt(i);
   return output;
 }
+
+
+export async function submitOfferInterest(payload) {
+  if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
+  return supabaseFetch("rpc/create_offer_interest", {
+    method: "POST",
+    body: JSON.stringify({
+      p_offer_id: payload.offerId,
+      p_name: payload.name || null,
+      p_email: payload.email,
+      p_phone: payload.phone || null,
+      p_message: payload.message || null,
+    }),
+  });
+}
