@@ -1673,9 +1673,11 @@ function RequestPage({ requestId, setPage }) {
   </div>
 )}
 
-          {donors.length > 0 && (
-            <div className="mt-8">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">Live support</p>
+          <div className="mt-8">
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">Live support</p>
+            {donors.length === 0 ? (
+              <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
+            ) : (
               <ul className="space-y-2">
                 {donors.map((d, i) => (
                   <li key={i} className="flex items-center justify-between text-sm font-body">
@@ -1684,8 +1686,8 @@ function RequestPage({ requestId, setPage }) {
                   </li>
                 ))}
               </ul>
-            </div>
-          )}
+            )}
+          </div>
           {request.amountNeeded ? (
             <div className="mt-8">
               <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">
