@@ -246,7 +246,7 @@ function CategoryCard({ cat, onClick }) {
 
 function RequestCard({ req, onHelp, onView }) {
   return (
-    <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md transition-shadow duration-200">
+    <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         <UrgencyBadge level={req.urgency} />
@@ -1801,6 +1801,7 @@ function ImpactPage({ setPage }) {
           Moments of help, connection and care — shared without exposing private details.
         </p>
       </section>
+      <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }`}</style>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
         {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
@@ -1812,7 +1813,7 @@ function ImpactPage({ setPage }) {
           <button
             key={post.id}
             type="button"
-            className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
+            className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md animate-[seekFade_0.5s_ease-out]"
             onClick={() => {
               const dest = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
               window.history.pushState({}, "", dest);
@@ -2325,6 +2326,7 @@ useEffect(() => {
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
 
+      <div key={page} className="animate-[seekFade_0.45s_ease-out]">
       {isRequestPage ? (
         <RequestPage requestId={requestId} setPage={setPage} />
       ) : isImpactStory ? (
@@ -2332,6 +2334,7 @@ useEffect(() => {
       ) : (
         pages[page] || pages.home
       )}
+      </div>
 
       {paymentReturn.status !== "idle" && (
         <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
