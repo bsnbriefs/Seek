@@ -154,7 +154,33 @@ export async function getAdminOffers() {
     throw new Error(data.message || "Could not load offers.");
   }
 
-  return data;
+  const list = Array.isArray(data) ? data : [];
+  const ids = list.map((row) => row.id).filter(Boolean);
+  if (!ids.length) return list;
+  const mediaRes = await fetch(
+    `${SUPABASE_URL}/rest/v1/offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(${ids.join(",")})`,
+    {
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+    }
+  );
+  const media = await mediaRes.json().catch(() => []);
+  const base = String(SUPABASE_URL || "").replace(/\/$/, "");
+  const byOffer = {};
+  (Array.isArray(media) ? media : []).forEach((row) => {
+    if (!row?.storage_path) return;
+    const url =
+      `${base}/storage/v1/object/public/seek-impact/` +
+      String(row.storage_path).split("/").map(encodeURIComponent).join("/");
+    byOffer[row.offer_id] = byOffer[row.offer_id] || [];
+    byOffer[row.offer_id].push({
+      public_url: url,
+      media_kind: String(row.media_kind || row.mime_type || "").includes("video") ? "video" : "image",
+    });
+  });
+  return list.map((row) => ({ ...row, media: byOffer[row.id] || [] }));
 }
 export async function getAdminVolunteers() {
   const session = getAdminSession();
