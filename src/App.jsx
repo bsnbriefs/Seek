@@ -20,6 +20,7 @@ import {
   uploadAppreciationMedia,
   getRequestAppreciation,
   listPublishedImpact,
+  listPublicOffers,
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -308,6 +309,7 @@ function Navbar({ page, setPage, userSession }) {
     { id: "home", label: "Home" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Help Someone" },
+    { id: "offers", label: "Offers" },
     { id: "impact", label: "Impact" },
     { id: "volunteer", label: "Volunteer" },
     { id: "about", label: "About" },
@@ -402,6 +404,7 @@ function Footer({ setPage }) {
           <ul className="space-y-2 text-sm">
             <li><button onClick={() => go("seek-help")} className="hover:text-white">Seek Help</button></li>
             <li><button onClick={() => go("give")} className="hover:text-white">Help Someone</button></li>
+            <li><button onClick={() => go("offers")} className="hover:text-white">Offers</button></li>
             <li><button onClick={() => go("give")} className="hover:text-white">Give</button></li>
             <li><button onClick={() => go("volunteer")} className="hover:text-white">Volunteer</button></li>
           </ul>
@@ -622,6 +625,56 @@ const GIVE_OPTIONS = [
   { icon: Briefcase, title: "Offer a service", desc: "Legal, medical, tutoring, or professional skills." },
   { icon: HeartHandshake, title: "Volunteer", desc: "Give time instead of, or alongside, items." },
 ];
+
+
+function OffersPage({ setPage }) {
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublicOffers();
+        if (!cancelled) setOffers(rows);
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load offers.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
+        <SectionLabel>Offers</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">People offering help</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
+          These are open offers. Contact details stay private. Seek connects them to a request.
+        </p>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
+        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading offers…</p>}
+        {error && <p className="font-body text-sm text-red-600">{error}</p>}
+        {!loading && !error && offers.length === 0 && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">No open offers yet.</p>
+        )}
+        {offers.map((offer) => (
+          <article key={offer.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+            <p className="font-body text-[#0D3B3B]">{offer.description}</p>
+            <p className="mt-2 text-xs text-[#0D3B3B]/45">
+              {offer.created_at ? new Date(offer.created_at).toLocaleDateString() : ""}
+            </p>
+          </article>
+        ))}
+        <div className="text-center pt-4">
+          <Button variant="primary" onClick={() => setPage("give")}>Make an offer</Button>
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function GivePage({ setPage }) {
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -2215,6 +2268,7 @@ export default function App() {
     if (path === "/admin") return "admin";
     if (path === "/volunteer") return "volunteer";
     if (path === "/give") return "give";
+    if (path === "/offers") return "offers";
     if (path === "/seek-help") return "seek-help";
     if (path === "/about") return "about";
     if (path === "/impact") return "impact";
@@ -2296,6 +2350,7 @@ useEffect(() => {
   const pages = {
     home: <HomePage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
+    offers: <OffersPage setPage={setPage} />,
     admin: <AdminPage />,
     "seek-help": <SeekHelpPage />,
     volunteer: <VolunteerPage />,
