@@ -808,6 +808,15 @@ export default function AdminPage() {
 
                     {(isPending || isOpen) && !isMatched && (
                       <div className="flex gap-3 mt-4">
+                        {isOpen && (
+                        <button
+                          type="button"
+                          onClick={() => updateOfferStatus(offer.id, "closed")}
+                          className="rounded-lg border px-3 py-2 text-sm"
+                        >
+                          Close offer
+                        </button>
+                        )}
                         {isPending && (
                         <button
                           onClick={() => updateOfferStatus(offer.id, "open")}
