@@ -71,7 +71,7 @@ export default function AdminPage() {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers(),
@@ -81,6 +81,7 @@ export default function AdminPage() {
         getAdminSafetyReports().catch(() => []),
         getAdminAuditLogs().catch(() => []),
         getAdminSupportConversations().catch(() => []),
+        getAdminOfferInterests().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -92,6 +93,7 @@ export default function AdminPage() {
       setSafetyReports(reportData);
       setAuditLogs(auditData);
       setSupportChats(chatData);
+      setOfferInterests(interestData);
     } catch (err) {
       setError(err.message);
     } finally {
