@@ -181,19 +181,18 @@ export async function submitOffer(payload) {
     throw new Error("Seek backend is not configured yet.");
   }
 
-  const rows = await supabaseFetch("offers", {
+  const created = await supabaseFetch("rpc/create_seek_offer", {
     method: "POST",
-    headers: { Prefer: "return=representation" },
     body: JSON.stringify({
-      description: payload.description,
-      category: payload.category,
-      request_id: payload.requestId || null,
-      contact_email: payload.contactEmail || null,
-      contact_phone: payload.contactPhone || null,
+      p_description: payload.description,
+      p_category: payload.category || null,
+      p_request_id: payload.requestId || null,
+      p_contact_email: payload.contactEmail || null,
+      p_contact_phone: payload.contactPhone || null,
     }),
   });
 
-  const saved = Array.isArray(rows) ? rows[0] : rows;
+  const saved = { id: typeof created === 'string' ? created : (created?.id || created) };
   const files = payload.files || [];
   if (files.length && !saved?.id) {
     throw new Error("Offer saved, but Seek could not attach photos. Try again.");
