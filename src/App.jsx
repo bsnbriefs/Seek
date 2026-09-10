@@ -24,6 +24,8 @@ import {
   submitOfferInterest,
   uploadProfilePhoto,
   getMyProfile,
+  getCachedAvatarUrl,
+  cacheAvatarUrl,
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -319,6 +321,8 @@ function Navbar({ page, setPage, userSession }) {
   const [avatar, setAvatar] = useState("");
   useEffect(() => {
     if (!userSession?.access_token) { setAvatar(""); return; }
+    const cached = getCachedAvatarUrl();
+    if (cached) setAvatar(cached);
     getMyProfile().then((p) => { if (p?.avatar_url) setAvatar(p.avatar_url); }).catch(() => {});
   }, [userSession]);
   const links = [
@@ -655,6 +659,8 @@ function OfferCard({ offer }) {
   useEffect(() => {
     const session = getUserSession();
     if (!session?.access_token) return;
+    const cached = getCachedAvatarUrl();
+    if (cached) setApplyAvatar(cached);
     getMyProfile().then((p) => {
       if (p?.avatar_url) setApplyAvatar(p.avatar_url);
       setApplyForm((prev) => ({
@@ -2077,6 +2083,8 @@ function AccountAvatar() {
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
   useEffect(() => {
+    const cached = getCachedAvatarUrl();
+    if (cached) setPhoto(cached);
     getMyProfile().then((p) => { if (p?.avatar_url) setPhoto(p.avatar_url); }).catch(() => {});
   }, []);
   return (
@@ -2098,7 +2106,9 @@ function AccountAvatar() {
             const result = await uploadProfilePhoto(file);
             const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
             if (result.storage_path) {
-              setPhoto(`${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/"));
+              const url = `${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/");
+              cacheAvatarUrl(url);
+              setPhoto(url);
             }
           } catch (err) {
             setError(err.message || "Could not upload photo.");
@@ -2337,6 +2347,8 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
 function MyRequestsPage({ setPage, userSession }) {
   const [myAvatar, setMyAvatar] = useState("");
   useEffect(() => {
+    const cached = getCachedAvatarUrl();
+    if (cached) setMyAvatar(cached);
     getMyProfile().then((p) => { if (p?.avatar_url) setMyAvatar(p.avatar_url); }).catch(() => {});
   }, []);
   const [items, setItems] = useState([]);
