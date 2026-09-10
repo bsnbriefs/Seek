@@ -21,6 +21,7 @@ import {
   getRequestAppreciation,
   listPublishedImpact,
   listPublicOffers,
+  getOfferMedia,
   submitOfferInterest,
   uploadProfilePhoto,
   getMyProfile,
@@ -116,7 +117,7 @@ const IMPACT_STATS = [
 function Logo({ light = false, className = "h-8" }) {
   return (
     <div className="flex items-center gap-2">
-      <img src={LOGO_SRC} alt="Seek" className={className + " w-auto object-contain"} />
+      <img loading="lazy" decoding="async" src={LOGO_SRC} alt="Seek" className={className + " w-auto object-contain"} />
     </div>
   );
 }
@@ -265,8 +266,14 @@ function RequestCard({ req, onHelp, onView }) {
         <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         <UrgencyBadge level={req.urgency} />
       </div>
-      {req.avatarUrl && <img src={req.avatarUrl} alt="" className="h-10 w-10 rounded-full object-cover mb-2" />}
-      <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title}</h3>
+      <div className="flex items-start gap-3 mb-2">
+        {req.avatarUrl ? (
+          <img loading="lazy" decoding="async" src={req.avatarUrl} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" />
+        ) : (
+          <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10 shrink-0" />
+        )}
+        <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title}</h3>
+      </div>
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
         <MapPin size={14} /> {req.location}
       </p>
@@ -319,6 +326,7 @@ function SectionLabel({ children }) {
 
 function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
+  const [media, setMedia] = useState(offer.media || []);
   const [avatar, setAvatar] = useState("");
   useEffect(() => {
     if (!userSession?.access_token) { setAvatar(""); return; }
@@ -369,7 +377,7 @@ function Navbar({ page, setPage, userSession }) {
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
           >
-            {avatar && <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
+            {avatar && <img loading="lazy" decoding="async" src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
             {userSession?.access_token ? "Account" : "Sign in"}
           </button>
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
@@ -490,7 +498,7 @@ function HomePage({ setPage }) {
     (async () => {
       try {
         const [rows, matchedIds, impactRows, stats] = await Promise.all([
-          listPublishedRequests(),
+          listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           Promise.all([
             listPublishedImpact().catch(() => []),
@@ -651,6 +659,7 @@ const GIVE_OPTIONS = [
 
 function OfferCard({ offer }) {
   const [open, setOpen] = useState(false);
+  const [media, setMedia] = useState(offer.media || []);
   const [apply, setApply] = useState(false);
   const [applying, setApplying] = useState(false);
   const [applied, setApplied] = useState(false);
@@ -675,7 +684,7 @@ function OfferCard({ offer }) {
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
       <div className="flex items-start gap-3">
         {offer.avatar_url ? (
-          <img src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
+          <img loading="lazy" decoding="async" src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" />
         ) : (
           <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10 shrink-0" />
         )}
@@ -690,11 +699,17 @@ function OfferCard({ offer }) {
         </div>
       </div>
       <div className="mt-4 flex items-center gap-4 text-sm font-semibold">
-        {offer.media && offer.media.length > 0 && (
-          <button type="button" className="text-[#1BAA9C]" onClick={() => setOpen(!open)}>
-            {open ? "Hide photos" : "Photos (" + offer.media.length + ")"}
-          </button>
-        )}
+        <button type="button" className="text-[#1BAA9C]" onClick={async () => {
+          if (!open && media.length === 0) {
+            try {
+              const files = await getOfferMedia(offer.id);
+              setMedia(files || []);
+            } catch (_e) {}
+          }
+          setOpen(!open);
+        }}>
+          {open ? "Hide photos" : (media.length ? "Photos (" + media.length + ")" : "Photos")}
+        </button>
         <button type="button" className="text-[#0D3B3B]" onClick={() => setApply(!apply)}>
           I am interested
         </button>
@@ -734,7 +749,7 @@ function OfferCard({ offer }) {
             }
           }}
         >
-          {applyAvatar && <img src={applyAvatar} alt="" className="h-12 w-12 rounded-full object-cover" />}
+          {applyAvatar && <img loading="lazy" decoding="async" src={applyAvatar} alt="" className="h-12 w-12 rounded-full object-cover" />}
           <input required value={applyForm.name} onChange={(e) => setApplyForm({ ...applyForm, name: e.target.value })} placeholder="Your name" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <input required type="email" value={applyForm.email} onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })} placeholder="Your email" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <input value={applyForm.phone} onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })} placeholder="Phone (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
@@ -746,13 +761,13 @@ function OfferCard({ offer }) {
         </form>
       )}
       {applied && <p className="mt-3 text-sm text-[#1BAA9C]">Your interest was sent. Seek will follow up.</p>}
-      {open && offer.media && (
+      {open && media.length > 0 && (
         <div className="mt-3 space-y-3">
-          {offer.media.map((m) => (
+          {media.map((m) => (
             m.media_kind === "video" ? (
               <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
             ) : (
-              <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[#0D3B3B]/5" />
+              <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[#0D3B3B]/5" />
             )
           ))}
         </div>
@@ -1574,7 +1589,7 @@ function RequestPage({ requestId, setPage }) {
                 item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
                   <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
                 ) : (
-                  <img key={item.public_url} src={item.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain" />
+                  <img loading="lazy" decoding="async" key={item.public_url} src={item.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain" />
                 )
               ))}
             </div>
@@ -1698,6 +1713,7 @@ function RequestPage({ requestId, setPage }) {
 
 function ReportRequestForm({ requestId }) {
   const [open, setOpen] = useState(false);
+  const [media, setMedia] = useState(offer.media || []);
   const [reason, setReason] = useState("inappropriate");
   const [details, setDetails] = useState("");
   const [email, setEmail] = useState("");
@@ -1997,7 +2013,7 @@ function ImpactStoryPage({ impactId, setPage }) {
           m.media_kind === "video" ? (
             <video key={m.public_url} src={m.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
           ) : (
-            <img key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
+            <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
         ))}
         <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
@@ -2061,7 +2077,7 @@ function ImpactPage({ setPage }) {
             {post.public_url && post.media_kind === "video" ? (
               <video src={post.public_url} muted playsInline preload="metadata" className="h-40 w-full object-cover bg-black" />
             ) : post.public_url ? (
-              <img src={post.public_url} alt="" className="h-40 w-full object-cover" />
+              <img loading="lazy" decoding="async" src={post.public_url} alt="" className="h-40 w-full object-cover" />
             ) : (
               <div className="h-24 bg-[#0D3B3B]/5" />
             )}
@@ -2096,7 +2112,7 @@ function AccountAvatar() {
   return (
     <div className="mt-6 text-left">
       {photo ? (
-        <img src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
+        <img loading="lazy" decoding="async" src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
       ) : (
         <div className="h-24 w-24 rounded-full bg-[#0D3B3B]/10 mb-3" />
       )}
@@ -2411,7 +2427,7 @@ function MyRequestsPage({ setPage, userSession }) {
         </h1>
         {/* avatar loaded below */}
         <div className="flex items-center gap-3 mb-8">
-          {myAvatar ? <img src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
+          {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
           <p className="font-body text-sm text-[#0D3B3B]/60">Signed in as {userSession.user?.email}</p>
         </div>
 
