@@ -120,6 +120,14 @@ export async function submitRequest(payload) {
   return request;
 }
 
+export async function listPublicOffers() {
+  if (!supabaseConfigured) return [];
+  const rows = await supabaseFetch(
+    "public_open_offers?select=id,description,created_at,status&order=created_at.desc&limit=48"
+  );
+  return Array.isArray(rows) ? rows : [];
+}
+
 export async function submitOffer(payload) {
   if (!supabaseConfigured) {
     throw new Error("Seek backend is not configured yet.");
