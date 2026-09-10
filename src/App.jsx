@@ -271,7 +271,7 @@ function ProgressBar({ raised, needed }) {
     <div>
       <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
         <div
-          className="h-full rounded-full"
+          className="h-full rounded-full transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.green})` }}
         />
       </div>
@@ -1709,7 +1709,7 @@ function RequestPage({ requestId, setPage }) {
             ) : (
               <ul className="space-y-2">
                 {donors.map((d, i) => (
-                  <li key={(d.created_at || "") + "-" + i} className="flex items-center justify-between text-sm font-body animate-[seekDonorIn_0.45s_ease-out]">
+                  <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 ? "bg-[#1BAA9C]/10" : "")}>
                     <span className="text-[#0D3B3B]/70">{d.anonymous || !d.name ? (d.anonymous ? "Anonymous" : "A supporter") : d.name}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
