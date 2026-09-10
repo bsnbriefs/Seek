@@ -22,6 +22,8 @@ import {
   listPublishedImpact,
   listPublicOffers,
   submitOfferInterest,
+  uploadProfilePhoto,
+  getMyProfile,
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
@@ -2048,6 +2050,47 @@ function ImpactPage({ setPage }) {
 
 /* ---------------- Account / Auth Page ---------------- */
 
+function AccountAvatar() {
+  const [photo, setPhoto] = useState("");
+  const [busy, setBusy] = useState(false);
+  const [error, setError] = useState("");
+  useEffect(() => {
+    getMyProfile().then((p) => { if (p?.avatar_url) setPhoto(p.avatar_url); }).catch(() => {});
+  }, []);
+  return (
+    <div className="mt-6 text-left">
+      {photo ? (
+        <img src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
+      ) : (
+        <div className="h-24 w-24 rounded-full bg-[#0D3B3B]/10 mb-3" />
+      )}
+      <p className="font-display font-semibold text-sm mb-2">Profile photo</p>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setBusy(true); setError("");
+          try {
+            const result = await uploadProfilePhoto(file);
+            const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+            if (result.storage_path) {
+              setPhoto(`${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/"));
+            }
+          } catch (err) {
+            setError(err.message || "Could not upload photo.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <p className="mt-1 text-xs text-[#0D3B3B]/50">{busy ? "Uploading…" : "A simple face photo helps people recognise you."}</p>
+      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
+    </div>
+  );
+}
+
 function AccountPage({ setPage, userSession, setUserSession }) {
   const [mode, setMode] = useState("signin"); // signin | signup
   const [email, setEmail] = useState("");
@@ -2066,6 +2109,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </h1>
           <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
             {userSession.user?.email}
+            <AccountAvatar />
           </p>
           <div className="flex flex-col gap-3">
             <Button variant="primary" onClick={() => setPage("my-requests")}>
