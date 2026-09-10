@@ -131,7 +131,7 @@ export async function listPublicOffers() {
   let media = [];
   try {
     media = await supabaseFetch(
-      "offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(" + ids.join(",") + ")"
+      "offer_media?select=offer_id,storage_path,media_kind,mime_type&offer_id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
     );
   } catch (_e) {
     media = [];
