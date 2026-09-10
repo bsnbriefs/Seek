@@ -689,7 +689,6 @@ function OfferCard({ offer }) {
             {open ? "Hide photos" : "View photos (" + offer.media.length + ")"}
           </button>
         )}
-        <a className="rounded-full border px-3 py-1.5 text-sm font-semibold" href={"https://wa.me/?text=" + encodeURIComponent(shareText)} target="_blank" rel="noreferrer">WhatsApp</a>
         <button type="button" className="rounded-full border px-3 py-1.5 text-sm font-semibold" onClick={() => setApply(!apply)}>
           I am interested
         </button>
