@@ -1534,6 +1534,10 @@ function RequestPage({ requestId, setPage }) {
     const [evidence, setEvidence] = useState([]);
     const [helped, setHelped] = useState(false);
     const [donors, setDonors] = useState([]);
+  useEffect(() => {
+    if (request?.title) document.title = request.title + " · Seek";
+    return () => { document.title = "Seek"; };
+  }, [request?.title]);
 
   useEffect(() => {
     let cancelled = false;
