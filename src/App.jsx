@@ -2662,6 +2662,44 @@ function MyRequestsPage({ setPage, userSession }) {
 
 /* ---------------- App ---------------- */
 
+function LiveTicker() {
+  const [items, setItems] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [reqRows, offerRows, world] = await Promise.all([
+          listPublishedRequests(6).catch(() => []),
+          listPublicOffers().catch(() => []),
+          fetch("/api/world-headlines").then((r) => r.json()).then((d) => d.items || []).catch(() => []),
+        ]);
+        const bits = [
+          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || "Open request")),
+          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "SEEK OFFER · " + String(o.description || "").slice(0, 70)),
+          ...(Array.isArray(world) ? world : []).map((name) => "WORLD · " + name),
+        ].filter(Boolean);
+        if (!cancelled) setItems(bits);
+      } catch (_e) {}
+    })();
+    return () => { cancelled = true; };
+  }, []);
+  if (!items.length) return null;
+  return (
+    <div className="border-b border-[#0D3B3B]/10 bg-[#0D3B3B] text-white overflow-hidden">
+      <div className="flex items-center gap-3 px-3 py-2">
+        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#E11D48] px-2 py-1 rounded">Live</span>
+        <div className="overflow-hidden flex-1">
+          <div className="seek-ticker-track">
+            {[...items, ...items].map((item, i) => (
+              <span key={i} className="text-sm font-body text-white/90">{item}</span>
+            ))}
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPage] = useState(() => {
     const path = window.location.pathname.replace(/\/+$/, "") || "/";
@@ -2784,6 +2822,7 @@ useEffect(() => {
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
+      <LiveTicker />
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
