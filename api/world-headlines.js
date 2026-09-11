@@ -1,30 +1,15 @@
 export default async function handler(_req, res) {
   const items = [];
-  const headers = { Accept: "application/json" };
   try {
-    const reports = await fetch(
-      "https://api.reliefweb.int/v2/reports?appname=seekbsn&limit=8",
-      { headers }
+    const rss = await fetch(
+      "https://news.un.org/feed/subscribe/en/news/topic/humanitarian-aid/feed/rss.xml"
     );
-    const json = await reports.json();
-    for (const row of json.data || []) {
-      const title = row?.fields?.title || row?.fields?.name;
-      if (title) items.push(title);
-    }
+    const xml = await rss.text();
+    const titles = [...xml.matchAll(/<title><!\[CDATA\[(.*?)\]\]><\/title>/g)]
+      .map((m) => m[1])
+      .filter((title) => title && !/UN News/i.test(title));
+    items.push(...titles.slice(0, 8));
   } catch (_e) {}
-  if (!items.length) {
-    try {
-      const disasters = await fetch(
-        "https://api.reliefweb.int/v1/disasters?appname=seekbsn&limit=8",
-        { headers }
-      );
-      const json = await disasters.json();
-      for (const row of json.data || []) {
-        const title = row?.fields?.name || row?.fields?.title;
-        if (title) items.push(title);
-      }
-    } catch (_e) {}
-  }
   res.setHeader("Cache-Control", "s-maxage=180");
   res.status(200).json({ items });
 }
