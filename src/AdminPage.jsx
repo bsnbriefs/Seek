@@ -9,6 +9,7 @@ import {
   getAdminRequestPrivate,
   getAdminDonations,
   updateAdminRequestStatus,
+  settleAdminRequest,
   updateAdminOfferStatus,
   getAdminOfferInterests,
   verifyAdminRequest,
