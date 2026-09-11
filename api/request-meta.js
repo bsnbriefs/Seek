@@ -1,6 +1,6 @@
 export default async function handler(req, res) {
   const id = String(req.query.id || "").trim();
-  const base = process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "";
+  const base = (process.env.VITE_SUPABASE_URL || process.env.SUPABASE_URL || "").replace(/\/$/, "");
   const key =
     process.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
     process.env.VITE_SUPABASE_ANON_KEY ||
@@ -8,7 +8,7 @@ export default async function handler(req, res) {
     "";
   let title = "Seek request";
   let description = "A verified request on Seek, a project of BSN Foundation.";
-  let image = "https://seekbsn.org/og-seek.png";
+  let image = "https://seekbsn.org/favicon.ico";
   if (id && base && key) {
     try {
       const response = await fetch(
@@ -22,22 +22,19 @@ export default async function handler(req, res) {
         const raised = row.amount_raised != null ? "₦" + Number(row.amount_raised).toLocaleString() + " raised. " : "";
         description = raised + String(row.description || description).slice(0, 160);
       }
-      try {
-        const ev = await fetch(
-          `${base}/rest/v1/request_evidence?request_id=eq.${encodeURIComponent(id)}&select=storage_path,mime_type&limit=5`,
-          { headers: { apikey: key, Authorization: "Bearer " + key } }
-        );
-        const files = await ev.json();
-        const photo = (Array.isArray(files) ? files : []).find((f) => String(f.mime_type || "").startsWith("image/") && f.storage_path);
-        if (photo?.storage_path) {
-          const path = String(photo.storage_path).split("/").map(encodeURIComponent).join("/");
-          const root = base.replace(/\/$/, "");
-          image = `${root}/storage/v1/object/public/seek-impact/${path}`;
-          if (String(photo.storage_path).includes("seek-evidence") || String(photo.storage_path).startsWith("evidence")) {
-            image = `${root}/storage/v1/object/public/seek-evidence/${path}`;
-          }
-        }
-      } catch (_e) {}
+      const ev = await fetch(
+        `${base}/rest/v1/request_evidence?request_id=eq.${encodeURIComponent(id)}&select=storage_path,mime_type&limit=8`,
+        { headers: { apikey: key, Authorization: "Bearer " + key } }
+      );
+      const files = await ev.json();
+      const photo = (Array.isArray(files) ? files : []).find(
+        (f) => String(f.mime_type || "").startsWith("image/") && f.storage_path
+      );
+      if (photo?.storage_path) {
+        image =
+          `${base}/storage/v1/object/public/seek-evidence/` +
+          String(photo.storage_path).split("/").map(encodeURIComponent).join("/");
+      }
     } catch (_e) {}
   }
   const url = "https://seekbsn.org/request/" + encodeURIComponent(id);
@@ -54,11 +51,14 @@ export default async function handler(req, res) {
   <meta property="og:description" content="${escapeHtml(description)}" />
   <meta property="og:url" content="${url}" />
   <meta property="og:image" content="${escapeHtml(image)}" />
-  <meta name="twitter:card" content="summary" />
+  <meta property="og:image:secure_url" content="${escapeHtml(image)}" />
+  <meta name="twitter:card" content="summary_large_image" />
+  <meta name="twitter:image" content="${escapeHtml(image)}" />
   <meta http-equiv="refresh" content="0;url=${url}" />
 </head>
 <body>
   <p><a href="${url}">Open this Seek request</a></p>
+  <p><img src="${escapeHtml(image)}" alt="" width="400" /></p>
 </body>
 </html>`);
 }
