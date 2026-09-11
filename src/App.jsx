@@ -590,7 +590,15 @@ function HomePage({ setPage }) {
         if (!cancelled) setRequestsLoading(false);
       }
     })();
-    return () => { cancelled = true; };
+    const poll = setInterval(async () => {
+      try {
+        const rows = await listPublishedRequests(4);
+        if (!cancelled) {
+          setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).slice(0, 4));
+        }
+      } catch (_e) {}
+    }, 15000);
+    return () => { cancelled = true; clearInterval(poll); };
   }, []);
 
   return (
@@ -2655,14 +2663,16 @@ function LiveTicker() {
     let cancelled = false;
     (async () => {
       try {
-        const [reqRows, offerRows, world] = await Promise.all([
+        const [reqRows, offerRows, impactRows, world] = await Promise.all([
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
+          listPublishedImpact().catch(() => []),
           fetch("/api/world-headlines").then((r) => r.json()).then((d) => d.items || []).catch(() => []),
         ]);
         const bits = [
           ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || "Open request")),
           ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "SEEK OFFER · " + String(o.description || "").slice(0, 70)),
+          ...(Array.isArray(impactRows) ? impactRows : []).slice(0, 6).map((s) => "IMPACT · " + (s.title || s.headline || "Community story")),
           ...(Array.isArray(world) ? world : []).map((name) => "WORLD · " + name),
         ].filter(Boolean);
         if (!cancelled) setItems(bits);
