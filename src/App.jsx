@@ -2140,7 +2140,7 @@ function ImpactStoryPage({ impactId, setPage }) {
             type="button"
             className="rounded-full border px-3 py-1.5 text-sm font-semibold"
             onClick={async () => {
-              const url = `${window.location.origin}/impact/${post.id}`;
+              const url = `${window.location.origin}/api/impact-meta?id=${post.id}`;
               try {
                 if (navigator.share) await navigator.share({ title: post.title, url });
                 else if (navigator.clipboard) {
