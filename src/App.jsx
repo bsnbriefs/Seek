@@ -553,7 +553,7 @@ function HomePage({ setPage }) {
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, stats, offerRows] = await Promise.all([
+        const [rows, matchedIds, impactRows, stats, offerRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           Promise.all([
@@ -562,6 +562,10 @@ function HomePage({ setPage }) {
           ]).then(([impactRows, thanksRows]) => [...(thanksRows || []).slice(0, 2), ...(impactRows || [])]),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
+          fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
+            .then((r) => r.json())
+            .then((json) => (Array.isArray(json?.data) ? json.data : []))
+            .catch(() => []),
         ]);
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
@@ -569,9 +573,14 @@ function HomePage({ setPage }) {
           setRequests(mapped);
           setImpactPreview((impactRows || []).slice(0, 3));
           if (stats) setLiveStats(stats);
+          const crisis = (Array.isArray(crisisRows) ? crisisRows : []).map((item) => {
+            const name = item?.fields?.name || item?.fields?.title || "";
+            return name ? "WORLD · " + name : "";
+          }).filter(Boolean);
           const bits = [
-            ...mapped.map((r) => "REQUEST · " + (r.title || "Open request")),
-            ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 6).map((o) => "OFFER · " + String(o.description || "").slice(0, 72)),
+            ...mapped.map((r) => "SEEK REQUEST · " + (r.title || "Open request")),
+            ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 6).map((o) => "SEEK OFFER · " + String(o.description || "").slice(0, 72)),
+            ...crisis,
           ].filter(Boolean);
           setTicker(bits);
         }
