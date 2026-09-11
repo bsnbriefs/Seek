@@ -2095,7 +2095,13 @@ function ImpactStoryPage({ impactId, setPage }) {
     let donorTick;
     (async () => {
       try {
-        const row = await getPublishedImpactById(impactId);
+        let row = null;
+        if (String(impactId).startsWith("thanks-")) {
+          const thanks = await listAppreciationStories().catch(() => []);
+          row = (thanks || []).find((item) => item.id === impactId) || null;
+        } else {
+          row = await getPublishedImpactById(impactId);
+        }
         if (!cancelled) {
           if (!row) setError("This story is not published.");
           setPost(row);
@@ -2209,9 +2215,10 @@ function ImpactPage({ setPage }) {
             type="button"
             className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md animate-[seekFade_0.5s_ease-out]"
             onClick={() => {
-              const dest = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
+              const isThanks = String(post.id).startsWith("thanks-");
+              const dest = isThanks ? `/impact/${post.id}` : (post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`);
               window.history.pushState({}, "", dest);
-              setPage(post.request_id ? `request:${post.request_id}` : `impact:${post.id}`);
+              setPage(isThanks ? `impact:${post.id}` : (post.request_id ? `request:${post.request_id}` : `impact:${post.id}`));
               window.scrollTo(0, 0);
             }}
           >
