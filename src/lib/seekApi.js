@@ -325,6 +325,8 @@ export async function initializeDonation({
   email,
   requestId = null,
   anonymous = false,
+  donorName = "",
+  coverFee = true,
   callbackUrl = window.location.origin,
 }) {
   if (!supabaseConfigured) {
@@ -344,6 +346,8 @@ export async function initializeDonation({
         email,
         request_id: requestId,
         anonymous,
+        donor_name: anonymous ? null : (donorName || null),
+        cover_fee: coverFee !== false,
         callback_url: callbackUrl,
       }),
     }
@@ -1010,13 +1014,26 @@ export async function getMyProfile() {
 
 export async function listRequestDonors(requestId) {
   if (!supabaseConfigured || !requestId) return [];
-  const rows = await supabaseFetch("rpc/list_request_donors", {
-    method: "POST",
-    body: JSON.stringify({ p_request_id: requestId }),
-  });
+  let rows = [];
+  try {
+    rows = await supabaseFetch("rpc/list_request_donors", {
+      method: "POST",
+      body: JSON.stringify({ p_request_id: requestId }),
+    });
+  } catch (_e) {
+    rows = [];
+  }
+  if (!Array.isArray(rows) || !rows.length) {
+    rows = await supabaseFetch(
+      "donations?select=amount,anonymous,created_at,donor_name,status&request_id=eq." +
+        encodeURIComponent(requestId) +
+        "&status=eq.successful&order=created_at.desc&limit=40"
+    );
+  }
   return (Array.isArray(rows) ? rows : []).map((row) => ({
     amount: Number(row.amount) || 0,
     anonymous: Boolean(row.anonymous),
+    name: row.donor_name || row.name || "",
     created_at: row.created_at,
   }));
 }
