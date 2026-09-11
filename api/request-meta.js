@@ -30,8 +30,12 @@ export default async function handler(req, res) {
         const files = await ev.json();
         const photo = (Array.isArray(files) ? files : []).find((f) => String(f.mime_type || "").startsWith("image/") && f.storage_path);
         if (photo?.storage_path) {
-          image = `${base.replace(/\/$/, "")}/storage/v1/object/public/seek-impact/` +
-            String(photo.storage_path).split("/").map(encodeURIComponent).join("/");
+          const path = String(photo.storage_path).split("/").map(encodeURIComponent).join("/");
+          const root = base.replace(/\/$/, "");
+          image = `${root}/storage/v1/object/public/seek-impact/${path}`;
+          if (String(photo.storage_path).includes("seek-evidence") || String(photo.storage_path).startsWith("evidence")) {
+            image = `${root}/storage/v1/object/public/seek-evidence/${path}`;
+          }
         }
       } catch (_e) {}
     } catch (_e) {}
