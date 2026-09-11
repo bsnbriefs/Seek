@@ -48,7 +48,14 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SERVICE_ROLE_KEY")!
     );
     const donation = await markPaid(supabase, reference, result.data || {});
-    return new Response(JSON.stringify({ ok: true, donation }), {
+    return new Response(JSON.stringify({
+      ok: true,
+      verified: true,
+      request_id: donation.request_id,
+      requestId: donation.request_id,
+      amount: donation.amount,
+      donation,
+    }), {
       headers: { ...cors, "Content-Type": "application/json" },
     });
   } catch (error) {
