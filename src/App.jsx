@@ -955,7 +955,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
 ]);
 const matchedSet = new Set(matchedIds);
 if (!cancelled) {
-  setRequests(rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
+  setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
 }
       } catch (err) {
         if (!cancelled) setRequestsError(err.message);
