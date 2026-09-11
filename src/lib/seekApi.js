@@ -671,7 +671,7 @@ export async function getPublishedImpactById(id) {
 export async function getPublicRequestById(requestId) {
   if (!supabaseConfigured || !requestId) return null;
   const rows = await supabaseFetch(
-    `requests?id=eq.${encodeURIComponent(requestId)}&status=in.(published,partially_funded,fulfilled)&select=*&limit=1`
+    `requests?id=eq.${encodeURIComponent(requestId)}&select=*&limit=1`
   );
   const row = Array.isArray(rows) ? rows[0] : null;
   return row ? mapRequestRow(row) : null;
