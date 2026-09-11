@@ -260,6 +260,27 @@ export async function getAdminDonations() {
   return data;
 }
 
+export async function settleAdminRequest(id, { note = "", amount = null } = {}) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const patch = {
+    settle_note: note || null,
+    settle_at: new Date().toISOString(),
+  };
+  if (amount != null && amount !== "") patch.settle_amount = Number(amount);
+  await fetch(`${SUPABASE_URL}/rest/v1/requests?id=eq.${encodeURIComponent(id)}`, {
+    method: "PATCH",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: `Bearer ${session.access_token}`,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify(patch),
+  });
+  return updateAdminRequestStatus(id, "fulfilled");
+}
+
 export async function updateAdminRequestStatus(id, status) {
   const session = getAdminSession();
 
