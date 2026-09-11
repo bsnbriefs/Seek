@@ -1535,6 +1535,7 @@ function RequestPage({ requestId, setPage }) {
     const [evidence, setEvidence] = useState([]);
     const [helped, setHelped] = useState(false);
     const [donors, setDonors] = useState([]);
+    const [showAllDonors, setShowAllDonors] = useState(false);
   useEffect(() => {
     if (request?.title) document.title = request.title + " · Seek";
     return () => { document.title = "Seek"; };
@@ -1758,14 +1759,21 @@ function RequestPage({ requestId, setPage }) {
             {donors.length === 0 ? (
               <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
             ) : (
+              <>
               <ul className="space-y-2">
-                {donors.map((d, i) => (
-                  <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 ? "bg-[#1BAA9C]/10" : "")}>
+                {(showAllDonors ? donors : donors.slice(0, 3)).map((d, i) => (
+                  <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 && !showAllDonors ? "bg-[#1BAA9C]/10" : "")}>
                     <span className="text-[#0D3B3B]/70">{d.anonymous ? "Anonymous" : (d.name || d.donor_name || "A supporter")}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
+              {donors.length > 3 && (
+                <button type="button" className="mt-3 text-sm font-semibold text-[#1BAA9C]" onClick={() => setShowAllDonors(!showAllDonors)}>
+                  {showAllDonors ? "Show latest only" : "See more"}
+                </button>
+              )}
+              </>
             )}
           </div>
           {request.amountNeeded ? (
