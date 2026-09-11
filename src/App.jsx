@@ -991,11 +991,12 @@ if (!cancelled) {
     e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
     try {
       const result = await initializeDonation({
-        amount: Math.round(Number(payment.amount) * (payment.coverFee ? 1.05 : 1)),
+        amount: Number(payment.amount),
         email: payment.email,
         requestId: selectedRequest?.id || null,
         anonymous: payment.anonymous,
         donorName: payment.name || "",
+        coverFee: payment.coverFee !== false,
         callbackUrl: window.location.origin,
       });
       window.location.href = result.authorization_url;
@@ -2681,14 +2682,15 @@ export default function App() {
         if (!cancelled) setPaymentReturn({ status: "checking", message: "Confirming your donation…" });
         const result = await verifyDonation(reference);
         if (!cancelled) {
-          const forRequest = result?.request_id || result?.requestId;
-          const amount = result?.amount;
+          const forRequest = result?.request_id || result?.requestId || result?.donation?.request_id;
+          const amount = result?.amount ?? result?.donation?.amount;
+          const verified = result?.verified || result?.ok || result?.donation?.status === "successful";
           const successMsg = forRequest
             ? `Your donation${amount ? " of ₦" + Number(amount).toLocaleString() : ""} has been confirmed for that request. Thank you.`
             : `Your donation${amount ? " of ₦" + Number(amount).toLocaleString() : ""} has been confirmed. Thank you for giving.`;
           setPaymentReturn({
-            status: result?.verified ? "success" : "pending",
-            message: result?.verified
+            status: verified ? "success" : "pending",
+            message: verified
               ? successMsg
               : (result?.error || "Paystack received this payment, but Seek is still confirming it. You can close this and check back shortly."),
             requestId: forRequest || null,
