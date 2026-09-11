@@ -1761,7 +1761,7 @@ function RequestPage({ requestId, setPage }) {
               <ul className="space-y-2">
                 {donors.map((d, i) => (
                   <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 ? "bg-[#1BAA9C]/10" : "")}>
-                    <span className="text-[#0D3B3B]/70">{d.anonymous || !d.name ? (d.anonymous ? "Anonymous" : "A supporter") : d.name}</span>
+                    <span className="text-[#0D3B3B]/70">{d.anonymous ? "Anonymous" : (d.name || d.donor_name || "A supporter")}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
@@ -1773,7 +1773,7 @@ function RequestPage({ requestId, setPage }) {
               <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">
                 Progress
               </p>
-              <ProgressBar raised={request.amountRaised} needed={request.amountNeeded} />
+              <ProgressBar raised={donors.length ? donors.reduce((sum, d) => sum + Number(d.amount || 0), 0) : request.amountRaised} needed={request.amountNeeded} />
             </div>
           ) : (
             <p className="mt-6 text-sm font-semibold font-body text-[#0D3B3B]">
