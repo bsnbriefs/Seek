@@ -117,6 +117,21 @@ export default function AdminPage() {
     }
   }
 
+
+  async function settleRequest(id) {
+    const note = window.prompt("How was this settled? Example: Bank transfer to requester, 11 Sep.");
+    if (note === null) return;
+    const amount = window.prompt("Amount sent (NGN), or leave blank.");
+    if (amount === null) return;
+    try {
+      setError("");
+      await settleAdminRequest(id, { note, amount: amount === "" ? null : amount });
+      await loadRequests();
+    } catch (err) {
+      setError(err.message);
+    }
+  }
+
   async function changeStatus(id, status) {
     try {
       setError("");
@@ -598,9 +613,7 @@ export default function AdminPage() {
                         </button>
 
                         <button
-                          onClick={() =>
-                            changeStatus(req.id, "fulfilled")
-                          }
+                          onClick={() => settleRequest(req.id)}
                           className="rounded-xl border px-4 py-2 text-sm"
                         >
                           Mark fulfilled
@@ -661,7 +674,7 @@ export default function AdminPage() {
                       req.status !== "published" &&
                       req.status !== "partially_funded" && (
                       <button
-                        onClick={() => changeStatus(req.id, "fulfilled")}
+                        onClick={() => settleRequest(req.id)}
                         className="rounded-xl bg-[#1BAA9C] px-4 py-2 text-sm font-semibold text-white"
                       >
                         Mark fulfilled
