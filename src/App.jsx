@@ -553,9 +553,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          {userSession?.access_token && (
-            <NotificationBell userSession={userSession} setPage={setPage} />
-          )}
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -583,11 +580,6 @@ function Navbar({ page, setPage, userSession }) {
             <button onClick={() => go("my-requests")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
               My requests
             </button>
-          )}
-          {userSession?.access_token && (
-            <div className="py-2">
-              <NotificationBell userSession={userSession} setPage={setPage} />
-            </div>
           )}
           <button onClick={() => go("account")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
             {userSession?.access_token ? "Account" : "Sign in"}
@@ -1412,6 +1404,9 @@ function SeekHelpPage() {
   type: "",
   urgency: "",
   evidenceFiles: [],
+  bankName: "",
+  accountName: "",
+  accountNumber: "",
 });
 const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   if (submitted) {
@@ -1480,6 +1475,12 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </Field>
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
           <Field label="Amount required (if applicable)"><input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="₦ (leave blank if not applicable)" /></Field>
+          <p className="font-body text-xs text-[#0D3B3B]/50 pt-2">Settlement account (admin only — never shown publicly)</p>
+          <div className="grid sm:grid-cols-2 gap-5">
+            <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
+            <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
+          </div>
+          <Field label="Account number"><input className={inputCls} inputMode="numeric" value={form.accountNumber} onChange={set("accountNumber")} placeholder="NUBAN / account number" /></Field>
           <Field label="Description">
             <textarea required rows={4} className={inputCls} value={form.description} onChange={set("description")} placeholder="Tell us a little more about your situation" />
           </Field>
