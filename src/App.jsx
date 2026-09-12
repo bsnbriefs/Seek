@@ -556,10 +556,7 @@ function HomePage({ setPage }) {
         const [rows, matchedIds, impactRows, stats, offerRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
-          Promise.all([
-            listPublishedImpact().catch(() => []),
-            listAppreciationStories().catch(() => []),
-          ]).then(([impactRows, thanksRows]) => [...(thanksRows || []).slice(0, 2), ...(impactRows || [])]),
+          listPublishedImpact().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
@@ -701,9 +698,8 @@ function HomePage({ setPage }) {
                   key={post.id}
                   type="button"
                   onClick={() => {
-                    const dest = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
-                    window.history.pushState({}, "", dest);
-                    setPage(post.request_id ? `request:${post.request_id}` : `impact:${post.id}`);
+                    window.history.pushState({}, "", `/impact/${post.id}`);
+                    setPage(`impact:${post.id}`);
                     window.scrollTo(0, 0);
                   }}
                   className="rounded-2xl bg-white/10 p-4 text-left hover:bg-white/15"
@@ -2185,6 +2181,7 @@ function ImpactStoryPage({ impactId, setPage }) {
 
 function ImpactPage({ setPage }) {
   const [posts, setPosts] = useState([]);
+  const [thanks, setThanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
 
@@ -2198,10 +2195,8 @@ function ImpactPage({ setPage }) {
           listAppreciationStories().catch(() => []),
         ]);
         if (!cancelled) {
-          const thanksList = thanks || [];
-          const used = new Set(thanksList.map((item) => item.request_id).filter(Boolean));
-          const uniqueImpact = (rows || []).filter((row) => !row.request_id || !used.has(row.request_id));
-          setPosts([...thanksList, ...uniqueImpact]);
+          setPosts(rows || []);
+          setThanks(thanks || []);
         }
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load impact stories.");
@@ -2225,7 +2220,7 @@ function ImpactPage({ setPage }) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
         {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
-        {!loading && !error && posts.length === 0 && (
+        {!loading && !error && posts.length === 0 && thanks.length === 0 && (
           <p className="font-body text-sm text-[#0D3B3B]/50">No published stories yet.</p>
         )}
         <div className="grid sm:grid-cols-2 gap-4">
@@ -2256,6 +2251,35 @@ function ImpactPage({ setPage }) {
           </button>
         ))}
         </div>
+        {thanks.length > 0 && (
+          <div className="pt-10">
+            <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-4">Thank-you notes from requesters</h2>
+            <div className="grid sm:grid-cols-2 gap-4">
+              {thanks.map((post) => (
+                <button
+                  key={post.id}
+                  type="button"
+                  className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
+                  onClick={() => {
+                    window.history.pushState({}, "", `/impact/${post.id}`);
+                    setPage(`impact:${post.id}`);
+                    window.scrollTo(0, 0);
+                  }}
+                >
+                  {post.public_url && post.media_kind === "video" ? (
+                    <video src={post.public_url} muted playsInline preload="metadata" className="h-40 w-full object-cover bg-black" />
+                  ) : post.public_url ? (
+                    <img loading="lazy" src={post.public_url} alt="" className="h-40 w-full object-cover" />
+                  ) : null}
+                  <div className="p-4">
+                    <h3 className="font-display font-bold text-base text-[#0D3B3B] line-clamp-2">{post.title}</h3>
+                    <p className="mt-1 font-body text-xs text-[#0D3B3B]/50 line-clamp-3">{post.story}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        )}
         <div className="text-center pt-4">
           <Button variant="primary" onClick={() => setPage("give")}>Help someone <ArrowRight size={16} /></Button>
         </div>
