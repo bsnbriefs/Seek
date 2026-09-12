@@ -803,12 +803,38 @@ export async function postRequestPublicUpdate(requestId, body) {
 }
 
 
+
+export async function assertFileNotAlreadyUploaded(file) {
+  if (!file || !file.name) return;
+  const name = file.name;
+  const size = Number(file.size) || 0;
+  const query =
+    "file_name=eq." + encodeURIComponent(name) + "&select=id,file_name,file_size&limit=5";
+  const tables = ["request_appreciation", "request_evidence", "community_impact"];
+  for (const table of tables) {
+    try {
+      const rows = await supabaseFetch(table + "?" + query);
+      const hit = (Array.isArray(rows) ? rows : []).find(
+        (row) => !size || !row.file_size || Number(row.file_size) === size
+      );
+      if (hit) {
+        throw new Error(
+          "This picture or video was already uploaded (" + name + "). Choose a different file."
+        );
+      }
+    } catch (err) {
+      if (String(err.message || "").includes("already uploaded")) throw err;
+    }
+  }
+}
+
 export async function uploadAppreciationMedia(requestId, file, onProgress) {
   const session = getUserSession();
   if (!session?.access_token) {
     throw new Error("Please sign in to upload appreciation media.");
   }
   if (!file) throw new Error("Choose a photo or video first.");
+  await assertFileNotAlreadyUploaded(file);
   if (typeof onProgress === "function") onProgress("Uploading appreciation…");
   const form = new FormData();
   form.append("file", file);
