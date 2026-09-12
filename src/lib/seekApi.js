@@ -309,7 +309,8 @@ export function mapRequestRow(row) {
         .includes("item")
         ? "item"
         : "money",
-    publicUpdate: row.public_update || "",
+    publicUpdate: row.public_update || row.publicUpdate || "",
+    publicUpdateAt: row.public_update_at || row.publicUpdateAt || "",
     appreciationPath: row.appreciation_storage_path || "",
     appreciationMime: row.appreciation_mime_type || "",
     appreciationKind: row.appreciation_kind || "",
@@ -862,37 +863,85 @@ export async function getRequestAppreciation(requestId) {
 
 export async function listAppreciationStories() {
   if (!supabaseConfigured) return [];
-  let rows = [];
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const mediaUrl = (path) =>
+    path
+      ? `${base}/storage/v1/object/public/seek-impact/` +
+        String(path).split("/").map(encodeURIComponent).join("/")
+      : "";
+
+  let requests = [];
   try {
-    rows = await supabaseFetch(
-      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,requests(title,location,status)&order=created_at.desc"
+    requests = await supabaseFetch(
+      "requests?status=eq.fulfilled&select=id,title,location,status,public_update,public_update_at&order=public_update_at.desc.nullslast"
     );
   } catch (_e) {
-    rows = await supabaseFetch(
-      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at&order=created_at.desc"
-    );
+    requests = [];
   }
-  const list = Array.isArray(rows) ? rows : [];
-  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  return list
-    .filter((row) => row?.storage_path && (row.requests?.status === "fulfilled" || !row.requests))
-    .map((row) => {
-      const path = String(row.storage_path);
-      const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
-      const isVideo = kind.includes("video") || /\.(mp4|webm|mov)$/i.test(path);
-      return {
-        id: "thanks-" + row.id,
-        title: (row.requests && row.requests.title) || "A thank you from someone Seek helped",
-        story: "Appreciation from a fulfilled Seek request.",
-        location: row.requests?.location || "",
-        media_kind: isVideo ? "video" : "image",
-        public_url:
-          `${base}/storage/v1/object/public/seek-impact/` +
-          path.split("/").map(encodeURIComponent).join("/"),
-        request_id: row.request_id,
-        created_at: row.created_at,
-      };
+  requests = Array.isArray(requests) ? requests : [];
+
+  let mediaRows = [];
+  try {
+    mediaRows = await supabaseFetch(
+      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,requests(title,location,status,public_update,public_update_at)&order=created_at.desc"
+    );
+  } catch (_e) {
+    try {
+      mediaRows = await supabaseFetch(
+        "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at&order=created_at.desc"
+      );
+    } catch (_err) {
+      mediaRows = [];
+    }
+  }
+  mediaRows = Array.isArray(mediaRows) ? mediaRows : [];
+
+  const byRequest = new Map();
+
+  for (const req of requests) {
+    const text = String(req.public_update || "").trim();
+    if (!text) continue;
+    byRequest.set(req.id, {
+      id: "thanks-" + req.id,
+      title: req.title || "A thank you from someone Seek helped",
+      story: text,
+      location: req.location || "",
+      media_kind: "",
+      public_url: "",
+      request_id: req.id,
+      created_at: req.public_update_at || "",
+      public_update_at: req.public_update_at || "",
     });
+  }
+
+  for (const row of mediaRows) {
+    if (!row?.storage_path) continue;
+    const req = row.requests || {};
+    if (req.status && req.status !== "fulfilled") continue;
+    const requestId = row.request_id;
+    if (!requestId) continue;
+    const path = String(row.storage_path);
+    const kind = String(row.media_kind || row.mime_type || path).toLowerCase();
+    const isVideo = kind.includes("video") || /\.(mp4|webm|mov)$/i.test(path);
+    const text = String(req.public_update || "").trim();
+    const existing = byRequest.get(requestId);
+    const story = text || existing?.story || "A thank-you message from a fulfilled Seek request.";
+    byRequest.set(requestId, {
+      id: existing?.id || ("thanks-" + (row.id || requestId)),
+      title: req.title || existing?.title || "A thank you from someone Seek helped",
+      story,
+      location: req.location || existing?.location || "",
+      media_kind: isVideo ? "video" : "image",
+      public_url: mediaUrl(path),
+      request_id: requestId,
+      created_at: row.created_at || existing?.created_at || "",
+      public_update_at: req.public_update_at || existing?.public_update_at || "",
+    });
+  }
+
+  return [...byRequest.values()].sort((a, b) =>
+    String(b.created_at || b.public_update_at).localeCompare(String(a.created_at || a.public_update_at))
+  );
 }
 
 
