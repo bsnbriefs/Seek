@@ -1674,12 +1674,12 @@ function RequestPage({ requestId, setPage }) {
               const headline = request.publicUpdate
                 ? String(request.publicUpdate).slice(0, 80)
                 : request.title;
-              const text = headline + " — " + (request.location || "") + amount + " " + url;
+              const text = headline + " — " + (request.location || "") + amount;
               try {
                 if (navigator.share) {
                   await navigator.share({ title: headline, text, url });
                 } else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(text);
+                  await navigator.clipboard.writeText(text + " " + url);
                   window.alert("Share text copied");
                 }
               } catch (_e) {}
@@ -2158,11 +2158,10 @@ function ImpactStoryPage({ impactId, setPage }) {
               const url = post.request_id
                 ? `${window.location.origin}/api/request-meta?id=${post.request_id}`
                 : `${window.location.origin}/api/impact-meta?id=${post.id}`;
-              const text = (post.title || "Seek story") + " " + url;
               try {
-                if (navigator.share) await navigator.share({ title: post.title, text, url });
+                if (navigator.share) await navigator.share({ title: post.title, url });
                 else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(text);
+                  await navigator.clipboard.writeText(url);
                   window.alert("Link copied");
                 }
               } catch (_e) {}
