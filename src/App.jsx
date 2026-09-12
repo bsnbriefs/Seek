@@ -818,14 +818,24 @@ function HomePage({ setPage, userSession }) {
         <SectionLabel>Yearly BSN outreaches</SectionLabel>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Give to a standing community programme.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/60 mb-6 max-w-2xl">These are BSN Foundation yearly outreaches. Choose one, set your amount, and give through Seek.</p>
-        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+        <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-3">Choose an outreach</p>
+        <div className="space-y-3">
           {OUTREACH_CAMPAIGNS.map((c) => (
-            <div key={c.id} className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 text-left">
-              <h3 className="font-display font-bold text-[#0D3B3B]">{c.title}</h3>
-              <p className="font-body text-sm text-[#0D3B3B]/60 mt-2">{c.blurb}</p>
-              <p className="font-display font-semibold text-[#1BAA9C] mt-3">Suggested ₦{c.amount.toLocaleString()}</p>
-              <Button className="mt-4 !px-4 !py-2" onClick={() => setOutreach(c)}>Give to this outreach</Button>
-            </div>
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setOutreach(c)}
+              className={`w-full text-left rounded-2xl border px-4 py-4 flex items-center gap-4 transition-all ${outreach?.id === c.id ? "border-[#1BAA9C] bg-[#0D3B3B] text-white" : "border-[#0D3B3B]/10 bg-white text-[#0D3B3B]"}`}
+            >
+              <span className={`h-11 w-11 rounded-xl shrink-0 flex items-center justify-center ${outreach?.id === c.id ? "bg-[#1BAA9C]" : "bg-[#0D3B3B]/8"}`}>
+                <HeartHandshake size={18} className={outreach?.id === c.id ? "text-white" : "text-[#1BAA9C]"} />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-display font-bold">{c.title}</span>
+                <span className={`block text-sm mt-0.5 ${outreach?.id === c.id ? "text-[#63C167]" : "text-[#1BAA9C]"}`}>Suggested ₦{c.amount.toLocaleString()}</span>
+                <span className={`block text-xs mt-1 ${outreach?.id === c.id ? "text-white/70" : "text-[#0D3B3B]/55"}`}>{c.blurb}</span>
+              </span>
+            </button>
           ))}
         </div>
       </section>
