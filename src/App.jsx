@@ -1501,12 +1501,13 @@ if (!cancelled) {
 
 function Field({ label, children }) {
   return (
-    <label className="block">
-      <span className="font-body text-sm font-semibold text-[#0D3B3B]">{label}</span>
-      <div className="mt-1.5">{children}</div>
+    <label className="block text-left">
+      <span className="block mb-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[#0D3B3B]/50">{label}</span>
+      {children}
     </label>
   );
 }
+
 
 const inputCls = "w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
 
