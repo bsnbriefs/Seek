@@ -17,7 +17,7 @@ export async function submitRequest(payload) {
 
   let evidenceSession = null;
   if (evidenceFiles.length) {
-    evidenceSession = getUserSession();
+    evidenceSession = (await refreshUserSession()) || getUserSession();
     const accessToken = evidenceSession?.access_token;
     const sessionEmail = (evidenceSession?.user?.email || "").trim().toLowerCase();
     const formEmail = (payload.email || "").trim().toLowerCase();
@@ -267,6 +267,17 @@ export async function listMatchedOfferRequestIds() {
   return rows.map((row) => row.request_id);
 }
 
+
+function seekImageUrl(path, _width) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const clean = String(path).replace(/^\/+/, "");
+  const encoded = clean.split("/").map(encodeURIComponent).join("/");
+  const withBucket = clean.includes("/") ? encoded : "profiles/" + encoded;
+  return base + "/storage/v1/object/public/seek-impact/" + withBucket;
+}
+
 async function attachAvatars(rows) {
   const list = Array.isArray(rows) ? rows : [];
   const ids = [...new Set(list.map((row) => row.user_id || row.created_by).filter(Boolean))];
@@ -415,6 +426,35 @@ export function cacheAvatarUrl(url) {
 
 export function getCachedAvatarUrl() {
   return localStorage.getItem(SEEK_AVATAR_KEY) || "";
+}
+
+export async function refreshUserSession() {
+  const session = getUserSession();
+  if (!session?.refresh_token) return session;
+  try {
+    const response = await fetch(
+      `${AUTH_URL}/auth/v1/token?grant_type=refresh_token`,
+      {
+        method: "POST",
+        headers: {
+          apikey: AUTH_KEY,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ refresh_token: session.refresh_token }),
+      }
+    );
+    const data = await response.json().catch(() => ({}));
+    if (response.ok && data?.access_token) {
+      const next = {
+        access_token: data.access_token,
+        refresh_token: data.refresh_token || session.refresh_token,
+        user: data.user || session.user,
+      };
+      setUserSession(next);
+      return next;
+    }
+  } catch (_e) {}
+  return session;
 }
 
 export function getUserSession() {
@@ -1078,7 +1118,7 @@ export async function getMyProfile() {
   const row = Array.isArray(rows) ? rows[0] : rows;
   if (!row) return null;
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  return {
+  const mapped = {
     ...row,
     avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
   };
