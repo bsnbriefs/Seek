@@ -570,14 +570,19 @@ function applySeekTheme(theme) {
 function ThemeToggle() {
   const [theme, setTheme] = useState(() => getSeekTheme());
   useEffect(() => { applySeekTheme(theme); }, [theme]);
+  const dark = theme === "dark";
   return (
     <button
       type="button"
-      aria-label={theme === "dark" ? "Use light background" : "Use dark background"}
-      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-xl border border-[#0D3B3B]/15 p-2 text-[#0D3B3B] hover:border-[#1BAA9C] transition-colors"
+      aria-label={dark ? "Use light background" : "Use dark background"}
+      onClick={() => setTheme(dark ? "light" : "dark")}
+      className="relative h-8 w-14 shrink-0 rounded-full border border-[#0D3B3B]/15 bg-[#F4F1EA]"
     >
-      {theme === "dark" ? <Sun key="sun" size={16} className="seek-theme-icon" /> : <Moon key="moon" size={16} className="seek-theme-icon" />}
+      <span
+        className={`absolute top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#0D3B3B] text-white shadow transition-transform duration-300 ${dark ? "translate-x-6" : "translate-x-0.5"}`}
+      >
+        {dark ? <Sun size={13} /> : <Moon size={13} />}
+      </span>
     </button>
   );
 }
