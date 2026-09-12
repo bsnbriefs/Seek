@@ -191,6 +191,14 @@ const IMPACT_STATS = [
   { value: "18+", label: "Communities across Nigeria" },
 ];
 
+const OUTREACH_CAMPAIGNS = [
+  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000 },
+  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000 },
+  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000 },
+  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000 },
+  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000 },
+];
+
 /* ---------------- Small building blocks ---------------- */
 
 function Logo({ light = false, className = "h-8" }) {
@@ -741,6 +749,22 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <SectionLabel>Yearly BSN outreaches</SectionLabel>
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Give to a standing community programme.</h2>
+        <p className="font-body text-sm text-[#0D3B3B]/60 mb-6 max-w-2xl">These are BSN Foundation yearly outreaches. Choose one, set your amount, and give through Seek.</p>
+        <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-4">
+          {OUTREACH_CAMPAIGNS.map((c) => (
+            <div key={c.id} className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 text-left">
+              <h3 className="font-display font-bold text-[#0D3B3B]">{c.title}</h3>
+              <p className="font-body text-sm text-[#0D3B3B]/60 mt-2">{c.blurb}</p>
+              <p className="font-display font-semibold text-[#1BAA9C] mt-3">Suggested ₦{c.amount.toLocaleString()}</p>
+              <Button className="mt-4 !px-4 !py-2" onClick={() => { sessionStorage.setItem("seek_campaign", JSON.stringify(c)); go("give"); }}>Give to this outreach</Button>
+            </div>
+          ))}
+        </div>
+      </section>
+
       {/* TWO-SIDED ENTRY */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-10">
         <div className="grid md:grid-cols-[1fr_auto_1fr] items-center gap-6">
@@ -1090,6 +1114,19 @@ if (!cancelled) {
     return () => { cancelled = true; };
   }, []);
 
+  const [campaign, setCampaign] = useState(null);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("seek_campaign");
+      if (!raw) return;
+      const c = JSON.parse(raw);
+      sessionStorage.removeItem("seek_campaign");
+      setCampaign(c);
+      setPayment((prev) => ({ ...prev, amount: String(c.amount || prev.amount || "") }));
+      setDonating(true);
+    } catch (_e) {}
+  }, []);
+
   function selectRequest(req) {
     setSelectedRequest(req);
     setDonating(true);
@@ -1115,7 +1152,7 @@ if (!cancelled) {
         email: payment.email,
         requestId: selectedRequest?.id || null,
         anonymous: payment.anonymous,
-        donorName: payment.name || "",
+        donorName: campaign ? ((payment.name || "Supporter") + " · " + campaign.title) : (payment.name || ""),
         coverFee: payment.coverFee !== false,
         callbackUrl: window.location.origin,
       });
@@ -1202,6 +1239,9 @@ if (!cancelled) {
             onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
           >
             Or give a general donation
+          {campaign && (
+            <p className="font-body text-sm text-[#1BAA9C] mb-3">Giving to {campaign.title}. Suggested ₦{Number(campaign.amount).toLocaleString()} — you can change the amount.</p>
+          )}
           </button>
         )}
         <input
