@@ -70,7 +70,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -98,6 +98,21 @@ const FONTS = (
     .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
     .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
     html { scroll-behavior: smooth; }
+    html.seek-dark { color-scheme: dark; }
+    html.seek-dark body { background: #0B1918; color: #E8EEEC; }
+    html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
+    html.seek-dark .bg-white, html.seek-dark .bg-white\/80 { background-color: #122624 !important; }
+    html.seek-dark .text-\[\#0D3B3B\],
+    html.seek-dark .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .text-\[\#0D3B3B\]\/80 { color: #D7E6E3 !important; }
+    html.seek-dark .border-\[\#0D3B3B\]\/8,
+    html.seek-dark .border-\[\#0D3B3B\]\/15,
+    html.seek-dark .border-\[\#0D3B3B\]\/5 { border-color: rgba(255,255,255,0.12) !important; }
+    html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
+      background: #0F221F !important; color: #E8EEEC !important; border-color: rgba(255,255,255,0.16) !important;
+    }
+
     @keyframes seek-loop {
       0% { stroke-dashoffset: 0; }
       100% { stroke-dashoffset: -120; }
@@ -379,6 +394,37 @@ function SectionLabel({ children }) {
 
 /* ---------------- Navbar / Footer ---------------- */
 
+
+function getSeekTheme() {
+  try {
+    return localStorage.getItem("seek_theme") === "dark" ? "dark" : "light";
+  } catch (_e) {
+    return "light";
+  }
+}
+
+function applySeekTheme(theme) {
+  const next = theme === "dark" ? "dark" : "light";
+  document.documentElement.classList.toggle("seek-dark", next === "dark");
+  try { localStorage.setItem("seek_theme", next); } catch (_e) {}
+  return next;
+}
+
+function ThemeToggle() {
+  const [theme, setTheme] = useState(() => getSeekTheme());
+  useEffect(() => { applySeekTheme(theme); }, [theme]);
+  return (
+    <button
+      type="button"
+      aria-label={theme === "dark" ? "Use light background" : "Use dark background"}
+      onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
+      className="rounded-full border border-[#0D3B3B]/15 p-2 text-[#0D3B3B]"
+    >
+      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+    </button>
+  );
+}
+
 function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
   const [avatar, setAvatar] = useState("");
@@ -424,6 +470,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle />
           {userSession?.access_token && (
             <NotificationBell userSession={userSession} setPage={setPage} />
           )}
@@ -455,6 +502,7 @@ function Navbar({ page, setPage, userSession }) {
               My requests
             </button>
           )}
+          <div className="py-2"><ThemeToggle /></div>
           {userSession?.access_token && (
             <div className="py-2">
               <NotificationBell userSession={userSession} setPage={setPage} />
@@ -2795,6 +2843,8 @@ function pathFromPage(page) {
   };
   return map[id] || "/";
 }
+
+try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
