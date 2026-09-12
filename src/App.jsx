@@ -553,7 +553,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <ThemeToggle />
           {userSession?.access_token && (
             <NotificationBell userSession={userSession} setPage={setPage} />
           )}
@@ -585,7 +584,6 @@ function Navbar({ page, setPage, userSession }) {
               My requests
             </button>
           )}
-          <div className="py-2"><ThemeToggle /></div>
           {userSession?.access_token && (
             <div className="py-2">
               <NotificationBell userSession={userSession} setPage={setPage} />
@@ -746,7 +744,6 @@ function HomePage({ setPage, userSession }) {
             Become a volunteer
           </button>
           <div className="mt-8 flex items-center justify-center gap-3">
-            <ThemeToggle />
             <NotificationBell userSession={userSession} setPage={setPage} />
           </div>
         </div>
@@ -2928,7 +2925,7 @@ function pathFromPage(page) {
   return map[id] || "/";
 }
 
-try { applySeekTheme(getSeekTheme()); } catch (_e) {}
+try { applySeekTheme("light"); localStorage.removeItem("seek_theme"); document.documentElement.classList.remove("seek-dark"); } catch (_e) {}
 
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
