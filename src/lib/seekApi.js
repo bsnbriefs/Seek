@@ -65,9 +65,13 @@ export async function submitRequest(payload) {
   const owner = getUserSession();
   if (owner?.user?.id) {
     try {
+      const profile = await getMyProfile().catch(() => null);
       await supabaseFetch("requests?id=eq." + request.id, {
         method: "PATCH",
-        body: JSON.stringify({ user_id: owner.user.id }),
+        body: JSON.stringify({
+          user_id: owner.user.id,
+          avatar_path: profile?.avatar_path || null,
+        }),
       });
     } catch (_e) {}
   }
@@ -292,19 +296,29 @@ async function attachAvatars(rows) {
       if (!p?.avatar_path) return;
       map[p.id] = seekImageUrl(p.avatar_path, 96);
     });
+    const me = getUserSession()?.user?.id;
+    const mine = getCachedAvatarUrl();
+    return list.map((row) => {
+      const owner = row.user_id || row.created_by;
+      return {
+        ...row,
+        avatar_url: map[owner] || (owner && me && owner === me ? mine : null) || row.avatar_url || null,
+      };
+    });
+  } catch (_e) {
+    const me = getUserSession()?.user?.id;
+    const mine = getCachedAvatarUrl();
     return list.map((row) => ({
       ...row,
-      avatar_url: map[row.user_id || row.created_by] || null,
+      avatar_url: (row.user_id === me || row.created_by === me) ? mine : row.avatar_url || null,
     }));
-  } catch (_e) {
-    return list;
   }
 }
 
 export function mapRequestRow(row) {
   return {
     id: row.id,
-    avatarUrl: row.avatar_url || "",
+    avatarUrl: row.avatar_url || (row.avatar_path ? seekImageUrl(row.avatar_path) : "") || "",
     title: row.title,
     category: row.category,
     location: row.location,
@@ -601,8 +615,10 @@ export async function listMyRequests() {
     );
   }
 
-  return Array.isArray(data) ? data : [];
-    }
+  const rows = Array.isArray(data) ? data : [];
+  const mine = getCachedAvatarUrl();
+  return rows.map((row) => ({ ...row, avatar_url: row.avatar_url || mine || null }));
+}
 /* =========================================================
    SEEK EVIDENCE VIEWING
    ========================================================= */
