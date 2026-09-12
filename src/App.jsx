@@ -95,8 +95,8 @@ const C = {
 const FONTS = (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
-    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
-    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
+    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; }
+    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
@@ -394,6 +394,26 @@ function RequestCard({ req, onHelp, onView }) {
   );
 }
 
+
+function SocialLinks({ light = false }) {
+  const cls = light
+    ? "h-10 w-10 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/50 flex items-center justify-center"
+    : "h-10 w-10 rounded-full border border-[#0D3B3B]/15 text-[#0D3B3B] hover:border-[#1BAA9C] hover:text-[#1BAA9C] flex items-center justify-center bg-white";
+  return (
+    <div className="flex items-center justify-center gap-2">
+      <a className={cls} href="https://wa.me/447402427408" target="_blank" rel="noreferrer" aria-label="WhatsApp">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor"><path d="M20 3.5A10 10 0 0 0 3.2 17.6L2 22l4.5-1.2A10 10 0 1 0 20 3.5zm-8 16.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.6.7.7-2.5-.2-.3A8.2 8.2 0 1 1 12 19.7zm4.7-6.1c-.3-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.3 0-.4.1-.6l.4-.5.1-.3a.5.5 0 0 0 0-.5c0-.1-.6-1.5-.8-2s-.4-.5-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.6 11.5 11.5 0 0 0 4.4 3.9 15 15 0 0 0 1.5.5 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.6-.3z"/></svg>
+      </a>
+      <a className={cls} href="https://www.instagram.com/bsnfoundationng" target="_blank" rel="noreferrer" aria-label="Instagram">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.8"><rect x="3" y="3" width="18" height="18" rx="5"/><circle cx="12" cy="12" r="4"/><circle cx="17.5" cy="6.5" r="1" fill="currentColor" stroke="none"/></svg>
+      </a>
+      <a className={cls} href="https://x.com/BSNFoundation_" target="_blank" rel="noreferrer" aria-label="X">
+        <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor"><path d="M18 3h3l-7.5 8.6L22 21h-6.2l-4.9-6.4L5.2 21H2l8-9.2L2.3 3H8.6l4.4 5.8L18 3z"/></svg>
+      </a>
+    </div>
+  );
+}
+
 function SectionLabel({ children }) {
   return (
     <span className="inline-block font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#1BAA9C] mb-3">
@@ -587,11 +607,7 @@ function Footer({ setPage }) {
         </div>
         <div>
           <p className="font-display font-semibold text-white mb-3 text-sm">Stay connected</p>
-          <div className="flex flex-col gap-2 text-sm">
-            <a href="https://wa.me/447402427408" target="_blank" rel="noreferrer" className="hover:text-white">WhatsApp</a>
-            <a href="https://www.instagram.com/bsnfoundationng" target="_blank" rel="noreferrer" className="hover:text-white">Instagram</a>
-            <a href="https://x.com/BSNFoundation_" target="_blank" rel="noreferrer" className="hover:text-white">X</a>
-          </div>
+          <SocialLinks light />
         </div>
       </div>
       <div className="border-t border-white/10 py-5 text-center text-xs text-white/40">
@@ -700,9 +716,12 @@ function HomePage({ setPage, userSession }) {
           <button onClick={() => go("volunteer")} className="mt-5 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
             Become a volunteer
           </button>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <ThemeToggle />
-            <NotificationBell userSession={userSession} setPage={setPage} />
+          <div className="mt-8 flex flex-col items-center gap-4">
+            <div className="flex items-center justify-center gap-3">
+              <ThemeToggle />
+              <NotificationBell userSession={userSession} setPage={setPage} />
+            </div>
+            <SocialLinks />
           </div>
         </div>
       </section>
