@@ -103,8 +103,24 @@ const FONTS = (
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark h1, html.seek-dark h2 { color: #EDE8E0 !important; }
+    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #EDE8E0 !important; }
+    html.seek-dark .text-\[\#0D3B3B\] { color: #EDE8E0 !important; }
+    html.seek-dark .text-\[\#0D3B3B\]\/70,
+    html.seek-dark .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .text-\[\#0D3B3B\]\/60,
+    html.seek-dark .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .text-\[\#0D3B3B\]\/50,
+    html.seek-dark .text-\[\#0D3B3B\]\/45 { color: rgba(237,232,224,0.72) !important; }
+    html.seek-dark .bg-white, html.seek-dark .bg-white * { color: unset; }
+    html.seek-dark .bg-white { color: #0F211F !important; }
     html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #0D3B3B !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #0D3B3B !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/70,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/45 { color: rgb(13 59 59 / 0.6) !important; }
 
 
     html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
@@ -746,6 +762,11 @@ function Connector() {
 
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
+  const [mine, setMine] = useState([]);
+  useEffect(() => {
+    if (!userSession?.access_token) { setMine([]); return; }
+    listMyRequests().then((rows) => setMine((rows || []).map(mapRequestRow).slice(0, 3))).catch(() => setMine([]));
+  }, [userSession]);
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
@@ -829,6 +850,34 @@ function HomePage({ setPage, userSession }) {
           </div>
         </div>
       </section>
+
+
+      {userSession?.access_token && (
+        <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10">
+          <div className="flex items-end justify-between gap-3 mb-4">
+            <div>
+              <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#1BAA9C]">Your requests</p>
+              <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">Pick up where you left off.</h2>
+            </div>
+            <button type="button" onClick={() => go("my-requests")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
+          </div>
+          {mine.length === 0 ? (
+            <p className="font-body text-sm text-[#0D3B3B]/60">No requests on this account yet. Use I need help to submit one.</p>
+          ) : (
+            <div className="space-y-3">
+              {mine.map((req) => (
+                <div key={req.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 flex items-start justify-between gap-3">
+                  <div>
+                    <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{req.category} · {formatSeekStatus(req.status)}</p>
+                    <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
+                  </div>
+                  <button type="button" onClick={() => go("my-requests")} className="text-sm font-semibold text-[#1BAA9C] shrink-0">Open</button>
+                </div>
+              ))}
+            </div>
+          )}
+        </section>
+      )}
 
       {/* TWO-SIDED ENTRY */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-0">
