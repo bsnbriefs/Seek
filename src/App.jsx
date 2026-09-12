@@ -106,6 +106,12 @@ const FONTS = (
     }
 
     html.seek-dark { color-scheme: dark; }
+    html.seek-dark #root, html.seek-dark h1, html.seek-dark h2, html.seek-dark h3,
+    html.seek-dark p, html.seek-dark label, html.seek-dark span, html.seek-dark button {
+      color: #E8EEEC;
+    }
+    html.seek-dark h1, html.seek-dark h2 { color: #F4F8F6 !important; }
+
     html.seek-dark body { background: #0B1918; color: #E8EEEC; }
     html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
     html.seek-dark .bg-white, html.seek-dark .bg-white\/80 { background-color: #122624 !important; }
@@ -418,7 +424,7 @@ function applySeekTheme(theme) {
     root.style.setProperty("--seek-bg", "#0B1918");
     root.style.setProperty("--seek-card", "#122624");
     root.style.setProperty("--seek-ink", "#E8EEEC");
-    root.style.setProperty("--seek-wash", "rgba(11,25,24,0.78)");
+    root.style.setProperty("--seek-wash", "rgba(11,25,24,0.55)");
     root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=60')");
     root.style.backgroundColor = "#0B1918";
     if (document.body) {
@@ -429,7 +435,7 @@ function applySeekTheme(theme) {
     root.style.setProperty("--seek-bg", "#F2F5F3");
     root.style.setProperty("--seek-card", "#FFFFFF");
     root.style.setProperty("--seek-ink", "#0F211F");
-    root.style.setProperty("--seek-wash", "rgba(242,245,243,0.82)");
+    root.style.setProperty("--seek-wash", "rgba(242,245,243,0.72)");
     root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=60')");
     root.style.backgroundColor = "#F2F5F3";
     if (document.body) {
