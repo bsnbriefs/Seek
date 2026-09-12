@@ -64,9 +64,22 @@ export async function submitRequest(payload) {
 
   if (payload.bankName || payload.accountName || payload.accountNumber) {
     try {
-      await supabaseFetch("request_private?request_id=eq." + request.id, {
+      const session = getUserSession();
+      const token = session?.access_token || "";
+      const base = (import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
+      const anon = (
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        import.meta.env.VITE_SUPABASE_ANON_KEY ||
+        ""
+      ).trim();
+      await fetch(base + "/rest/v1/request_private?request_id=eq." + encodeURIComponent(request.id), {
         method: "PATCH",
-        headers: { Prefer: "return=minimal" },
+        headers: {
+          apikey: anon,
+          Authorization: "Bearer " + (token || anon),
+          "Content-Type": "application/json",
+          Prefer: "return=minimal",
+        },
         body: JSON.stringify({
           bank_name: payload.bankName || null,
           account_name: payload.accountName || null,
