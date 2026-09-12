@@ -2223,12 +2223,12 @@ function ImpactPage({ setPage }) {
         {!loading && !error && posts.length === 0 && thanks.length === 0 && (
           <p className="font-body text-sm text-[#0D3B3B]/50">No published stories yet.</p>
         )}
-        <div className="grid sm:grid-cols-2 gap-4">
+        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
         {posts.map((post) => (
           <button
             key={post.id}
             type="button"
-            className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md animate-[seekFade_0.5s_ease-out]"
+            className="rounded-xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
             onClick={() => {
               window.history.pushState({}, "", `/impact/${post.id}`);
               setPage(`impact:${post.id}`);
@@ -2236,15 +2236,15 @@ function ImpactPage({ setPage }) {
             }}
           >
             {post.public_url && post.media_kind === "video" ? (
-              <video src={post.public_url} muted playsInline preload="metadata" className="h-40 w-full object-cover bg-black" />
+              <video src={post.public_url} muted playsInline preload="metadata" className="h-24 w-full object-cover bg-black" />
             ) : post.public_url ? (
-              <img loading="lazy" decoding="async" src={post.public_url} alt="" className="h-40 w-full object-cover" />
+              <img loading="lazy" decoding="async" src={post.public_url} alt="" className="h-24 w-full object-cover" />
             ) : (
-              <div className="h-24 bg-[#0D3B3B]/5" />
+              <div className="h-16 bg-[#0D3B3B]/5" />
             )}
-            <div className="p-4">
-              <h2 className="font-display font-bold text-base text-[#0D3B3B] line-clamp-2">{post.title}</h2>
-              <p className="mt-1 font-body text-xs text-[#0D3B3B]/50 line-clamp-2">
+            <div className="p-2.5">
+              <h2 className="font-display font-semibold text-sm text-[#0D3B3B] line-clamp-2">{post.title}</h2>
+              <p className="mt-1 font-body text-[11px] text-[#0D3B3B]/50 line-clamp-2">
                 {post.story || [post.location, post.happened_on].filter(Boolean).join(" · ")}
               </p>
             </div>
@@ -2254,12 +2254,12 @@ function ImpactPage({ setPage }) {
         {thanks.length > 0 && (
           <div className="pt-10">
             <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-4">Thank-you notes from requesters</h2>
-            <div className="grid sm:grid-cols-2 gap-4">
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
               {thanks.map((post) => (
                 <button
                   key={post.id}
                   type="button"
-                  className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
+                  className="rounded-xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
                   onClick={() => {
                     window.history.pushState({}, "", `/impact/${post.id}`);
                     setPage(`impact:${post.id}`);
@@ -2267,13 +2267,13 @@ function ImpactPage({ setPage }) {
                   }}
                 >
                   {post.public_url && post.media_kind === "video" ? (
-                    <video src={post.public_url} muted playsInline preload="metadata" className="h-40 w-full object-cover bg-black" />
+                    <video src={post.public_url} muted playsInline preload="metadata" className="h-24 w-full object-cover bg-black" />
                   ) : post.public_url ? (
-                    <img loading="lazy" src={post.public_url} alt="" className="h-40 w-full object-cover" />
+                    <img loading="lazy" src={post.public_url} alt="" className="h-24 w-full object-cover" />
                   ) : null}
-                  <div className="p-4">
-                    <h3 className="font-display font-bold text-base text-[#0D3B3B] line-clamp-2">{post.title}</h3>
-                    <p className="mt-1 font-body text-xs text-[#0D3B3B]/50 line-clamp-3">{post.story}</p>
+                  <div className="p-2.5">
+                    <h3 className="font-display font-semibold text-sm text-[#0D3B3B] line-clamp-2">{post.title}</h3>
+                    <p className="mt-1 font-body text-[11px] text-[#0D3B3B]/50 line-clamp-2">{post.story}</p>
                   </div>
                 </button>
               ))}
