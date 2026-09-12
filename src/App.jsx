@@ -106,11 +106,21 @@ const FONTS = (
     }
 
     html.seek-dark { color-scheme: dark; }
+    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #F4F8F6 !important; }
+    html.seek-dark p, html.seek-dark label { color: #D5E4E1 !important; }
     html.seek-dark .bg-white h1,
     html.seek-dark .bg-white h2,
+    html.seek-dark .bg-white h3,
     html.seek-dark .bg-white p,
+    html.seek-dark .bg-white label,
     html.seek-dark .bg-white span,
     html.seek-dark .bg-white button { color: #0F211F !important; }
+    html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
+      color: #F4F8F6 !important;
+    }
+    html.seek-dark .bg-white input,
+    html.seek-dark .bg-white textarea,
+    html.seek-dark .bg-white select { color: #0F211F !important; }
 
     html.seek-dark body { background: #0B1918; color: #E8EEEC; }
     html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
