@@ -47,6 +47,45 @@ Deno.serve(async (req) => {
       Deno.env.get("SUPABASE_URL")!,
       Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SERVICE_ROLE_KEY")!
     );
+
+    const meta = result.data?.metadata || {};
+    if (String(meta.interval || "") === "monthly") {
+      const authCode = result.data?.authorization?.authorization_code;
+      const customer = result.data?.customer?.customer_code || result.data?.customer?.email;
+      const kobo = Number(result.data?.amount || 0);
+      if (authCode && customer && kobo > 0) {
+        const planRes = await fetch("https://api.paystack.co/plan", {
+          method: "POST",
+          headers: {
+            Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
+            "Content-Type": "application/json",
+          },
+          body: JSON.stringify({
+            name: "Seek monthly " + Math.round(kobo / 100),
+            interval: "monthly",
+            amount: kobo,
+            currency: "NGN",
+          }),
+        });
+        const plan = await planRes.json();
+        const planCode = plan?.data?.plan_code;
+        if (planCode) {
+          await fetch("https://api.paystack.co/subscription", {
+            method: "POST",
+            headers: {
+              Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
+              "Content-Type": "application/json",
+            },
+            body: JSON.stringify({
+              customer,
+              plan: planCode,
+              authorization: authCode,
+            }),
+          });
+        }
+      }
+    }
+
     const donation = await markPaid(supabase, reference, result.data || {});
     return new Response(JSON.stringify({
       ok: true,
