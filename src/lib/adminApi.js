@@ -1,3 +1,4 @@
+import { assertFileNotAlreadyUploaded } from "./seekApi";
 const SUPABASE_URL = (import.meta.env.VITE_SUPABASE_URL || '').trim();
 const SUPABASE_KEY = (
   import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
@@ -503,6 +504,7 @@ export async function uploadImpactMedia(file) {
     throw new Error("Admin session expired. Please sign in again.");
   }
   const form = new FormData();
+  await assertFileNotAlreadyUploaded(file);
   form.append("file", file);
   form.append("purpose", "impact");
   form.append("original_name", file.name || "impact");
