@@ -95,8 +95,10 @@ const C = {
 const FONTS = (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
-    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; }
-    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
+    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.045em; }
+    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.01em; line-height: 1.55; }
+    @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+    .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
@@ -573,9 +575,9 @@ function ThemeToggle() {
       type="button"
       aria-label={theme === "dark" ? "Use light background" : "Use dark background"}
       onClick={() => setTheme(theme === "dark" ? "light" : "dark")}
-      className="rounded-full border border-[#0D3B3B]/15 p-2 text-[#0D3B3B]"
+      className="rounded-xl border border-[#0D3B3B]/15 p-2 text-[#0D3B3B] hover:border-[#1BAA9C] transition-colors"
     >
-      {theme === "dark" ? <Sun size={16} /> : <Moon size={16} />}
+      {theme === "dark" ? <Sun key="sun" size={16} className="seek-theme-icon" /> : <Moon key="moon" size={16} className="seek-theme-icon" />}
     </button>
   );
 }
@@ -625,6 +627,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle />
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -636,9 +639,12 @@ function Navbar({ page, setPage, userSession }) {
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
 
-        <button className="lg:hidden p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
+        <div className="lg:hidden flex items-center gap-1">
+        <ThemeToggle />
+        <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
+        </div>
       </div>
 
       {open && (
@@ -815,9 +821,9 @@ function HomePage({ setPage, userSession }) {
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <SectionLabel>Yearly BSN outreaches</SectionLabel>
-        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Give to a standing community programme.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/60 mb-6 max-w-2xl">These are BSN Foundation yearly outreaches. Choose one, set your amount, and give through Seek.</p>
+        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#1BAA9C] mb-2">Yearly programmes</p>
+        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-3">Give to a BSN outreach.</h2>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6 max-w-2xl">Select a programme. Suggested amount is a starting point — you choose what to give.</p>
         <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-3">Choose an outreach</p>
         <div className="space-y-3">
           {OUTREACH_CAMPAIGNS.map((c) => (
@@ -3043,7 +3049,7 @@ function pathFromPage(page) {
   return map[id] || "/";
 }
 
-try { applySeekTheme("light"); localStorage.removeItem("seek_theme"); document.documentElement.classList.remove("seek-dark"); } catch (_e) {}
+try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
