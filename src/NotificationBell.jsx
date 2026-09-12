@@ -172,7 +172,7 @@ export default function NotificationBell({ userSession, setPage }) {
           ) : error ? (
             <p className="p-4 text-sm text-red-600">{error}</p>
           ) : items.length === 0 ? (
-            <p className="p-4 text-sm text-[#0D3B3B]/50">No notifications yet.</p>
+            <p className="p-4 text-sm text-[#0D3B3B]/50">You're all caught up. New updates will appear here.</p>
           ) : (
             <ul>
               {items.map((n) => (
