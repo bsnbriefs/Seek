@@ -1037,7 +1037,7 @@ const GIVE_OPTIONS = [
 ];
 
 
-function OfferCard({ offer }) {
+function OfferCard({ offer, setPage }) {
   const [open, setOpen] = useState(false);
   const [ownerRows, setOwnerRows] = useState([]);
   const session = getUserSession();
@@ -1097,7 +1097,15 @@ function OfferCard({ offer }) {
         }}>
           {open ? "Hide photos" : (media.length ? "Photos (" + media.length + ")" : "Photos")}
         </button>
-        <button type="button" className="text-[#0D3B3B]" onClick={() => setApply(!apply)}>
+        <button type="button" className="text-[#0D3B3B]" onClick={() => {
+          const session = getUserSession();
+          if (!session?.access_token) {
+            if (setPage) setPage("account");
+            else window.alert("Sign in first to join a giveaway.");
+            return;
+          }
+          setApply(!apply);
+        }}>
           I am interested
         </button>
         {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
@@ -1278,7 +1286,7 @@ function OffersPage({ setPage }) {
           <p className="font-body text-sm text-[#0D3B3B]/50">No open giveaways yet.</p>
         )}
         {offers.filter((o) => !offerFilter || o.category === offerFilter).map((offer) => (
-          <OfferCard offer={offer} />
+          <OfferCard offer={offer} setPage={setPage} />
         ))}
         <div className="pt-8">
           <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
