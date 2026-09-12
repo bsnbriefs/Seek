@@ -1669,7 +1669,7 @@ function RequestPage({ requestId, setPage }) {
             type="button"
             className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
             onClick={async () => {
-              const url = `${window.location.origin}/api/request-meta?id=${request.id}`;
+              const url = `${window.location.origin}/request/${request.id}`;
               const amount = request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "";
               const headline = request.publicUpdate
                 ? String(request.publicUpdate).slice(0, 80)
@@ -1693,7 +1693,7 @@ function RequestPage({ requestId, setPage }) {
               (request.publicUpdate ? String(request.publicUpdate).slice(0, 80) : request.title) +
               " — " + (request.location || "") +
               (request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "") +
-              " " + window.location.origin + "/api/request-meta?id=" + request.id
+              " " + window.location.origin + "/request/" + request.id
             )}`}
             target="_blank"
             rel="noreferrer"
@@ -2156,8 +2156,8 @@ function ImpactStoryPage({ impactId, setPage }) {
             className="rounded-full border px-3 py-1.5 text-sm font-semibold"
             onClick={async () => {
               const url = post.request_id
-                ? `${window.location.origin}/api/request-meta?id=${post.request_id}`
-                : `${window.location.origin}/api/impact-meta?id=${post.id}`;
+                ? `${window.location.origin}/request/${post.request_id}`
+                : `${window.location.origin}/impact/${post.id}`;
               try {
                 if (navigator.share) await navigator.share({ title: post.title, url });
                 else if (navigator.clipboard) {
