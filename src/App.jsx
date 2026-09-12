@@ -2158,7 +2158,7 @@ function ImpactStoryPage({ impactId, setPage }) {
               const url = post.request_id
                 ? `${window.location.origin}/api/request-meta?id=${post.request_id}`
                 : `${window.location.origin}/api/impact-meta?id=${post.id}`;
-              const text = (post.story || post.title || "Seek story") + " " + url;
+              const text = (post.title || "Seek story") + " " + url;
               try {
                 if (navigator.share) await navigator.share({ title: post.title, text, url });
                 else if (navigator.clipboard) {
