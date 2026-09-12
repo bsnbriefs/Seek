@@ -475,6 +475,12 @@ export default function AdminPage() {
                       <span className="font-semibold">Contact:</span>{" "}
                       {contact.full_name || "—"} • {contact.email || "—"}
                       {contact.phone ? ` • ${contact.phone}` : ""}
+                      {(contact.bank_name || contact.account_name || contact.account_number) && (
+                        <p className="mt-2 text-sm">
+                          <span className="font-semibold">Settlement:</span>{" "}
+                          {[contact.bank_name, contact.account_name, contact.account_number].filter(Boolean).join(" • ")}
+                        </p>
+                      )}
                     </div>
                   )}
 
