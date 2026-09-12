@@ -380,6 +380,7 @@ export async function initializeDonation({
   anonymous = false,
   donorName = "",
   coverFee = true,
+  interval = "once",
   callbackUrl = window.location.origin,
 }) {
   if (!supabaseConfigured) {
@@ -401,6 +402,7 @@ export async function initializeDonation({
         anonymous,
         donor_name: anonymous ? null : (donorName || null),
         cover_fee: coverFee !== false,
+        interval: interval === "monthly" ? "monthly" : "once",
         callback_url: callbackUrl,
       }),
     }
