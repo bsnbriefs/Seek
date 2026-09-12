@@ -87,9 +87,9 @@ const C = {
   deepTeal: "#0D3B3B",
   teal: "#1BAA9C",
   green: "#63C167",
-  bg: "#F2F5F3",
-  white: "#FFFFFF",
-  ink: "#0F211F",
+  bg: "var(--seek-bg, #F2F5F3)",
+  white: "var(--seek-card, #FFFFFF)",
+  ink: "var(--seek-ink, #0F211F)",
 };
 
 const FONTS = (
@@ -405,7 +405,23 @@ function getSeekTheme() {
 
 function applySeekTheme(theme) {
   const next = theme === "dark" ? "dark" : "light";
-  document.documentElement.classList.toggle("seek-dark", next === "dark");
+  const root = document.documentElement;
+  root.classList.toggle("seek-dark", next === "dark");
+  if (next === "dark") {
+    root.style.setProperty("--seek-bg", "#0B1918");
+    root.style.setProperty("--seek-card", "#122624");
+    root.style.setProperty("--seek-ink", "#E8EEEC");
+    root.style.backgroundColor = "#0B1918";
+    document.body && (document.body.style.backgroundColor = "#0B1918");
+    document.body && (document.body.style.color = "#E8EEEC");
+  } else {
+    root.style.setProperty("--seek-bg", "#F2F5F3");
+    root.style.setProperty("--seek-card", "#FFFFFF");
+    root.style.setProperty("--seek-ink", "#0F211F");
+    root.style.backgroundColor = "#F2F5F3";
+    document.body && (document.body.style.backgroundColor = "#F2F5F3");
+    document.body && (document.body.style.color = "#0F211F");
+  }
   try { localStorage.setItem("seek_theme", next); } catch (_e) {}
   return next;
 }
