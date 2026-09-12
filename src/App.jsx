@@ -1509,7 +1509,7 @@ function Field({ label, children }) {
 }
 
 
-const inputCls = "w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
+const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
 
 function SeekHelpPage() {
   const [submitted, setSubmitted] = useState(false);
