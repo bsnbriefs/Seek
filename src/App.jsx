@@ -98,62 +98,32 @@ const FONTS = (
     .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
     .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
     html { scroll-behavior: smooth; }
-    html, body {
-      background-image: linear-gradient(var(--seek-wash, rgba(242,245,243,0.88)), var(--seek-wash, rgba(242,245,243,0.88))), var(--seek-photo, none);
-      background-size: cover;
-      background-attachment: fixed;
-      background-position: center;
-    }
-
+    html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark .text-\[\#0D3B3B\],
-    html.seek-dark .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .text-\[\#0D3B3B\]\/60,
-    html.seek-dark .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .text-\[\#0D3B3B\]\/70,
-    html.seek-dark .text-\[\#0D3B3B\]\/80 { color: #E8EEEC !important; }
-    html.seek-dark .bg-white .text-\[\#0D3B3B\],
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/80 { color: #0D3B3B !important; }
-    html.seek-dark input::placeholder,
-    html.seek-dark textarea::placeholder { color: #C5D6D3 !important; opacity: 1; }
-    html.seek-dark .bg-white input::placeholder,
-    html.seek-dark .bg-white textarea::placeholder { color: #6B7C79 !important; }
-
-    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #F4F8F6 !important; }
-    html.seek-dark p, html.seek-dark label { color: #D5E4E1 !important; }
+    html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
+    html.seek-dark header { background: rgba(26,29,36,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
+    html.seek-dark header .text-\[\#0D3B3B\],
+    html.seek-dark header button { color: #F4F1EA !important; }
+    html.seek-dark .bg-white { background-color: #F7F6F2 !important; color: #1A1D24; }
     html.seek-dark .bg-white h1,
     html.seek-dark .bg-white h2,
     html.seek-dark .bg-white h3,
     html.seek-dark .bg-white p,
     html.seek-dark .bg-white label,
     html.seek-dark .bg-white span,
-    html.seek-dark .bg-white button { color: #0F211F !important; }
-    html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
-      color: #F4F8F6 !important;
-    }
+    html.seek-dark .bg-white button,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #1A1D24 !important; }
     html.seek-dark .bg-white input,
     html.seek-dark .bg-white textarea,
-    html.seek-dark .bg-white select { color: #0F211F !important; }
-
-    html.seek-dark body { background: #0B1918; color: #E8EEEC; }
-    html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
-    html.seek-dark .bg-white, html.seek-dark .bg-white\/80 { background-color: #122624 !important; }
-    html.seek-dark .text-\[\#0D3B3B\],
-    html.seek-dark .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .text-\[\#0D3B3B\]\/80 { color: #D7E6E3 !important; }
-    html.seek-dark .border-\[\#0D3B3B\]\/8,
-    html.seek-dark .border-\[\#0D3B3B\]\/15,
-    html.seek-dark .border-\[\#0D3B3B\]\/5 { border-color: rgba(255,255,255,0.12) !important; }
-    html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
-      background: #0F221F !important; color: #E8EEEC !important; border-color: rgba(255,255,255,0.16) !important;
+    html.seek-dark .bg-white select {
+      background: #FFFFFF !important;
+      color: #1A1D24 !important;
+      border-color: rgba(26,29,36,0.18) !important;
     }
+    html.seek-dark .bg-white input::placeholder,
+    html.seek-dark .bg-white textarea::placeholder { color: #6B7280 !important; opacity: 1; }
 
-    @keyframes seek-loop {
+        @keyframes seek-loop {
       0% { stroke-dashoffset: 0; }
       100% { stroke-dashoffset: -120; }
     }
