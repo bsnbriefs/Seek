@@ -36,6 +36,7 @@ import {
   userSignUp,
   userSignIn,
   listMyRequests,
+  deleteRejectedRequest,
   postRequestPublicUpdate,
   uploadAppreciationMedia,
   getRequestAppreciation,
@@ -102,6 +103,9 @@ const FONTS = (
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
+    html.seek-dark h1, html.seek-dark h2 { color: #EDE8E0 !important; }
+    html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #0D3B3B !important; }
+
 
     html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
     html.seek-dark header { background: rgba(26,29,36,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
@@ -460,6 +464,7 @@ function OutreachCheckout({ campaign, onClose }) {
   const [email, setEmail] = useState("");
   const [amount, setAmount] = useState(10000);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   if (!campaign) return null;
   return (
@@ -803,7 +808,7 @@ function HomePage({ setPage, userSession }) {
     <>
 
       {/* HERO */}
-      <section className="relative overflow-hidden" style={{ background: `linear-gradient(180deg, ${C.bg}, #ffffff)` }}>
+      <section className="relative overflow-visible" style={{ background: `linear-gradient(180deg, ${C.bg}, #ffffff)` }}>
         <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
           <SectionLabel>Seek · A project of BSN Foundation</SectionLabel>
           <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-6xl leading-[1.05] max-w-3xl mx-auto">
@@ -826,7 +831,7 @@ function HomePage({ setPage, userSession }) {
       </section>
 
       {/* TWO-SIDED ENTRY */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-10">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-0">
         <div className="grid md:grid-cols-[1fr_auto_1fr] items-center gap-6">
           <div className="rounded-3xl p-8 sm:p-10 text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #135050)` }}>
             <Search size={26} className="mb-4 text-[#63C167]" />
@@ -1091,6 +1096,7 @@ function OffersPage({ setPage }) {
   const [offerFilter, setOfferFilter] = useState("");
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   useEffect(() => {
     let cancelled = false;
     let donorTick;
@@ -1520,6 +1526,7 @@ const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4
 function SeekHelpPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
   const [form, setForm] = useState({
@@ -1668,6 +1675,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 function VolunteerPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [form, setForm] = useState({name:"",email:"",location:"",interests:"",role:""});
   const roles = [
@@ -1791,6 +1799,7 @@ function RequestPage({ requestId, setPage }) {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
     const [evidence, setEvidence] = useState([]);
     const [helped, setHelped] = useState(false);
     const [donors, setDonors] = useState([]);
@@ -2133,6 +2142,7 @@ function ReportRequestForm({ requestId }) {
   const [email, setEmail] = useState("");
   const [sent, setSent] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
 
   if (sent) {
@@ -2221,6 +2231,7 @@ function SupportChat() {
   const [text, setText] = useState("");
   const [email, setEmail] = useState("");
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -2364,6 +2375,7 @@ function ImpactStoryPage({ impactId, setPage }) {
   const [post, setPost] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -2450,6 +2462,7 @@ function ImpactPage({ setPage }) {
   const [thanks, setThanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
     let cancelled = false;
@@ -2560,6 +2573,7 @@ function AccountAvatar() {
   const [photo, setPhoto] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   useEffect(() => {
     const cached = getCachedAvatarUrl();
     if (cached) setPhoto(cached);
@@ -2606,6 +2620,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
 
@@ -2764,6 +2779,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
   const [file, setFile] = useState(null);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [saved, setSaved] = useState(Boolean(existing || existingMedia));
 
   return (
@@ -2832,6 +2848,7 @@ function MyRequestsPage({ setPage, userSession }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
 
   useEffect(() => {
     if (!userSession?.access_token) {
@@ -2951,6 +2968,27 @@ function MyRequestsPage({ setPage, userSession }) {
                 >
                   View public page
                 </button>
+                {req.status === "rejected" && (
+                  <button
+                    type="button"
+                    disabled={deletingId === req.id}
+                    onClick={async () => {
+                      if (!window.confirm("Delete this unpublished request? Your thank-you notes will not be removed.")) return;
+                      setDeletingId(req.id);
+                      try {
+                        await deleteRejectedRequest(req.id);
+                        setItems((prev) => prev.filter((item) => item.id !== req.id));
+                      } catch (err) {
+                        setError(err.message || "Could not delete this request.");
+                      } finally {
+                        setDeletingId("");
+                      }
+                    }}
+                    className="text-sm font-semibold text-red-700 hover:underline"
+                  >
+                    {deletingId === req.id ? "Deleting…" : "Delete request"}
+                  </button>
+                )}
               </div>
               {req.status === "fulfilled" && (
                 <RequesterUpdateForm
