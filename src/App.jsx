@@ -44,6 +44,8 @@ import {
   listPublicOffers,
   getOfferMedia,
   submitOfferInterest,
+  listMyOfferInterests,
+  markOfferInterestStatus,
   uploadProfilePhoto,
   getMyProfile,
   getCachedAvatarUrl,
@@ -696,7 +698,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <ThemeToggle />
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -709,7 +710,6 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <ThemeToggle />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -1039,6 +1039,13 @@ const GIVE_OPTIONS = [
 
 function OfferCard({ offer }) {
   const [open, setOpen] = useState(false);
+  const [ownerRows, setOwnerRows] = useState([]);
+  const session = getUserSession();
+  const isOwner = Boolean(session?.user?.id && offer.created_by && session.user.id === offer.created_by);
+  useEffect(() => {
+    if (!isOwner) return;
+    listMyOfferInterests(offer.id).then(setOwnerRows).catch(() => setOwnerRows([]));
+  }, [isOwner, offer.id]);
   const [media, setMedia] = useState(offer.media || []);
   const [apply, setApply] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -1093,6 +1100,7 @@ function OfferCard({ offer }) {
         <button type="button" className="text-[#0D3B3B]" onClick={() => setApply(!apply)}>
           I am interested
         </button>
+        {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
         <button
           type="button"
           className="text-[#0D3B3B]/50"
@@ -1106,6 +1114,25 @@ function OfferCard({ offer }) {
           Share
         </button>
       </div>
+
+      {isOwner && ownerRows.length > 0 && (
+        <div className="mt-4 rounded-xl bg-[#F4F1EA] p-3 space-y-2">
+          <p className="text-xs font-semibold uppercase text-[#0D3B3B]/50">People interested</p>
+          {ownerRows.map((row) => (
+            <div key={row.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
+              <span>{row.name || row.email} · {row.status || "interested"}</span>
+              <span className="flex gap-2">
+                {row.status !== "completed" && (
+                  <button type="button" className="text-[#1BAA9C] font-semibold" onClick={async () => {
+                    await markOfferInterestStatus(row.id, row.status === "contacted" ? "completed" : "contacted");
+                    setOwnerRows(await listMyOfferInterests(offer.id));
+                  }}>{row.status === "contacted" ? "Mark given" : "Reached out"}</button>
+                )}
+              </span>
+            </div>
+          ))}
+        </div>
+      )}
       {apply && !applied && (
         <form
           className="mt-3 space-y-2"
@@ -2434,6 +2461,7 @@ function ImpactStoryPage({ impactId, setPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
+  const [donateOpen, setDonateOpen] = useState(false);
 
   useEffect(() => {
     let cancelled = false;
@@ -2509,7 +2537,16 @@ function ImpactStoryPage({ impactId, setPage }) {
             <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
         ))}
-        <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
+        <div className="flex flex-wrap gap-3">
+          <Button variant="primary" onClick={() => setDonateOpen(true)}>Donate to support this work</Button>
+          <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
+        </div>
+        {donateOpen && (
+          <OutreachCheckout
+            campaign={{ title: post.title, amount: 10000 }}
+            onClose={() => setDonateOpen(false)}
+          />
+        )}
       </section>
     </div>
   );
