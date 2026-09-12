@@ -451,6 +451,70 @@ function CountUp({ value }) {
   return <span ref={ref}>{prefix}{shown.toLocaleString()}</span>;
 }
 
+
+function OutreachCheckout({ campaign, onClose }) {
+  const chips = [5000, 10000, 25000, 50000];
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [amount, setAmount] = useState(campaign?.amount || 5000);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  if (!campaign) return null;
+  return (
+    <div className="fixed inset-0 z-[80] bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setError("");
+          setLoading(true);
+          try {
+            const result = await initializeDonation({
+              amount: Number(amount),
+              email,
+              requestId: null,
+              anonymous: false,
+              donorName: (name || "Supporter") + " · " + campaign.title,
+              coverFee: true,
+              callbackUrl: window.location.origin,
+            });
+            window.location.href = result.authorization_url;
+          } catch (err) {
+            setError(err.message || "Payment could not start.");
+            setLoading(false);
+          }
+        }}
+        className="w-full max-w-md rounded-3xl bg-[#F7F1EA] p-6 shadow-2xl"
+      >
+        <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#1BAA9C]">Paystack checkout</p>
+        <h3 className="font-display font-bold text-xl text-[#0D3B3B] mt-1">Support {campaign.title}</h3>
+        <div className="mt-3 rounded-xl bg-[#1BAA9C]/10 px-3 py-2 text-sm text-[#0D3B3B]">
+          Campaign target: {campaign.title}
+        </div>
+        <label className="block mt-4 text-xs font-semibold uppercase text-[#0D3B3B]/60">Your name</label>
+        <input required className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
+        <label className="block mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Email address</label>
+        <input required type="email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        <p className="mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Amount (₦)</p>
+        <div className="mt-2 grid grid-cols-4 gap-2">
+          {chips.map((n) => (
+            <button type="button" key={n} onClick={() => setAmount(n)} className={`rounded-lg py-2 text-xs font-semibold border ${Number(amount) === n ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>
+              ₦{n.toLocaleString()}
+            </button>
+          ))}
+        </div>
+        <input className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B] mt-2" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+        <button disabled={loading} className="mt-4 w-full rounded-xl bg-[#0D3B3B] text-white font-display font-semibold py-3">
+          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment"}
+        </button>
+        <p className="mt-2 text-[11px] text-[#0D3B3B]/45">Secure checkout. Card details are handled by Paystack.</p>
+        <button type="button" onClick={onClose} className="mt-2 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
+      </form>
+    </div>
+  );
+}
+
 function SectionLabel({ children }) {
   return (
     <span className="inline-block font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#1BAA9C] mb-3">
@@ -665,6 +729,7 @@ function Connector() {
 /* ---------------- Homepage ---------------- */
 
 function HomePage({ setPage, userSession }) {
+  const [outreach, setOutreach] = useState(null);
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
@@ -759,11 +824,13 @@ function HomePage({ setPage, userSession }) {
               <h3 className="font-display font-bold text-[#0D3B3B]">{c.title}</h3>
               <p className="font-body text-sm text-[#0D3B3B]/60 mt-2">{c.blurb}</p>
               <p className="font-display font-semibold text-[#1BAA9C] mt-3">Suggested ₦{c.amount.toLocaleString()}</p>
-              <Button className="mt-4 !px-4 !py-2" onClick={() => { sessionStorage.setItem("seek_campaign", JSON.stringify(c)); go("give"); }}>Give to this outreach</Button>
+              <Button className="mt-4 !px-4 !py-2" onClick={() => setOutreach(c)}>Give to this outreach</Button>
             </div>
           ))}
         </div>
       </section>
+
+      {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
 
       {/* TWO-SIDED ENTRY */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-10">
