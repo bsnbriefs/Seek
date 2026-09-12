@@ -100,6 +100,9 @@ const FONTS = (
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
+    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #F4F1EA !important; }
+    html.seek-dark p { color: #D5D0C8 !important; }
+
     html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
     html.seek-dark header { background: rgba(26,29,36,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
     html.seek-dark header .text-\[\#0D3B3B\],
