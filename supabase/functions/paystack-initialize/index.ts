@@ -16,6 +16,7 @@ Deno.serve(async (req) => {
     const coverFee = body.cover_fee !== false && body.coverFee !== false;
     const donorName = anonymous ? null : String(body.donor_name || body.donorName || "").trim() || null;
     const callbackUrl = String(body.callback_url || body.callbackUrl || "https://seekbsn.org").trim();
+    const interval = String(body.interval || "once").trim() === "monthly" ? "monthly" : "once";
 
     if (!email || !Number.isFinite(gift) || gift <= 0) {
       throw new Error("Valid email and donation amount are required.");
@@ -80,6 +81,7 @@ Deno.serve(async (req) => {
           gift_amount: gift,
           platform_fee: fee,
           platform: "seek",
+          interval,
         },
       }),
     });
