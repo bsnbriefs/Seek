@@ -1669,12 +1669,15 @@ function RequestPage({ requestId, setPage }) {
             type="button"
             className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
             onClick={async () => {
-              const url = `${window.location.origin}/request/${request.id}`;
+              const url = `${window.location.origin}/api/request-meta?id=${request.id}`;
               const amount = request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "";
-              const text = "Seek request: " + request.title + " — " + (request.location || "") + "." + amount + " " + url;
+              const headline = request.publicUpdate
+                ? String(request.publicUpdate).slice(0, 80)
+                : request.title;
+              const text = headline + " — " + (request.location || "") + amount + " " + url;
               try {
                 if (navigator.share) {
-                  await navigator.share({ title: request.title, text, url });
+                  await navigator.share({ title: headline, text, url });
                 } else if (navigator.clipboard) {
                   await navigator.clipboard.writeText(text);
                   window.alert("Share text copied");
@@ -1687,7 +1690,8 @@ function RequestPage({ requestId, setPage }) {
           <a
             className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
             href={`https://wa.me/?text=${encodeURIComponent(
-              "Seek request: " + request.title + " — " + (request.location || "") +
+              (request.publicUpdate ? String(request.publicUpdate).slice(0, 80) : request.title) +
+              " — " + (request.location || "") +
               (request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "") +
               " " + window.location.origin + "/api/request-meta?id=" + request.id
             )}`}
@@ -2151,11 +2155,14 @@ function ImpactStoryPage({ impactId, setPage }) {
             type="button"
             className="rounded-full border px-3 py-1.5 text-sm font-semibold"
             onClick={async () => {
-              const url = `${window.location.origin}/api/impact-meta?id=${post.id}`;
+              const url = post.request_id
+                ? `${window.location.origin}/api/request-meta?id=${post.request_id}`
+                : `${window.location.origin}/api/impact-meta?id=${post.id}`;
+              const text = (post.story || post.title || "Seek story") + " " + url;
               try {
-                if (navigator.share) await navigator.share({ title: post.title, url });
+                if (navigator.share) await navigator.share({ title: post.title, text, url });
                 else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(url);
+                  await navigator.clipboard.writeText(text);
                   window.alert("Link copied");
                 }
               } catch (_e) {}
