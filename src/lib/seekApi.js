@@ -62,6 +62,20 @@ export async function submitRequest(payload) {
     throw new Error("Request was submitted but no request ID was returned.");
   }
 
+  if (payload.bankName || payload.accountName || payload.accountNumber) {
+    try {
+      await supabaseFetch("request_private?request_id=eq." + request.id, {
+        method: "PATCH",
+        headers: { Prefer: "return=minimal" },
+        body: JSON.stringify({
+          bank_name: payload.bankName || null,
+          account_name: payload.accountName || null,
+          account_number: payload.accountNumber || null,
+        }),
+      });
+    } catch (_e) {}
+  }
+
   const owner = getUserSession();
   if (owner?.user?.id) {
     try {
