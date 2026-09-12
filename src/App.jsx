@@ -230,11 +230,11 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
-  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000 },
-  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000 },
-  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000 },
-  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000 },
-  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000 },
+  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000, story: "Each year BSN stands with girls who miss school because they cannot afford sanitary care. Past outreaches have reached classrooms with kits, dignity, and a simple message: you belong in class.", photos: ["https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900&q=80", "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=900&q=80"] },
+  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000, story: "Bags, books and shoes have gone out before term starts so children can walk into class ready. This page is that same work, year after year.", photos: ["https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=80", "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&q=80"] },
+  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000, story: "Young people have sat in BSN skill sessions to learn a trade they can use. The next class is funded the same way this one was: people giving what they can.", photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80", "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=900&q=80"] },
+  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000, story: "Wards have seen BSN teams arrive with food, conversation and presence. Hospital visitation is still that: show up, then give so the next visit can happen.", photos: ["https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=80", "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=900&q=80"] },
+  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000, story: "Food packs have left BSN drives for homes that needed a meal that week. Give so the next pack can go out.", photos: ["https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&q=80", "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=900&q=80"] },
 ];
 
 /* ---------------- Small building blocks ---------------- */
@@ -489,6 +489,25 @@ function CountUp({ value }) {
   return <span ref={ref}>{prefix}{shown.toLocaleString()}</span>;
 }
 
+
+
+function OutreachStory({ campaign, onBack, onDonate }) {
+  if (!campaign) return null;
+  return (
+    <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
+      <button type="button" onClick={onBack} className="text-sm font-semibold text-[#1BAA9C] mb-6">Back to Give</button>
+      <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">Already done</p>
+      <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-4">{campaign.title}</h1>
+      <p className="font-body text-[#0D3B3B]/70 mb-6">{campaign.story || campaign.blurb}</p>
+      <div className="grid sm:grid-cols-2 gap-3 mb-8">
+        {(campaign.photos || []).map((src) => (
+          <img key={src} src={src} alt="" className="w-full h-48 object-cover rounded-2xl" />
+        ))}
+      </div>
+      <Button variant="primary" onClick={onDonate}>Donate to support this outreach</Button>
+    </section>
+  );
+}
 
 function OutreachCheckout({ campaign, onClose }) {
   const chips = [5000, 10000, 25000, 50000];
@@ -1271,6 +1290,7 @@ function OffersPage({ setPage }) {
 
 function GivePage({ setPage }) {
   const [outreach, setOutreach] = useState(null);
+  const [storyCampaign, setStoryCampaign] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchFilter, setSearchFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -1530,8 +1550,10 @@ if (!cancelled) {
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
         <div className="space-y-3">
-          {OUTREACH_CAMPAIGNS.map((c) => (
-            <button key={c.id} type="button" onClick={() => setOutreach(c)} className="w-full text-left rounded-2xl border border-[#0D3B3B]/10 bg-white px-4 py-4">
+          {storyCampaign ? (
+        <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
+      ) : OUTREACH_CAMPAIGNS.map((c) => (
+            <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="w-full text-left rounded-2xl border border-[#0D3B3B]/10 bg-white px-4 py-4">
               <span className="block font-display font-bold text-[#0D3B3B]">{c.title}</span>
               <span className="block text-sm text-[#1BAA9C] mt-0.5">Suggested ₦{c.amount.toLocaleString()}</span>
               <span className="block text-xs text-[#0D3B3B]/55 mt-1">{c.blurb}</span>
