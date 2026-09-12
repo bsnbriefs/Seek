@@ -2182,7 +2182,12 @@ function ImpactPage({ setPage }) {
           listPublishedImpact(),
           listAppreciationStories().catch(() => []),
         ]);
-        if (!cancelled) setPosts([...(thanks || []), ...(rows || [])]);
+        if (!cancelled) {
+          const thanksList = thanks || [];
+          const used = new Set(thanksList.map((item) => item.request_id).filter(Boolean));
+          const uniqueImpact = (rows || []).filter((row) => !row.request_id || !used.has(row.request_id));
+          setPosts([...thanksList, ...uniqueImpact]);
+        }
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load impact stories.");
       } finally {
