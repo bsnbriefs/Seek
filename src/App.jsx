@@ -2752,28 +2752,61 @@ function LiveTicker() {
   );
 }
 
+
+function pageFromPath(pathname) {
+  const path = String(pathname || "/").replace(/\/+$/, "") || "/";
+  if (path === "/admin") return "admin";
+  if (path === "/volunteer") return "volunteer";
+  if (path === "/give") return "give";
+  if (path === "/offers") return "offers";
+  if (path === "/seek-help") return "seek-help";
+  if (path === "/about") return "about";
+  if (path === "/impact") return "impact";
+  if (path.startsWith("/impact/")) return "impact:" + path.split("/")[2];
+  if (path === "/privacy") return "privacy";
+  if (path === "/terms") return "terms";
+  if (path === "/guidelines") return "guidelines";
+  if (path === "/contact") return "contact";
+  if (path === "/my-requests") return "my-requests";
+  if (path === "/account") return "account";
+  if (path.startsWith("/request/")) return "request:" + path.split("/")[2];
+  return "home";
+}
+
+function pathFromPage(page) {
+  const id = String(page || "home");
+  if (id.startsWith("request:")) return "/request/" + id.split(":")[1];
+  if (id.startsWith("impact:") && id !== "impact") return "/impact/" + id.split(":")[1];
+  const map = {
+    home: "/",
+    give: "/give",
+    offers: "/offers",
+    admin: "/admin",
+    "seek-help": "/seek-help",
+    volunteer: "/volunteer",
+    about: "/about",
+    impact: "/impact",
+    privacy: "/privacy",
+    terms: "/terms",
+    guidelines: "/guidelines",
+    contact: "/contact",
+    "my-requests": "/my-requests",
+    account: "/account",
+  };
+  return map[id] || "/";
+}
+
 export default function App() {
-  const [page, setPage] = useState(() => {
-    const path = window.location.pathname.replace(/\/+$/, "") || "/";
-    if (path === "/admin") return "admin";
-    if (path === "/volunteer") return "volunteer";
-    if (path === "/give") return "give";
-    if (path === "/offers") return "offers";
-    if (path === "/seek-help") return "seek-help";
-    if (path === "/about") return "about";
-    if (path === "/impact") return "impact";
-    if (path.startsWith("/impact/")) return `impact:${path.split("/")[2]}`;
-    if (path === "/privacy") return "privacy";
-    if (path === "/terms") return "terms";
-    if (path === "/guidelines") return "guidelines";
-    if (path === "/contact") return "contact";
-    if (path === "/my-requests") return "my-requests";
-    if (path === "/account") return "account";
-    if (path.startsWith("/request/")) {
-      return `request:${path.split("/")[2]}`;
+  const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
+  const setPage = (id) => {
+    setPageState(id);
+    const url = pathFromPage(id);
+    const current = window.location.pathname.replace(/\/+$/, "") || "/";
+    const next = url.replace(/\/+$/, "") || "/";
+    if (current !== next) {
+      window.history.pushState({ seekPage: id }, "", url);
     }
-    return "home";
-  });
+  };
 
   const [userSession, setUserSession] = useState(() => getUserSession());
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
@@ -2816,10 +2849,10 @@ export default function App() {
   }, []);
 
   useEffect(() => {
-  if (window.location.pathname === "/admin") {
-    setPage("admin");
-  }
-}, []);
+    const onPop = () => setPageState(pageFromPath(window.location.pathname));
+    window.addEventListener("popstate", onPop);
+    return () => window.removeEventListener("popstate", onPop);
+  }, []);
 
 useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
