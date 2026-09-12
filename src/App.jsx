@@ -526,7 +526,7 @@ function OutreachCheckout({ campaign, onClose }) {
         className="w-full max-w-md rounded-3xl bg-[#F7F1EA] p-6 shadow-2xl"
       >
         <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#1BAA9C]">Paystack checkout</p>
-        <h3 className="font-display font-bold text-xl text-[#0D3B3B] mt-1">Support {campaign.title}</h3>
+        <h3 className="font-display font-bold text-xl text-[#0D3B3B] mt-1">Support a BSN outreach this year</h3>
         <div className="mt-3 rounded-xl bg-[#1BAA9C]/10 px-3 py-2 text-sm text-[#0D3B3B]">
           Campaign target: {campaign.title}
         </div>
@@ -721,11 +721,11 @@ function Footer({ setPage }) {
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
           <Logo className="h-7 brightness-0 invert" />
-          <p className="mt-4 text-sm text-white/60 max-w-xs">Connecting needs with people willing to help.</p>
+          <p className="mt-4 text-sm text-white/60 max-w-xs">Ask for what you need. Offer what you can.</p>
           <p className="mt-3 text-xs uppercase tracking-wide text-white/40">A project of BSN Foundation</p>
         </div>
         <div>
-          <p className="font-display font-semibold text-white mb-3 text-sm">Platform</p>
+          <p className="font-display font-semibold text-white mb-3 text-sm">Seek</p>
           <ul className="space-y-2 text-sm">
             <li><button onClick={() => go("seek-help")} className="hover:text-white">Seek Help</button></li>
             <li><button onClick={() => go("give")} className="hover:text-white">Help Someone</button></li>
@@ -901,7 +901,7 @@ function HomePage({ setPage, userSession }) {
           <div className="rounded-3xl p-8 sm:p-10 text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #135050)` }}>
             <Search size={26} className="mb-4 text-[#63C167]" />
             <h3 className="font-display font-bold text-2xl mb-2">I need help</h3>
-            <p className="font-body text-white/70 mb-6">Tell us what you need and let the community help you find it.</p>
+            <p className="font-body text-white/70 mb-6">Share the details that will help people understand how they can help.</p>
             <Button variant="light" onClick={() => go("seek-help")}>Ask for help <ArrowRight size={16} /></Button>
           </div>
           <Connector />
@@ -1597,7 +1597,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
         <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">What do you need help with?</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Tell us what you need.</h1>
         <p className="mt-3 font-body text-[#0D3B3B]/60">Share only what's needed to describe your request — you're always in control of what's shown publicly.</p>
       </section>
 
@@ -1716,8 +1716,8 @@ function VolunteerPage() {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10 text-center">
         <SectionLabel>Volunteer</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Become a Seek Volunteer.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Volunteers are the trust layer of Seek — helping verify requests and connect people to real support.</p>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give your time. Make a difference.</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Tell us how you would like to help, and we will keep you in mind for opportunities.</p>
       </section>
 
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pb-14">
@@ -2518,9 +2518,9 @@ function ImpactPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
         <SectionLabel>Community Impact</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Stories from the Seek community</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">See what your help made possible.</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          Moments of help, connection and care — shared without exposing private details.
+          Stories of people and communities reached through Seek and BSN Foundation.
         </p>
       </section>
       <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }`}</style>
@@ -2658,7 +2658,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
         <section className="mx-auto max-w-md px-5 py-16 text-center">
           <SectionLabel>Account</SectionLabel>
           <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B] mb-2">
-            You’re signed in
+            Keep track of your requests.
           </h1>
           <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
             {userSession.user?.email}
@@ -2719,7 +2719,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             {mode === "signin" ? "Sign in" : "Create account"}
           </h1>
           <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
-            Track your requests and see when help is offered.
+            Sign in to see your requests, updates, and activity.
           </p>
         </div>
 
@@ -2948,10 +2948,10 @@ function MyRequestsPage({ setPage, userSession }) {
         {!loading && !error && items.length === 0 && (
           <div className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-8 text-center">
             <p className="font-body text-[#0D3B3B]/60 mb-4">
-              No requests found for this email yet.
+              You have no requests yet.
             </p>
             <p className="font-body text-xs text-[#0D3B3B]/45 mb-6">
-              Submit a request using this same email address, then return here to track it.
+              When you need help, you can ask here.
             </p>
             <Button variant="primary" onClick={() => setPage("seek-help")}>
               Submit a request <ArrowRight size={16} />
@@ -3001,7 +3001,7 @@ function MyRequestsPage({ setPage, userSession }) {
                     type="button"
                     disabled={deletingId === req.id}
                     onClick={async () => {
-                      if (!window.confirm("Delete this unpublished request? Your thank-you notes will not be removed.")) return;
+                      if (!window.confirm("Delete this request? This will permanently remove the request from your account. Thank-you notes are not removed.")) return;
                       setDeletingId(req.id);
                       try {
                         await deleteRejectedRequest(req.id);
