@@ -1552,7 +1552,22 @@ function RequestPage({ requestId, setPage }) {
       try {
         setLoading(true);
         setError("");
-        const matched = await getPublicRequestById(requestId);
+        let matched = await getPublicRequestById(requestId);
+        if (!matched) {
+          const stories = await listAppreciationStories().catch(() => []);
+          const story = (stories || []).find((item) => item.request_id === requestId || item.id === "thanks-" + requestId);
+          if (story) {
+            matched = {
+              id: requestId,
+              title: story.title,
+              location: story.location,
+              publicUpdate: story.story,
+              appreciationUrl: story.public_url,
+              appreciationKind: story.media_kind,
+              status: "fulfilled",
+            };
+          }
+        }
         if (!cancelled) {
   if (!matched) {
     setError("This request could not be found or is no longer published.");
@@ -2220,10 +2235,8 @@ function ImpactPage({ setPage }) {
             type="button"
             className="rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm transition-transform duration-300 hover:-translate-y-1 hover:shadow-md animate-[seekFade_0.5s_ease-out]"
             onClick={() => {
-              const isThanks = String(post.id).startsWith("thanks-");
-              const dest = isThanks ? `/impact/${post.id}` : (post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`);
-              window.history.pushState({}, "", dest);
-              setPage(isThanks ? `impact:${post.id}` : (post.request_id ? `request:${post.request_id}` : `impact:${post.id}`));
+              window.history.pushState({}, "", `/impact/${post.id}`);
+              setPage(`impact:${post.id}`);
               window.scrollTo(0, 0);
             }}
           >
