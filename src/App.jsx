@@ -716,12 +716,9 @@ function HomePage({ setPage, userSession }) {
           <button onClick={() => go("volunteer")} className="mt-5 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
             Become a volunteer
           </button>
-          <div className="mt-8 flex flex-col items-center gap-4">
-            <div className="flex items-center justify-center gap-3">
-              <ThemeToggle />
-              <NotificationBell userSession={userSession} setPage={setPage} />
-            </div>
-            <SocialLinks />
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <ThemeToggle />
+            <NotificationBell userSession={userSession} setPage={setPage} />
           </div>
         </div>
       </section>
@@ -1803,6 +1800,7 @@ function RequestPage({ requestId, setPage }) {
             target="_blank"
             rel="noreferrer"
           >
+            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="inline-block mr-1.5 align-[-2px]"><path d="M20 3.5A10 10 0 0 0 3.2 17.6L2 22l4.5-1.2A10 10 0 1 0 20 3.5zm-8 16.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.6.7.7-2.5-.2-.3A8.2 8.2 0 1 1 12 19.7zm4.7-6.1c-.3-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.3 0-.4.1-.6l.4-.5.1-.3a.5.5 0 0 0 0-.5c0-.1-.6-1.5-.8-2s-.4-.5-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.6 11.5 11.5 0 0 1 4.4 3.9 15 15 0 0 0 1.5.5 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.6-.3z"/></svg>
             WhatsApp
           </a>
         </div>
