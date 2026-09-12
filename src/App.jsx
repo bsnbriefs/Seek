@@ -515,6 +515,7 @@ function OutreachCheckout({ campaign, onClose }) {
               anonymous: false,
               donorName: (name || "Supporter") + " · " + campaign.title,
               coverFee: true,
+              interval,
               callbackUrl: window.location.origin,
             });
             window.location.href = result.authorization_url;
@@ -534,6 +535,12 @@ function OutreachCheckout({ campaign, onClose }) {
         <input required className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
         <label className="block mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Email address</label>
         <input required type="email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
+        <p className="mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">How often</p>
+        <div className="mt-2 grid grid-cols-2 gap-2">
+          {[{ id: "once", label: "Give once" }, { id: "monthly", label: "Monthly" }].map((opt) => (
+            <button type="button" key={opt.id} onClick={() => setIntervalKind(opt.id)} className={`rounded-lg py-2 text-xs font-semibold border ${interval === opt.id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>{opt.label}</button>
+          ))}
+        </div>
         <p className="mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Amount (₦)</p>
         <div className="mt-2 grid grid-cols-4 gap-2">
           {chips.map((n) => (
@@ -545,7 +552,7 @@ function OutreachCheckout({ campaign, onClose }) {
         <input className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B] mt-2" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
         {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
         <button disabled={loading} className="mt-4 w-full rounded-xl bg-[#0D3B3B] text-white font-display font-semibold py-3">
-          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment"}
+          {loading ? "Opening Paystack…" : (interval === "monthly" ? "Authorize ₦" + Number(amount || 0).toLocaleString() + " monthly" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment")}
         </button>
         <p className="mt-2 text-[11px] text-[#0D3B3B]/45">Secure checkout. Card details are handled by Paystack. A small processing fee is included so Seek receives the amount you choose.</p>
         <button type="button" onClick={onClose} className="mt-2 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
