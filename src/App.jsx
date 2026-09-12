@@ -645,7 +645,7 @@ function Navbar({ page, setPage, userSession }) {
     { id: "home", label: "Home" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Help Someone" },
-    { id: "offers", label: "Offers" },
+    { id: "offers", label: "Giveaways" },
     { id: "impact", label: "Impact" },
     { id: "volunteer", label: "Volunteer" },
     { id: "about", label: "About" },
@@ -737,7 +737,7 @@ function Footer({ setPage }) {
           <ul className="space-y-2 text-sm">
             <li><button onClick={() => go("seek-help")} className="hover:text-white">Seek Help</button></li>
             <li><button onClick={() => go("give")} className="hover:text-white">Help Someone</button></li>
-            <li><button onClick={() => go("offers")} className="hover:text-white">Offers</button></li>
+            <li><button onClick={() => go("offers")} className="hover:text-white">Giveaways</button></li>
             <li><button onClick={() => go("give")} className="hover:text-white">Give</button></li>
             <li><button onClick={() => go("volunteer")} className="hover:text-white">Volunteer</button></li>
           </ul>
@@ -1157,13 +1157,13 @@ function GiveOfferForm() {
     return (
       <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
         <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you — your offer has been received.</h2>
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you — your giveaway has been received.</h2>
       </div>
     );
   }
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 bg-white">
-      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give?</h2>
+      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
       <select value={offerRequestId} onChange={(e) => setOfferRequestId(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3">
         <option value="">General offer (not tied to a specific request)</option>
         {requests.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
@@ -1189,7 +1189,7 @@ function GiveOfferForm() {
           setSubmitted(true);
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
-      }}>{offerLoading ? "Submitting…" : "Submit offer"}</Button>
+      }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
       {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
     </div>
   );
@@ -1209,7 +1209,7 @@ function OffersPage({ setPage }) {
         const rows = await listPublicOffers();
         if (!cancelled) setOffers(rows);
       } catch (err) {
-        if (!cancelled) setError(err.message || "Could not load offers.");
+        if (!cancelled) setError(err.message || "Could not load giveaways.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -1220,16 +1220,16 @@ function OffersPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
         <SectionLabel>Offers</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">What people are ready to give</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Giveaways</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          Food, time, goods, skills. Seek keeps details private until there is a fit.
+          Food, time, goods, skills people are ready to give. Seek keeps details private until there is a fit.
         </p>
       </section>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
-        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading offers…</p>}
+        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading giveaways…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
         {!loading && !error && offers.length === 0 && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">No open offers yet.</p>
+          <p className="font-body text-sm text-[#0D3B3B]/50">No open giveaways yet.</p>
         )}
         {offers.filter((o) => !offerFilter || o.category === offerFilter).map((offer) => (
           <OfferCard offer={offer} />
@@ -1259,7 +1259,7 @@ function OffersPage({ setPage }) {
           </div>
         </div>
         <div className="text-center pt-6">
-          <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Make an offer</Button>
+          <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
         </div>
         <div id="make-offer" className="pt-10 text-left">
           <GiveOfferForm />
@@ -1375,7 +1375,7 @@ if (!cancelled) {
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
         <SectionLabel>Give</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give money where it is needed.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">A published request, or a BSN outreach. To give things or time, use Offers.</p>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
       </section>
       {selectedRequest && (
         <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
@@ -1528,7 +1528,7 @@ if (!cancelled) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Offers.</p>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
         <div className="space-y-3">
           {OUTREACH_CAMPAIGNS.map((c) => (
             <button key={c.id} type="button" onClick={() => setOutreach(c)} className="w-full text-left rounded-2xl border border-[#0D3B3B]/10 bg-white px-4 py-4">
