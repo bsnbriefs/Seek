@@ -98,6 +98,13 @@ const FONTS = (
     .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; }
     .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; }
     html { scroll-behavior: smooth; }
+    html, body {
+      background-image: linear-gradient(var(--seek-wash, rgba(242,245,243,0.88)), var(--seek-wash, rgba(242,245,243,0.88))), var(--seek-photo, none);
+      background-size: cover;
+      background-attachment: fixed;
+      background-position: center;
+    }
+
     html.seek-dark { color-scheme: dark; }
     html.seek-dark body { background: #0B1918; color: #E8EEEC; }
     html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
@@ -411,16 +418,24 @@ function applySeekTheme(theme) {
     root.style.setProperty("--seek-bg", "#0B1918");
     root.style.setProperty("--seek-card", "#122624");
     root.style.setProperty("--seek-ink", "#E8EEEC");
+    root.style.setProperty("--seek-wash", "rgba(11,25,24,0.78)");
+    root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=60')");
     root.style.backgroundColor = "#0B1918";
-    document.body && (document.body.style.backgroundColor = "#0B1918");
-    document.body && (document.body.style.color = "#E8EEEC");
+    if (document.body) {
+      document.body.style.backgroundColor = "#0B1918";
+      document.body.style.color = "#E8EEEC";
+    }
   } else {
     root.style.setProperty("--seek-bg", "#F2F5F3");
     root.style.setProperty("--seek-card", "#FFFFFF");
     root.style.setProperty("--seek-ink", "#0F211F");
+    root.style.setProperty("--seek-wash", "rgba(242,245,243,0.82)");
+    root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=60')");
     root.style.backgroundColor = "#F2F5F3";
-    document.body && (document.body.style.backgroundColor = "#F2F5F3");
-    document.body && (document.body.style.color = "#0F211F");
+    if (document.body) {
+      document.body.style.backgroundColor = "#F2F5F3";
+      document.body.style.color = "#0F211F";
+    }
   }
   try { localStorage.setItem("seek_theme", next); } catch (_e) {}
   return next;
