@@ -458,7 +458,7 @@ function OutreachCheckout({ campaign, onClose }) {
   const chips = [5000, 10000, 25000, 50000];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState(campaign?.amount || 5000);
+  const [amount, setAmount] = useState(10000);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   if (!campaign) return null;
@@ -510,7 +510,7 @@ function OutreachCheckout({ campaign, onClose }) {
         <button disabled={loading} className="mt-4 w-full rounded-xl bg-[#0D3B3B] text-white font-display font-semibold py-3">
           {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment"}
         </button>
-        <p className="mt-2 text-[11px] text-[#0D3B3B]/45">Secure checkout. Card details are handled by Paystack.</p>
+        <p className="mt-2 text-[11px] text-[#0D3B3B]/45">Secure checkout. Card details are handled by Paystack. A small processing fee is included so Seek receives the amount you choose.</p>
         <button type="button" onClick={onClose} className="mt-2 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
       </form>
     </div>
@@ -825,34 +825,6 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#1BAA9C] mb-2">Yearly programmes</p>
-        <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-3">Give to a BSN outreach.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6 max-w-2xl">Select a programme. Suggested amount is a starting point — you choose what to give.</p>
-        <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-3">Choose an outreach</p>
-        <div className="space-y-3">
-          {OUTREACH_CAMPAIGNS.map((c) => (
-            <button
-              key={c.id}
-              type="button"
-              onClick={() => setOutreach(c)}
-              className={`w-full text-left rounded-2xl border px-4 py-4 flex items-center gap-4 transition-all ${outreach?.id === c.id ? "border-[#1BAA9C] bg-[#0D3B3B] text-white" : "border-[#0D3B3B]/10 bg-white text-[#0D3B3B]"}`}
-            >
-              <span className={`h-11 w-11 rounded-xl shrink-0 flex items-center justify-center ${outreach?.id === c.id ? "bg-[#1BAA9C]" : "bg-[#0D3B3B]/8"}`}>
-                <HeartHandshake size={18} className={outreach?.id === c.id ? "text-white" : "text-[#1BAA9C]"} />
-              </span>
-              <span className="min-w-0">
-                <span className="block font-display font-bold">{c.title}</span>
-                <span className={`block text-sm mt-0.5 ${outreach?.id === c.id ? "text-[#63C167]" : "text-[#1BAA9C]"}`}>Suggested ₦{c.amount.toLocaleString()}</span>
-                <span className={`block text-xs mt-1 ${outreach?.id === c.id ? "text-white/70" : "text-[#0D3B3B]/55"}`}>{c.blurb}</span>
-              </span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
-
       {/* TWO-SIDED ENTRY */}
       <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-10">
         <div className="grid md:grid-cols-[1fr_auto_1fr] items-center gap-6">
@@ -947,6 +919,35 @@ function HomePage({ setPage, userSession }) {
           </button>
         </div>
       </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Yearly programmes you can support.</h2>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6 max-w-2xl">These sit beside Seek, not in place of a live request. Tap one to give through Paystack.</p>
+        <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-3">Choose an outreach</p>
+        <div className="space-y-3">
+          {OUTREACH_CAMPAIGNS.map((c) => (
+            <button
+              key={c.id}
+              type="button"
+              onClick={() => setOutreach(c)}
+              className={`w-full text-left rounded-2xl border px-4 py-4 flex items-center gap-4 transition-all ${outreach?.id === c.id ? "border-[#1BAA9C] bg-[#0D3B3B] text-white" : "border-[#0D3B3B]/10 bg-white text-[#0D3B3B]"}`}
+            >
+              <span className={`h-11 w-11 rounded-xl shrink-0 flex items-center justify-center ${outreach?.id === c.id ? "bg-[#1BAA9C]" : "bg-[#0D3B3B]/8"}`}>
+                <HeartHandshake size={18} className={outreach?.id === c.id ? "text-white" : "text-[#1BAA9C]"} />
+              </span>
+              <span className="min-w-0">
+                <span className="block font-display font-bold">{c.title}</span>
+                <span className={`block text-sm mt-0.5 ${outreach?.id === c.id ? "text-[#63C167]" : "text-[#1BAA9C]"}`}>Suggested ₦{c.amount.toLocaleString()}</span>
+                <span className={`block text-xs mt-1 ${outreach?.id === c.id ? "text-white/70" : "text-[#0D3B3B]/55"}`}>{c.blurb}</span>
+              </span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
+
 
     </>
   );
