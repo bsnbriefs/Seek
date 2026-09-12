@@ -448,15 +448,15 @@ function applySeekTheme(theme) {
   const root = document.documentElement;
   root.classList.toggle("seek-dark", next === "dark");
   if (next === "dark") {
-    root.style.setProperty("--seek-bg", "#0B1918");
-    root.style.setProperty("--seek-card", "#122624");
-    root.style.setProperty("--seek-ink", "#E8EEEC");
-    root.style.setProperty("--seek-wash", "rgba(11,25,24,0.55)");
-    root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?auto=format&fit=crop&w=1800&q=60')");
-    root.style.backgroundColor = "#0B1918";
+    root.style.setProperty("--seek-bg", "#1A1D24");
+    root.style.setProperty("--seek-card", "#F7F6F2");
+    root.style.setProperty("--seek-ink", "#F4F1EA");
+    root.style.setProperty("--seek-wash", "rgba(26,29,36,0.88)");
+    root.style.setProperty("--seek-photo", "none");
+    root.style.backgroundColor = "#1A1D24";
     if (document.body) {
-      document.body.style.backgroundColor = "#0B1918";
-      document.body.style.color = "#E8EEEC";
+      document.body.style.backgroundColor = "#1A1D24";
+      document.body.style.color = "#F4F1EA";
     }
   } else {
     root.style.setProperty("--seek-bg", "#F2F5F3");
@@ -1281,7 +1281,7 @@ if (!cancelled) {
       <section className="bg-white py-16">
         <div className="mx-auto max-w-2xl px-5 sm:px-8">
           {!submitted ? (
-            <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 sm:p-10" style={{ background: C.bg }}>
+            <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 sm:p-10 bg-white" style={{ background: C.white }}>
               <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Create an offer to help</h2>
               <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">
                 Describe what you can offer — for example, "I have children's clothes to give," or "I can sponsor school fees up to ₦100,000."
@@ -1566,8 +1566,8 @@ function VolunteerPage() {
                   ...form,
                   interests: [form.role, form.interests].filter(Boolean).join(" — "),
                 }); setSubmitted(true); } catch (err) { setError(err.message); } finally { setLoading(false); } }}
-              className="rounded-3xl p-8 sm:p-10 space-y-5"
-              style={{ background: C.bg }}
+              className="rounded-3xl p-8 sm:p-10 space-y-5 bg-white"
+              style={{ background: C.white }}
             >
               <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-1">Volunteer application</h2>
               <div className="grid sm:grid-cols-2 gap-5">
