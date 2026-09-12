@@ -1135,6 +1135,47 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 
+export async function listMyOfferInterests(offerId) {
+  const session = getUserSession();
+  if (!session?.access_token || !offerId) return [];
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const response = await fetch(
+    url + "/rest/v1/offer_interest?offer_id=eq." + encodeURIComponent(offerId) + "&select=id,name,email,phone,message,status,created_at,contacted_at,completed_at&order=created_at.desc",
+    { headers: { apikey: key, Authorization: "Bearer " + session.access_token } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) return [];
+  return Array.isArray(data) ? data : [];
+}
+
+export async function markOfferInterestStatus(interestId, status) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Sign in first.");
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const patch = { status };
+  if (status === "contacted") patch.contacted_at = new Date().toISOString();
+  if (status === "completed") patch.completed_at = new Date().toISOString();
+  const response = await fetch(
+    url + "/rest/v1/offer_interest?id=eq." + encodeURIComponent(interestId),
+    {
+      method: "PATCH",
+      headers: {
+        apikey: key,
+        Authorization: "Bearer " + session.access_token,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify(patch),
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not update this interest.");
+  }
+}
+
 export async function submitOfferInterest(payload) {
   if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
   return supabaseFetch("rpc/create_offer_interest", {
