@@ -1,6 +1,6 @@
 import AdminPage from "./AdminPage";
 import NotificationBell from "./NotificationBell";
-import React, { useEffect, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -100,8 +100,6 @@ const FONTS = (
     html { scroll-behavior: smooth; }
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #F4F1EA !important; }
-    html.seek-dark p { color: #D5D0C8 !important; }
 
     html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
     html.seek-dark header { background: rgba(26,29,36,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
@@ -415,6 +413,34 @@ function SocialLinks({ light = false }) {
       </a>
     </div>
   );
+}
+
+
+function CountUp({ value }) {
+  const raw = String(value ?? "");
+  const target = Number(raw.replace(/[^0-9.]/g, "")) || 0;
+  const prefix = raw.trim().startsWith("₦") ? "₦" : "";
+  const [shown, setShown] = useState(0);
+  const ref = useRef(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const io = new IntersectionObserver((entries) => {
+      if (!entries[0]?.isIntersecting) return;
+      const start = performance.now();
+      const tick = (now) => {
+        const p = Math.min(1, (now - start) / 900);
+        setShown(Math.round(target * p));
+        if (p < 1) requestAnimationFrame(tick);
+      };
+      requestAnimationFrame(tick);
+      io.disconnect();
+    }, { threshold: 0.35 });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [target]);
+  if (!target) return <span>{raw}</span>;
+  return <span ref={ref}>{prefix}{shown.toLocaleString()}</span>;
 }
 
 function SectionLabel({ children }) {
@@ -788,7 +814,7 @@ function HomePage({ setPage, userSession }) {
               : IMPACT_STATS
             ).map((s) => (
               <div key={s.label}>
-                <p className="font-display font-extrabold text-3xl sm:text-4xl text-white">{s.value}</p>
+                <p className="font-display font-extrabold text-3xl sm:text-4xl text-white"><CountUp value={s.value} /></p>
                 <p className="font-body text-sm text-white/55 mt-1">{s.label}</p>
               </div>
             ))}
