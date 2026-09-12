@@ -1,5 +1,5 @@
 import { useEffect, useRef, useState } from "react";
-import { Bell } from "lucide-react";
+import { Mailbox } from "lucide-react";
 import { supabase } from "./lib/supabaseClient";
 import { enableSeekPush } from "./lib/seekApi";
 
@@ -139,13 +139,13 @@ export default function NotificationBell({ userSession, setPage }) {
   const unreadCount = items.filter((n) => !n.read_at).length;
 
   return (
-    <div className="relative">
+    <div className="relative z-[80]">
       <button
         onClick={() => setOpen((o) => !o)}
         className="relative p-2 text-[#0D3B3B]/70 hover:text-[#0D3B3B]"
-        aria-label="Notifications"
+        aria-label="Inbox"
       >
-        <Bell size={22} />
+        <Mailbox size={22} />
         {unreadCount > 0 && (
           <span className="absolute -top-0.5 -right-0.5 bg-red-500 text-white text-[10px] font-bold rounded-full min-w-[16px] h-4 flex items-center justify-center px-1">
             {unreadCount > 9 ? "9+" : unreadCount}
@@ -157,7 +157,7 @@ export default function NotificationBell({ userSession, setPage }) {
       </button>
 
       {open && (
-        <div className="absolute right-0 mt-2 w-80 max-h-96 overflow-y-auto rounded-2xl bg-white border border-[#0D3B3B]/10 shadow-lg z-50">
+        <div className="absolute left-1/2 z-[90] mt-2 w-[min(20rem,calc(100vw-2rem))] -translate-x-1/2 max-h-96 overflow-y-auto rounded-2xl bg-white border border-[#0D3B3B]/10 shadow-2xl">
           <div className="flex items-center justify-between px-4 py-3 border-b border-[#0D3B3B]/8">
             <p className="font-display font-bold text-sm text-[#0D3B3B]">Notifications</p>
             {unreadCount > 0 && (
