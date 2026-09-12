@@ -852,7 +852,7 @@ function HomePage({ setPage, userSession }) {
             Everyone deserves a little help.
           </h1>
           <p className="mt-5 font-body text-lg text-[#0D3B3B]/70 max-w-xl mx-auto">
-            Seek connects people who need help with people who are willing to give it.
+            Ask for what you need. Offer what you can.
           </p>
           <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
             <Button variant="primary" onClick={() => go("seek-help")}>I need help <ArrowRight size={16} /></Button>
@@ -1155,7 +1155,7 @@ function GiveOfferForm() {
   }
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 bg-white">
-      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Create an offer to help</h2>
+      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give?</h2>
       <select value={offerRequestId} onChange={(e) => setOfferRequestId(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3">
         <option value="">General offer (not tied to a specific request)</option>
         {requests.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
@@ -1212,9 +1212,9 @@ function OffersPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
         <SectionLabel>Offers</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">People offering help</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">What people are ready to give</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          These are open offers. Contact details stay private. Seek connects them to a request.
+          Food, time, goods, skills. Seek keeps details private until there is a fit.
         </p>
       </section>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
@@ -1366,8 +1366,8 @@ if (!cancelled) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
         <SectionLabel>Give</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">You don't have to give money to make a difference.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Support a published request, give generally, or fund a BSN yearly outreach. Offers of goods or time are on Offers.</p>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give money where it is needed.</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">A published request, or a BSN outreach. To give things or time, use Offers.</p>
       </section>
       {selectedRequest && (
         <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
@@ -1519,8 +1519,8 @@ if (!cancelled) {
 
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
-        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Yearly programmes you can support.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Give money to a standing BSN outreach. Offers of goods or time live on the Offers page.</p>
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Offers.</p>
         <div className="space-y-3">
           {OUTREACH_CAMPAIGNS.map((c) => (
             <button key={c.id} type="button" onClick={() => setOutreach(c)} className="w-full text-left rounded-2xl border border-[#0D3B3B]/10 bg-white px-4 py-4">
