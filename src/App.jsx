@@ -94,9 +94,9 @@ const C = {
 
 const FONTS = (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Playfair+Display:ital,wght@0,600;0,700;1,600;1,700&family=Plus+Jakarta+Sans:wght@400;500;600;700;800&display=swap');
-    .font-display { font-family: 'Playfair Display', Georgia, 'Times New Roman', serif; letter-spacing: -0.02em; }
-    .font-body { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.01em; line-height: 1.6; }
+    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
+    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; }
+    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
     @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
     .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
     html { scroll-behavior: smooth; }
@@ -802,7 +802,7 @@ function HomePage({ setPage, userSession }) {
         <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
           <SectionLabel>Seek · A project of BSN Foundation</SectionLabel>
           <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-6xl leading-[1.05] max-w-3xl mx-auto">
-            Everyone deserves a <em className="italic">little</em> help.
+            Everyone deserves a little help.
           </h1>
           <p className="mt-5 font-body text-lg text-[#0D3B3B]/70 max-w-xl mx-auto">
             Seek connects people who need help with people who are willing to give it.
