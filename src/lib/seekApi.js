@@ -606,6 +606,33 @@ export async function userSignIn(email, password) {
   return session;
 }
 
+export async function deleteRejectedRequest(requestId) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Please sign in first.");
+  if (!requestId) throw new Error("Missing request.");
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").trim().replace(/\/$/, "");
+  const anon = (
+    import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+    import.meta.env.VITE_SUPABASE_ANON_KEY ||
+    ""
+  ).trim();
+  const response = await fetch(
+    base + "/rest/v1/requests?id=eq." + encodeURIComponent(requestId) + "&status=eq.rejected",
+    {
+      method: "DELETE",
+      headers: {
+        apikey: anon,
+        Authorization: "Bearer " + session.access_token,
+        Prefer: "return=minimal",
+      },
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || data?.hint || "Could not delete this request.");
+  }
+}
+
 export async function listMyRequests() {
   const session = getUserSession();
 
