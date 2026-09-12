@@ -106,6 +106,23 @@ const FONTS = (
     }
 
     html.seek-dark { color-scheme: dark; }
+    html.seek-dark .text-\[\#0D3B3B\],
+    html.seek-dark .text-\[\#0D3B3B\]\/50,
+    html.seek-dark .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .text-\[\#0D3B3B\]\/60,
+    html.seek-dark .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .text-\[\#0D3B3B\]\/70,
+    html.seek-dark .text-\[\#0D3B3B\]\/80 { color: #E8EEEC !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\],
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/80 { color: #0D3B3B !important; }
+    html.seek-dark input::placeholder,
+    html.seek-dark textarea::placeholder { color: #C5D6D3 !important; opacity: 1; }
+    html.seek-dark .bg-white input::placeholder,
+    html.seek-dark .bg-white textarea::placeholder { color: #6B7C79 !important; }
+
     html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #F4F8F6 !important; }
     html.seek-dark p, html.seek-dark label { color: #D5E4E1 !important; }
     html.seek-dark .bg-white h1,
@@ -634,7 +651,7 @@ function Connector() {
 
 /* ---------------- Homepage ---------------- */
 
-function HomePage({ setPage }) {
+function HomePage({ setPage, userSession }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   const [requests, setRequests] = useState([]);
   const [requestsLoading, setRequestsLoading] = useState(true);
@@ -713,6 +730,10 @@ function HomePage({ setPage }) {
           <button onClick={() => go("volunteer")} className="mt-5 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
             Become a volunteer
           </button>
+          <div className="mt-8 flex items-center justify-center gap-3">
+            <ThemeToggle />
+            <NotificationBell userSession={userSession} setPage={setPage} />
+          </div>
         </div>
       </section>
 
@@ -2969,7 +2990,7 @@ useEffect(() => {
   }, [page]);
 
   const pages = {
-    home: <HomePage setPage={setPage} />,
+    home: <HomePage setPage={setPage} userSession={userSession} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     admin: <AdminPage />,
