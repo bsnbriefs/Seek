@@ -105,22 +105,38 @@ const FONTS = (
     html.seek-dark { color-scheme: dark; }
     html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #EDE8E0 !important; }
     html.seek-dark .text-\[\#0D3B3B\] { color: #EDE8E0 !important; }
-    html.seek-dark .text-\[\#0D3B3B\]\/70,
-    html.seek-dark .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .text-\[\#0D3B3B\]\/60,
-    html.seek-dark .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .text-\[\#0D3B3B\]\/20,
+    html.seek-dark .text-\[\#0D3B3B\]\/25,
+    html.seek-dark .text-\[\#0D3B3B\]\/30,
+    html.seek-dark .text-\[\#0D3B3B\]\/35,
+    html.seek-dark .text-\[\#0D3B3B\]\/40,
+    html.seek-dark .text-\[\#0D3B3B\]\/45,
     html.seek-dark .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .text-\[\#0D3B3B\]\/45 { color: rgba(237,232,224,0.72) !important; }
+    html.seek-dark .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .text-\[\#0D3B3B\]\/60,
+    html.seek-dark .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .text-\[\#0D3B3B\]\/70,
+    html.seek-dark .text-\[\#0D3B3B\]\/75,
+    html.seek-dark .text-\[\#0D3B3B\]\/80,
+    html.seek-dark .text-\[\#0D3B3B\]\/90 { color: rgba(237,232,224,0.78) !important; }
     html.seek-dark .bg-white, html.seek-dark .bg-white * { color: unset; }
     html.seek-dark .bg-white { color: #0F211F !important; }
     html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #0D3B3B !important; }
     html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #0D3B3B !important; }
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/70,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/20,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/25,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/30,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/35,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/40,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/45,
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/45 { color: rgb(13 59 59 / 0.6) !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/70,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/75,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/80,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: rgb(13 59 59 / 0.62) !important; }
 
 
     html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
