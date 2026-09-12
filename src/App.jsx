@@ -106,11 +106,11 @@ const FONTS = (
     }
 
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark #root, html.seek-dark h1, html.seek-dark h2, html.seek-dark h3,
-    html.seek-dark p, html.seek-dark label, html.seek-dark span, html.seek-dark button {
-      color: #E8EEEC;
-    }
-    html.seek-dark h1, html.seek-dark h2 { color: #F4F8F6 !important; }
+    html.seek-dark .bg-white h1,
+    html.seek-dark .bg-white h2,
+    html.seek-dark .bg-white p,
+    html.seek-dark .bg-white span,
+    html.seek-dark .bg-white button { color: #0F211F !important; }
 
     html.seek-dark body { background: #0B1918; color: #E8EEEC; }
     html.seek-dark header { background: rgba(11,25,24,0.88) !important; border-color: rgba(255,255,255,0.08) !important; }
