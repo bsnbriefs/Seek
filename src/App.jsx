@@ -285,8 +285,16 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 function daysPosted(iso) {
   if (!iso) return "";
-  const days = Math.max(0, Math.floor((Date.now() - new Date(iso).getTime()) / 86400000));
-  if (days === 0) return "Posted today";
+  const ms = Date.now() - new Date(iso).getTime();
+  if (Number.isNaN(ms) || ms < 0) return "Posted just now";
+  const mins = Math.floor(ms / 60000);
+  if (mins < 1) return "Posted just now";
+  if (mins === 1) return "Posted 1 minute ago";
+  if (mins < 60) return "Posted " + mins + " minutes ago";
+  const hours = Math.floor(mins / 60);
+  if (hours === 1) return "Posted 1 hour ago";
+  if (hours < 24) return "Posted " + hours + " hours ago";
+  const days = Math.floor(hours / 24);
   if (days === 1) return "Posted 1 day ago";
   return "Posted " + days + " days ago";
 }
@@ -423,6 +431,7 @@ function RequestCard({ req, onHelp, onView }) {
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
         <MapPin size={14} /> {req.location}
       </p>
+      {req.created_at || req.createdAt ? <p className="text-xs text-[#0D3B3B]/45 mb-3">{daysPosted(req.created_at || req.createdAt)}</p> : null}
       {req.amountNeeded ? (
         <div className="mb-4"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
       ) : (
@@ -3171,13 +3180,13 @@ function LiveTicker() {
         ]);
         const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
           const purpose = String(g.donor_name || "").split("·").slice(1).join("·").replace(/\[.*?\]/g, "").trim() || "Seek";
-          return "NEW GIFT · ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose;
+          return "NEW GIFT · ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose + " · " + daysPosted(g.created_at);
         });
         const bits = [
           stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
           ...giftBits,
-          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request")),
-          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70)),
+          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request") + " · " + daysPosted(r.created_at || r.createdAt)),
+          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70) + " · " + daysPosted(o.created_at || o.createdAt)),
           ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
           ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
         ].filter(Boolean);
