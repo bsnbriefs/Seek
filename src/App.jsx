@@ -57,6 +57,7 @@ import {
   getPublicRequestById,
   listRequestDonors,
   submitSafetyReport,
+  enableSeekPush,
   startSupportConversation,
   listSupportMessages,
   sendSupportMessage,
@@ -3203,6 +3204,34 @@ function CookieBanner() {
   );
 }
 
+
+function InstallSeekPrompt() {
+  const [hidden, setHidden] = useState(() => {
+    try { return localStorage.getItem("seek_install_seen") === "1"; } catch { return false; }
+  });
+  const [msg, setMsg] = useState("");
+  if (hidden) return null;
+  return (
+    <div className="mx-auto max-w-3xl px-5 pb-4">
+      <div className="rounded-2xl border border-[#0D3B3B]/10 bg-white p-4">
+        <p className="font-body text-sm text-[#0D3B3B]">Install Seek on your home screen and allow alerts when help or a giveaway needs you.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
+            try {
+              await enableSeekPush();
+              setMsg("Alerts on. On your phone: browser menu → Add to Home screen.");
+            } catch (err) {
+              setMsg(err.message || "Allow notifications in the browser prompt.");
+            }
+          }}>Enable alerts</button>
+          <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_seen", "1"); } catch (_e) {} setHidden(true); }}>Not now</button>
+        </div>
+        {msg && <p className="mt-2 text-xs text-[#1BAA9C]">{msg}</p>}
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
   const setPage = (id) => {
@@ -3315,6 +3344,7 @@ useEffect(() => {
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <CookieBanner />
+      <InstallSeekPrompt />
       <LiveTicker />
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
