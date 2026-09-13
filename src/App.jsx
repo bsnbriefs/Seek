@@ -249,7 +249,7 @@ const IMPACT_STATS = [
 const OUTREACH_CAMPAIGNS = [
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4"] },
-  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAIWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYNOJNW6FQTn.mp4"] },
+  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
   { id: "hospital", title: "Hospital Visitations", blurb: "Someone in a ward should not eat alone.", amount: 10000, budget: 5000000, story: "BSN walks into wards with food and a face that stayed. The next ward visit needs ₦5 million this year. A gift today is a basket on a bedside table this month.", photos: ["/outreach/hospital-2.jpg", "/outreach/hospital-3.jpg", "/outreach/hospital-1.png"] },
   { id: "food-drive", title: "Charity / Food Drive", blurb: "A family should not sleep hungry this week.", amount: 5000, budget: 5500000, story: "Those packs on the table went to homes last outreach. The cupboard is empty again. ₦5.5 million fills packs for the year. Give one pack. We will take it.", photos: ["/outreach/food-drive-1.jpg"], videos: ["/outreach/5y_puvyl-vIFzHJa.mp4"] },
 ];
@@ -526,10 +526,10 @@ function OutreachStory({ campaign, onBack, onDonate }) {
       ) : null}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {(campaign.videos || []).map((src) => (
-          <video key={src} src={src} className="w-full rounded-2xl bg-black" controls playsInline preload="metadata" />
+          <video key={src} src={encodeURI(src)} className="w-full rounded-2xl bg-black" controls playsInline preload="metadata" />
         ))}
         {(campaign.photos || []).map((src) => (
-          <img key={src} src={src} alt="" className="w-full h-48 object-cover rounded-2xl" />
+          <img key={src} src={encodeURI(src)} alt="" className="w-full h-48 object-cover rounded-2xl" />
         ))}
       </div>
       <Button variant="primary" onClick={onDonate}>Donate to support this outreach</Button>
