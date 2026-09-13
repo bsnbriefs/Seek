@@ -891,7 +891,7 @@ export async function postAdminAppeal({ title, category, location, amount, descr
   return { id, share: id ? `https://seekbsn.org/request/${id}` : "" };
 }
 
-export async function postAdminGiveaway({ description, category, city, contactEmail }) {
+export async function postAdminGiveaway({ description, category, city, contactEmail, files }) {
   const session = getAdminSession();
   if (!session?.access_token) throw new Error("Admin sign in required.");
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_seek_offer`, {
@@ -931,11 +931,29 @@ export async function postAdminGiveaway({ description, category, city, contactEm
     });
     const row = await insert.json().catch(() => ({}));
     if (!insert.ok) throw new Error(row?.message || data?.message || "Could not post giveaway.");
-    const id = Array.isArray(row) ? row[0]?.id : row?.id;
-    if (id) await updateAdminOfferStatus(id, "open");
-    return { id, share: "https://seekbsn.org/offers" };
+    const fallbackId = Array.isArray(row) ? row[0]?.id : row?.id;
+    if (fallbackId) await updateAdminOfferStatus(fallbackId, "open");
+    data.id = fallbackId;
   }
   const id = Array.isArray(data) ? data[0]?.id : data?.id;
   if (id) await updateAdminOfferStatus(id, "open");
-  return { id, share: "https://seekbsn.org/offers" };
+  const offerId = id;
+  for (const file of files || []) {
+    const form = new FormData();
+    form.append("file", file);
+    form.append("purpose", "offer");
+    form.append("offer_id", offerId);
+    form.append("original_name", file.name || "offer");
+    const up = await fetch(`${SUPABASE_URL}/functions/v1/secure-media-upload`, {
+      method: "POST",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: form,
+    });
+    const result = await up.json().catch(() => ({}));
+    if (!up.ok || !result?.success) throw new Error(result?.error || "Giveaway posted but a photo failed.");
+  }
+  return { id: offerId, share: "https://seekbsn.org/offers" };
 }
