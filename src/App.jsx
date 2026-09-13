@@ -235,8 +235,12 @@ const CATEGORIES = [
   { id: "emergency", label: "Emergency", icon: AlertTriangle },
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "company", label: "Company / Friends", icon: Users },
+  { id: "celebrate", label: "Celebrate & Connect", icon: HeartHandshake },
+  { id: "accompany", label: "Accompaniment", icon: Users },
+  { id: "study", label: "Study companion", icon: GraduationCap },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
+const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
 
 const PARTNERS = [
   { name: "BSN Foundation", href: "https://barristerstreet.org" },
@@ -1791,7 +1795,12 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
               {CATEGORIES.map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
             </select>
           </Field>
-          <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
+          {CONNECT_CATS.includes(form.category) && (
+            <p className="text-sm text-[#0D3B3B]/65 rounded-xl bg-[#1BAA9C]/10 p-3">
+              This is for company, celebration or learning — not dating. Seek reviews every post before it is public. Do not share your home address here.
+            </p>
+          )}
+          <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder={CONNECT_CATS.includes(form.category) ? "e.g. Company at my graduation on Saturday" : "e.g. School fees for this term"} /></Field>
           <Field label="Amount needed (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
           </Field>
@@ -3215,7 +3224,7 @@ function LiveTicker() {
         const bits = [
           stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
           ...giftBits,
-          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request") + " · " + daysPosted(r.created_at || r.createdAt)),
+          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => (CONNECT_CATS.includes(r.category) ? "CELEBRATE · " : "SEEK REQUEST · ") + (r.title || r.need || r.category || "Open request") + " · " + daysPosted(r.created_at || r.createdAt)),
           ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70) + " · " + daysPosted(o.created_at || o.createdAt)),
           ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
           ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
@@ -3224,7 +3233,7 @@ function LiveTicker() {
       } catch (_e) {}
     };
     load();
-    const id = setInterval(load, 60000);
+    const id = setInterval(load, 20000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
   if (!items.length) return null;
