@@ -54,6 +54,7 @@ import {
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
+  getOutreachRaised,
   listPublicSponsors,
   getPublicRequestById,
   listRequestDonors,
@@ -509,6 +510,11 @@ function CountUp({ value }) {
 
 
 function OutreachStory({ campaign, onBack, onDonate }) {
+  const [raised, setRaised] = useState(0);
+  useEffect(() => {
+    if (!campaign?.title) return;
+    getOutreachRaised(campaign.title).then(setRaised).catch(() => setRaised(0));
+  }, [campaign?.title]);
   if (!campaign) return null;
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
@@ -520,7 +526,7 @@ function OutreachStory({ campaign, onBack, onDonate }) {
         <div className="mb-6 rounded-2xl bg-white border border-[#0D3B3B]/08 p-4">
           <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">What this year costs</p>
           <p className="font-display font-bold text-2xl text-[#0D3B3B] mt-1">₦{Number(campaign.budget).toLocaleString()}</p>
-          <div className="mt-3"><ProgressBar raised={0} needed={campaign.budget} /></div>
+          <div className="mt-3"><ProgressBar raised={raised} needed={campaign.budget} /></div>
           <p className="mt-2 text-xs text-[#0D3B3B]/50">Give what you can. We will take it from there.</p>
         </div>
       ) : null}
@@ -560,7 +566,7 @@ function OutreachCheckout({ campaign, onClose }) {
               email,
               requestId: null,
               anonymous,
-              donorName: anonymous ? "" : ((name || "Supporter") + " · " + campaign.title),
+              donorName: (anonymous ? "Anonymous" : (name || "Supporter")) + " · " + campaign.title,
               coverFee: true,
               interval: monthly ? "monthly" : "once",
               callbackUrl: `${window.location.origin}/give?outreach=${encodeURIComponent(campaign.id)}`,
