@@ -1,15 +1,13 @@
 {
-  "name": "Seek — Connecting needs with people willing to help",
+  "name": "Seek",
   "short_name": "Seek",
-  "description": "Seek connects people who need help with people willing to give it. A project of BSN Foundation.",
   "start_url": "/",
-  "scope": "/",
   "display": "standalone",
-  "orientation": "portrait-primary",
   "background_color": "#F2F5F3",
   "theme_color": "#0D3B3B",
+  "description": "Ask for what you need. Offer what you can.",
   "icons": [
-    {"src":"/pwa-192.png","sizes":"192x192","type":"image/png","purpose":"any maskable"},
-    {"src":"/pwa-512.png","sizes":"512x512","type":"image/png","purpose":"any maskable"}
+    { "src": "/logo.png", "sizes": "192x192", "type": "image/png" },
+    { "src": "/logo.png", "sizes": "512x512", "type": "image/png" }
   ]
 }
