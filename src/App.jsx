@@ -35,6 +35,7 @@ import {
   userLogout,
   userSignUp,
   userSignIn,
+  sendMagicLink,
   listMyRequests,
   deleteRejectedRequest,
   postRequestPublicUpdate,
@@ -2751,26 +2752,10 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     setMessage("");
     setLoading(true);
     try {
-      if (mode === "signup") {
-        const result = await userSignUp(email, password);
-        if (result?.needsConfirmation) {
-          setMessage("Check your email to confirm your account, then sign in.");
-          setMode("signin");
-        } else {
-          setUserSession(result);
-          const back = sessionStorage.getItem("seek_return") || "my-requests";
-          sessionStorage.removeItem("seek_return");
-          setPage(back);
-        }
-      } else {
-        const session = await userSignIn(email, password);
-        setUserSession(session);
-        const back = sessionStorage.getItem("seek_return") || "my-requests";
-        sessionStorage.removeItem("seek_return");
-        setPage(back);
-      }
+      await sendMagicLink(email);
+      setMessage("Check that inbox for a Seek link. Open it to finish signing in. No password needed.");
     } catch (err) {
-      setError(err.message || "Something went wrong.");
+      setError(err.message || "Could not send the link.");
     } finally {
       setLoading(false);
     }
@@ -2785,7 +2770,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             {mode === "signin" ? "Sign in" : "Create account"}
           </h1>
           <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
-            Sign in to see your requests, updates, and activity.
+            Enter the email you already use. We will send a link. No password.
           </p>
         </div>
 
@@ -2803,27 +2788,12 @@ function AccountPage({ setPage, userSession, setUserSession }) {
               placeholder="you@example.com"
             />
           </Field>
-          <Field label="Password">
-            <input
-              required
-              type="password"
-              minLength={6}
-              className={inputCls}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-            />
-          </Field>
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
 
           <Button disabled={loading} type="submit" variant="primary" className="w-full">
-            {loading
-              ? "Please wait…"
-              : mode === "signin"
-                ? "Sign in"
-                : "Create account"}
+            {loading ? "Sending link…" : "Email me a sign-in link"}
           </Button>
 
           <p className="text-center text-sm text-[#0D3B3B]/55">
