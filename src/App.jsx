@@ -247,11 +247,11 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
-  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000, story: "Each year BSN stands with girls who miss school because they cannot afford sanitary care. Past outreaches have reached classrooms with kits, dignity, and a simple message: you belong in class.", photos: ["/outreach/pad-a-girl-1.jpg", "/outreach/pad-a-girl-2.jpg"] },
-  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000, story: "Bags, books and shoes have gone out before term starts so children can walk into class ready. This page is that same work, year after year.", photos: ["/outreach/back-to-school-1.jpg", "/outreach/back-to-school-2.jpg"] },
-  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000, story: "Young people have sat in BSN skill sessions to learn a trade they can use. The next class is funded the same way this one was: people giving what they can.", photos: ["/outreach/skills-1.jpg", "/outreach/skills-2.jpg"] },
-  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000, story: "Wards have seen BSN teams arrive with food, conversation and presence. Hospital visitation is still that: show up, then give so the next visit can happen.", photos: ["/outreach/hospital-2.jpg", "/outreach/hospital-3.jpg", "/outreach/hospital-1.png"] },
-  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000, story: "Food packs have left BSN drives for homes that needed a meal that week. Give so the next pack can go out.", photos: ["/outreach/food-drive-1.jpg"] },
+  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000, budget: 2000000, story: "Each year BSN stands with girls who miss school because they cannot afford sanitary care. Past outreaches have reached classrooms with kits, dignity, and a simple message: you belong in class.", photos: ["/outreach/pad-a-girl-1.jpg", "/outreach/pad-a-girl-2.jpg"] },
+  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000, budget: 4000000, story: "Bags, books and shoes have gone out before term starts so children can walk into class ready. This page is that same work, year after year.", photos: ["/outreach/back-to-school-1.jpg", "/outreach/back-to-school-2.jpg"] },
+  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000, budget: 5000000, story: "Young people have sat in BSN skill sessions to learn a trade they can use. The next class is funded the same way this one was: people giving what they can.", photos: ["/outreach/skills-1.jpg", "/outreach/skills-2.jpg"] },
+  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000, budget: 3000000, story: "Wards have seen BSN teams arrive with food, conversation and presence. Hospital visitation is still that: show up, then give so the next visit can happen.", photos: ["/outreach/hospital-2.jpg", "/outreach/hospital-3.jpg", "/outreach/hospital-1.png"] },
+  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000, budget: 2000000, story: "Food packs have left BSN drives for homes that needed a meal that week. Give so the next pack can go out.", photos: ["/outreach/food-drive-1.jpg"] },
 ];
 
 /* ---------------- Small building blocks ---------------- */
@@ -516,6 +516,14 @@ function OutreachStory({ campaign, onBack, onDonate }) {
       <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">Already done</p>
       <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-4">{campaign.title}</h1>
       <p className="font-body text-[#0D3B3B]/70 mb-6">{campaign.story || campaign.blurb}</p>
+      {campaign.budget ? (
+        <div className="mb-6 rounded-2xl bg-white border border-[#0D3B3B]/08 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">This year&apos;s budget · all states</p>
+          <p className="font-display font-bold text-2xl text-[#0D3B3B] mt-1">₦{Number(campaign.budget).toLocaleString()}</p>
+          <div className="mt-3"><ProgressBar raised={0} needed={campaign.budget} /></div>
+          <p className="mt-2 text-xs text-[#0D3B3B]/50">Every gift on this page counts toward that work.</p>
+        </div>
+      ) : null}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {(campaign.photos || []).map((src) => (
           <img key={src} src={src} alt="" className="w-full h-48 object-cover rounded-2xl" />
@@ -1596,6 +1604,7 @@ if (!cancelled) {
                 <div className="p-4">
                   <span className="block font-display font-bold text-lg text-[#0D3B3B]">{c.title}</span>
                   <span className="block text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</span>
+                  {c.budget ? <p className="mt-2 text-xs font-semibold text-[#0D3B3B]/55">Annual budget ₦{Number(c.budget).toLocaleString()} across states</p> : null}
                   <span className="mt-3 inline-flex text-sm font-semibold text-[#1BAA9C]">See this work →</span>
                 </div>
               </button>
