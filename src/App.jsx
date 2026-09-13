@@ -191,7 +191,7 @@ const FONTS = (
     .seek-ticker-track {
       display: inline-flex;
       gap: 2.5rem;
-      animation: seekTicker 28s linear infinite;
+      animation: seekTicker 80s linear infinite;
       white-space: nowrap;
     }
     @media (prefers-reduced-motion: reduce) {
@@ -859,7 +859,7 @@ function HomePage({ setPage, userSession }) {
   const [ticker, setTicker] = useState([]);
   useEffect(() => {
     const tick = () => getSeekLiveStats().then(setLiveStats).catch(() => {});
-    const id = setInterval(tick, 20000);
+    const id = setInterval(tick, 45000);
     return () => clearInterval(id);
   }, []);
 
@@ -3194,7 +3194,7 @@ function LiveTicker() {
       } catch (_e) {}
     };
     load();
-    const id = setInterval(load, 20000);
+    const id = setInterval(load, 60000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
   if (!items.length) return null;
