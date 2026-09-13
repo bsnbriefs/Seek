@@ -970,7 +970,7 @@ export async function postAdminGiveaway({ description, category, city, contactEm
     if (fallbackId) await updateAdminOfferStatus(fallbackId, "open");
     data.id = fallbackId;
   }
-  const id = Array.isArray(data) ? data[0]?.id : data?.id;
+  const id = Array.isArray(data) ? data[0]?.id : (data?.id || (typeof data === "string" ? data : null));
   if (id) await updateAdminOfferStatus(id, "open");
   const offerId = id;
   for (const file of files || []) {
