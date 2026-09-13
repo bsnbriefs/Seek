@@ -1172,6 +1172,14 @@ function urlBase64ToUint8Array(base64String) {
 }
 
 
+export async function getOfferInterestCount(offerId) {
+  if (!offerId) return 0;
+  const rows = await supabaseFetch(
+    "offer_interest?select=id&offer_id=eq." + encodeURIComponent(offerId)
+  ).catch(() => []);
+  return Array.isArray(rows) ? rows.length : 0;
+}
+
 export async function listMyOfferInterests(offerId) {
   const session = getUserSession();
   if (!session?.access_token || !offerId) return [];
