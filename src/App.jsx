@@ -3191,6 +3191,27 @@ function pathFromPage(page) {
 
 try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
+
+function CookieBanner() {
+  const [open, setOpen] = useState(() => {
+    try { return localStorage.getItem("seek_cookie_consent") !== "1"; } catch { return true; }
+  });
+  if (!open) return null;
+  return (
+    <div className="fixed inset-x-0 bottom-0 z-[90] p-4">
+      <div className="mx-auto max-w-3xl rounded-2xl bg-[#0D3B3B] text-white p-4 shadow-2xl">
+        <p className="font-body text-sm leading-relaxed">
+          We value your privacy. In compliance with the GDPR and NDPR, we use cookies to optimize performance, analyze website traffic, and support marketing.
+        </p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" className="rounded-full bg-white text-[#0D3B3B] px-4 py-2 text-sm font-semibold" onClick={() => { try { localStorage.setItem("seek_cookie_consent", "1"); } catch (_e) {} setOpen(false); }}>Accept</button>
+          <button type="button" className="rounded-full border border-white/30 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_cookie_consent", "necessary"); } catch (_e) {} setOpen(false); }}>Necessary only</button>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
   const setPage = (id) => {
@@ -3302,6 +3323,7 @@ useEffect(() => {
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
+      <CookieBanner />
       <LiveTicker />
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
