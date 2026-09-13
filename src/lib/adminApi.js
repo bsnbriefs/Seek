@@ -860,6 +860,15 @@ export async function getAdminOfferInterests() {
 export async function postAdminAppeal({ title, category, location, amount, description, email, files, name, phone }) {
   const session = getAdminSession();
   if (!session?.access_token) throw new Error("Admin sign in required.");
+  const checkTitle = (title || "").trim();
+  if (checkTitle) {
+    const dup = await fetch(
+      `${SUPABASE_URL}/rest/v1/requests?select=id,title&title=eq.${encodeURIComponent(checkTitle)}&status=in.(published,pending_review,partially_funded)&limit=1`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+    );
+    const rows = await dup.json().catch(() => []);
+    if (Array.isArray(rows) && rows.length) throw new Error("This appeal is already posted.");
+  }
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_seek_request`, {
     method: "POST",
     headers: {
@@ -911,6 +920,15 @@ export async function postAdminAppeal({ title, category, location, amount, descr
 export async function postAdminGiveaway({ description, category, city, contactEmail, files }) {
   const session = getAdminSession();
   if (!session?.access_token) throw new Error("Admin sign in required.");
+  const check = (description || "").trim();
+  if (check) {
+    const dup = await fetch(
+      `${SUPABASE_URL}/rest/v1/offers?select=id,description&description=eq.${encodeURIComponent(check)}&status=in.(open,pending_review,matched)&limit=1`,
+      { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+    );
+    const rows = await dup.json().catch(() => []);
+    if (Array.isArray(rows) && rows.length) throw new Error("This giveaway is already posted.");
+  }
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_seek_offer`, {
     method: "POST",
     headers: {
