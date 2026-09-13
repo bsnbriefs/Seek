@@ -1257,6 +1257,8 @@ function OffersPage({ setPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
     let cancelled = false;
     let donorTick;
@@ -2938,6 +2940,8 @@ function MyRequestsPage({ setPage, userSession }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
+  const [q, setQ] = useState("");
+  const [statusFilter, setStatusFilter] = useState("all");
 
   useEffect(() => {
     if (!userSession?.access_token) {
@@ -3020,12 +3024,37 @@ function MyRequestsPage({ setPage, userSession }) {
           </div>
         )}
 
-        <div className="space-y-4">
-          {items.map((req) => (
-            <div
+        {!loading && items.length > 0 && (
+          <>
+            <input className="mb-3 w-full rounded-xl border px-4 py-3 text-sm" placeholder="Search your requests" value={q} onChange={(e) => setQ(e.target.value)} />
+            <div className="mb-4 flex flex-wrap gap-2">
+              {[
+                { id: "all", label: "All" },
+                { id: "pending_review", label: "Under review" },
+                { id: "published", label: "Live" },
+                { id: "fulfilled", label: "Need met" },
+                { id: "rejected", label: "Not published" },
+              ].map((f) => (
+                <button key={f.id} type="button" onClick={() => setStatusFilter(f.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusFilter === f.id ? "bg-[#0D3B3B] text-white" : "bg-white border"}`}>{f.label}</button>
+              ))}
+            </div>
+          </>
+        )}
+        <div className="space-y-3">
+          {items.filter((req) => {
+            if (statusFilter !== "all" && req.status !== statusFilter && !(statusFilter === "published" && req.status === "partially_funded")) return false;
+            const hay = `${req.title || ""} ${req.location || ""} ${req.category || ""} ${req.id || ""}`.toLowerCase();
+            return hay.includes(q.trim().toLowerCase());
+          }).map((req) => (
+            <details
               key={req.id}
-              className="rounded-2xl bg-white border border-[#0D3B3B]/08 p-5 sm:p-6"
+              className="rounded-2xl bg-white border border-[#0D3B3B]/08"
             >
+              <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
+                <span className="font-display font-bold text-[#0D3B3B]">{req.title}</span>
+                <span className="text-xs font-semibold text-[#0D3B3B]/50">{formatSeekStatus(req.status)}</span>
+              </summary>
+              <div className="px-5 pb-5">
               <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
                   {req.category}
@@ -3089,7 +3118,8 @@ function MyRequestsPage({ setPage, userSession }) {
                   }}
                 />
               )}
-            </div>
+              </div>
+            </details>
           ))}
         </div>
       </section>
