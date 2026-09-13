@@ -1573,16 +1573,6 @@ if (!cancelled) {
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
-        {sponsors.length > 0 && (
-          <div className="mb-8 rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-2">This year&apos;s sponsors</p>
-            <ul className="space-y-1 text-sm text-[#0D3B3B]">
-              {sponsors.map((s, i) => (
-                <li key={i}>{s.donor_name} — ₦{Number(s.amount || 0).toLocaleString()}</li>
-              ))}
-            </ul>
-          </div>
-        )}
         <div className="space-y-3">
           {storyCampaign ? (
         <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
@@ -3210,6 +3200,15 @@ function InstallSeekPrompt() {
     try { return localStorage.getItem("seek_install_seen") === "1"; } catch { return false; }
   });
   const [msg, setMsg] = useState("");
+  const [installEvent, setInstallEvent] = useState(null);
+  useEffect(() => {
+    const onPrompt = (e) => {
+      e.preventDefault();
+      setInstallEvent(e);
+    };
+    window.addEventListener("beforeinstallprompt", onPrompt);
+    return () => window.removeEventListener("beforeinstallprompt", onPrompt);
+  }, []);
   if (hidden) return null;
   return (
     <div className="mx-auto max-w-3xl px-5 pb-4">
@@ -3217,13 +3216,18 @@ function InstallSeekPrompt() {
         <p className="font-body text-sm text-[#0D3B3B]">Install Seek on your home screen and allow alerts when help or a giveaway needs you.</p>
         <div className="mt-3 flex flex-wrap gap-2">
           <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-            try {
-              await enableSeekPush();
-              setMsg("Alerts on. On your phone: browser menu → Add to Home screen.");
-            } catch (err) {
-              setMsg(err.message || "Allow notifications in the browser prompt.");
-            }
+            try { await enableSeekPush(); setMsg("Alerts allowed."); } catch (err) { setMsg(err.message || "Allow notifications when the browser asks."); }
           }}>Enable alerts</button>
+          <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={async () => {
+            if (installEvent) {
+              installEvent.prompt();
+              await installEvent.userChoice.catch(() => null);
+              setInstallEvent(null);
+              setMsg("Follow the install sheet.");
+            } else {
+              setMsg("Chrome menu → Add to Home screen. iPhone: Share → Add to Home Screen.");
+            }
+          }}>Install Seek</button>
           <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_seen", "1"); } catch (_e) {} setHidden(true); }}>Not now</button>
         </div>
         {msg && <p className="mt-2 text-xs text-[#1BAA9C]">{msg}</p>}
