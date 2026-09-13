@@ -668,7 +668,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-[110] bg-white border-b border-[#0D3B3B]/8">
+    <header className="sticky top-0 z-[110] relative bg-white border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -712,40 +712,32 @@ function Navbar({ page, setPage, userSession }) {
       </div>
 
       {open && (
-        <div className="lg:hidden fixed inset-0 z-[120] bg-[#0B1211] text-white flex flex-col">
-          <div className="flex items-center justify-between px-5 h-16">
-            <Logo className="h-7" />
-            <button className="p-2" onClick={() => setOpen(false)} aria-label="Close"><X size={22} /></button>
-          </div>
-          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
-            {[
-              { id: "home", label: "Home", icon: HomeIcon },
-              { id: "seek-help", label: "Seek Help", icon: Search },
-              { id: "give", label: "Give", icon: HeartHandshake },
-              { id: "offers", label: "Giveaways", icon: Package },
-              { id: "impact", label: "Impact", icon: BadgeCheck },
-              { id: "volunteer", label: "Volunteer", icon: Users },
-              { id: "about", label: "About", icon: ShieldCheck },
-            ].map((l) => {
-              const Icon = l.icon;
-              const on = page === l.id;
-              return (
-                <button key={l.id} onClick={() => go(l.id)} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.14em] uppercase ${on ? "bg-white/10 text-white" : "text-white/70"}`}>
-                  <Icon size={16} /> {l.label}
-                </button>
-              );
-            })}
-            {userSession?.access_token && (
-              <button onClick={() => go("my-requests")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.14em] uppercase text-white/70">
-                <Clock size={16} /> My requests
+        <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
+          {[
+            { id: "home", label: "Home", icon: HomeIcon },
+            { id: "seek-help", label: "Seek Help", icon: Search },
+            { id: "give", label: "Give", icon: HeartHandshake },
+            { id: "offers", label: "Giveaways", icon: Package },
+            { id: "impact", label: "Impact", icon: BadgeCheck },
+            { id: "volunteer", label: "Volunteer", icon: Users },
+            { id: "about", label: "About", icon: ShieldCheck },
+          ].map((l) => {
+            const Icon = l.icon;
+            const on = page === l.id;
+            return (
+              <button key={l.id} onClick={() => go(l.id)} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase ${on ? "bg-[#0D3B3B]/5 text-[#0D3B3B]" : "text-[#0D3B3B]/70"}`}>
+                <Icon size={16} /> {l.label}
               </button>
-            )}
-          </nav>
-          <div className="p-4">
-            <button onClick={() => go("account")} className="w-full rounded-xl bg-white/10 py-3 text-sm tracking-[0.16em] uppercase">
-              {userSession?.access_token ? "Account" : "Sign in"}
+            );
+          })}
+          {userSession?.access_token && (
+            <button onClick={() => go("my-requests")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase text-[#0D3B3B]/70">
+              <Clock size={16} /> My requests
             </button>
-          </div>
+          )}
+          <button onClick={() => go("account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
+            {userSession?.access_token ? "Account" : "Sign in"}
+          </button>
         </div>
       )}
     </header>
@@ -838,7 +830,6 @@ function HomePage({ setPage, userSession }) {
         const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
-          listPublishedImpact().catch(() => []),
           listPublicSponsors().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
@@ -3109,18 +3100,17 @@ function LiveTicker() {
     let cancelled = false;
     (async () => {
       try {
-        const [reqRows, offerRows, impactRows, world] = await Promise.all([
+        const [reqRows, offerRows, disasters, nigeria] = await Promise.all([
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
-          listPublishedImpact().catch(() => []),
-          listPublicSponsors().catch(() => []),
-          fetch("/api/world-headlines").then((r) => r.json()).then((d) => d.items || []).catch(() => []),
+          fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=8&sort[]=date:desc").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.name).filter(Boolean)).catch(() => []),
+          fetch("https://api.reliefweb.int/v1/reports?appname=seekbsn&profile=list&limit=8&sort[]=date:desc&filter[field]=primary_country&filter[value]=Nigeria").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.title).filter(Boolean)).catch(() => []),
         ]);
         const bits = [
           ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || "Open request")),
           ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "SEEK OFFER · " + String(o.description || "").slice(0, 70)),
-          ...(Array.isArray(impactRows) ? impactRows : []).slice(0, 6).map((s) => "IMPACT · " + (s.title || s.headline || "Community story")),
-          ...(Array.isArray(world) ? world : []).map((name) => "WORLD · " + name),
+          ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
+          ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
         ].filter(Boolean);
         if (!cancelled) setItems(bits);
       } catch (_e) {}
