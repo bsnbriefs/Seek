@@ -105,6 +105,14 @@ const FONTS = (
     @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
     .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
     html { scroll-behavior: smooth; }
+    :root {
+      --seek-template: editorial;
+      --seek-page: #EFEAE2;
+      --seek-paper: #FFFcf7;
+      --seek-line: rgba(13,59,59,0.10);
+    }
+    body { background: var(--seek-page) !important; }
+
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
     html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #EDE8E0 !important; }
@@ -667,7 +675,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#0D3B3B]/8">
+    <header className="sticky top-0 z-50 border-b border-[#0D3B3B]/10" style={{ background: "rgba(255,252,247,0.92)", backdropFilter: "blur(10px)" }}>
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -711,23 +719,24 @@ function Navbar({ page, setPage, userSession }) {
       </div>
 
       {open && (
-        <div className="lg:hidden border-t border-[#0D3B3B]/8 bg-white px-5 py-4 flex flex-col gap-1">
-          {links.map((l, i) => (
-            <button key={l.label + i} onClick={() => go(l.id)} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
-              {l.label}
-            </button>
-          ))}
-          {userSession?.access_token && (
-            <button onClick={() => go("my-requests")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
-              My requests
-            </button>
-          )}
-          <button onClick={() => go("account")} className="text-left font-body text-[#0D3B3B] py-2.5 border-b border-[#0D3B3B]/5">
-            {userSession?.access_token ? "Account" : "Sign in"}
-          </button>
-          <div className="flex flex-col gap-2 mt-3">
-            <Button variant="secondary" onClick={() => go("seek-help")}>I need help</Button>
-            <Button variant="primary" onClick={() => go("give")}>I want to help</Button>
+        <div className="lg:hidden fixed inset-0 z-[70] bg-[#F7F6F2] flex flex-col">
+          <div className="flex items-center justify-between px-5 h-16 border-b border-[#0D3B3B]/8 bg-white">
+            <Logo className="h-7" />
+            <button className="p-2" onClick={() => setOpen(false)} aria-label="Close"><X size={22} /></button>
+          </div>
+          <div className="flex-1 overflow-y-auto px-6 py-6">
+            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-2">Ask</p>
+            <button onClick={() => go("seek-help")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">I need help</button>
+            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mt-6 mb-2">Give</p>
+            <button onClick={() => go("give")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">I want to help</button>
+            <button onClick={() => go("offers")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">Giveaways</button>
+            <button onClick={() => go("volunteer")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">Volunteer</button>
+            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mt-6 mb-2">Seek</p>
+            <button onClick={() => go("home")} className="block w-full text-left py-2 text-[#0D3B3B]">Home</button>
+            <button onClick={() => go("impact")} className="block w-full text-left py-2 text-[#0D3B3B]">Impact</button>
+            <button onClick={() => go("about")} className="block w-full text-left py-2 text-[#0D3B3B]">About</button>
+            {userSession?.access_token && <button onClick={() => go("my-requests")} className="block w-full text-left py-2 text-[#0D3B3B]">My requests</button>}
+            <button onClick={() => go("account")} className="block w-full text-left py-2 text-[#0D3B3B]">{userSession?.access_token ? "Account" : "Sign in"}</button>
           </div>
         </div>
       )}
@@ -3345,7 +3354,7 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
+    <div className="font-body min-h-screen" style={{ background: "#EFEAE2", color: C.ink }}>
       {FONTS}
       <CookieBanner />
       <InstallSeekPrompt />
