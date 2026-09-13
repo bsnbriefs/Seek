@@ -172,6 +172,11 @@ const FONTS = (
       100% { stroke-dashoffset: -120; }
     }
     .seek-connector path { stroke-dasharray: 6 10; animation: seek-loop 3.2s linear infinite; }
+    @keyframes seekLiveBlink {
+      0%, 49% { opacity: 1; }
+      50%, 100% { opacity: 0.15; }
+    }
+    .seek-live-blink { animation: seekLiveBlink 0.8s steps(1) infinite; }
     @keyframes seekLivePulse {
       0%, 100% { opacity: 1; transform: scale(1); }
       50% { opacity: 0.35; transform: scale(0.75); }
@@ -474,7 +479,7 @@ function SocialLinks({ light = false }) {
 
 
 function CountUp({ value }) {
-  const raw = String(value ?? "");
+  const raw = (value === undefined || value === null || value === "undefined") ? "0" : String(value);
   const target = Number(raw.replace(/[^0-9.]/g, "")) || 0;
   const prefix = raw.trim().startsWith("₦") ? "₦" : "";
   const [shown, setShown] = useState(0);
@@ -658,13 +663,13 @@ function Navbar({ page, setPage, userSession }) {
     getMyProfile().then((p) => { if (p?.avatar_url) setAvatar(p.avatar_url); }).catch(() => {});
   }, [userSession]);
   const links = [
-    { id: "home", label: "Home" },
-    { id: "seek-help", label: "Seek Help" },
-    { id: "give", label: "Help Someone" },
-    { id: "offers", label: "Giveaways" },
-    { id: "impact", label: "Impact" },
-    { id: "volunteer", label: "Volunteer" },
-    { id: "about", label: "About" },
+    { id: "home", label: "Home", icon: HomeIcon },
+    { id: "seek-help", label: "Seek Help", icon: HeartHandshake },
+    { id: "give", label: "Help Someone", icon: Wallet },
+    { id: "offers", label: "Giveaways", icon: Package },
+    { id: "impact", label: "Impact", icon: BadgeCheck },
+    { id: "volunteer", label: "Volunteer", icon: Users },
+    { id: "about", label: "About", icon: ShieldCheck },
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
@@ -677,8 +682,9 @@ function Navbar({ page, setPage, userSession }) {
             <button
               key={l.label + i}
               onClick={() => go(l.id)}
-              className={`font-body text-sm font-medium transition-colors ${page === l.id ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              className={`font-body text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${page === l.id ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
             >
+              {l.icon ? <l.icon size={14} /> : null}
               {l.label}
             </button>
           ))}
@@ -1495,8 +1501,7 @@ if (!cancelled) {
           >
             Or give a general donation
           {campaign && (
-            <p className="font-body text-sm text-[#1BAA9C] mb-3">Giving to {campaign.title}. Suggested ₦{Number(campaign.amount).toLocaleString()} — you can change the amount.</p>
-          )}
+                      )}
           </button>
         )}
         <input
@@ -1581,17 +1586,22 @@ if (!cancelled) {
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
-        <div className="space-y-3">
-          {storyCampaign ? (
-        <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
-      ) : OUTREACH_CAMPAIGNS.map((c) => (
-            <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="w-full text-left rounded-2xl border border-[#0D3B3B]/10 bg-white px-4 py-4">
-              <span className="block font-display font-bold text-[#0D3B3B]">{c.title}</span>
-              <span className="block text-sm text-[#1BAA9C] mt-0.5">Suggested ₦{c.amount.toLocaleString()}</span>
-              <span className="block text-xs text-[#0D3B3B]/55 mt-1">{c.blurb}</span>
-            </button>
-          ))}
-        </div>
+        {storyCampaign ? (
+          <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {OUTREACH_CAMPAIGNS.map((c) => (
+              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="text-left rounded-3xl overflow-hidden bg-white border border-[#0D3B3B]/8 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition">
+                {c.photos?.[0] && <img src={c.photos[0]} alt="" className="h-36 w-full object-cover" />}
+                <div className="p-4">
+                  <span className="block font-display font-bold text-lg text-[#0D3B3B]">{c.title}</span>
+                  <span className="block text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</span>
+                  <span className="mt-3 inline-flex text-sm font-semibold text-[#1BAA9C]">See this work →</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
         {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
       </section>
     </div>
@@ -3107,8 +3117,8 @@ function LiveTicker() {
           fetch("https://api.reliefweb.int/v1/reports?appname=seekbsn&profile=list&limit=8&sort[]=date:desc&filter[field]=primary_country&filter[value]=Nigeria").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.title).filter(Boolean)).catch(() => []),
         ]);
         const bits = [
-          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || "Open request")),
-          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "SEEK OFFER · " + String(o.description || "").slice(0, 70)),
+          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request")),
+          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70)),
           ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
           ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
         ].filter(Boolean);
@@ -3121,7 +3131,7 @@ function LiveTicker() {
   return (
     <div className="border-b border-[#0D3B3B]/10 bg-[#0D3B3B] text-white overflow-hidden">
       <div className="flex items-center gap-3 px-3 py-2">
-        <span className="shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#E11D48] px-2 py-1 rounded">Live</span>
+        <span className="seek-live-blink shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#E11D48] px-2 py-1 rounded">Live</span>
         <div className="overflow-hidden flex-1">
           <div className="seek-ticker-track">
             {[...items, ...items].map((item, i) => (
