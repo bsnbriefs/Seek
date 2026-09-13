@@ -283,6 +283,14 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 }
 
 
+
+const SEEK_FACE = "/seek-logo.png";
+function postAvatar(url, row = {}) {
+  const blob = [row.title, row.description, row.name, row.contactEmail, row.requester_name, row.display_name, row.category].join(" ").toLowerCase();
+  if (blob.includes("bsn") || blob.includes("barrister street")) return SEEK_FACE;
+  return url || "";
+}
+
 function daysPosted(iso) {
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
@@ -421,8 +429,8 @@ function RequestCard({ req, onHelp, onView }) {
         <UrgencyBadge level={req.urgency} />
       </div>
       <div className="flex items-start gap-3 mb-2">
-        {req.avatarUrl ? (
-          <img loading="lazy" decoding="async" src={req.avatarUrl} alt="" className="h-11 w-11 rounded-full object-cover shrink-0" fetchpriority="high" />
+        {postAvatar(req.avatarUrl, req) ? (
+          <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white shrink-0" fetchpriority="high" />
         ) : (
           <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10 shrink-0" />
         )}
@@ -1104,8 +1112,8 @@ function OfferCard({ offer, setPage }) {
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
       <div className="flex items-start gap-3">
-        {offer.avatar_url ? (
-          <img loading="lazy" decoding="async" src={offer.avatar_url} alt="" className="h-12 w-12 rounded-full object-cover shrink-0" fetchpriority="high" />
+        {postAvatar(offer.avatar_url, offer) ? (
+          <img loading="lazy" decoding="async" src={postAvatar(offer.avatar_url, offer)} alt="" className="h-12 w-12 rounded-full object-cover bg-white shrink-0" fetchpriority="high" />
         ) : (
           <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10 shrink-0" />
         )}
