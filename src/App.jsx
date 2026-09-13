@@ -1715,15 +1715,17 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <Field label="Category">
-            <ChoiceChips value={form.category} onChange={(v) => setForm({ ...form, category: v })} options={CATEGORIES.map((c) => c.label)} />
+            <select required className={inputCls} value={form.category} onChange={set("category")}>
+              <option value="">Choose a category</option>
+              {CATEGORIES.map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
+            </select>
           </Field>
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
           <Field label="Amount needed (₦)">
-            <ChoiceChips value={String(form.amount)} onChange={(v) => setForm({ ...form, amount: v })} options={["5000","10000","25000","50000","100000"]} />
-            <input className={inputCls + " mt-2"} value={form.amount} onChange={set("amount")} placeholder="Or type another amount" inputMode="numeric" />
+            <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
           </Field>
           <Field label="Your video story">
-            <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Record a short video asking the Seek community for support. Photos or a PDF can go with it.</p>
+            <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Look into the camera and tell people why this help matters. A short video reaches hearts faster than a form. Add photos if you have them.</p>
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
               <Upload size={18} />
               <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a video (MP4, MOV, WEBM) or photos"}</span>
