@@ -563,7 +563,7 @@ function OutreachCheckout({ campaign, onClose }) {
               donorName: anonymous ? "" : ((name || "Supporter") + " · " + campaign.title),
               coverFee: true,
               interval: monthly ? "monthly" : "once",
-              callbackUrl: window.location.origin,
+              callbackUrl: `${window.location.origin}/give?outreach=${encodeURIComponent(campaign.id)}`,
             });
             window.location.href = result.authorization_url;
           } catch (err) {
@@ -841,6 +841,11 @@ function HomePage({ setPage, userSession }) {
   const [sponsors, setSponsors] = useState([]);
   const [liveStats, setLiveStats] = useState(null);
   const [ticker, setTicker] = useState([]);
+  useEffect(() => {
+    const tick = () => getSeekLiveStats().then(setLiveStats).catch(() => {});
+    const id = setInterval(tick, 20000);
+    return () => clearInterval(id);
+  }, []);
 
     useEffect(() => {
     let cancelled = false;
@@ -1341,7 +1346,10 @@ function GivePage({ setPage }) {
   const [sponsors, setSponsors] = useState([]);
   useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
   const [outreach, setOutreach] = useState(null);
-  const [storyCampaign, setStoryCampaign] = useState(null);
+  const [storyCampaign, setStoryCampaign] = useState(() => {
+    const id = new URLSearchParams(window.location.search).get("outreach");
+    return OUTREACH_CAMPAIGNS.find((c) => c.id === id) || null;
+  });
   const [categoryFilter, setCategoryFilter] = useState("all");
   const [searchFilter, setSearchFilter] = useState("");
   const [locationFilter, setLocationFilter] = useState("all");
@@ -3146,13 +3154,15 @@ function LiveTicker() {
     let cancelled = false;
     (async () => {
       try {
-        const [reqRows, offerRows, disasters, nigeria] = await Promise.all([
+        const [reqRows, offerRows, disasters, nigeria, stats] = await Promise.all([
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=8&sort[]=date:desc").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.name).filter(Boolean)).catch(() => []),
           fetch("https://api.reliefweb.int/v1/reports?appname=seekbsn&profile=list&limit=8&sort[]=date:desc&filter[field]=primary_country&filter[value]=Nigeria").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.title).filter(Boolean)).catch(() => []),
+          getSeekLiveStats().catch(() => null),
         ]);
         const bits = [
+          stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
           ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request")),
           ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70)),
           ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
@@ -3321,6 +3331,7 @@ export default function App() {
         const result = await verifyDonation(reference);
         if (!cancelled) {
           const forRequest = result?.request_id || result?.requestId || result?.donation?.request_id;
+          const outreachId = params.get("outreach");
           const amount = result?.amount ?? result?.donation?.amount;
           const verified = result?.verified || result?.ok || result?.donation?.status === "successful";
           const successMsg = forRequest
@@ -3332,13 +3343,18 @@ export default function App() {
               ? successMsg
               : (result?.error || "Paystack received this payment, but Seek is still confirming it. You can close this and check back shortly."),
             requestId: forRequest || null,
+            outreachId: outreachId || null,
           });
         }
       } catch (error) {
         if (!cancelled) setPaymentReturn({ status: "failed", message: error?.message || "Payment verification failed." });
       } finally {
         if (!cancelled) {
-          const cleanUrl = `${window.location.pathname}${window.location.hash}`;
+          const keep = new URLSearchParams();
+          const o = params.get("outreach");
+          if (o) keep.set("outreach", o);
+          const q = keep.toString();
+          const cleanUrl = `${window.location.pathname}${q ? "?" + q : ""}${window.location.hash}`;
           window.history.replaceState({}, document.title, cleanUrl);
         }
       }
@@ -3452,6 +3468,19 @@ useEffect(() => {
                     }}
                   >
                     View request
+                  </button>
+                )}
+                {paymentReturn.outreachId && (
+                  <button
+                    type="button"
+                    className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm"
+                    onClick={() => {
+                      setPaymentReturn({ status: "idle", message: "" });
+                      setPage("give");
+                      window.history.pushState({}, "", `/give?outreach=${encodeURIComponent(paymentReturn.outreachId)}`);
+                    }}
+                  >
+                    View outreach
                   </button>
                 )}
                 <button
