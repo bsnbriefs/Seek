@@ -53,6 +53,7 @@ import {
   listAppreciationStories,
   getPublishedImpactById,
   getSeekLiveStats,
+  listPublicSponsors,
   getPublicRequestById,
   listRequestDonors,
   submitSafetyReport,
@@ -513,13 +514,12 @@ function OutreachStory({ campaign, onBack, onDonate }) {
 }
 
 function OutreachCheckout({ campaign, onClose }) {
-  const chips = [5000, 10000, 25000, 50000];
   const [name, setName] = useState("");
   const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState(10000);
-  const [giftInterval, setGiftInterval] = useState("once");
+  const [amount, setAmount] = useState(campaign?.amount || 10000);
+  const [monthly, setMonthly] = useState(false);
+  const [anonymous, setAnonymous] = useState(false);
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   if (!campaign) return null;
   return (
@@ -535,10 +535,10 @@ function OutreachCheckout({ campaign, onClose }) {
               amount: Number(amount),
               email,
               requestId: null,
-              anonymous: false,
-              donorName: (name || "Supporter") + " · " + campaign.title,
+              anonymous,
+              donorName: anonymous ? "" : ((name || "Supporter") + " · " + campaign.title),
               coverFee: true,
-              giftInterval,
+              interval: monthly ? "monthly" : "once",
               callbackUrl: window.location.origin,
             });
             window.location.href = result.authorization_url;
@@ -549,36 +549,23 @@ function OutreachCheckout({ campaign, onClose }) {
         }}
         className="w-full max-w-md rounded-3xl bg-[#F7F1EA] p-6 shadow-2xl"
       >
-        <p className="text-[11px] font-semibold tracking-[0.16em] uppercase text-[#1BAA9C]">Paystack checkout</p>
-        <h3 className="font-display font-bold text-xl text-[#0D3B3B] mt-1">Support a BSN outreach this year</h3>
-        <div className="mt-3 rounded-xl bg-[#1BAA9C]/10 px-3 py-2 text-sm text-[#0D3B3B]">
-          Campaign target: {campaign.title}
-        </div>
-        <label className="block mt-4 text-xs font-semibold uppercase text-[#0D3B3B]/60">Your name</label>
-        <input required className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your full name" />
-        <label className="block mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Email address</label>
-        <input required type="email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B]" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" />
-        <p className="mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">How often</p>
-        <div className="mt-2 grid grid-cols-2 gap-2">
-          {[{ id: "once", label: "Give once" }, { id: "monthly", label: "Monthly" }].map((opt) => (
-            <button type="button" key={opt.id} onClick={() => setGiftInterval(opt.id)} className={`rounded-lg py-2 text-xs font-semibold border ${giftInterval === opt.id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>{opt.label}</button>
-          ))}
-        </div>
-        <p className="mt-3 text-xs font-semibold uppercase text-[#0D3B3B]/60">Amount (₦)</p>
-        <div className="mt-2 grid grid-cols-4 gap-2">
-          {chips.map((n) => (
-            <button type="button" key={n} onClick={() => setAmount(n)} className={`rounded-lg py-2 text-xs font-semibold border ${Number(amount) === n ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>
-              ₦{n.toLocaleString()}
-            </button>
-          ))}
-        </div>
-        <input className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body text-[#0D3B3B] mt-2" inputMode="numeric" value={amount} onChange={(e) => setAmount(e.target.value)} />
+        <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Give to {campaign.title}</h3>
+        <input required className="mt-4 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+        <input required type="email" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        <input required inputMode="numeric" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount in naira" />
+        <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
+          <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
+          Give this amount every month
+        </label>
+        <label className="mt-2 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
+          <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
+          Give anonymously
+        </label>
         {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
         <button disabled={loading} className="mt-4 w-full rounded-xl bg-[#0D3B3B] text-white font-display font-semibold py-3">
-          {loading ? "Opening Paystack…" : (giftInterval === "monthly" ? "Authorize ₦" + Number(amount || 0).toLocaleString() + " monthly" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment")}
+          {loading ? "Opening Paystack…" : "Give ₦" + Number(amount || 0).toLocaleString()}
         </button>
-        <p className="mt-2 text-[11px] text-[#0D3B3B]/45">Secure checkout. Card details are handled by Paystack. A small processing fee is included so Seek receives the amount you choose.</p>
-        <button type="button" onClick={onClose} className="mt-2 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
+        <button type="button" onClick={onClose} className="mt-3 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
       </form>
     </div>
   );
@@ -1326,6 +1313,8 @@ function OffersPage({ setPage }) {
 }
 
 function GivePage({ setPage }) {
+  const [sponsors, setSponsors] = useState([]);
+  useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
   const [outreach, setOutreach] = useState(null);
   const [storyCampaign, setStoryCampaign] = useState(null);
   const [categoryFilter, setCategoryFilter] = useState("all");
@@ -1586,6 +1575,16 @@ if (!cancelled) {
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
+        {sponsors.length > 0 && (
+          <div className="mb-8 rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C] mb-2">This year&apos;s sponsors</p>
+            <ul className="space-y-1 text-sm text-[#0D3B3B]">
+              {sponsors.map((s, i) => (
+                <li key={i}>{s.donor_name} — ₦{Number(s.amount || 0).toLocaleString()}</li>
+              ))}
+            </ul>
+          </div>
+        )}
         <div className="space-y-3">
           {storyCampaign ? (
         <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
