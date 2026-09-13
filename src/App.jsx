@@ -592,6 +592,7 @@ function OutreachCheckout({ campaign, onClose }) {
               donorName: (anonymous ? "Anonymous" : (name || "Supporter")) + " · " + campaign.title + " [" + campaign.id + "]",
               coverFee: true,
               interval: monthly ? "monthly" : "once",
+              campaignId: campaign.id,
               callbackUrl: `${window.location.origin}/give?outreach=${encodeURIComponent(campaign.id)}`,
             });
             window.location.href = result.authorization_url;
