@@ -989,15 +989,6 @@ function HomePage({ setPage, userSession }) {
             Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities over 5 years — including Enugu, Abuja and Lagos, and not limited to those cities.
           </p>
           <div className="mt-12 text-left">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50 mb-3">Sponsors</p>
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
-              {(sponsors.length ? sponsors : [{ donor_name: "Your name can stand here", amount: 0 }]).slice(0, 6).map((s, i) => (
-                <div key={i} className="rounded-2xl bg-white/10 p-4 min-h-[88px]">
-                  <p className="font-display font-semibold text-white">{s.donor_name || "Supporter"}</p>
-                  {s.amount ? <p className="text-xs text-white/60 mt-1">₦{Number(s.amount).toLocaleString()}</p> : <p className="text-xs text-white/50 mt-1">Give on the Give page to be listed</p>}
-                </div>
-              ))}
-            </div>
             <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50 mb-3">Partners</p>
             <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
               {PARTNERS.map((p) => (
