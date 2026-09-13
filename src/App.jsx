@@ -714,7 +714,7 @@ function Navbar({ page, setPage, userSession }) {
       {open && (
         <div className="lg:hidden fixed inset-0 z-[120] bg-[#0B1211] text-white flex flex-col">
           <div className="flex items-center justify-between px-5 h-16">
-            <Logo className="h-7 brightness-0 invert" />
+            <Logo className="h-7" />
             <button className="p-2" onClick={() => setOpen(false)} aria-label="Close"><X size={22} /></button>
           </div>
           <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
@@ -758,7 +758,7 @@ function Footer({ setPage }) {
     <footer style={{ background: C.deepTeal }} className="text-white/80 font-body">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
         <div>
-          <Logo className="h-7 brightness-0 invert" />
+          <Logo className="h-7" />
           <p className="mt-4 text-sm text-white/60 max-w-xs">Ask for what you need. Offer what you can.</p>
           <p className="mt-3 text-xs uppercase tracking-wide text-white/40">A project of BSN Foundation</p>
         </div>
