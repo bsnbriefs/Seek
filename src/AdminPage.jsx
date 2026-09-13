@@ -812,9 +812,9 @@ export default function AdminPage() {
 
                 return (
                   <details key={offer.id} className="rounded-xl border bg-white">
-                    <summary className="cursor-pointer list-none px-5 py-4 flex justify-between gap-3">
-                      <span className="font-semibold text-[#0D3B3B]">{(offer.description || "Giveaway").slice(0, 80)}</span>
-                      <span className="text-xs text-[#0D3B3B]/50">{status}</span>
+                    <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
+                      <span className="font-semibold text-[#0D3B3B] min-w-0 truncate">{(offer.description || "Giveaway").slice(0, 80)}</span>
+                      <span className="shrink-0 rounded-full bg-[#0D3B3B]/8 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#0D3B3B]/60">{status}</span>
                     </summary>
                     <div className="px-5 pb-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
@@ -909,22 +909,14 @@ export default function AdminPage() {
                     </p>
 
                     {(isPending || isOpen) && !isMatched && (
-                      <div className="flex gap-3 mt-4">
-                        {isOpen && (
-                        <button
-                          type="button"
-                          onClick={() => updateOfferStatus(offer.id, "closed")}
-                          className="rounded-lg border px-3 py-2 text-sm"
-                        >
-                          Close offer
-                        </button>
-                        )}
+                      <div className="mt-4 grid grid-cols-2 gap-2">
                         {isPending && (
                         <button
+                          type="button"
                           onClick={() => updateOfferStatus(offer.id, "open")}
-                          className="rounded-lg border px-3 py-2 text-sm"
+                          className="rounded-xl border px-4 py-2 text-sm"
                         >
-                          Publish offer
+                          Publish
                         </button>
                         )}
                         <button
@@ -932,10 +924,10 @@ export default function AdminPage() {
                           onClick={() => updateOfferStatus(offer.id, "matched")}
                           className="rounded-xl bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white"
                         >
-                          Accept & Notify
+                          Accept
                         </button>
-
                         <button
+                          type="button"
                           onClick={() => updateOfferStatus(offer.id, "rejected")}
                           className="rounded-xl border px-4 py-2 text-sm"
                         >
@@ -946,7 +938,7 @@ export default function AdminPage() {
                           onClick={() => updateOfferStatus(offer.id, "closed")}
                           className="rounded-xl border px-4 py-2 text-sm"
                         >
-                          Close giveaway
+                          Close
                         </button>
                       </div>
                     )}
