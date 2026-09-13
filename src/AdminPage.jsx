@@ -462,10 +462,12 @@ export default function AdminPage() {
               const contact = requestPrivate.find((p) => p.request_id === req.id);
 
               return (
-                <div
-                  key={req.id}
-                  className="rounded-2xl bg-white p-6 shadow-sm"
-                >
+                <details key={req.id} className="rounded-2xl bg-white shadow-sm">
+                  <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[#0D3B3B]">{req.title || req.need || req.category}</span>
+                    <span className="text-xs text-[#0D3B3B]/50">{req.status}</span>
+                  </summary>
+                  <div className="px-5 pb-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
@@ -731,7 +733,8 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
-                </div>
+                  </div>
+                </details>
               );
             })}
           </div>
@@ -792,10 +795,12 @@ export default function AdminPage() {
                 const notified = !!offer.requester_notified_at;
 
                 return (
-                  <div
-                    key={offer.id}
-                    className="rounded-xl border p-5 bg-white"
-                  >
+                  <details key={offer.id} className="rounded-xl border bg-white">
+                    <summary className="cursor-pointer list-none px-5 py-4 flex justify-between gap-3">
+                      <span className="font-semibold text-[#0D3B3B]">{(offer.description || "Giveaway").slice(0, 80)}</span>
+                      <span className="text-xs text-[#0D3B3B]/50">{status}</span>
+                    </summary>
+                    <div className="px-5 pb-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-semibold text-[#0D3B3B]">
@@ -947,6 +952,8 @@ export default function AdminPage() {
                       </p>
                     )}
                   </div>
+                  </div>
+                  </details>
                 );
               })}
             </div>
