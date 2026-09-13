@@ -859,6 +859,7 @@ function HomePage({ setPage, userSession }) {
   const [ticker, setTicker] = useState([]);
   useEffect(() => {
     const tick = () => getSeekLiveStats().then(setLiveStats).catch(() => {});
+    tick();
     const id = setInterval(tick, 45000);
     return () => clearInterval(id);
   }, []);
@@ -871,6 +872,7 @@ function HomePage({ setPage, userSession }) {
         const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
+          listPublishedImpact().catch(() => []),
           listPublicSponsors().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
