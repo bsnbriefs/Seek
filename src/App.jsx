@@ -1098,7 +1098,9 @@ function OfferCard({ offer, setPage }) {
   const [media, setMedia] = useState(offer.media || []);
   const [apply, setApply] = useState(false);
   const [applying, setApplying] = useState(false);
-  const [applied, setApplied] = useState(false);
+  const [applied, setApplied] = useState(() => {
+    try { return Boolean(localStorage.getItem("seek_interest_" + offer.id)); } catch (_e) { return false; }
+  });
   const [applyError, setApplyError] = useState("");
   const [applyForm, setApplyForm] = useState({ name: "", email: "", phone: "", message: "" });
   const [applyAvatar, setApplyAvatar] = useState("");
@@ -1149,6 +1151,7 @@ function OfferCard({ offer, setPage }) {
         </button>
         <button type="button" className="text-[#0D3B3B]" onClick={() => {
           const session = getUserSession();
+          if (applied) return;
           if (!session?.access_token) {
             try { sessionStorage.setItem("seek_return", "offers"); } catch (_e) {}
             if (setPage) setPage("account");
@@ -1207,7 +1210,7 @@ function OfferCard({ offer, setPage }) {
                 phone: applyForm.phone,
                 message: applyForm.message,
               });
-              setApplied(true); setInterestCount((n) => n + 1);
+              setApplied(true); setInterestCount((n) => n + 1); try { localStorage.setItem("seek_interest_" + offer.id, "1"); } catch (_e) {};
             } catch (err) {
               setApplyError(err.message || "Could not send interest.");
             } finally {
