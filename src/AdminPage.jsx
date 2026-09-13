@@ -382,7 +382,7 @@ export default function AdminPage() {
             <input type="file" multiple accept="image/*,video/mp4,video/webm" className="w-full text-sm" onChange={(e) => setGiveaway({ ...giveaway, files: Array.from(e.target.files || []).slice(0, 5) })} />
             <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish giveaway + copy link</button>
           </form>
-          {shareLink && <p className="lg:col-span-2 text-sm text-[#1BAA9C]">Share: {shareLink}</p>}
+          {shareLink && <p className="lg:col-span-2 text-sm font-semibold text-[#1BAA9C]">Published — live. Share: {shareLink}</p>}
         </div>
         )}
 
@@ -599,8 +599,15 @@ export default function AdminPage() {
                   </div>
 
                   <p className="mt-2 text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/60">
-                    {req.status}
+                    {req.status === "published" || req.status === "partially_funded" ? "Published — live" : req.status}
                   </p>
+                  {(req.status === "published" || req.status === "partially_funded") && (
+                    <button type="button" className="mt-2 text-sm font-semibold text-[#1BAA9C]" onClick={() => {
+                      const url = "https://seekbsn.org/request/" + req.id;
+                      if (navigator.clipboard) navigator.clipboard.writeText(url);
+                      setShareLink(url);
+                    }}>Live · copy link</button>
+                  )}
 
                   <div className="mt-5 flex flex-wrap gap-2">
                     {req.status === "pending_review" && (
