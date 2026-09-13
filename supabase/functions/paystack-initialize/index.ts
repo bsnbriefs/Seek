@@ -12,6 +12,7 @@ Deno.serve(async (req) => {
     const email = String(body.email || "").trim();
     const gift = Number(body.amount);
     const request_id = body.request_id || null;
+    const campaign_id = body.campaign_id || body.campaignId || null;
     const anonymous = Boolean(body.anonymous);
     const coverFee = body.cover_fee !== false && body.coverFee !== false;
     const donorName = anonymous ? null : String(body.donor_name || body.donorName || "").trim() || null;
@@ -52,12 +53,14 @@ Deno.serve(async (req) => {
       status: "pending",
     };
     if (donorName) row.donor_name = donorName;
+    if (campaign_id) row.campaign_id = campaign_id;
     row.platform_fee = fee;
 
     const { error: insertError } = await supabase.from("donations").insert(row);
     if (insertError) {
       delete row.platform_fee;
       delete row.donor_name;
+      delete row.campaign_id;
       const retry = await supabase.from("donations").insert(row);
       if (retry.error) throw retry.error;
     }
@@ -76,6 +79,7 @@ Deno.serve(async (req) => {
         callback_url: callbackUrl,
         metadata: {
           request_id,
+          campaign_id,
           anonymous,
           donor_name: donorName,
           gift_amount: gift,
