@@ -35,7 +35,7 @@ import {
 export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
   const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "" });
-  const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "" });
+  const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "", files: [] });
   const [shareLink, setShareLink] = useState("");
 
   const [requests, setRequests] = useState([]);
@@ -373,6 +373,7 @@ export default function AdminPage() {
             <p className="font-semibold text-[#0D3B3B]">Post a giveaway</p>
             <textarea required className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="What BSN or a partner can give" value={giveaway.description} onChange={(e) => setGiveaway({ ...giveaway, description: e.target.value })} />
             <input className="w-full rounded-xl border p-3 text-sm" placeholder="City (optional)" value={giveaway.city} onChange={(e) => setGiveaway({ ...giveaway, city: e.target.value })} />
+            <input type="file" multiple accept="image/*,video/mp4,video/webm" className="w-full text-sm" onChange={(e) => setGiveaway({ ...giveaway, files: Array.from(e.target.files || []).slice(0, 5) })} />
             <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish giveaway + copy link</button>
           </form>
           {shareLink && <p className="lg:col-span-2 text-sm text-[#1BAA9C]">Share: {shareLink}</p>}
