@@ -23,6 +23,9 @@
       "destination": "/api/impact-meta?id=:id"
     },
     { "source": "/api/(.*)", "destination": "/api/$1" },
-    { "source": "/(.*)", "destination": "/index.html" }
+    {
+      "source": "/((?!outreach/|assets/|icons/).*)",
+      "destination": "/index.html"
+    }
   ]
 }
