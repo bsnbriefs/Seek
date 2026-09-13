@@ -1501,8 +1501,6 @@ if (!cancelled) {
             onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
           >
             Or give a general donation
-          {campaign && (
-                      )}
           </button>
         )}
         <input
