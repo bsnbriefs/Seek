@@ -1712,59 +1712,24 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <Field label="Full name (admin only)"><input required className={inputCls} value={form.name} onChange={set("name")} placeholder="Your name" /></Field>
             <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
           </div>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Phone (optional, admin only)"><input className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
-            <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
-          </div>
+          <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
+          <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <Field label="Category">
             <ChoiceChips value={form.category} onChange={(v) => setForm({ ...form, category: v })} options={CATEGORIES.map((c) => c.label)} />
           </Field>
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
-          <Field label="Amount required (if applicable)"><input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="₦ (leave blank if not applicable)" /></Field>
-          <details className="rounded-2xl border border-[#0D3B3B]/10 p-4">
-            <summary className="font-body text-sm text-[#0D3B3B]/70 cursor-pointer">Add settlement account (optional, admin only)</summary>
-            <div className="grid sm:grid-cols-2 gap-5 mt-4">
-              <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
-              <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
-            </div>
-            <Field label="Account number"><input className={inputCls} inputMode="numeric" value={form.accountNumber} onChange={set("accountNumber")} placeholder="NUBAN / account number" /></Field>
-          </details>
-          <Field label="Anything else? (optional)">
-            <textarea rows={3} className={inputCls} value={form.description} onChange={set("description")} placeholder="Only if you need to say more" />
+          <Field label="Amount needed (₦)">
+            <ChoiceChips value={String(form.amount)} onChange={(v) => setForm({ ...form, amount: v })} options={["5000","10000","25000","50000","100000"]} />
+            <input className={inputCls + " mt-2"} value={form.amount} onChange={set("amount")} placeholder="Or type another amount" inputMode="numeric" />
           </Field>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Preferred type of assistance">
-              <ChoiceChips value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={["Money","Item","Service","Any form of help"]} />
-            </Field>
-            <Field label="Urgency">
-              <ChoiceChips value={form.urgency} onChange={(v) => setForm({ ...form, urgency: v })} options={["Normal","Urgent","Emergency"]} />
-            </Field>
-          </div>
-          <Field label="Supporting files (optional, up to 5)">
-  <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm hover:bg-[#0D3B3B]/5">
-    <Upload size={18} />
-    <span>
-      {form.evidenceFiles?.length
-        ? form.evidenceFiles.map((f) => f.name).join(", ")
-        : "Choose up to 5 images, videos, or PDFs"}
-    </span>
-
-    <input
-      type="file"
-      multiple
-      accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf"
-      className="hidden"
-      onChange={(e) =>
-        setForm((prev) => ({
-          ...prev,
-          evidenceFiles: Array.from(e.target.files || []).slice(0, 5),
-        }))
-      }
-    />
-  </label>
-</Field>
-      
-          
+          <Field label="Your video story">
+            <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Record a short video asking the Seek community for support. Photos or a PDF can go with it.</p>
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
+              <Upload size={18} />
+              <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a video (MP4, MOV, WEBM) or photos"}</span>
+              <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf" className="hidden" onChange={(e) => setForm((prev) => ({ ...prev, evidenceFiles: Array.from(e.target.files || []).slice(0, 5) }))} />
+            </label>
+          </Field>
           <p className="text-xs font-body text-[#0D3B3B]/45 leading-relaxed">
             Your privacy matters. Please only share sensitive information — like full addresses or medical details — where it's genuinely necessary. Seek and BSN Foundation never display this publicly.
           </p>
