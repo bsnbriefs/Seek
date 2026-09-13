@@ -1795,7 +1795,7 @@ function VolunteerPage() {
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
-  const [form, setForm] = useState({name:"",email:"",location:"",interests:"",role:""});
+  const [form, setForm] = useState({name:"",email:"",phone:"",location:"",interests:"",role:""});
   const roles = [
     { id: "verify", title: "Verify requests", desc: "Help confirm that a published need is real and safely described." },
     { id: "followup", title: "Follow up after a match", desc: "Check that help reached the person and that Seek can mark it fulfilled." },
@@ -1843,6 +1843,7 @@ function VolunteerPage() {
                 <Field label="Full name"><input required className={inputCls} placeholder="Your name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} /></Field>
                 <Field label="Email"><input required type="email" className={inputCls} placeholder="you@example.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} /></Field>
               </div>
+              <Field label="Phone number"><input required type="tel" className={inputCls} placeholder="For verification" value={form.phone} onChange={e=>setForm({...form,phone:e.target.value})} /></Field>
               <Field label="Location"><input required className={inputCls} placeholder="City, country" value={form.location} onChange={e=>setForm({...form,location:e.target.value})} /></Field>
               <Field label="Chosen role">
                 <input className={inputCls} value={form.role} onChange={e=>setForm({...form,role:e.target.value})} placeholder="Tap a role above" />
