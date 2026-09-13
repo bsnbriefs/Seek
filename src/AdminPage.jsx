@@ -34,7 +34,7 @@ import {
 
 export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
-  const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "", files: [] });
+  const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "", files: [], name: "BSN Foundation", email: "", phone: "" });
   const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "", files: [] });
   const [shareLink, setShareLink] = useState("");
 
@@ -356,6 +356,9 @@ export default function AdminPage() {
           }}>
             <p className="font-semibold text-[#0D3B3B]">Post a public appeal</p>
             <input required className="w-full rounded-xl border p-3 text-sm" placeholder="What people should give to" value={appeal.title} onChange={(e) => setAppeal({ ...appeal, title: e.target.value })} />
+            <input required className="w-full rounded-xl border p-3 text-sm" placeholder="Contact name" value={appeal.name} onChange={(e) => setAppeal({ ...appeal, name: e.target.value })} />
+            <input required type="email" className="w-full rounded-xl border p-3 text-sm" placeholder="Contact email" value={appeal.email} onChange={(e) => setAppeal({ ...appeal, email: e.target.value })} />
+            <input required className="w-full rounded-xl border p-3 text-sm" placeholder="Contact phone" value={appeal.phone} onChange={(e) => setAppeal({ ...appeal, phone: e.target.value })} />
             <input className="w-full rounded-xl border p-3 text-sm" placeholder="Amount ₦ (optional)" value={appeal.amount} onChange={(e) => setAppeal({ ...appeal, amount: e.target.value })} />
             <input className="w-full rounded-xl border p-3 text-sm" placeholder="Location" value={appeal.location} onChange={(e) => setAppeal({ ...appeal, location: e.target.value })} />
             <textarea className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="Short appeal" value={appeal.description} onChange={(e) => setAppeal({ ...appeal, description: e.target.value })} />
