@@ -1100,6 +1100,7 @@ function OfferCard({ offer, setPage }) {
         <button type="button" className="text-[#0D3B3B]" onClick={() => {
           const session = getUserSession();
           if (!session?.access_token) {
+            try { sessionStorage.setItem("seek_return", "offers"); } catch (_e) {}
             if (setPage) setPage("account");
             else window.alert("Sign in first to join a giveaway.");
             return;
@@ -1222,15 +1223,15 @@ function GiveOfferForm() {
         <option value="">General offer (not tied to a specific request)</option>
         {requests.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
       </select>
-      <select value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]">
-        <option value="">What are you offering?</option>
-        <option value="money">Money</option>
-        <option value="food">Food</option>
-        <option value="clothing">Clothing</option>
-        <option value="items">Items</option>
-        <option value="time">Time / skills</option>
-        <option value="shelter">Shelter / space</option>
-      </select>
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">What are you giving?</p>
+      <ChoiceChips value={offerCategory} onChange={setOfferCategory} options={[
+        { id: "money", label: "Money" },
+        { id: "food", label: "Food" },
+        { id: "clothing", label: "Clothing" },
+        { id: "items", label: "Items" },
+        { id: "time", label: "Time / skills" },
+        { id: "shelter", label: "Shelter / space" },
+      ]} />
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="I can provide..." className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
       <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
@@ -1614,6 +1615,24 @@ function Field({ label, children }) {
 }
 
 
+
+function ChoiceChips({ value, onChange, options }) {
+  return (
+    <div className="flex flex-wrap gap-2">
+      {options.map((opt) => {
+        const id = typeof opt === "string" ? opt : opt.id;
+        const label = typeof opt === "string" ? opt : opt.label;
+        const on = value === id || value === label;
+        return (
+          <button key={id} type="button" onClick={() => onChange(id)} className={`rounded-full px-4 py-2 text-sm font-semibold border ${on ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>
+            {label}
+          </button>
+        );
+      })}
+    </div>
+  );
+}
+
 const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
 
 function SeekHelpPage() {
@@ -1698,10 +1717,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           </div>
           <Field label="Category">
-            <select required className={inputCls} value={form.category} onChange={set("category")}>
-              <option value="">Select a category</option>
-              {CATEGORIES.map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
-            </select>
+            <ChoiceChips value={form.category} onChange={(v) => setForm({ ...form, category: v })} options={CATEGORIES.map((c) => c.label)} />
           </Field>
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
           <Field label="Amount required (if applicable)"><input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="₦ (leave blank if not applicable)" /></Field>
@@ -1716,14 +1732,10 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </Field>
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Preferred type of assistance">
-              <select className={inputCls} value={form.type} onChange={set("type")}>
-                <option>Money</option><option>Item</option><option>Service</option><option>Any form of help</option>
-              </select>
+              <ChoiceChips value={form.type} onChange={(v) => setForm({ ...form, type: v })} options={["Money","Item","Service","Any form of help"]} />
             </Field>
             <Field label="Urgency">
-              <select className={inputCls} value={form.urgency} onChange={set("urgency")}>
-                <option>Normal</option><option>Urgent</option><option>Emergency</option>
-              </select>
+              <ChoiceChips value={form.urgency} onChange={(v) => setForm({ ...form, urgency: v })} options={["Normal","Urgent","Emergency"]} />
             </Field>
           </div>
           <Field label="Supporting files (optional, up to 5)">
@@ -2771,12 +2783,16 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           setMode("signin");
         } else {
           setUserSession(result);
-          setPage("my-requests");
+          const back = sessionStorage.getItem("seek_return") || "my-requests";
+          sessionStorage.removeItem("seek_return");
+          setPage(back);
         }
       } else {
         const session = await userSignIn(email, password);
         setUserSession(session);
-        setPage("my-requests");
+        const back = sessionStorage.getItem("seek_return") || "my-requests";
+        sessionStorage.removeItem("seek_return");
+        setPage(back);
       }
     } catch (err) {
       setError(err.message || "Something went wrong.");
