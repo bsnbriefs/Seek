@@ -700,6 +700,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <NotificationBell userSession={userSession} setPage={setPage} />
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -712,6 +713,7 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
+        <NotificationBell userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -900,9 +902,6 @@ function HomePage({ setPage, userSession }) {
           <button onClick={() => go("volunteer")} className="mt-5 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
             Become a volunteer
           </button>
-          <div className="mt-8 flex items-center justify-center gap-3">
-            <NotificationBell userSession={userSession} setPage={setPage} />
-          </div>
         </div>
       </section>
 
