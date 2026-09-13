@@ -883,15 +883,23 @@ async function countRows(path) {
   return Number.isFinite(n) ? n : 0;
 }
 
-export async function getOutreachRaised(campaignTitle) {
-  const needle = String(campaignTitle || "").trim().toLowerCase();
-  if (!needle) return 0;
-  const rows = await supabaseFetch("donations?select=amount,donor_name,status&limit=2000").catch(() => []);
+export async function listRecentGifts(limit = 8) {
+  const rows = await supabaseFetch(
+    "donations?select=amount,donor_name,created_at,status&status=eq.successful&order=created_at.desc&limit=" + limit
+  ).catch(() => []);
+  return Array.isArray(rows) ? rows : [];
+}
+
+export async function getOutreachRaised(campaignTitle, campaignId) {
+  const needles = [campaignTitle, campaignId].filter(Boolean).map((s) => String(s).toLowerCase());
+  if (!needles.length) return 0;
+  const rows = await supabaseFetch(
+    "donations?select=donor_name,amount,anonymous,status&status=eq.successful&order=created_at.desc&limit=500"
+  ).catch(() => []);
   return (Array.isArray(rows) ? rows : [])
     .filter((row) => {
-      const s = String(row.status || "successful").toLowerCase();
-      const ok = s === "successful" || s === "success" || s === "confirmed" || !row.status;
-      return ok && String(row.donor_name || "").toLowerCase().includes(needle);
+      const name = String(row.donor_name || "").toLowerCase();
+      return needles.some((n) => name.includes(n));
     })
     .reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
 }
