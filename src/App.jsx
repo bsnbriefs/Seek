@@ -1713,7 +1713,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
           </div>
           <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Phone number (admin only)"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
+            <Field label="Phone (optional, admin only)"><input className={inputCls} value={form.phone} onChange={set("phone")} placeholder="Kept private" /></Field>
             <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           </div>
           <Field label="Category">
@@ -1721,14 +1721,16 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </Field>
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder="e.g. School fees for this term" /></Field>
           <Field label="Amount required (if applicable)"><input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="₦ (leave blank if not applicable)" /></Field>
-          <p className="font-body text-xs text-[#0D3B3B]/50 pt-2">Settlement account (admin only — never shown publicly)</p>
-          <div className="grid sm:grid-cols-2 gap-5">
-            <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
-            <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
-          </div>
-          <Field label="Account number"><input className={inputCls} inputMode="numeric" value={form.accountNumber} onChange={set("accountNumber")} placeholder="NUBAN / account number" /></Field>
-          <Field label="Description">
-            <textarea required rows={4} className={inputCls} value={form.description} onChange={set("description")} placeholder="Tell us a little more about your situation" />
+          <details className="rounded-2xl border border-[#0D3B3B]/10 p-4">
+            <summary className="font-body text-sm text-[#0D3B3B]/70 cursor-pointer">Add settlement account (optional, admin only)</summary>
+            <div className="grid sm:grid-cols-2 gap-5 mt-4">
+              <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
+              <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
+            </div>
+            <Field label="Account number"><input className={inputCls} inputMode="numeric" value={form.accountNumber} onChange={set("accountNumber")} placeholder="NUBAN / account number" /></Field>
+          </details>
+          <Field label="Anything else? (optional)">
+            <textarea rows={3} className={inputCls} value={form.description} onChange={set("description")} placeholder="Only if you need to say more" />
           </Field>
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Preferred type of assistance">
