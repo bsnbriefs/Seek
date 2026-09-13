@@ -28,10 +28,16 @@ import {
   getAdminSupportConversations,
   getAdminSupportMessages,
   sendAdminSupportMessage,
+  postAdminAppeal,
+  postAdminGiveaway,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
+  const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "" });
+  const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "" });
+  const [shareLink, setShareLink] = useState("");
+
   const [requests, setRequests] = useState([]);
   const [offers, setOffers] = useState([]);
   const [offerInterests, setOfferInterests] = useState([]);
@@ -335,6 +341,42 @@ export default function AdminPage() {
             {error}
           </p>
         )}
+
+        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+          <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
+            e.preventDefault();
+            setError("");
+            try {
+              const res = await postAdminAppeal(appeal);
+              setShareLink(res.share);
+              if (res.share && navigator.clipboard) await navigator.clipboard.writeText(res.share);
+              await loadRequests();
+            } catch (err) { setError(err.message); }
+          }}>
+            <p className="font-semibold text-[#0D3B3B]">Post a public appeal</p>
+            <input required className="w-full rounded-xl border p-3 text-sm" placeholder="What people should give to" value={appeal.title} onChange={(e) => setAppeal({ ...appeal, title: e.target.value })} />
+            <input className="w-full rounded-xl border p-3 text-sm" placeholder="Amount ₦ (optional)" value={appeal.amount} onChange={(e) => setAppeal({ ...appeal, amount: e.target.value })} />
+            <input className="w-full rounded-xl border p-3 text-sm" placeholder="Location" value={appeal.location} onChange={(e) => setAppeal({ ...appeal, location: e.target.value })} />
+            <textarea className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="Short appeal" value={appeal.description} onChange={(e) => setAppeal({ ...appeal, description: e.target.value })} />
+            <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish appeal + copy link</button>
+          </form>
+          <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
+            e.preventDefault();
+            setError("");
+            try {
+              const res = await postAdminGiveaway(giveaway);
+              setShareLink(res.share);
+              if (res.share && navigator.clipboard) await navigator.clipboard.writeText(res.share);
+              await loadRequests();
+            } catch (err) { setError(err.message); }
+          }}>
+            <p className="font-semibold text-[#0D3B3B]">Post a giveaway</p>
+            <textarea required className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="What BSN or a partner can give" value={giveaway.description} onChange={(e) => setGiveaway({ ...giveaway, description: e.target.value })} />
+            <input className="w-full rounded-xl border p-3 text-sm" placeholder="City (optional)" value={giveaway.city} onChange={(e) => setGiveaway({ ...giveaway, city: e.target.value })} />
+            <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish giveaway + copy link</button>
+          </form>
+          {shareLink && <p className="lg:col-span-2 text-sm text-[#1BAA9C]">Share: {shareLink}</p>}
+        </div>
 
 
         <div className="mb-6 flex flex-wrap gap-2">
