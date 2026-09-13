@@ -43,10 +43,10 @@ export async function submitRequest(payload) {
   const rows = await supabaseFetch("rpc/submit_seek_request", {
     method: "POST",
     body: JSON.stringify({
-      p_title: payload.need,
+      p_title: payload.title || payload.need,
       p_category: payload.category,
       p_location: payload.location,
-      p_description: payload.description,
+      p_description: payload.description || payload.need,
       p_amount_needed: amount,
       p_urgency: payload.urgency?.toLowerCase(),
       p_assistance_type: payload.type,
