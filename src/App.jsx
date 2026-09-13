@@ -221,6 +221,7 @@ const CATEGORIES = [
   { id: "transport", label: "Transportation", icon: Bus },
   { id: "emergency", label: "Emergency", icon: AlertTriangle },
   { id: "financial", label: "Financial Assistance", icon: Wallet },
+  { id: "company", label: "Company / Friends", icon: Users },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
 
