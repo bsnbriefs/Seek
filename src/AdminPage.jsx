@@ -34,7 +34,7 @@ import {
 
 export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
-  const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "" });
+  const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "", files: [] });
   const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "", files: [] });
   const [shareLink, setShareLink] = useState("");
 
@@ -54,7 +54,7 @@ export default function AdminPage() {
   const [requestFilter, setRequestFilter] = useState("all");
   const [offerFilter, setOfferFilter] = useState("all");
   const [search, setSearch] = useState("");
-  const [adminTab, setAdminTab] = useState("requests");
+  const [adminTab, setAdminTab] = useState("post");
   const [impactPosts, setImpactPosts] = useState([]);
   const [openOfferMedia, setOpenOfferMedia] = useState({});
   const [impactEditingId, setImpactEditingId] = useState(null);
@@ -342,6 +342,7 @@ export default function AdminPage() {
           </p>
         )}
 
+        {adminTab === "post" && (
         <div className="mb-8 grid gap-4 lg:grid-cols-2">
           <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
             e.preventDefault();
@@ -358,6 +359,8 @@ export default function AdminPage() {
             <input className="w-full rounded-xl border p-3 text-sm" placeholder="Amount ₦ (optional)" value={appeal.amount} onChange={(e) => setAppeal({ ...appeal, amount: e.target.value })} />
             <input className="w-full rounded-xl border p-3 text-sm" placeholder="Location" value={appeal.location} onChange={(e) => setAppeal({ ...appeal, location: e.target.value })} />
             <textarea className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="Short appeal" value={appeal.description} onChange={(e) => setAppeal({ ...appeal, description: e.target.value })} />
+            <input type="file" multiple accept="image/*,video/mp4,video/webm,video/quicktime" className="w-full text-sm" onChange={(e) => setAppeal({ ...appeal, files: Array.from(e.target.files || []).slice(0, 5) })} />
+            <p className="text-xs text-[#0D3B3B]/50">Photos or a short video for the public appeal.</p>
             <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish appeal + copy link</button>
           </form>
           <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
@@ -378,10 +381,12 @@ export default function AdminPage() {
           </form>
           {shareLink && <p className="lg:col-span-2 text-sm text-[#1BAA9C]">Share: {shareLink}</p>}
         </div>
+        )}
 
 
         <div className="mb-6 flex flex-wrap gap-2">
           {[
+            { id: "post", label: "Post" },
             { id: "requests", label: "Requests" },
             { id: "offers", label: "Offers" },
             { id: "money", label: "Money" },
@@ -462,10 +467,12 @@ export default function AdminPage() {
               const contact = requestPrivate.find((p) => p.request_id === req.id);
 
               return (
-                <div
-                  key={req.id}
-                  className="rounded-2xl bg-white p-6 shadow-sm"
-                >
+                <details key={req.id} className="rounded-2xl bg-white shadow-sm">
+                  <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
+                    <span className="font-semibold text-[#0D3B3B]">{req.title || req.need || req.category}</span>
+                    <span className="text-xs text-[#0D3B3B]/50">{req.status}</span>
+                  </summary>
+                  <div className="px-5 pb-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
                     <div>
                       <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
@@ -731,7 +738,8 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
-                </div>
+                  </div>
+                </details>
               );
             })}
           </div>
@@ -792,10 +800,12 @@ export default function AdminPage() {
                 const notified = !!offer.requester_notified_at;
 
                 return (
-                  <div
-                    key={offer.id}
-                    className="rounded-xl border p-5 bg-white"
-                  >
+                  <details key={offer.id} className="rounded-xl border bg-white">
+                    <summary className="cursor-pointer list-none px-5 py-4 flex justify-between gap-3">
+                      <span className="font-semibold text-[#0D3B3B]">{(offer.description || "Giveaway").slice(0, 80)}</span>
+                      <span className="text-xs text-[#0D3B3B]/50">{status}</span>
+                    </summary>
+                    <div className="px-5 pb-5">
                     <div className="flex flex-wrap items-start justify-between gap-3">
                       <div>
                         <h3 className="text-lg font-semibold text-[#0D3B3B]">
@@ -947,6 +957,8 @@ export default function AdminPage() {
                       </p>
                     )}
                   </div>
+                  </div>
+                  </details>
                 );
               })}
             </div>
