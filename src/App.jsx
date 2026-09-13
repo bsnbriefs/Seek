@@ -3097,9 +3097,9 @@ function LiveTicker() {
   }, []);
   if (!items.length) return null;
   return (
-    <div className="border-b border-[#0D3B3B]/10 bg-[#7F1D1D] text-white overflow-hidden">
+    <div className="border-b border-[#0D3B3B]/10 bg-[#0D3B3B] text-white overflow-hidden">
       <div className="flex items-center gap-3 px-3 py-2">
-        <span className="seek-live-blink shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#E11D48] px-2 py-1 rounded">Live</span>
+        <span className="seek-live-blink shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-2 py-1 rounded">Live</span>
         <div className="overflow-hidden flex-1">
           <div className="seek-ticker-track">
             {[...items, ...items].map((item, i) => (
