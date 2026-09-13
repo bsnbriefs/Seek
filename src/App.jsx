@@ -226,6 +226,11 @@ const CATEGORIES = [
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
 
+const PARTNERS = [
+  { name: "BSN Foundation", href: "https://barristerstreet.org" },
+  { name: "Seek community", href: "/" },
+];
+
 const IMPACT_STATS = [
   { value: "3,000+", label: "Lives supported" },
   { value: "₦50M+", label: "Public donations before Seek" },
@@ -803,6 +808,7 @@ function HomePage({ setPage, userSession }) {
   const [requestsLoading, setRequestsLoading] = useState(true);
   const [requestsError, setRequestsError] = useState("");
   const [impactPreview, setImpactPreview] = useState([]);
+  const [sponsors, setSponsors] = useState([]);
   const [liveStats, setLiveStats] = useState(null);
   const [ticker, setTicker] = useState([]);
 
@@ -811,10 +817,11 @@ function HomePage({ setPage, userSession }) {
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, stats, offerRows, crisisRows] = await Promise.all([
+        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           listPublishedImpact().catch(() => []),
+          listPublicSponsors().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
@@ -827,6 +834,7 @@ function HomePage({ setPage, userSession }) {
           const mapped = rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4);
           setRequests(mapped);
           setImpactPreview((impactRows || []).slice(0, 3));
+          setSponsors(sponsorRows || []);
           if (stats) setLiveStats(stats);
           const crisis = (Array.isArray(crisisRows) ? crisisRows : []).map((item) => {
             const name = item?.fields?.name || item?.fields?.title || "";
@@ -980,25 +988,23 @@ function HomePage({ setPage, userSession }) {
           <p className="mt-10 text-xs text-white/35 font-body">
             Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities over 5 years — including Enugu, Abuja and Lagos, and not limited to those cities.
           </p>
-          {impactPreview.length > 0 && (
-            <div className="mt-12 grid sm:grid-cols-3 gap-4 text-left">
-              {impactPreview.map((post) => (
-                <button
-                  key={post.id}
-                  type="button"
-                  onClick={() => {
-                    window.history.pushState({}, "", `/impact/${post.id}`);
-                    setPage(`impact:${post.id}`);
-                    window.scrollTo(0, 0);
-                  }}
-                  className="rounded-2xl bg-white/10 p-4 text-left hover:bg-white/15"
-                >
-                  <p className="font-display font-semibold text-white">{post.title}</p>
-                  <p className="mt-2 font-body text-xs text-white/70 line-clamp-3">{post.story}</p>
-                </button>
+          <div className="mt-12 text-left">
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50 mb-3">Sponsors</p>
+            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-3 mb-8">
+              {(sponsors.length ? sponsors : [{ donor_name: "Your name can stand here", amount: 0 }]).slice(0, 6).map((s, i) => (
+                <div key={i} className="rounded-2xl bg-white/10 p-4 min-h-[88px]">
+                  <p className="font-display font-semibold text-white">{s.donor_name || "Supporter"}</p>
+                  {s.amount ? <p className="text-xs text-white/60 mt-1">₦{Number(s.amount).toLocaleString()}</p> : <p className="text-xs text-white/50 mt-1">Give on the Give page to be listed</p>}
+                </div>
               ))}
             </div>
-          )}
+            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50 mb-3">Partners</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+              {PARTNERS.map((p) => (
+                <a key={p.name} href={p.href} className="rounded-2xl bg-white/10 min-h-[72px] px-4 py-4 text-sm text-white flex items-center justify-center text-center">{p.name}</a>
+              ))}
+            </div>
+          </div>
           <button type="button" onClick={() => go("impact")} className="mt-8 font-display font-semibold text-white underline underline-offset-4">
             See Community Impact
           </button>
@@ -3108,6 +3114,7 @@ function LiveTicker() {
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
           listPublishedImpact().catch(() => []),
+          listPublicSponsors().catch(() => []),
           fetch("/api/world-headlines").then((r) => r.json()).then((d) => d.items || []).catch(() => []),
         ]);
         const bits = [
