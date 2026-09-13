@@ -55,6 +55,7 @@ import {
   getPublishedImpactById,
   getSeekLiveStats,
   getOutreachRaised,
+  listRecentGifts,
   listPublicSponsors,
   getPublicRequestById,
   listRequestDonors,
@@ -513,8 +514,8 @@ function OutreachStory({ campaign, onBack, onDonate }) {
   const [raised, setRaised] = useState(0);
   useEffect(() => {
     if (!campaign?.title) return;
-    getOutreachRaised(campaign.title).then(setRaised).catch(() => setRaised(0));
-  }, [campaign?.title]);
+    getOutreachRaised(campaign.title, campaign.id).then(setRaised).catch(() => setRaised(0));
+  }, [campaign?.title, campaign?.id]);
   if (!campaign) return null;
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
@@ -566,7 +567,7 @@ function OutreachCheckout({ campaign, onClose }) {
               email,
               requestId: null,
               anonymous,
-              donorName: (anonymous ? "Anonymous" : (name || "Supporter")) + " · " + campaign.title,
+              donorName: (anonymous ? "Anonymous" : (name || "Supporter")) + " · " + campaign.title + " [" + campaign.id + "]",
               coverFee: true,
               interval: monthly ? "monthly" : "once",
               callbackUrl: `${window.location.origin}/give?outreach=${encodeURIComponent(campaign.id)}`,
@@ -3158,26 +3159,34 @@ function LiveTicker() {
   const [items, setItems] = useState([]);
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const load = async () => {
       try {
-        const [reqRows, offerRows, disasters, nigeria, stats] = await Promise.all([
+        const [reqRows, offerRows, disasters, nigeria, stats, gifts] = await Promise.all([
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=8&sort[]=date:desc").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.name).filter(Boolean)).catch(() => []),
           fetch("https://api.reliefweb.int/v1/reports?appname=seekbsn&profile=list&limit=8&sort[]=date:desc&filter[field]=primary_country&filter[value]=Nigeria").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.title).filter(Boolean)).catch(() => []),
           getSeekLiveStats().catch(() => null),
+          listRecentGifts(8).catch(() => []),
         ]);
+        const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
+          const purpose = String(g.donor_name || "").split("·").slice(1).join("·").replace(/\[.*?\]/g, "").trim() || "Seek";
+          return "NEW GIFT · ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose;
+        });
         const bits = [
           stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
+          ...giftBits,
           ...(Array.isArray(reqRows) ? reqRows : []).map((r) => "SEEK REQUEST · " + (r.title || r.need || r.category || "Open request")),
           ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70)),
           ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
           ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
         ].filter(Boolean);
-        if (!cancelled) setItems(bits);
+        if (!cancelled) setItems(bits.filter(Boolean));
       } catch (_e) {}
-    })();
-    return () => { cancelled = true; };
+    };
+    load();
+    const id = setInterval(load, 20000);
+    return () => { cancelled = true; clearInterval(id); };
   }, []);
   if (!items.length) return null;
   return (
