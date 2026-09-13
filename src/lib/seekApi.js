@@ -874,7 +874,7 @@ export async function getSeekLiveStats() {
   const [openRequests, fulfilled, donationRows] = await Promise.all([
     countRows("requests?select=id&is_public=eq.true&status=in.(published,partially_funded)"),
     countRows("requests?select=id&status=eq.fulfilled"),
-    supabaseFetch("donations?select=amount,status&status=eq.success&limit=1000").catch(() =>
+    supabaseFetch("donations?select=amount,status&status=eq.successful&limit=1000").catch(() =>
       supabaseFetch("donations?select=amount&limit=1000").catch(() => [])
     ),
   ]);
@@ -883,10 +883,10 @@ export async function getSeekLiveStats() {
   const raised = donations.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
 
   return {
-    openRequests,
-    fulfilled,
-    raised,
-    donationCount: donations.length,
+    openRequests: Number(openRequests) || 0,
+    fulfilled: Number(fulfilled) || 0,
+    raised: Number(raised) || 0,
+    donationCount: donations.length || 0,
   };
 }
 
