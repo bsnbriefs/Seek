@@ -1174,6 +1174,12 @@ function urlBase64ToUint8Array(base64String) {
 
 export async function getOfferInterestCount(offerId) {
   if (!offerId) return 0;
+  const counted = await supabaseFetch("rpc/offer_interest_count", {
+    method: "POST",
+    body: JSON.stringify({ p_offer_id: offerId }),
+  }).catch(() => null);
+  if (typeof counted === "number") return counted;
+  if (counted && typeof counted.count === "number") return counted.count;
   const rows = await supabaseFetch(
     "offer_interest?select=id&offer_id=eq." + encodeURIComponent(offerId)
   ).catch(() => []);
