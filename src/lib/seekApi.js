@@ -887,12 +887,15 @@ export async function getSeekLiveStats() {
   const [openRequests, fulfilled, donationRows] = await Promise.all([
     countRows("requests?select=id&is_public=eq.true&status=in.(published,partially_funded)"),
     countRows("requests?select=id&status=eq.fulfilled"),
-    supabaseFetch("donations?select=amount,status&status=eq.successful&limit=1000").catch(() =>
-      supabaseFetch("donations?select=amount&limit=1000").catch(() => [])
+    supabaseFetch("donations?select=amount,status&status=in.(successful,success,confirmed)&limit=2000").catch(() =>
+      supabaseFetch("donations?select=amount,status&limit=2000").catch(() => [])
     ),
   ]);
 
-  const donations = Array.isArray(donationRows) ? donationRows : [];
+  const donations = (Array.isArray(donationRows) ? donationRows : []).filter((row) => {
+    const s = String(row.status || "successful").toLowerCase();
+    return s === "successful" || s === "success" || s === "confirmed" || !row.status;
+  });
   const raised = donations.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
 
   return {
