@@ -1239,6 +1239,27 @@ export async function markOfferInterestStatus(interestId, status) {
   }
 }
 
+export async function closeMyOffer(offerId) {
+  const session = getUserSession();
+  if (!session?.access_token || !offerId) throw new Error("Sign in first.");
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const response = await fetch(url + "/rest/v1/offers?id=eq." + encodeURIComponent(offerId), {
+    method: "PATCH",
+    headers: {
+      apikey: key,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+      Prefer: "return=minimal",
+    },
+    body: JSON.stringify({ status: "closed" }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not close this giveaway.");
+  }
+}
+
 export async function submitOfferInterest(payload) {
   if (!supabaseConfigured) throw new Error("Seek backend is not configured yet.");
   return supabaseFetch("rpc/create_offer_interest", {
