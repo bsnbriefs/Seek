@@ -45,6 +45,7 @@ import {
   listPublicOffers,
   getOfferMedia,
   submitOfferInterest,
+  closeMyOffer,
   listMyOfferInterests,
   getOfferInterestCount,
   markOfferInterestStatus,
@@ -1089,6 +1090,7 @@ function OfferCard({ offer, setPage }) {
   const [open, setOpen] = useState(false);
   const [ownerRows, setOwnerRows] = useState([]);
   const [interestCount, setInterestCount] = useState(Number(offer.interest_count || 0));
+  const [closed, setClosed] = useState(String(offer.status || "").toLowerCase() === "closed");
   const session = getUserSession();
   const isOwner = Boolean(session?.user?.id && offer.created_by && session.user.id === offer.created_by);
   useEffect(() => {
@@ -1152,7 +1154,7 @@ function OfferCard({ offer, setPage }) {
         </button>
         <button type="button" className="text-[#0D3B3B]" onClick={() => {
           const session = getUserSession();
-          if (applied) return;
+          if (closed || applied) return;
           if (!session?.access_token) {
             try { sessionStorage.setItem("seek_return", "offers"); } catch (_e) {}
             if (setPage) setPage("account");
@@ -1161,8 +1163,13 @@ function OfferCard({ offer, setPage }) {
           }
           setApply(!apply);
         }}>
-          {interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
+          {closed ? "This giveaway is closed" : interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
         </button>
+        {isOwner && !closed && (
+          <button type="button" className="text-xs text-[#0D3B3B]/60" onClick={async () => {
+            try { await closeMyOffer(offer.id); setClosed(true); } catch (err) { window.alert(err.message); }
+          }}>Close giveaway</button>
+        )}
         {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
         <button
           type="button"
