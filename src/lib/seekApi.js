@@ -1265,3 +1265,15 @@ export async function listRequestDonors(requestId) {
     created_at: row.created_at,
   }));
 }
+
+export async function listPublicSponsors() {
+  if (!supabaseConfigured) return [];
+  try {
+    const rows = await supabaseFetch(
+      "donations?select=donor_name,amount,created_at,anonymous&status=eq.successful&order=amount.desc&limit=20"
+    );
+    return (rows || []).filter((r) => !r.anonymous && r.donor_name).slice(0, 8);
+  } catch (_e) {
+    return [];
+  }
+}
