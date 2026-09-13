@@ -668,7 +668,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#0D3B3B]/8">
+    <header className="sticky top-0 z-[110] bg-white border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -712,7 +712,7 @@ function Navbar({ page, setPage, userSession }) {
       </div>
 
       {open && (
-        <div className="lg:hidden fixed inset-0 z-[80] bg-[#0B1211] text-white flex flex-col">
+        <div className="lg:hidden fixed inset-0 z-[120] bg-[#0B1211] text-white flex flex-col">
           <div className="flex items-center justify-between px-5 h-16">
             <Logo className="h-7 brightness-0 invert" />
             <button className="p-2" onClick={() => setOpen(false)} aria-label="Close"><X size={22} /></button>
@@ -3369,6 +3369,7 @@ useEffect(() => {
   return (
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
+      <Navbar page={page} setPage={setPage} userSession={userSession} />
       <CookieBanner />
       <InstallSeekPrompt />
       <LiveTicker />
@@ -3430,7 +3431,6 @@ useEffect(() => {
         </div>
       )}
 
-      <Navbar page={page} setPage={setPage} userSession={userSession} />
       <Footer setPage={setPage} />
     </div>
   );
