@@ -994,7 +994,24 @@ export default function AdminPage() {
         <div>
         {/* DONATIONS */}
         <div className="mt-10">
-          <h2 className="text-2xl font-semibold mb-4">Donations</h2>
+          <h2 className="text-2xl font-semibold mb-4">Donation tracking</h2>
+          {(() => {
+            const ok = donations.filter((d) => d.status === "successful" || d.status === "success");
+            const pending = donations.filter((d) => d.status === "pending");
+            const total = ok.reduce((s, d) => s + Number(d.amount || 0), 0);
+            const byReq = {};
+            ok.forEach((d) => {
+              const key = d.request_id || "general";
+              byReq[key] = (byReq[key] || 0) + Number(d.amount || 0);
+            });
+            return (
+              <div className="grid sm:grid-cols-3 gap-3 mb-6">
+                <div className="rounded-2xl bg-white border p-4"><p className="text-xs uppercase text-slate-500">Confirmed</p><p className="text-2xl font-bold">₦{total.toLocaleString()}</p><p className="text-xs text-slate-500">{ok.length} gifts</p></div>
+                <div className="rounded-2xl bg-white border p-4"><p className="text-xs uppercase text-slate-500">Pending</p><p className="text-2xl font-bold">{pending.length}</p></div>
+                <div className="rounded-2xl bg-white border p-4"><p className="text-xs uppercase text-slate-500">Appeals funded</p><p className="text-2xl font-bold">{Object.keys(byReq).length}</p></div>
+              </div>
+            );
+          })()}
           <p className="mb-4 text-sm text-slate-600">
             Paystack confirms payment into the Seek/BSN settlement path. Seek does not pay requesters from this screen. Record fulfilment on the request after help has actually arrived.
           </p>
