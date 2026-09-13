@@ -247,11 +247,11 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
-  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000, story: "Each year BSN stands with girls who miss school because they cannot afford sanitary care. Past outreaches have reached classrooms with kits, dignity, and a simple message: you belong in class.", photos: ["https://images.unsplash.com/photo-1509062522246-3755977927d7?w=900&q=80", "https://images.unsplash.com/photo-1427504494785-3a9ca7044f45?w=900&q=80"] },
-  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000, story: "Bags, books and shoes have gone out before term starts so children can walk into class ready. This page is that same work, year after year.", photos: ["https://images.unsplash.com/photo-1503676260728-1c00da094a0b?w=900&q=80", "https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&q=80"] },
-  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000, story: "Young people have sat in BSN skill sessions to learn a trade they can use. The next class is funded the same way this one was: people giving what they can.", photos: ["https://images.unsplash.com/photo-1581091226825-a6a2a5aee158?w=900&q=80", "https://images.unsplash.com/photo-1524178232363-1fb2b075b655?w=900&q=80"] },
-  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000, story: "Wards have seen BSN teams arrive with food, conversation and presence. Hospital visitation is still that: show up, then give so the next visit can happen.", photos: ["https://images.unsplash.com/photo-1576091160399-112ba8d25d1d?w=900&q=80", "https://images.unsplash.com/photo-1519494026892-80bbd2d6fd0d?w=900&q=80"] },
-  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000, story: "Food packs have left BSN drives for homes that needed a meal that week. Give so the next pack can go out.", photos: ["https://images.unsplash.com/photo-1488521787991-ed7bbaae773c?w=900&q=80", "https://images.unsplash.com/photo-1593113598332-cd288d649433?w=900&q=80"] },
+  { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "Supporting girls with essentials and hope.", amount: 5000, story: "Each year BSN stands with girls who miss school because they cannot afford sanitary care. Past outreaches have reached classrooms with kits, dignity, and a simple message: you belong in class.", photos: ["/outreach/pad-a-girl-1.jpg", "/outreach/pad-a-girl-2.jpg"] },
+  { id: "back-to-school", title: "Back to School", blurb: "Equipping children for a brighter future.", amount: 10000, story: "Bags, books and shoes have gone out before term starts so children can walk into class ready. This page is that same work, year after year.", photos: ["/outreach/back-to-school-1.jpg", "/outreach/back-to-school-2.jpg"] },
+  { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "Building skills. Creating opportunities. Inspiring change.", amount: 15000, story: "Young people have sat in BSN skill sessions to learn a trade they can use. The next class is funded the same way this one was: people giving what they can.", photos: ["/outreach/skills-1.jpg", "/outreach/skills-2.jpg"] },
+  { id: "hospital", title: "Hospital Visitations", blurb: "Showing up, bringing comfort and reminding them they're not alone.", amount: 10000, story: "Wards have seen BSN teams arrive with food, conversation and presence. Hospital visitation is still that: show up, then give so the next visit can happen.", photos: ["/outreach/hospital-2.jpg", "/outreach/hospital-3.jpg", "/outreach/hospital-1.png"] },
+  { id: "food-drive", title: "Charity / Food Drive", blurb: "Reaching out with love when it matters most.", amount: 5000, story: "Food packs have left BSN drives for homes that needed a meal that week. Give so the next pack can go out.", photos: ["/outreach/food-drive-1.jpg"] },
 ];
 
 /* ---------------- Small building blocks ---------------- */
@@ -1223,15 +1223,15 @@ function GiveOfferForm() {
         <option value="">General offer (not tied to a specific request)</option>
         {requests.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
       </select>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">What are you giving?</p>
-      <ChoiceChips value={offerCategory} onChange={setOfferCategory} options={[
-        { id: "money", label: "Money" },
-        { id: "food", label: "Food" },
-        { id: "clothing", label: "Clothing" },
-        { id: "items", label: "Items" },
-        { id: "time", label: "Time / skills" },
-        { id: "shelter", label: "Shelter / space" },
-      ]} />
+      <select required value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]">
+        <option value="">What are you giving?</option>
+        <option value="money">Money</option>
+        <option value="food">Food</option>
+        <option value="clothing">Clothing</option>
+        <option value="items">Items</option>
+        <option value="time">Time / skills</option>
+        <option value="shelter">Shelter / space</option>
+      </select>
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="I can provide..." className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
       <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
