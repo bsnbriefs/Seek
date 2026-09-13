@@ -857,7 +857,7 @@ export async function getAdminOfferInterests() {
   return Array.isArray(data) ? data : [];
 }
 
-export async function postAdminAppeal({ title, category, location, amount, description, email }) {
+export async function postAdminAppeal({ title, category, location, amount, description, email, files }) {
   const session = getAdminSession();
   if (!session?.access_token) throw new Error("Admin sign in required.");
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_seek_request`, {
@@ -887,6 +887,23 @@ export async function postAdminAppeal({ title, category, location, amount, descr
   const id = row?.id || row?.request_id;
   if (id) {
     await updateAdminRequestStatus(id, "published");
+    for (const file of files || []) {
+      const form = new FormData();
+      form.append("file", file);
+      form.append("purpose", "evidence");
+      form.append("request_id", id);
+      form.append("original_name", file.name || "appeal");
+      const up = await fetch(`${SUPABASE_URL}/functions/v1/secure-media-upload`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+        },
+        body: form,
+      });
+      const result = await up.json().catch(() => ({}));
+      if (!up.ok || !result?.success) throw new Error(result?.error || "Appeal posted but media failed.");
+    }
   }
   return { id, share: id ? `https://seekbsn.org/request/${id}` : "" };
 }
