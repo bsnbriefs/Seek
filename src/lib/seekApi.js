@@ -163,9 +163,14 @@ export async function submitRequest(payload) {
 
 export async function listPublicOffers() {
   if (!supabaseConfigured) return [];
-  const rows = await supabaseFetch(
-    "public_open_offers?select=id,description,created_at,status,category,city,created_by,avatar_path&order=created_at.desc&limit=48"
-  );
+  let rows = await supabaseFetch(
+    "offers?select=id,description,created_at,status,category,city,created_by,avatar_path&status=in.(open,matched)&order=created_at.desc&limit=48"
+  ).catch(() => []);
+  if (!Array.isArray(rows) || !rows.length) {
+    rows = await supabaseFetch(
+      "public_open_offers?select=id,description,created_at,status,category,city,created_by,avatar_path&order=created_at.desc&limit=48"
+    ).catch(() => []);
+  }
   const list = (Array.isArray(rows) ? rows : []).filter((row) => {
     if (!row.created_at) return true;
     return (Date.now() - new Date(row.created_at).getTime()) / 86400000 <= 21;
