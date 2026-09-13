@@ -105,13 +105,6 @@ const FONTS = (
     @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
     .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
     html { scroll-behavior: smooth; }
-    :root {
-      --seek-template: editorial;
-      --seek-page: #EFEAE2;
-      --seek-paper: #FFFcf7;
-      --seek-line: rgba(13,59,59,0.10);
-    }
-    body { background: var(--seek-page) !important; }
 
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
@@ -675,7 +668,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-50 border-b border-[#0D3B3B]/10" style={{ background: "rgba(255,252,247,0.92)", backdropFilter: "blur(10px)" }}>
+    <header className="sticky top-0 z-50 bg-white/80 backdrop-blur-md border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -700,7 +693,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <ThemeToggle />
           <button
             onClick={() => go(userSession?.access_token ? "account" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
@@ -713,7 +705,6 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <ThemeToggle />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -721,24 +712,39 @@ function Navbar({ page, setPage, userSession }) {
       </div>
 
       {open && (
-        <div className="lg:hidden fixed inset-0 z-[70] bg-[#F7F6F2] flex flex-col">
-          <div className="flex items-center justify-between px-5 h-16 border-b border-[#0D3B3B]/8 bg-white">
-            <Logo className="h-7" />
+        <div className="lg:hidden fixed inset-0 z-[80] bg-[#0B1211] text-white flex flex-col">
+          <div className="flex items-center justify-between px-5 h-16">
+            <Logo className="h-7 brightness-0 invert" />
             <button className="p-2" onClick={() => setOpen(false)} aria-label="Close"><X size={22} /></button>
           </div>
-          <div className="flex-1 overflow-y-auto px-6 py-6">
-            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mb-2">Ask</p>
-            <button onClick={() => go("seek-help")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">I need help</button>
-            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mt-6 mb-2">Give</p>
-            <button onClick={() => go("give")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">I want to help</button>
-            <button onClick={() => go("offers")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">Giveaways</button>
-            <button onClick={() => go("volunteer")} className="block w-full text-left font-display text-2xl text-[#0D3B3B] py-2">Volunteer</button>
-            <p className="text-[11px] tracking-[0.18em] uppercase text-[#0D3B3B]/40 mt-6 mb-2">Seek</p>
-            <button onClick={() => go("home")} className="block w-full text-left py-2 text-[#0D3B3B]">Home</button>
-            <button onClick={() => go("impact")} className="block w-full text-left py-2 text-[#0D3B3B]">Impact</button>
-            <button onClick={() => go("about")} className="block w-full text-left py-2 text-[#0D3B3B]">About</button>
-            {userSession?.access_token && <button onClick={() => go("my-requests")} className="block w-full text-left py-2 text-[#0D3B3B]">My requests</button>}
-            <button onClick={() => go("account")} className="block w-full text-left py-2 text-[#0D3B3B]">{userSession?.access_token ? "Account" : "Sign in"}</button>
+          <nav className="flex-1 overflow-y-auto px-4 py-4 space-y-1">
+            {[
+              { id: "home", label: "Home", icon: HomeIcon },
+              { id: "seek-help", label: "Seek Help", icon: Search },
+              { id: "give", label: "Give", icon: HeartHandshake },
+              { id: "offers", label: "Giveaways", icon: Package },
+              { id: "impact", label: "Impact", icon: BadgeCheck },
+              { id: "volunteer", label: "Volunteer", icon: Users },
+              { id: "about", label: "About", icon: ShieldCheck },
+            ].map((l) => {
+              const Icon = l.icon;
+              const on = page === l.id;
+              return (
+                <button key={l.id} onClick={() => go(l.id)} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.14em] uppercase ${on ? "bg-white/10 text-white" : "text-white/70"}`}>
+                  <Icon size={16} /> {l.label}
+                </button>
+              );
+            })}
+            {userSession?.access_token && (
+              <button onClick={() => go("my-requests")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.14em] uppercase text-white/70">
+                <Clock size={16} /> My requests
+              </button>
+            )}
+          </nav>
+          <div className="p-4">
+            <button onClick={() => go("account")} className="w-full rounded-xl bg-white/10 py-3 text-sm tracking-[0.16em] uppercase">
+              {userSession?.access_token ? "Account" : "Sign in"}
+            </button>
           </div>
         </div>
       )}
@@ -3248,6 +3254,11 @@ function InstallSeekPrompt() {
 }
 
 export default function App() {
+  useEffect(() => {
+    document.documentElement.classList.remove("seek-dark");
+    try { localStorage.removeItem("seek_theme"); } catch (_e) {}
+  }, []);
+
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
   const setPage = (id) => {
     setPageState(id);
@@ -3356,7 +3367,7 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen" style={{ background: "#EFEAE2", color: C.ink }}>
+    <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <CookieBanner />
       <InstallSeekPrompt />
