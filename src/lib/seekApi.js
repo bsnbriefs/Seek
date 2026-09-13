@@ -526,6 +526,19 @@ export function userLogout() {
   setUserSession(null);
 }
 
+export async function sendMagicLink(email) {
+  const response = await fetch(`${AUTH_URL}/auth/v1/otp`, {
+    method: "POST",
+    headers: { apikey: AUTH_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email, create_user: true, options: { emailRedirectTo: (typeof window !== "undefined" ? window.location.origin : "https://seekbsn.org") + "/account" } }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.msg || data?.error_description || data?.message || "Could not send the sign-in link.");
+  }
+  return true;
+}
+
 export async function userSignUp(email, password) {
   const response = await fetch(
     `${AUTH_URL}/auth/v1/signup`,
