@@ -382,6 +382,7 @@ export async function initializeDonation({
   coverFee = true,
   interval = "once",
   callbackUrl = window.location.origin,
+  campaignId = null,
 }) {
   if (!supabaseConfigured) {
     throw new Error("Seek backend is not configured yet.");
@@ -404,6 +405,7 @@ export async function initializeDonation({
         cover_fee: coverFee !== false,
         interval: interval === "monthly" ? "monthly" : "once",
         callback_url: callbackUrl,
+        campaign_id: campaignId || null,
       }),
     }
   );
@@ -893,11 +895,21 @@ export async function listRecentGifts(limit = 8) {
 export async function getOutreachRaised(campaignTitle, campaignId) {
   const needles = [campaignTitle, campaignId].filter(Boolean).map((s) => String(s).toLowerCase());
   if (!needles.length) return 0;
+  let byCampaign = [];
+  if (campaignId) {
+    byCampaign = await supabaseFetch(
+      "donations?select=amount,status,campaign_id&campaign_id=eq." + encodeURIComponent(campaignId) + "&status=eq.successful&limit=500"
+    ).catch(() => []);
+  }
+  if (Array.isArray(byCampaign) && byCampaign.length) {
+    return byCampaign.reduce((sum, row) => sum + (Number(row.amount) || 0), 0);
+  }
   const rows = await supabaseFetch(
-    "donations?select=donor_name,amount,anonymous,status&status=eq.successful&order=created_at.desc&limit=500"
+    "donations?select=donor_name,amount,anonymous,status,campaign_id&status=eq.successful&order=created_at.desc&limit=500"
   ).catch(() => []);
   return (Array.isArray(rows) ? rows : [])
     .filter((row) => {
+      if (campaignId && String(row.campaign_id || "") === String(campaignId)) return true;
       const name = String(row.donor_name || "").toLowerCase();
       return needles.some((n) => name.includes(n));
     })
