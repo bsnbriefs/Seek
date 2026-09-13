@@ -46,6 +46,7 @@ import {
   getOfferMedia,
   submitOfferInterest,
   listMyOfferInterests,
+  getOfferInterestCount,
   markOfferInterestStatus,
   uploadProfilePhoto,
   getMyProfile,
@@ -285,9 +286,12 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 
 const SEEK_FACE = "/seek-logo.png";
-function postAvatar(url, row = {}) {
+function isBsnPost(row = {}) {
   const blob = [row.title, row.description, row.name, row.contactEmail, row.requester_name, row.display_name, row.category].join(" ").toLowerCase();
-  if (blob.includes("bsn") || blob.includes("barrister street")) return SEEK_FACE;
+  return blob.includes("bsn") || blob.includes("barrister street");
+}
+function postAvatar(url, row = {}) {
+  if (isBsnPost(row)) return SEEK_FACE;
   return url || "";
 }
 
@@ -426,6 +430,7 @@ function RequestCard({ req, onHelp, onView }) {
     <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
       <div className="flex flex-wrap items-center gap-2 mb-3">
         <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
+        {isBsnPost(req) && <span className="text-[10px] font-semibold uppercase tracking-wide rounded-full bg-[#0D3B3B] text-white px-2 py-0.5">Posted by Admin</span>}
         <UrgencyBadge level={req.urgency} />
       </div>
       <div className="flex items-start gap-3 mb-2">
@@ -1082,9 +1087,11 @@ const GIVE_OPTIONS = [
 function OfferCard({ offer, setPage }) {
   const [open, setOpen] = useState(false);
   const [ownerRows, setOwnerRows] = useState([]);
+  const [interestCount, setInterestCount] = useState(Number(offer.interest_count || 0));
   const session = getUserSession();
   const isOwner = Boolean(session?.user?.id && offer.created_by && session.user.id === offer.created_by);
   useEffect(() => {
+    getOfferInterestCount(offer.id).then(setInterestCount).catch(() => {});
     if (!isOwner) return;
     listMyOfferInterests(offer.id).then(setOwnerRows).catch(() => setOwnerRows([]));
   }, [isOwner, offer.id]);
@@ -1125,6 +1132,7 @@ function OfferCard({ offer, setPage }) {
           )}
           <p className="mt-1 font-body text-[#0D3B3B] leading-relaxed">{offer.description}</p>
           <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
+          {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#0D3B3B]">Posted by Admin</p>}
         </div>
       </div>
       <div className="mt-4 flex items-center gap-4 text-sm font-semibold">
@@ -1149,7 +1157,7 @@ function OfferCard({ offer, setPage }) {
           }
           setApply(!apply);
         }}>
-          I am interested
+          {interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
         </button>
         {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
         <button
@@ -1199,7 +1207,7 @@ function OfferCard({ offer, setPage }) {
                 phone: applyForm.phone,
                 message: applyForm.message,
               });
-              setApplied(true);
+              setApplied(true); setInterestCount((n) => n + 1);
             } catch (err) {
               setApplyError(err.message || "Could not send interest.");
             } finally {
