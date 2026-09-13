@@ -81,7 +81,7 @@ export default function AdminPage() {
       const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
-        getAdminVolunteers(),
+        getAdminVolunteers().catch(() => []),
         getAdminRequestPrivate(),
         getAdminDonations(),
         getAdminImpactPosts().catch(() => []),
@@ -392,6 +392,7 @@ export default function AdminPage() {
             { id: "post", label: "Post" },
             { id: "requests", label: "Requests" },
             { id: "offers", label: "Offers" },
+            { id: "volunteers", label: "Volunteers" },
             { id: "money", label: "Money" },
             { id: "trust", label: "Trust" },
             { id: "impact", label: "Impact" },
@@ -974,8 +975,11 @@ export default function AdminPage() {
           )}
         </div>
 
-        {/* VOLUNTEERS */}
-        <div className="mt-10">
+        </div>
+        )}
+        {adminTab === "volunteers" && (
+        <div>
+        <div className="mt-2">
           <h2 className="text-2xl font-semibold mb-4">Volunteers</h2>
 
           {volunteers.length === 0 ? (
@@ -996,14 +1000,19 @@ export default function AdminPage() {
                   </p>
 
                   <p className="mt-1 text-sm text-slate-600">
-                    {v.location}
+                    {v.location || "Location not given"}
                   </p>
-
+                  <p className="mt-1 text-xs text-slate-400">
+                    {v.created_at ? new Date(v.created_at).toLocaleString() : ""}
+                  </p>
                   {v.interests && (
                     <p className="mt-2 text-sm text-slate-700">
-                      Interests: {v.interests}
+                      Interests: {Array.isArray(v.interests) ? v.interests.join(", ") : v.interests}
                     </p>
                   )}
+                  {v.message && <p className="mt-2 text-sm text-slate-700">{v.message}</p>}
+                  {v.skills && <p className="mt-2 text-sm text-slate-700">Skills: {v.skills}</p>}
+                  {v.availability && <p className="mt-2 text-sm text-slate-700">Availability: {v.availability}</p>}
                 </div>
               ))}
             </div>
