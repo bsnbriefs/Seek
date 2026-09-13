@@ -857,7 +857,7 @@ export async function getAdminOfferInterests() {
   return Array.isArray(data) ? data : [];
 }
 
-export async function postAdminAppeal({ title, category, location, amount, description, email, files }) {
+export async function postAdminAppeal({ title, category, location, amount, description, email, files, name, phone }) {
   const session = getAdminSession();
   if (!session?.access_token) throw new Error("Admin sign in required.");
   const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/submit_seek_request`, {
@@ -874,9 +874,9 @@ export async function postAdminAppeal({ title, category, location, amount, descr
       p_location: location || "Nigeria",
       p_description: description || title,
       p_amount_needed: amount ? Number(amount) : null,
-      p_full_name: "BSN Foundation",
+      p_full_name: name || "BSN Foundation",
       p_email: email || session.user?.email,
-      p_phone: null,
+      p_phone: phone || "00000000000",
       p_urgency: "normal",
       p_assistance_type: "Money",
     }),
