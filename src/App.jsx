@@ -223,6 +223,10 @@ const FONTS = (
 /* ---------------- APP DATA ---------------- */
 
 const CATEGORIES = [
+  { id: "celebrate", label: "Celebrate & Connect", icon: HeartHandshake },
+  { id: "company", label: "Company / Friends", icon: Users },
+  { id: "accompany", label: "Accompaniment", icon: Users },
+  { id: "study", label: "Study companion", icon: GraduationCap },
   { id: "food", label: "Food", icon: Utensils },
   { id: "clothing", label: "Clothing", icon: Shirt },
   { id: "medical", label: "Medical", icon: Stethoscope },
@@ -234,10 +238,6 @@ const CATEGORIES = [
   { id: "transport", label: "Transportation", icon: Bus },
   { id: "emergency", label: "Emergency", icon: AlertTriangle },
   { id: "financial", label: "Financial Assistance", icon: Wallet },
-  { id: "company", label: "Company / Friends", icon: Users },
-  { id: "celebrate", label: "Celebrate & Connect", icon: HeartHandshake },
-  { id: "accompany", label: "Accompaniment", icon: Users },
-  { id: "study", label: "Study companion", icon: GraduationCap },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
