@@ -2,7 +2,6 @@ import AdminPage from "./AdminPage";
 import NotificationBell from "./NotificationBell";
 import NotificationsPage from "./NotificationsPage";
 import React, { useEffect, useRef, useState } from "react";
-import { supabase } from "./lib/supabaseClient";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -3901,8 +3900,8 @@ function pageFromPath(pathname) {
   if (path === "/terms") return "terms";
   if (path === "/guidelines") return "guidelines";
   if (path === "/contact") return "contact";
-  if (path === "/notifications") return "notifications";
   if (path === "/my-requests") return "my-requests";
+  if (path === "/notifications") return "notifications";
   if (path === "/dashboard" || path === "/my-seek") return "my-seek";
   if (path === "/account") return "account";
   if (path.startsWith("/request/")) return "request:" + path.split("/")[2];
@@ -3928,8 +3927,8 @@ function pathFromPage(page) {
     guidelines: "/guidelines",
     contact: "/contact",
     "my-requests": "/my-requests",
-    "my-seek": "/dashboard",
     notifications: "/notifications",
+    "my-seek": "/dashboard",
     account: "/account",
   };
   return map[id] || "/";
@@ -3940,46 +3939,6 @@ try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
 function SeekMobileBottomNav({ page, setPage, userSession }) {
   const [composerOpen, setComposerOpen] = useState(false);
-  const [unreadNotifications, setUnreadNotifications] = useState(0);
-
-  useEffect(() => {
-    const userId = userSession?.user?.id;
-    const accessToken = userSession?.access_token;
-    const refreshToken = userSession?.refresh_token;
-    if (!userId || !accessToken) {
-      setUnreadNotifications(0);
-      return undefined;
-    }
-    let cancelled = false;
-    let channel = null;
-    const loadCount = async () => {
-      try {
-        const { data, error } = await supabase
-          .from("notifications")
-          .select("id,read_at")
-          .order("created_at", { ascending: false })
-          .limit(100);
-        if (!error && !cancelled) setUnreadNotifications((data || []).filter((item) => !item.read_at).length);
-      } catch (_e) {}
-    };
-    (async () => {
-      try { await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }); } catch (_e) {}
-      if (cancelled) return;
-      await loadCount();
-      if (cancelled) return;
-      channel = supabase
-        .channel(`notifications-bottom-${userId}`)
-        .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, (payload) => {
-          if (!payload.new?.read_at) setUnreadNotifications((count) => count + 1);
-        })
-        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => { loadCount(); })
-        .subscribe();
-    })();
-    return () => {
-      cancelled = true;
-      if (channel) supabase.removeChannel(channel);
-    };
-  }, [userSession?.access_token, userSession?.user?.id]);
   const go = (id) => {
     setComposerOpen(false);
     setPage(id);
@@ -4055,10 +4014,9 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
 
           {items.slice(2).map((item) => {
             const Icon = item.icon;
-            const active = item.id === "notifications" ? page === "notifications" : page === "messages";
             return (
-              <button key={item.id} type="button" onClick={() => item.action()} className={`relative flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 ${active ? "text-white" : "text-white/55"}`} aria-label={item.label}>
-                <span className="relative"><Icon size={25} strokeWidth={active ? 2.6 : 2} />{item.id === "notifications" && unreadNotifications > 0 && <span className="absolute -right-2 -top-1 min-w-[15px] h-[15px] px-1 rounded-full bg-[#1598E5] text-white text-[9px] leading-[15px] font-bold text-center">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>}</span>
+              <button key={item.id} type="button" onClick={() => item.action()} className="flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 text-white/55" aria-label={item.label}>
+                <Icon size={25} strokeWidth={2} />
                 <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
               </button>
             );
@@ -4076,18 +4034,57 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
 
 function CookieBanner() {
   const [open, setOpen] = useState(() => {
-    try { return localStorage.getItem("seek_cookie_consent") !== "1"; } catch { return true; }
+    try {
+      return !localStorage.getItem("seek_cookie_consent");
+    } catch {
+      return true;
+    }
   });
+
   if (!open) return null;
+
+  const saveConsent = (value) => {
+    try {
+      localStorage.setItem("seek_cookie_consent", value);
+    } catch (_e) {}
+    setOpen(false);
+  };
+
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[90] p-4">
-      <div className="mx-auto max-w-3xl rounded-2xl bg-[#0D3B3B] text-white p-4 shadow-2xl">
-        <p className="font-body text-sm leading-relaxed">
-          We value your privacy. In compliance with the GDPR and NDPR, we use cookies to optimize performance, analyze website traffic, and support marketing.
-        </p>
+    <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-3 sm:px-4 sm:pb-4">
+      <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[#0D3B3B] p-4 text-white shadow-2xl">
+        <div className="flex items-start justify-between gap-3">
+          <div className="min-w-0">
+            <p className="font-body text-sm leading-relaxed">
+              We value your privacy. SEEK uses cookies and similar technologies to keep the platform secure, remember your preferences, understand how the platform is used, and support relevant services.
+            </p>
+          </div>
+
+          <button
+            type="button"
+            aria-label="Close privacy notice"
+            onClick={() => saveConsent("necessary")}
+            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-lg text-white hover:bg-white/20"
+          >
+            ×
+          </button>
+        </div>
+
         <div className="mt-3 flex flex-wrap gap-2">
-          <button type="button" className="rounded-full bg-white text-[#0D3B3B] px-4 py-2 text-sm font-semibold" onClick={() => { try { localStorage.setItem("seek_cookie_consent", "1"); } catch (_e) {} setOpen(false); }}>Accept</button>
-          <button type="button" className="rounded-full border border-white/30 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_cookie_consent", "necessary"); } catch (_e) {} setOpen(false); }}>Necessary only</button>
+          <button
+            type="button"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0D3B3B]"
+            onClick={() => saveConsent("1")}
+          >
+            Accept all
+          </button>
+          <button
+            type="button"
+            className="rounded-full border border-white/30 px-4 py-2 text-sm"
+            onClick={() => saveConsent("necessary")}
+          >
+            Necessary only
+          </button>
         </div>
       </div>
     </div>
@@ -4259,7 +4256,7 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek", "notifications"];
+  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
