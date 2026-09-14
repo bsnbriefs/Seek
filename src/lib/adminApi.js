@@ -992,3 +992,45 @@ export async function postAdminGiveaway({ description, category, city, contactEm
   }
   return { id: offerId, share: "https://seekbsn.org/offers" };
 }
+
+
+export async function getAdminCelebrateRsvps() {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/list_all_celebrate_rsvps`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+    },
+    body: "{}",
+  });
+  const data = await response.json().catch(() => []);
+  if (!response.ok) throw new Error(data?.message || "Could not load Celebrate RSVPs.");
+  const base = SUPABASE_URL.replace(/\/$/, "");
+  return (Array.isArray(data) ? data : []).map((row) => ({
+    ...row,
+    photo_url: row.photo_path
+      ? (String(row.photo_path).startsWith("http") ? row.photo_path : base + "/storage/v1/object/public/" + String(row.photo_path).replace(/^\//, ""))
+      : "",
+  }));
+}
+
+export async function updateAdminCelebrateRsvp(id, status) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(`${SUPABASE_URL}/rest/v1/rpc/update_celebrate_rsvp_status`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_id: id, p_status: status }),
+  });
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not update RSVP.");
+  }
+}
