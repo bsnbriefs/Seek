@@ -1416,6 +1416,23 @@ export async function submitCelebrateRsvp(payload) {
 }
 
 
+async function signSeekPhoto(path, accessToken) {
+  if (!path) return "";
+  if (/^https?:\/\//i.test(path)) return path;
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const clean = String(path).replace(/^\/+/, "").replace(/^seek-evidence\//, "");
+  const signRes = await fetch(base + "/storage/v1/object/sign/seek-evidence/" + clean, {
+    method: "POST",
+    headers: { apikey: key, Authorization: "Bearer " + accessToken, "Content-Type": "application/json" },
+    body: JSON.stringify({ expiresIn: 600 }),
+  });
+  const signData = await signRes.json().catch(() => ({}));
+  const signedPath = signData?.signedURL || signData?.signedUrl || "";
+  if (signedPath) return signedPath.startsWith("http") ? signedPath : base + "/storage/v1" + signedPath;
+  return seekImageUrl(path);
+}
+
 export async function listCelebrateRsvps(requestId) {
   const session = getUserSession();
   if (!session?.access_token || !requestId) return [];
@@ -1423,15 +1440,11 @@ export async function listCelebrateRsvps(requestId) {
     method: "POST",
     body: JSON.stringify({ p_request_id: requestId }),
   }).catch(() => []);
-  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  return (Array.isArray(rows) ? rows : []).map((row) => ({
-    ...row,
-    photo_url: row.photo_path
-      ? (String(row.photo_path).startsWith("http")
-          ? row.photo_path
-          : base + "/storage/v1/object/public/" + String(row.photo_path).replace(/^\//, ""))
-      : "",
-  }));
+  const out = [];
+  for (const row of Array.isArray(rows) ? rows : []) {
+    out.push({ ...row, photo_url: await signSeekPhoto(row.photo_path, session.access_token) });
+  }
+  return out;
 }
 
 
@@ -1441,5 +1454,15 @@ export async function updateCelebrateRsvpStatus(rsvpId, status) {
   return supabaseFetch("rpc/update_celebrate_rsvp_status", {
     method: "POST",
     body: JSON.stringify({ p_id: rsvpId, p_status: status }),
+  });
+}
+
+
+export async function closeCelebrateInvite(requestId) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Sign in first.");
+  return supabaseFetch("rpc/close_celebrate_invite", {
+    method: "POST",
+    body: JSON.stringify({ p_request_id: requestId }),
   });
 }
