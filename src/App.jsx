@@ -1836,7 +1836,7 @@ function CelebratePage({ setPage }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const [list, setList] = useState([]);
-  const [form, setForm] = useState({ name: "", email: "", phone: "", location: "", category: "Celebrate & Connect", need: "" });
+  const [form, setForm] = useState({ name: "", email: "", phone: "", location: "", category: "Celebrate & Connect", need: "", evidenceFiles: [] });
   useEffect(() => {
     listPublishedRequests(48).then((rows) => setList((rows || []).map(mapRequestRow).filter((r) => CONNECT_CATS.includes(r.category)))).catch(() => []);
   }, []);
@@ -1861,7 +1861,7 @@ function CelebratePage({ setPage }) {
         <form className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 space-y-4" onSubmit={async (e) => {
           e.preventDefault(); setError(""); setLoading(true);
           try {
-            await submitRequest({ ...form, amount: "", description: form.need });
+            await submitRequest({ ...form, amount: "", description: form.need, evidenceFiles: form.evidenceFiles });
             setSubmitted(true);
           } catch (err) { setError(err.message); } finally { setLoading(false); }
         }}>
@@ -1876,6 +1876,13 @@ function CelebratePage({ setPage }) {
           </Field>
           <Field label="What are you inviting people to">
             <textarea required rows={3} className={inputCls} value={form.need} onChange={(e) => setForm({ ...form, need: e.target.value })} placeholder="e.g. Graduation on Saturday in Enugu. I would like two people there." />
+          </Field>
+          <Field label="Photo or video of the invitation">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-4 text-sm text-[#0D3B3B]/50">
+              <Upload size={16} />
+              <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a photo or short video"}</span>
+              <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={(e) => setForm((prev) => ({ ...prev, evidenceFiles: Array.from(e.target.files || []).slice(0, 5) }))} />
+            </label>
           </Field>
           <p className="text-xs text-[#0D3B3B]/50">Do not post your home address. Meet in a public place. Seek is not a dating app.</p>
           {error && <p className="text-sm text-red-600">{error}</p>}
