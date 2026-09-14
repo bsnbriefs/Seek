@@ -2038,7 +2038,7 @@ function CelebrateRsvp({ request, setPage }) {
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const session = getUserSession();
-  const [form, setForm] = useState({ name: "", email: session?.user?.email || "", phone: "", age: "", message: "" });
+  const [form, setForm] = useState({ name: "", email: session?.user?.email || "", phone: "", age: "", message: "", photo: null });
   useEffect(() => {
     getCelebrateRsvpCount(request.id).then(setCount).catch(() => {});
   }, [request.id]);
@@ -2055,7 +2055,9 @@ function CelebrateRsvp({ request, setPage }) {
         <form className="mt-4 space-y-3" onSubmit={async (e) => {
           e.preventDefault(); setLoading(true); setError("");
           try {
-            await submitCelebrateRsvp({ requestId: request.id, ...form });
+            if (!form.photo) throw new Error("Add a recent photo of yourself.");
+            const uploaded = await uploadProfilePhoto(form.photo);
+            await submitCelebrateRsvp({ requestId: request.id, ...form, photo: uploaded.storage_path || uploaded.path || uploaded.public_url || "" });
             try { localStorage.setItem("seek_rsvp_" + request.id, "1"); } catch (_e) {}
             setDone(true); setCount((n) => n + 1);
           } catch (err) { setError(err.message || "Could not send this."); }
@@ -2066,6 +2068,9 @@ function CelebrateRsvp({ request, setPage }) {
           <input required className={inputCls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
           <textarea required rows={2} className={inputCls} placeholder="When you can be there" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          <label className="block text-sm text-[#0D3B3B]/60">Recent photo of you
+            <input required type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" onChange={(e) => setForm({ ...form, photo: e.target.files?.[0] || null })} />
+          </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : "Send to host"}</Button>
         </form>
