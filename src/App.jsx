@@ -2046,7 +2046,11 @@ function CelebrateRsvp({ request, setPage }) {
   return (
     <div className="w-full">
       <Button variant="primary" className="w-full sm:w-auto" onClick={() => {
-        if (!session?.access_token) { if (setPage) setPage("account"); return; }
+        if (!session?.access_token) {
+          try { sessionStorage.setItem("seek_return", "request:" + request.id); } catch (_e) {}
+          if (setPage) setPage("account");
+          return;
+        }
         setOpen(!open);
       }}>
         {count ? count + " people can be there · I can be there" : "I can be there"}
@@ -2968,6 +2972,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           setUserSession(result);
           const back = sessionStorage.getItem("seek_return") || "my-requests";
           sessionStorage.removeItem("seek_return");
+          if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
           setPage(back);
         }
       } else {
@@ -2975,6 +2980,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
         setUserSession(session);
         const back = sessionStorage.getItem("seek_return") || "my-requests";
         sessionStorage.removeItem("seek_return");
+        if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
         setPage(back);
       }
     } catch (err) {
