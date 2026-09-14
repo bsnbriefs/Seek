@@ -4022,7 +4022,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
             );
           })}
 
-          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1598E5] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
+          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1BAA9C] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
             <Plus size={35} strokeWidth={2.2} />
           </button>
         </div>
@@ -4051,26 +4051,22 @@ function CookieBanner() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-3 sm:px-4 sm:pb-4">
-      <div className="mx-auto max-w-3xl rounded-2xl border border-white/10 bg-[#0D3B3B] p-4 text-white shadow-2xl">
-        <div className="flex items-start justify-between gap-3">
-          <div className="min-w-0">
-            <p className="font-body text-sm leading-relaxed">
-              We value your privacy. SEEK uses cookies and similar technologies to keep the platform secure, remember your preferences, understand how the platform is used, and support relevant services.
-            </p>
-          </div>
+    <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[84px] sm:px-4 sm:pb-4">
+      <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0D3B3B] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
+        <button
+          type="button"
+          aria-label="Close privacy notice"
+          onClick={() => saveConsent("necessary")}
+          className="absolute right-3 top-3 flex h-9 w-9 items-center justify-center rounded-full bg-white/10 text-xl leading-none text-white hover:bg-white/20 focus:outline-none focus:ring-2 focus:ring-white/50"
+        >
+          <span aria-hidden="true">×</span>
+        </button>
 
-          <button
-            type="button"
-            aria-label="Close privacy notice"
-            onClick={() => saveConsent("necessary")}
-            className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/10 text-lg text-white hover:bg-white/20"
-          >
-            ×
-          </button>
-        </div>
+        <p className="m-0 pr-1 font-body text-sm leading-6 text-white/95 sm:text-[15px]">
+          We value your privacy. SEEK uses cookies and similar technologies to keep the platform secure, remember your preferences, understand how the platform is used, and support relevant services.
+        </p>
 
-        <div className="mt-3 flex flex-wrap gap-2">
+        <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
             className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0D3B3B]"
@@ -4080,7 +4076,7 @@ function CookieBanner() {
           </button>
           <button
             type="button"
-            className="rounded-full border border-white/30 px-4 py-2 text-sm"
+            className="rounded-full border border-white/40 px-4 py-2 text-sm font-semibold text-white hover:bg-white/10"
             onClick={() => saveConsent("necessary")}
           >
             Necessary only
@@ -4090,7 +4086,6 @@ function CookieBanner() {
     </div>
   );
 }
-
 
 function InstallSeekPrompt() {
   const [hidden, setHidden] = useState(() => {
