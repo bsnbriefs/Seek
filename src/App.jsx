@@ -1875,7 +1875,7 @@ function CelebratePage({ setPage }) {
       <section className="mx-auto max-w-2xl px-5 pt-16 pb-8 text-center">
         <SectionLabel>Celebrate & Connect</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Find company. Not a donation.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65">Birthdays, graduations, a new city, a study partner. Seek reviews every post. This is not dating.</p>
+        <p className="mt-3 font-body text-[#0D3B3B]/65">Ask for company at a birthday, a graduation, or in a new city. Seek reads every post before it is public.</p>
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-10">
         <form className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 space-y-4" onSubmit={async (e) => {
@@ -2417,11 +2417,13 @@ function RequestPage({ requestId, setPage }) {
               <button type="button" className="mt-4 rounded-full border px-4 py-2 text-sm font-semibold" onClick={async () => {
                 try {
                   await closeCelebrateInvite(request.id);
-                  window.alert("This invitation is closed.");
-                  window.location.reload();
+                  setRequest((prev) => prev ? { ...prev, status: "fulfilled" } : prev);
                 } catch (err) { window.alert(err.message); }
               }}>Close invitation</button>
             </div>
+          )}
+          {request.status === "fulfilled" && getUserSession()?.access_token && (
+            <RequesterUpdateForm requestId={request.id} existing={request.publicUpdate} existingMedia={request.appreciationUrl} onSaved={(text) => setRequest((prev) => prev ? { ...prev, publicUpdate: text } : prev)} />
           )}
           <ReportRequestForm requestId={request.id} />
 
@@ -3150,15 +3152,10 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         try {
           setSaving(true);
           setError("");
-          if (text.trim().length >= 3) {
-            await postRequestPublicUpdate(requestId, text);
-          }
-          if (file) {
-            await uploadAppreciationMedia(requestId, file);
-          }
-          if (text.trim().length < 3 && !file) {
-            throw new Error("Add a short thank-you or a photo/video.");
-          }
+          if (text.trim().length < 3) throw new Error("Write a short note about how it went.");
+          if (!file && !existingMedia) throw new Error("Add a photo or video of the experience.");
+          await postRequestPublicUpdate(requestId, text);
+          if (file) await uploadAppreciationMedia(requestId, file);
           setSaved(true);
           onSaved?.(text.trim());
         } catch (err) {
@@ -3169,14 +3166,15 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
       }}
     >
       <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">
-        Public update
+        How did Seek go?
       </p>
       <textarea
+        required
         value={text}
         maxLength={280}
         rows={3}
         onChange={(e) => setText(e.target.value)}
-        placeholder="Example: School fees were paid. Thank you."
+        placeholder="What happened, and how did people show up?"
         className="w-full rounded-xl border px-3 py-2 text-sm"
       />
       <input
