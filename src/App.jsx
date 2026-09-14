@@ -23,6 +23,8 @@ class ErrorBoundary extends React.Component {
 }
 import {
   submitRequest,
+  submitCelebrateRsvp,
+  getCelebrateRsvpCount,
   submitOffer,
   submitVolunteer,
   initializeDonation,
@@ -2026,6 +2028,52 @@ function AboutPage({ setPage }) {
 
 /* ---------------- Public Request Page ---------------- */
 
+
+function CelebrateRsvp({ request, setPage }) {
+  const [open, setOpen] = useState(false);
+  const [done, setDone] = useState(() => {
+    try { return Boolean(localStorage.getItem("seek_rsvp_" + request.id)); } catch (_e) { return false; }
+  });
+  const [count, setCount] = useState(0);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const session = getUserSession();
+  const [form, setForm] = useState({ name: "", email: session?.user?.email || "", phone: "", age: "", message: "" });
+  useEffect(() => {
+    getCelebrateRsvpCount(request.id).then(setCount).catch(() => {});
+  }, [request.id]);
+  if (done) return <p className="font-semibold text-[#1BAA9C]">You said you can be there. {count ? count + " people have indicated." : ""}</p>;
+  return (
+    <div className="w-full">
+      <Button variant="primary" className="w-full sm:w-auto" onClick={() => {
+        if (!session?.access_token) { if (setPage) setPage("account"); return; }
+        setOpen(!open);
+      }}>
+        {count ? count + " people can be there · I can be there" : "I can be there"}
+      </Button>
+      {open && (
+        <form className="mt-4 space-y-3" onSubmit={async (e) => {
+          e.preventDefault(); setLoading(true); setError("");
+          try {
+            await submitCelebrateRsvp({ requestId: request.id, ...form });
+            try { localStorage.setItem("seek_rsvp_" + request.id, "1"); } catch (_e) {}
+            setDone(true); setCount((n) => n + 1);
+          } catch (err) { setError(err.message || "Could not send this."); }
+          finally { setLoading(false); }
+        }}>
+          <input required className={inputCls} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
+          <input required type="email" className={inputCls} placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          <input required className={inputCls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
+          <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          <textarea required rows={2} className={inputCls} placeholder="When you can be there" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : "Send to host"}</Button>
+        </form>
+      )}
+    </div>
+  );
+}
+
 function RequestPage({ requestId, setPage }) {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -2336,6 +2384,9 @@ function RequestPage({ requestId, setPage }) {
               </>
             ) : (
               <>
+                {CONNECT_CATS.includes(request.category) ? (
+                <CelebrateRsvp request={request} setPage={setPage} />
+                ) : (
                 <Button
                   variant="primary"
                   className="w-full sm:w-auto"
@@ -2348,8 +2399,9 @@ function RequestPage({ requestId, setPage }) {
                 >
                   I Want to Help <HandHeart size={16} />
                 </Button>
+                )}
                 <p className="font-body text-xs text-[#0D3B3B]/45">
-                  You’ll be taken to the Give page where you can make an offer or donate.
+                  {CONNECT_CATS.includes(request.category) ? "Your contact goes to the host after Seek records it. Meet in public." : "You’ll be taken to the Give page where you can make an offer or donate."}
                 </p>
               </>
             )}
