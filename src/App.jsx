@@ -450,7 +450,9 @@ function RequestCard({ req, onHelp, onView }) {
         <MapPin size={14} /> {req.location}
       </p>
       {req.created_at || req.createdAt ? <p className="text-xs text-[#0D3B3B]/45 mb-3">{daysPosted(req.created_at || req.createdAt)}</p> : null}
-      {req.amountNeeded ? (
+      {CONNECT_CATS.includes(req.category) ? (
+        <p className="mb-4 text-sm font-semibold font-body text-[#0D3B3B]">Looking for company, not donations.</p>
+      ) : req.amountNeeded ? (
         <div className="mb-4"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
       ) : (
         <p className="mb-4 text-sm font-semibold font-body text-[#0D3B3B]">
@@ -479,7 +481,7 @@ function RequestCard({ req, onHelp, onView }) {
             onClick={onHelp ? () => onHelp(req) : undefined}
             className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors"
           >
-            Help <ChevronRight size={15} />
+            {CONNECT_CATS.includes(req.category) ? "I can be there" : "Help"} <ChevronRight size={15} />
           </button>
         </div>
       </div>
@@ -712,6 +714,7 @@ function Navbar({ page, setPage, userSession }) {
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "seek-help", label: "Seek Help", icon: HeartHandshake },
+    { id: "celebrate", label: "Celebrate", icon: Users },
     { id: "give", label: "Help Someone", icon: Wallet },
     { id: "offers", label: "Giveaways", icon: Package },
     { id: "impact", label: "Impact", icon: BadgeCheck },
@@ -771,6 +774,7 @@ function Navbar({ page, setPage, userSession }) {
           {[
             { id: "home", label: "Home", icon: HomeIcon },
             { id: "seek-help", label: "Seek Help", icon: Search },
+            { id: "celebrate", label: "Celebrate", icon: Users },
             { id: "give", label: "Give", icon: HeartHandshake },
             { id: "offers", label: "Giveaways", icon: Package },
             { id: "impact", label: "Impact", icon: BadgeCheck },
@@ -1612,7 +1616,7 @@ if (!cancelled) {
           (() => {
             const visible = requests.filter((r) => {
               const q = searchFilter.trim().toLowerCase();
-              const matchesCat = categoryFilter === "all" || r.category === categoryFilter;
+              const matchesCat = (categoryFilter === "all" || r.category === categoryFilter) && !CONNECT_CATS.includes(r.category);
               const matchesLoc = locationFilter === "all" || r.location === locationFilter;
               const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
               return matchesCat && matchesLoc && matchesQ;
@@ -1792,7 +1796,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Category">
             <select required className={inputCls} value={form.category} onChange={set("category")}>
               <option value="">Choose a category</option>
-              {CATEGORIES.map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
+              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
             </select>
           </Field>
           {CONNECT_CATS.includes(form.category) && (
@@ -1825,6 +1829,71 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 }
 
 /* ---------------- Volunteer Page ---------------- */
+
+
+function CelebratePage({ setPage }) {
+  const [submitted, setSubmitted] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [list, setList] = useState([]);
+  const [form, setForm] = useState({ name: "", email: "", phone: "", location: "", category: "Celebrate & Connect", need: "" });
+  useEffect(() => {
+    listPublishedRequests(48).then((rows) => setList((rows || []).map(mapRequestRow).filter((r) => CONNECT_CATS.includes(r.category)))).catch(() => []);
+  }, []);
+  if (submitted) {
+    return (
+      <div className="min-h-[50vh] flex items-center justify-center px-5">
+        <div className="max-w-md text-center">
+          <h1 className="font-display font-bold text-3xl text-[#0D3B3B]">Seek will review this.</h1>
+          <p className="mt-3 font-body text-[#0D3B3B]/65">If it is a genuine ask for company, it will appear here. This is not a fundraiser.</p>
+        </div>
+      </div>
+    );
+  }
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-2xl px-5 pt-16 pb-8 text-center">
+        <SectionLabel>Celebrate & Connect</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Find company. Not a donation.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/65">Birthdays, graduations, a new city, a study partner. Seek reviews every post. This is not dating.</p>
+      </section>
+      <section className="mx-auto max-w-2xl px-5 pb-10">
+        <form className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 space-y-4" onSubmit={async (e) => {
+          e.preventDefault(); setError(""); setLoading(true);
+          try {
+            await submitRequest({ ...form, amount: "", description: form.need });
+            setSubmitted(true);
+          } catch (err) { setError(err.message); } finally { setLoading(false); }
+        }}>
+          <Field label="Your name"><input required className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
+          <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+          <Field label="Phone"><input required className={inputCls} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
+          <Field label="City"><input required className={inputCls} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></Field>
+          <Field label="What kind of company">
+            <select required className={inputCls} value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })}>
+              {CONNECT_CATS.map((c) => <option key={c} value={c}>{c}</option>)}
+            </select>
+          </Field>
+          <Field label="What are you inviting people to">
+            <textarea required rows={3} className={inputCls} value={form.need} onChange={(e) => setForm({ ...form, need: e.target.value })} placeholder="e.g. Graduation on Saturday in Enugu. I would like two people there." />
+          </Field>
+          <p className="text-xs text-[#0D3B3B]/50">Do not post your home address. Meet in a public place. Seek is not a dating app.</p>
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? "Submitting…" : "Share this invitation"}</Button>
+        </form>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 pb-16">
+        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-4">Open invitations</h2>
+        <div className="grid gap-4">
+          {list.map((req) => (
+            <RequestCard key={req.id} req={req} onView={() => setPage && setPage("request:" + req.id)} onHelp={() => setPage && setPage("request:" + req.id)} />
+          ))}
+          {!list.length && <p className="text-sm text-[#0D3B3B]/50">No published invitations yet.</p>}
+        </div>
+      </section>
+    </div>
+  );
+}
 
 function VolunteerPage() {
   const [submitted, setSubmitted] = useState(false);
@@ -3261,6 +3330,7 @@ function pageFromPath(pathname) {
   if (path === "/give") return "give";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
+  if (path === "/celebrate") return "celebrate";
   if (path === "/about") return "about";
   if (path === "/impact") return "impact";
   if (path.startsWith("/impact/")) return "impact:" + path.split("/")[2];
@@ -3284,6 +3354,7 @@ function pathFromPage(page) {
     offers: "/offers",
     admin: "/admin",
     "seek-help": "/seek-help",
+    celebrate: "/celebrate",
     volunteer: "/volunteer",
     about: "/about",
     impact: "/impact",
@@ -3454,6 +3525,7 @@ useEffect(() => {
     offers: <OffersPage setPage={setPage} />,
     admin: <AdminPage />,
     "seek-help": <SeekHelpPage />,
+    celebrate: <CelebratePage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
     impact: <ImpactPage setPage={setPage} />,
@@ -3478,7 +3550,7 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help", "my-requests"];
+  const gatedPages = ["seek-help", "celebrate", "my-requests"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
