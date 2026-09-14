@@ -1433,3 +1433,13 @@ export async function listCelebrateRsvps(requestId) {
       : "",
   }));
 }
+
+
+export async function updateCelebrateRsvpStatus(rsvpId, status) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Sign in first.");
+  return supabaseFetch("rpc/update_celebrate_rsvp_status", {
+    method: "POST",
+    body: JSON.stringify({ p_id: rsvpId, p_status: status }),
+  });
+}
