@@ -2381,10 +2381,9 @@ function RequestPage({ requestId, setPage }) {
             </p>
           )}
 
-          {CONNECT_CATS.includes(request.category) && getUserSession()?.access_token && (
+          {hostRsvps.length > 0 && (
             <div className="mt-8 rounded-2xl border border-[#0D3B3B]/10 bg-white p-4">
               <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">People who can be there</p>
-              {!hostRsvps.length && <p className="text-sm text-[#0D3B3B]/50">No replies yet. When someone RSVPs, they appear here with photo and Approve / Decline.</p>}
               <ul className="space-y-3">
                 {hostRsvps.map((row) => (
                   <li key={row.id} className="flex gap-3 items-start">
