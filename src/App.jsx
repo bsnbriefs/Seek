@@ -742,10 +742,10 @@ function FeatureStrip({ page, setPage }) {
                 key={item.id}
                 type="button"
                 onClick={() => go(item)}
-                className={`shrink-0 px-3 py-2 text-sm font-semibold rounded-full ${active ? "text-[#0D3B3B] bg-[#0D3B3B]/8" : "text-[#0D3B3B]/55"}`}
+                className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
               >
                 {item.label}
-                {active ? <span className="block h-0.5 mt-1 rounded-full bg-[#1BAA9C]" /> : null}
+                {null}
               </button>
             );
           })}
@@ -1043,8 +1043,73 @@ function HomePage({ setPage, userSession }) {
         </section>
       )}
 
+      {/* SEEK FEATURES */}
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <div className="flex items-end justify-between gap-4 mb-6">
+          <div>
+            <SectionLabel>SEEK Features</SectionLabel>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">What would you like to do?</h2>
+          </div>
+          <button type="button" onClick={() => go("offers")} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore all <ArrowRight size={15} /></button>
+        </div>
+        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+          {[
+            { id: "seek-help", icon: Search, title: "Seek Help", text: "Tell us what you need." },
+            { id: "give", icon: HandHeart, title: "Give Support", text: "Support a person or community." },
+            { id: "offers", icon: Package, title: "Giveaways", text: "Offer money, goods or services." },
+            { id: "jobs", icon: Briefcase, title: "Jobs", text: "Offer or find an opportunity." , filter: "job"},
+            { id: "mentorship", icon: Users, title: "Mentorship", text: "Offer or request guidance.", filter: "mentorship" },
+            { id: "counselling", icon: HeartHandshake, title: "Counselling", text: "Offer or request support.", filter: "counselling" },
+            { id: "celebrate", icon: Users, title: "Celebrate", text: "Share positive moments." },
+            { id: "impact", icon: BadgeCheck, title: "Impact", text: "See what help made possible." },
+          ].map((item) => (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => {
+                if (item.filter) { try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {} setPage("offers"); }
+                else setPage(item.id);
+                window.scrollTo(0, 0);
+              }}
+              className="group text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 hover:-translate-y-0.5 hover:shadow-md transition"
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#1BAA9C]/10 text-[#0D3B3B] mb-3">
+                <item.icon size={19} />
+              </span>
+              <h3 className="font-display font-bold text-base sm:text-lg text-[#0D3B3B]">{item.title}</h3>
+              <p className="mt-1 text-xs sm:text-sm text-[#0D3B3B]/55 leading-relaxed">{item.text}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      {/* HOW SEEK WORKS */}
+      <section className="bg-[#F4F1EA] py-16 sm:py-20">
+        <div className="mx-auto max-w-6xl px-5 sm:px-8">
+          <div className="max-w-2xl mb-10">
+            <SectionLabel>How SEEK works</SectionLabel>
+            <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">Simple steps. Real people. Real help.</h2>
+            <p className="mt-3 font-body text-[#0D3B3B]/60">SEEK helps people ask for support, find ways to give it, and show what happened afterwards.</p>
+          </div>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            {[
+              ["01", "Tell us what you need", "Submit a request for help, an opportunity or support."],
+              ["02", "SEEK reviews it", "We review and verify information where necessary."],
+              ["03", "People respond", "Supporters, partners, volunteers and BSN Foundation can respond."],
+              ["04", "Help reaches you", "Support is delivered and the outcome can be shared through updates, photos or videos."],
+            ].map(([num, title, text]) => (
+              <div key={num} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+                <span className="text-xs font-bold tracking-[0.18em] text-[#1BAA9C]">{num}</span>
+                <h3 className="mt-3 font-display font-bold text-lg text-[#0D3B3B]">{title}</h3>
+                <p className="mt-2 text-sm text-[#0D3B3B]/60 leading-relaxed">{text}</p>
+              </div>
+            ))}
+          </div>
+        </div>
+      </section>
+
       {/* TWO-SIDED ENTRY */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 -mt-6 sm:-mt-10 pb-20 relative z-0">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 -mt-6 sm:-mt-10 pb-20 relative z-0">
         <div className="grid md:grid-cols-[1fr_auto_1fr] items-center gap-6">
           <div className="rounded-3xl p-8 sm:p-10 text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #135050)` }}>
             <Search size={26} className="mb-4 text-[#63C167]" />
@@ -3248,6 +3313,12 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         className="block w-full text-sm"
       />
       <p className="text-xs text-[#0D3B3B]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
+      {saved && (existing || existingMedia) && (
+        <div className="rounded-2xl bg-[#1BAA9C]/10 border border-[#1BAA9C]/15 p-4">
+          <p className="font-semibold text-sm text-[#0D3B3B]">Your update has been received.</p>
+          <p className="mt-1 text-xs text-[#0D3B3B]/60 leading-relaxed">SEEK may review the update before publishing it. Once approved, it can appear on the relevant request/story so people can see the outcome.</p>
+        </div>
+      )}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
