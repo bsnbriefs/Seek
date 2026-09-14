@@ -40,6 +40,8 @@ import {
   userSignIn,
   sendMagicLink,
   listMyRequests,
+  listMyOffers,
+  listMyOfferInterestsSummary,
   deleteRejectedRequest,
   postRequestPublicUpdate,
   uploadAppreciationMedia,
@@ -73,6 +75,10 @@ import {
   listSupportMessages,
   sendSupportMessage,
 } from "./lib/seekApi";
+
+import {
+  listMyNotifications,
+} from "./lib/notificationApi";
 
 import {
   adminLogin,
@@ -3495,54 +3501,180 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
 function MySeekDashboard({ setPage, userSession }) {
   const [requests, setRequests] = useState([]);
-  const [avatar, setAvatar] = useState("");
+  const [offers, setOffers] = useState([]);
+  const [interests, setInterests] = useState([]);
+  const [notifications, setNotifications] = useState([]);
+  const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     if (!userSession?.access_token) return;
     let cancelled = false;
-    Promise.all([
-      listMyRequests().catch(() => []),
-      getMyProfile().catch(() => null),
-      getSeekLiveStats().catch(() => null),
-    ]).then(([rows, profile, live]) => {
-      if (cancelled) return;
-      setRequests((rows || []).map(mapRequestRow));
-      if (profile?.avatar_url) setAvatar(profile.avatar_url);
-      if (live) setStats(live);
-    }).finally(() => { if (!cancelled) setLoading(false); });
+
+    (async () => {
+      try {
+        const [requestRows, offerRows, profileRow, liveStats, notificationRows] = await Promise.all([
+          listMyRequests().catch(() => []),
+          listMyOffers().catch(() => []),
+          getMyProfile().catch(() => null),
+          getSeekLiveStats().catch(() => null),
+          listMyNotifications(50).catch(() => []),
+        ]);
+
+        if (cancelled) return;
+
+        const mappedRequests = (requestRows || []).map(mapRequestRow);
+        const mappedOffers = Array.isArray(offerRows) ? offerRows : [];
+        setRequests(mappedRequests);
+        setOffers(mappedOffers);
+        setProfile(profileRow || null);
+        setStats(liveStats || null);
+        setNotifications(Array.isArray(notificationRows) ? notificationRows : []);
+
+        const offerIds = mappedOffers.map((offer) => offer.id).filter(Boolean);
+        if (offerIds.length) {
+          const interestRows = await listMyOfferInterestsSummary(offerIds).catch(() => []);
+          if (!cancelled) setInterests(Array.isArray(interestRows) ? interestRows : []);
+        } else {
+          setInterests([]);
+        }
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+
     return () => { cancelled = true; };
   }, [userSession]);
 
-  if (!userSession?.access_token) return <AccountPage setPage={setPage} userSession={userSession} setUserSession={() => {}} />;
-  const open = requests.filter((r) => !["fulfilled","closed","rejected"].includes(r.status));
-  const fulfilled = requests.filter((r) => r.status === "fulfilled");
+  if (!userSession?.access_token) {
+    return <AccountPage setPage={setPage} userSession={userSession} setUserSession={() => {}} />;
+  }
+
+  const openRequests = requests.filter((r) => !["fulfilled", "closed", "rejected"].includes(r.status));
+  const fulfilledRequests = requests.filter((r) => r.status === "fulfilled");
+  const openOffers = offers.filter((o) => !["closed", "fulfilled"].includes(String(o.status || "").toLowerCase()));
+  const unreadNotifications = notifications.filter((n) => !n.read_at).length;
+  const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
+  const avatar = profile?.avatar_url || "";
+  const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+  const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
+
+  const go = (page, path = null) => {
+    if (path) window.history.pushState({}, "", path);
+    setPage(page);
+    window.scrollTo(0, 0);
+  };
+
+  const statCards = [
+    { label: "Requests", value: requests.length, icon: HeartHandshake, action: () => go("my-requests", "/my-requests") },
+    { label: "Active needs", value: openRequests.length, icon: Search, action: () => go("my-requests", "/my-requests") },
+    { label: "Giveaways", value: offers.length, icon: Package, action: () => go("offers", "/offers") },
+    { label: "Interests", value: interests.length, icon: Users, action: () => go("offers", "/offers") },
+  ];
+
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-14 pb-10">
-        <div className="flex flex-wrap items-center justify-between gap-5">
-          <div className="flex items-center gap-4">
-            <div className="relative shrink-0">
-              {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-16 w-16 rounded-full object-cover" /> : <div className="h-16 w-16 rounded-full bg-[#0D3B3B]/10" />}
-              <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+    <div style={{ background: C.bg }} className="min-h-screen">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-7">
+        <div className="rounded-[2rem] bg-[#0D3B3B] text-white overflow-hidden relative">
+          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#1BAA9C]/20" aria-hidden="true" />
+          <div className="absolute -left-20 -bottom-24 h-56 w-56 rounded-full bg-white/5" aria-hidden="true" />
+          <div className="relative p-6 sm:p-8">
+            <div className="flex items-center justify-between gap-4">
+              <div className="flex items-center gap-4 min-w-0">
+                <div className="relative shrink-0">
+                  {avatar ? (
+                    <img loading="lazy" decoding="async" src={avatar} alt="" className="h-16 w-16 rounded-full object-cover border-2 border-white/20" />
+                  ) : (
+                    <div className="h-16 w-16 rounded-full bg-white/10 flex items-center justify-center text-xl font-bold">
+                      {firstName.charAt(0).toUpperCase()}
+                    </div>
+                  )}
+                  <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+                </div>
+                <div className="min-w-0">
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
+                  <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {firstName} 👋</h1>
+                  <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+                </div>
+              </div>
+              <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Profile</button>
             </div>
-            <div><SectionLabel>My SEEK</SectionLabel><h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Your help journey, in one place.</h1><p className="mt-1 text-sm text-[#0D3B3B]/55">{userSession.user?.email}</p></div>
+            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
+              <span><strong className="text-white">{requests.length}</strong> requests</span>
+              <span><strong className="text-white">{offers.length}</strong> giveaways</span>
+              <span><strong className="text-white">{interests.length}</strong> interests</span>
+              <span><strong className="text-white">{unreadNotifications}</strong> unread</span>
+            </div>
           </div>
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("account")}>Edit profile →</button>
         </div>
       </section>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[["Requests",requests.length],["Active",open.length],["Need met",fulfilled.length],["SEEK raised",stats?.raised ? "₦"+Number(stats.raised).toLocaleString() : "—"]].map(([label,value]) => <div key={label} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]">{value}</p></div>)}
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-7 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {statCards.map(({ label, value, icon: Icon, action }) => (
+          <button key={label} type="button" onClick={action} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 sm:p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
+            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><Icon size={18} /></span>
+            <p className="mt-3 text-[10px] uppercase tracking-widest text-[#0D3B3B]/45">{label}</p>
+            <p className="mt-1 font-display font-extrabold text-2xl text-[#0D3B3B]">{loading ? "—" : value}</p>
+          </button>
+        ))}
       </section>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16 grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 rounded-3xl bg-white border border-[#0D3B3B]/10 p-6">
-          <div className="flex items-center justify-between gap-3 mb-4"><h2 className="font-display font-bold text-xl text-[#0D3B3B]">Your requests</h2><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("my-requests")}>Manage all</button></div>
-          {loading ? <p className="text-sm text-[#0D3B3B]/50">Loading your activity…</p> : requests.length === 0 ? <p className="text-sm text-[#0D3B3B]/50">You have not submitted a request yet.</p> : <div className="space-y-3">{requests.slice(0,5).map((r) => <button key={r.id} type="button" className="w-full text-left rounded-2xl border border-[#0D3B3B]/8 p-4 hover:bg-[#F2F5F3]" onClick={() => { setPage(`request:${r.id}`); window.history.pushState({},"",`/request/${r.id}`); window.scrollTo(0,0); }}><div className="flex items-center justify-between gap-3"><span className="font-display font-bold text-[#0D3B3B]">{r.title}</span><span className="text-xs font-semibold text-[#1BAA9C]">{formatSeekStatus(r.status)}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{r.category} · {r.location}</p></button>)}</div>}
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10 grid lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 space-y-5">
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3 mb-4">
+              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your activity</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Requests you've made</h2></div>
+              <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("my-requests", "/my-requests")}>See all →</button>
+            </div>
+            {loading ? <p className="text-sm text-[#0D3B3B]/50">Loading your activity…</p> : requests.length === 0 ? (
+              <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">Nothing here yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">When you ask SEEK for help, your requests will appear here.</p><button type="button" onClick={() => go("seek-help", "/seek-help")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Ask for help</button></div>
+            ) : (
+              <div className="space-y-2">
+                {requests.slice(0, 4).map((r) => (
+                  <button key={r.id} type="button" className="w-full text-left rounded-2xl border border-[#0D3B3B]/8 p-4 hover:bg-[#F2F5F3] transition" onClick={() => go(`request:${r.id}`, `/request/${r.id}`)}>
+                    <div className="flex items-center justify-between gap-3"><span className="font-display font-bold text-[#0D3B3B] line-clamp-1">{r.title}</span><span className="shrink-0 text-xs font-semibold text-[#1BAA9C]">{formatSeekStatus(r.status)}</span></div>
+                    <p className="mt-1 text-xs text-[#0D3B3B]/45">{r.category}{r.location ? ` · ${r.location}` : ""}</p>
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
+            <div className="flex items-center justify-between gap-3 mb-4"><div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Give & receive</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your giveaways</h2></div><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>Explore →</button></div>
+            {offers.length === 0 ? <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">You haven't created a giveaway yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Offer goods, services, opportunities or other support to someone in the SEEK community.</p><button type="button" onClick={() => go("offers", "/offers")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Give support</button></div> : (
+              <div className="space-y-2">
+                {offers.slice(0, 3).map((offer) => <div key={offer.id} className="rounded-2xl border border-[#0D3B3B]/8 p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold text-[#0D3B3B] line-clamp-1">{offer.description || offer.category || "SEEK giveaway"}</p><span className="text-xs font-semibold text-[#1BAA9C]">{offer.status || "Open"}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{offer.category || "Support"}{offer.city ? ` · ${offer.city}` : ""}</p></div>)}
+              </div>
+            )}
+          </div>
         </div>
-        <div className="rounded-3xl bg-[#0D3B3B] text-white p-6">
-          <p className="text-xs uppercase tracking-widest text-[#8DE3C5]">Keep moving help forward</p><h2 className="mt-2 font-display font-bold text-2xl">What do you want to do?</h2>
-          <div className="mt-5 grid gap-2">{[["seek-help","Ask SEEK for help"],["give","Give money"],["offers","Offer a giveaway"],["volunteer","Volunteer"]].map(([id,label]) => <button key={id} type="button" onClick={() => setPage(id)} className="rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-semibold hover:bg-white/15">{label} →</button>)}</div>
-          <button type="button" onClick={() => setPage("guidelines")} className="mt-5 text-xs text-white/60 underline">Read SEEK community guidelines</button>
+
+        <div className="space-y-5">
+          <div className="rounded-3xl bg-[#0D3B3B] text-white p-6">
+            <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5]">Quick actions</p>
+            <h2 className="mt-2 font-display font-bold text-2xl">Keep help moving.</h2>
+            <div className="mt-5 grid gap-2">
+              {[['seek-help','Ask for Help','Tell SEEK what you need',HeartHandshake],['give','Give Support','Help someone today',HandHeart],['offers','Create Giveaway','Offer what you can',Package],['celebrate','Connect & Celebrate','Connect with people and moments',Users]].map(([id,label,note,Icon]) => <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white/10 px-4 py-3 text-left hover:bg-white/15 transition"><span className="flex items-center gap-3"><span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10"><Icon size={18}/></span><span><span className="block text-sm font-bold">{label}</span><span className="block text-[11px] text-white/55">{note}</span></span></span></button>)}
+            </div>
+          </div>
+
+          <button type="button" onClick={() => go("notifications", "/notifications")} className="w-full rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
+            <div className="flex items-center justify-between gap-3"><span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#1BAA9C]/10 text-[#1BAA9C]"><Bell size={19}/></span><ArrowRight size={17} className="text-[#0D3B3B]/35"/></div>
+            <h2 className="mt-4 font-display font-bold text-lg text-[#0D3B3B]">Notifications</h2>
+            <p className="mt-1 text-sm text-[#0D3B3B]/55">{unreadNotifications > 0 ? `${unreadNotifications} unread notification${unreadNotifications === 1 ? "" : "s"}` : "You're all caught up."}</p>
+          </button>
+
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your progress</p>
+            <div className="mt-4 space-y-3 text-sm">
+              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Requests fulfilled</span><strong className="text-[#0D3B3B]">{fulfilledRequests.length}</strong></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Open giveaways</span><strong className="text-[#0D3B3B]">{openOffers.length}</strong></div>
+              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Completed giveaways</span><strong className="text-[#0D3B3B]">{completedOffers}</strong></div>
+            </div>
+            <p className="mt-4 pt-4 border-t border-[#0D3B3B]/8 text-xs leading-relaxed text-[#0D3B3B]/50">These figures reflect activity available to your SEEK account. No estimated or invented impact numbers are shown.</p>
+          </div>
         </div>
       </section>
     </div>
