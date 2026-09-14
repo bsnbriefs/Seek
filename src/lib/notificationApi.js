@@ -1,28 +1,15 @@
 import { supabase } from "./supabaseClient";
 
 /**
- * SEEK Notifications API
+ * Load the current user's notifications.
  *
- * Uses the existing SEEK notifications architecture:
- * - notifications table
- * - read_at column
- * - mark_notification_read RPC
- * - mark_all_notifications_read RPC
- * - Supabase Realtime
+ * RLS on the notifications table determines which
+ * notifications the signed-in user can access.
  */
-
-/**
- * Get the current user's notifications.
- */
-export async function listNotifications(userId, limit = 100) {
-  if (!userId) {
-    return [];
-  }
-
+export async function listMyNotifications(limit = 50) {
   const { data, error } = await supabase
     .from("notifications")
     .select("*")
-    .eq("user_id", userId)
     .order("created_at", { ascending: false })
     .limit(limit);
 
@@ -31,55 +18,19 @@ export async function listNotifications(userId, limit = 100) {
     throw error;
   }
 
-  return data || [];
-}
-
-/**
- * Get the number of unread notifications.
- *
- * SEEK uses read_at:
- * null = unread
- * timestamp = read
- */
-export async function getUnreadNotificationCount(userId) {
-  if (!userId) {
-    return 0;
-  }
-
-  const { count, error } = await supabase
-    .from("notifications")
-    .select("id", {
-      count: "exact",
-      head: true,
-    })
-    .eq("user_id", userId)
-    .is("read_at", null);
-
-  if (error) {
-    console.error(
-      "SEEK unread notification count error:",
-      error
-    );
-    throw error;
-  }
-
-  return count || 0;
+  return Array.isArray(data) ? data : [];
 }
 
 /**
  * Mark one notification as read.
- *
- * Uses the existing SEEK Supabase RPC.
  */
-export async function markNotificationRead(notificationId) {
-  if (!notificationId) {
-    return;
-  }
+export async function markNotificationRead(id) {
+  if (!id) return;
 
-  const { data, error } = await supabase.rpc(
+  const { error } = await supabase.rpc(
     "mark_notification_read",
     {
-      p_notification_id: notificationId,
+      p_id: id,
     }
   );
 
@@ -90,18 +41,13 @@ export async function markNotificationRead(notificationId) {
     );
     throw error;
   }
-
-  return data;
 }
 
 /**
- * Mark all notifications belonging to the current
- * authenticated user as read.
- *
- * Uses the existing SEEK RPC.
+ * Mark all notifications as read.
  */
 export async function markAllNotificationsRead() {
-  const { data, error } = await supabase.rpc(
+  const { error } = await supabase.rpc(
     "mark_all_notifications_read"
   );
 
@@ -112,29 +58,88 @@ export async function markAllNotificationsRead() {
     );
     throw error;
   }
-
-  return data;
 }
 
 /**
- * Subscribe to newly-created and updated notifications
- * for a specific SEEK user.
+ * Convert notification timestamp into a
+ * human-friendly relative time.
  *
- * Returns an unsubscribe function.
+ * Examples:
+ * now
+ * 12m
+ * 3h
+ * 2d
+ * 2w
+ * Sep 14
  */
-export function subscribeToNotifications(
+export function relativeNotificationTime(value) {
+  if (!value) return "";
+
+  const then = new Date(value).getTime();
+
+  if (!Number.isFinite(then)) {
+    return "";
+  }
+
+  const seconds = Math.max(
+    0,
+    Math.floor((Date.now() - then) / 1000)
+  );
+
+  if (seconds < 60) {
+    return "now";
+  }
+
+  const minutes = Math.floor(seconds / 60);
+
+  if (minutes < 60) {
+    return `${minutes}m`;
+  }
+
+  const hours = Math.floor(minutes / 60);
+
+  if (hours < 24) {
+    return `${hours}h`;
+  }
+
+  const days = Math.floor(hours / 24);
+
+  if (days < 7) {
+    return `${days}d`;
+  }
+
+  const weeks = Math.floor(days / 7);
+
+  if (weeks < 5) {
+    return `${weeks}w`;
+  }
+
+  return new Date(value).toLocaleDateString(
+    undefined,
+    {
+      day: "numeric",
+      month: "short",
+    }
+  );
+}
+
+/**
+ * Subscribe to notifications for the current user.
+ *
+ * Returns the Supabase realtime channel so the
+ * caller can remove it when the component unmounts.
+ */
+export function subscribeToMyNotifications(
   userId,
-  {
-    onInsert,
-    onUpdate,
-  } = {}
+  onInsert,
+  onUpdate
 ) {
   if (!userId) {
-    return () => {};
+    return null;
   }
 
   const channel = supabase
-    .channel(`seek-notifications-${userId}`)
+    .channel(`notifications-${userId}`)
     .on(
       "postgres_changes",
       {
@@ -165,40 +170,5 @@ export function subscribeToNotifications(
     )
     .subscribe();
 
-  return () => {
-    supabase.removeChannel(channel);
-  };
-}
-
-/**
- * Convert a SEEK notification's read_at value
- * into a simple boolean for UI components.
- */
-export function isNotificationRead(notification) {
-  return Boolean(notification?.read_at);
-}
-
-/**
- * Get a notification destination.
- *
- * SEEK notifications may use link_page/link_id.
- */
-export function getNotificationLink(notification) {
-  if (!notification) {
-    return null;
-  }
-
-  if (notification.link_page) {
-    return notification.link_page;
-  }
-
-  if (notification.metadata?.link) {
-    return notification.metadata.link;
-  }
-
-  if (notification.metadata?.path) {
-    return notification.metadata.path;
-  }
-
-  return null;
+  return channel;
 }
