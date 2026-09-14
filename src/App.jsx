@@ -2302,12 +2302,7 @@ function RequestPage({ requestId, setPage }) {
           )}
           {evidence.length > 0 && (
   <div className="mt-6 space-y-4">
-    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50">
-      Supporting evidence
-    <p className="font-body text-xs text-[#0D3B3B]/50">
-      Shown on this page for review. Seek does not provide a download button.
-    </p>
-    </p>
+    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50">Photos and video</p>
 
     {evidence.map((file) => (
       <div key={file.id} className="space-y-2">
