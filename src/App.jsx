@@ -335,6 +335,18 @@ function formatSeekStatus(status) {
   return map[status] || status || "Under review";
 }
 
+function SeekVerifiedCheck({ className = "" }) {
+  return (
+    <span
+      title="SEEK member"
+      aria-label="SEEK member"
+      className={`inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-[#1D9BF0] text-white shrink-0 ${className}`}
+    >
+      <Check size={11} strokeWidth={3} />
+    </span>
+  );
+}
+
 function VerificationBadge({ status }) {
     const map = {
     pending_review: {
@@ -444,11 +456,14 @@ function RequestCard({ req, onHelp, onView }) {
         <UrgencyBadge level={req.urgency} />
       </div>
       <div className="flex items-start gap-3 mb-2">
-        {postAvatar(req.avatarUrl, req) ? (
-          <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white shrink-0" fetchpriority="high" />
-        ) : (
-          <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10 shrink-0" />
-        )}
+        <div className="relative shrink-0">
+          {postAvatar(req.avatarUrl, req) ? (
+            <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white" fetchpriority="high" />
+          ) : (
+            <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10" />
+          )}
+          <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+        </div>
         <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title}</h3>
       </div>
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
@@ -821,10 +836,10 @@ function Navbar({ page, setPage, userSession }) {
           ))}
           {userSession?.access_token && (
             <button
-              onClick={() => go("my-requests")}
-              className={`font-body text-sm font-medium transition-colors ${page === "my-requests" ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              onClick={() => go("my-seek")}
+              className={`font-body text-sm font-medium transition-colors ${page === "my-seek" ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
             >
-              My requests
+              My SEEK
             </button>
           )}
         </nav>
@@ -871,8 +886,8 @@ function Navbar({ page, setPage, userSession }) {
             );
           })}
           {userSession?.access_token && (
-            <button onClick={() => go("my-requests")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase text-[#0D3B3B]/70">
-              <Clock size={16} /> My requests
+            <button onClick={() => go("my-seek")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase text-[#0D3B3B]/70">
+              <User size={16} /> My SEEK
             </button>
           )}
           <button onClick={() => go("account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
@@ -1261,9 +1276,86 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-16">
+        <div className="max-w-2xl mb-6">
+          <SectionLabel>Help someone today</SectionLabel>
+          <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">People are asking SEEK for help.</h2>
+          <p className="mt-3 text-[#0D3B3B]/60">Choose a need you can support with money, goods, skills, time, a job or a simple connection.</p>
+        </div>
+        <HelpSomeoneFeed setPage={setPage} limit={6} />
+      </section>
 
+      <SeekStoriesSection setPage={setPage} limit={3} />
 
     </>
+  );
+}
+
+
+/* ---------------- Help Someone Feed ---------------- */
+
+function HelpSomeoneFeed({ setPage, limit = 6, compact = false }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    let cancelled = false;
+    listPublishedRequests(Math.max(limit, 8)).then((rows) => {
+      if (cancelled) return;
+      setRequests((rows || []).map(mapRequestRow).filter((r) => !CONNECT_CATS.includes(r.category)).slice(0, limit));
+    }).catch(() => { if (!cancelled) setRequests([]); }).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [limit]);
+
+  if (loading) return <p className="font-body text-sm text-[#0D3B3B]/50">Loading people who need help…</p>;
+  if (!requests.length) return <p className="font-body text-sm text-[#0D3B3B]/50">No public requests are available right now. Check back soon.</p>;
+
+  return (
+    <>
+    <div className="mb-4 rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 text-sm text-[#0D3B3B]/60">
+      <span className="font-semibold text-[#0D3B3B]">A quick trust note:</span> SEEK reviews public requests before they appear. If something looks wrong, use the report option on the request page.
+    </div>
+    <div className={compact ? "grid sm:grid-cols-2 gap-3" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
+      {requests.map((req) => (
+        <article key={req.id} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 shadow-sm">
+          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Support needed"}</p>
+          <h3 className="mt-1 font-display font-bold text-lg text-[#0D3B3B] line-clamp-2">{req.title}</h3>
+          <p className="mt-1 text-sm text-[#0D3B3B]/55 line-clamp-2">{req.description || req.need || "Someone in the SEEK community is asking for support."}</p>
+          {req.location && <p className="mt-2 text-xs text-[#0D3B3B]/45">{req.location}</p>}
+          {req.amountNeeded ? <div className="mt-3"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div> : null}
+          <div className="mt-4 flex gap-3 items-center">
+            <button type="button" className="text-sm font-semibold text-[#0D3B3B]" onClick={() => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0,0); }}>View need</button>
+            <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("give")}>Help</button>
+          </div>
+        </article>
+      ))}
+    </div>
+    </>
+  );
+}
+
+function SeekStoriesSection({ setPage, limit = 3 }) {
+  const [stories, setStories] = useState([]);
+  useEffect(() => { listAppreciationStories().then((rows) => setStories((rows || []).slice(0, limit))).catch(() => setStories([])); }, [limit]);
+  if (!stories.length) return null;
+  return (
+    <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+      <div className="flex items-end justify-between gap-4 mb-5">
+        <div>
+          <SectionLabel>SEEK Stories</SectionLabel>
+          <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See what happened after people asked.</h2>
+          <p className="mt-2 text-sm text-[#0D3B3B]/55">Real updates from requesters, shared after review.</p>
+        </div>
+        <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("impact")}>See all stories →</button>
+      </div>
+      <div className="grid sm:grid-cols-3 gap-4">
+        {stories.map((story) => (
+          <button key={story.id} type="button" className="text-left rounded-2xl overflow-hidden bg-white border border-[#0D3B3B]/10 shadow-sm" onClick={() => { setPage("impact"); window.scrollTo(0,0); }}>
+            {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-28 bg-[#0D3B3B]/5" />}
+            <div className="p-4"><p className="font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p><p className="mt-2 text-sm text-[#0D3B3B]/55 line-clamp-3">{story.story}</p></div>
+          </button>
+        ))}
+      </div>
+    </section>
   );
 }
 
@@ -1319,11 +1411,14 @@ function OfferCard({ offer, setPage }) {
   return (
     <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
       <div className="flex items-start gap-3">
-        {postAvatar(offer.avatar_url, offer) ? (
-          <img loading="lazy" decoding="async" src={postAvatar(offer.avatar_url, offer)} alt="" className="h-12 w-12 rounded-full object-cover bg-white shrink-0" fetchpriority="high" />
-        ) : (
-          <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10 shrink-0" />
-        )}
+        <div className="relative shrink-0">
+          {postAvatar(offer.avatar_url, offer) ? (
+            <img loading="lazy" decoding="async" src={postAvatar(offer.avatar_url, offer)} alt="" className="h-12 w-12 rounded-full object-cover bg-white" fetchpriority="high" />
+          ) : (
+            <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />
+          )}
+          <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+        </div>
         <div className="min-w-0">
           {(offer.category || offer.city) && (
             <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
@@ -2483,7 +2578,7 @@ function RequestPage({ requestId, setPage }) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
         <SectionLabel>Public request</SectionLabel>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-4">
-          Seek reviewed this request. Names, phones and emails stay private.
+          Seek reviewed this request. The check mark identifies a SEEK member account; request review is shown separately below. Names, phones and emails stay private.
         </p>
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">
@@ -2609,7 +2704,7 @@ function RequestPage({ requestId, setPage }) {
               <ul className="space-y-2">
                 {(showAllDonors ? donors : donors.slice(0, 3)).map((d, i) => (
                   <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 && !showAllDonors ? "bg-[#1BAA9C]/10" : "")}>
-                    <span className="text-[#0D3B3B]/70">{d.anonymous ? "Anonymous" : (d.name || d.donor_name || "A supporter")}</span>
+                    <span className="text-[#0D3B3B]/70 inline-flex items-center gap-1.5">{d.anonymous ? "Anonymous" : (d.name || d.donor_name || "A supporter")} {!d.anonymous && <SeekVerifiedCheck className="h-4 w-4" />}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
@@ -3078,19 +3173,22 @@ function ImpactPage({ setPage }) {
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
+  const [liveStats, setLiveStats] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
     let donorTick;
     (async () => {
       try {
-        const [rows, thanks] = await Promise.all([
+        const [rows, thanks, live] = await Promise.all([
           listPublishedImpact(),
           listAppreciationStories().catch(() => []),
+          getSeekLiveStats().catch(() => null),
         ]);
         if (!cancelled) {
           setPosts(rows || []);
           setThanks(thanks || []);
+          setLiveStats(live || null);
         }
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load impact stories.");
@@ -3111,6 +3209,9 @@ function ImpactPage({ setPage }) {
         </p>
       </section>
       <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }`}</style>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[["Help raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"], ["Gifts received", liveStats?.donationCount ?? "—"], ["Published stories", thanks.length], ["Impact posts", posts.length]].map(([label,value]) => <div key={label} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]">{value}</p></div>)}
+      </section>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
         {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
@@ -3248,7 +3349,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             Keep track of your requests.
           </h1>
           <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
-            {userSession.user?.email}
+            <span className="inline-flex items-center justify-center gap-1.5">{userSession.user?.email} <SeekVerifiedCheck /></span>
             <AccountAvatar />
           </p>
           <div className="flex flex-col gap-3">
@@ -3383,6 +3484,65 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             )}
           </p>
         </form>
+      </section>
+    </div>
+  );
+}
+
+
+/* ---------------- My SEEK Dashboard ---------------- */
+
+function MySeekDashboard({ setPage, userSession }) {
+  const [requests, setRequests] = useState([]);
+  const [avatar, setAvatar] = useState("");
+  const [stats, setStats] = useState(null);
+  const [loading, setLoading] = useState(true);
+  useEffect(() => {
+    if (!userSession?.access_token) return;
+    let cancelled = false;
+    Promise.all([
+      listMyRequests().catch(() => []),
+      getMyProfile().catch(() => null),
+      getSeekLiveStats().catch(() => null),
+    ]).then(([rows, profile, live]) => {
+      if (cancelled) return;
+      setRequests((rows || []).map(mapRequestRow));
+      if (profile?.avatar_url) setAvatar(profile.avatar_url);
+      if (live) setStats(live);
+    }).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, [userSession]);
+
+  if (!userSession?.access_token) return <AccountPage setPage={setPage} userSession={userSession} setUserSession={() => {}} />;
+  const open = requests.filter((r) => !["fulfilled","closed","rejected"].includes(r.status));
+  const fulfilled = requests.filter((r) => r.status === "fulfilled");
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-14 pb-10">
+        <div className="flex flex-wrap items-center justify-between gap-5">
+          <div className="flex items-center gap-4">
+            <div className="relative shrink-0">
+              {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-16 w-16 rounded-full object-cover" /> : <div className="h-16 w-16 rounded-full bg-[#0D3B3B]/10" />}
+              <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+            </div>
+            <div><SectionLabel>My SEEK</SectionLabel><h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Your help journey, in one place.</h1><p className="mt-1 text-sm text-[#0D3B3B]/55">{userSession.user?.email}</p></div>
+          </div>
+          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("account")}>Edit profile →</button>
+        </div>
+      </section>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
+        {[["Requests",requests.length],["Active",open.length],["Need met",fulfilled.length],["SEEK raised",stats?.raised ? "₦"+Number(stats.raised).toLocaleString() : "—"]].map(([label,value]) => <div key={label} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]">{value}</p></div>)}
+      </section>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16 grid lg:grid-cols-3 gap-5">
+        <div className="lg:col-span-2 rounded-3xl bg-white border border-[#0D3B3B]/10 p-6">
+          <div className="flex items-center justify-between gap-3 mb-4"><h2 className="font-display font-bold text-xl text-[#0D3B3B]">Your requests</h2><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("my-requests")}>Manage all</button></div>
+          {loading ? <p className="text-sm text-[#0D3B3B]/50">Loading your activity…</p> : requests.length === 0 ? <p className="text-sm text-[#0D3B3B]/50">You have not submitted a request yet.</p> : <div className="space-y-3">{requests.slice(0,5).map((r) => <button key={r.id} type="button" className="w-full text-left rounded-2xl border border-[#0D3B3B]/8 p-4 hover:bg-[#F2F5F3]" onClick={() => { setPage(`request:${r.id}`); window.history.pushState({},"",`/request/${r.id}`); window.scrollTo(0,0); }}><div className="flex items-center justify-between gap-3"><span className="font-display font-bold text-[#0D3B3B]">{r.title}</span><span className="text-xs font-semibold text-[#1BAA9C]">{formatSeekStatus(r.status)}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{r.category} · {r.location}</p></button>)}</div>}
+        </div>
+        <div className="rounded-3xl bg-[#0D3B3B] text-white p-6">
+          <p className="text-xs uppercase tracking-widest text-[#8DE3C5]">Keep moving help forward</p><h2 className="mt-2 font-display font-bold text-2xl">What do you want to do?</h2>
+          <div className="mt-5 grid gap-2">{[["seek-help","Ask SEEK for help"],["give","Give money"],["offers","Offer a giveaway"],["volunteer","Volunteer"]].map(([id,label]) => <button key={id} type="button" onClick={() => setPage(id)} className="rounded-xl bg-white/10 px-4 py-3 text-left text-sm font-semibold hover:bg-white/15">{label} →</button>)}</div>
+          <button type="button" onClick={() => setPage("guidelines")} className="mt-5 text-xs text-white/60 underline">Read SEEK community guidelines</button>
+        </div>
       </section>
     </div>
   );
@@ -3523,8 +3683,11 @@ function MyRequestsPage({ setPage, userSession }) {
         </h1>
         {/* avatar loaded below */}
         <div className="flex items-center gap-3 mb-8">
-          {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
-          <p className="font-body text-sm text-[#0D3B3B]/60">Signed in as {userSession.user?.email}</p>
+          <div className="relative shrink-0">
+            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
+            <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
+          </div>
+          <p className="font-body text-sm text-[#0D3B3B]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
         </div>
 
         {loading && (
@@ -3604,6 +3767,17 @@ function MyRequestsPage({ setPage, userSession }) {
                   <ProgressBar raised={req.amountRaised} needed={req.amountNeeded} />
                 </div>
               ) : null}
+              <div className="mb-5 rounded-2xl bg-[#F2F5F3] p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#0D3B3B]/45 mb-3">Request journey</p>
+                <div className="grid grid-cols-5 gap-1">
+                  {[['pending_review','Submitted'],['published','Published'],['partially_funded','Help started'],['fulfilled','Need met'],['closed','Closed']].map(([id,label], index) => {
+                    const order = {pending_review:0,verification_required:0,published:1,partially_funded:2,matched:2,fulfilled:3,closed:4,rejected:-1};
+                    const current = order[req.status] ?? 0;
+                    const active = current >= index && req.status !== 'rejected';
+                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[#1BAA9C]' : 'bg-[#0D3B3B]/10'}`}></div><span className={`mt-1 block text-[9px] leading-tight ${active ? 'text-[#0D3B3B] font-semibold' : 'text-[#0D3B3B]/40'}`}>{label}</span></div>;
+                  })}
+                </div>
+              </div>
               <div className="flex flex-wrap gap-3">
                 <button
                   type="button"
@@ -3726,6 +3900,7 @@ function pageFromPath(pathname) {
   if (path === "/guidelines") return "guidelines";
   if (path === "/contact") return "contact";
   if (path === "/my-requests") return "my-requests";
+  if (path === "/dashboard" || path === "/my-seek") return "my-seek";
   if (path === "/account") return "account";
   if (path.startsWith("/request/")) return "request:" + path.split("/")[2];
   return "home";
@@ -3750,6 +3925,7 @@ function pathFromPage(page) {
     guidelines: "/guidelines",
     contact: "/contact",
     "my-requests": "/my-requests",
+    "my-seek": "/dashboard",
     account: "/account",
   };
   return map[id] || "/";
@@ -3930,6 +4106,9 @@ useEffect(() => {
     "my-requests": (
       <MyRequestsPage setPage={setPage} userSession={userSession} />
     ),
+    "my-seek": (
+      <MySeekDashboard setPage={setPage} userSession={userSession} />
+    ),
   };
 
   const isRequestPage = typeof page === "string" && page.startsWith("request:");
@@ -3937,7 +4116,7 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help", "celebrate", "my-requests"];
+  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
