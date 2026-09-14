@@ -1466,3 +1466,86 @@ export async function closeCelebrateInvite(requestId) {
     body: JSON.stringify({ p_request_id: requestId }),
   });
 }
+/* =========================================================
+   MY SEEK DASHBOARD
+   ========================================================= */
+
+export async function listMyOffers() {
+  const session = getUserSession();
+
+  if (!session?.access_token) {
+    return [];
+  }
+
+  if (!supabaseConfigured) {
+    return [];
+  }
+
+  try {
+    const rows = await supabaseFetch(
+      "offers?select=*&created_by=eq." +
+        encodeURIComponent(session.user.id) +
+        "&order=created_at.desc"
+    );
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error("Could not load my offers:", error);
+    return [];
+  }
+}
+
+
+export async function listMyGiveaways() {
+  const session = getUserSession();
+
+  if (!session?.access_token) {
+    return [];
+  }
+
+  if (!supabaseConfigured) {
+    return [];
+  }
+
+  try {
+    const rows = await supabaseFetch(
+      "offers?select=*&created_by=eq." +
+        encodeURIComponent(session.user.id) +
+        "&is_giveaway=eq.true&order=created_at.desc"
+    );
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error("Could not load my giveaways:", error);
+    return [];
+  }
+}
+
+
+export async function listMyOfferInterests() {
+  const session = getUserSession();
+
+  if (!session?.access_token) {
+    return [];
+  }
+
+  if (!supabaseConfigured) {
+    return [];
+  }
+
+  try {
+    const rows = await supabaseFetch(
+      "offer_interests?select=*&user_id=eq." +
+        encodeURIComponent(session.user.id) +
+        "&order=created_at.desc"
+    );
+
+    return Array.isArray(rows) ? rows : [];
+  } catch (error) {
+    console.error(
+      "Could not load my offer interests:",
+      error
+    );
+    return [];
+  }
+}
