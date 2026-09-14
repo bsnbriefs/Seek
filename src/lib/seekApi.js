@@ -1275,6 +1275,7 @@ export async function submitOfferInterest(payload) {
       p_email: payload.email,
       p_phone: payload.phone || null,
       p_message: payload.message || null,
+      p_age: payload.age ? Number(payload.age) : null,
     }),
   });
 }
@@ -1365,4 +1366,30 @@ export async function listPublicSponsors() {
   } catch (_e) {
     return [];
   }
+}
+
+
+export async function getCelebrateRsvpCount(requestId) {
+  if (!requestId) return 0;
+  const n = await supabaseFetch("rpc/celebrate_rsvp_count", {
+    method: "POST",
+    body: JSON.stringify({ p_request_id: requestId }),
+  }).catch(() => 0);
+  return Number(n) || 0;
+}
+
+export async function submitCelebrateRsvp(payload) {
+  const session = getUserSession();
+  if (!session?.access_token) throw new Error("Sign in first to say you can be there.");
+  return supabaseFetch("rpc/create_celebrate_rsvp", {
+    method: "POST",
+    body: JSON.stringify({
+      p_request_id: payload.requestId,
+      p_name: payload.name || null,
+      p_email: payload.email,
+      p_phone: payload.phone || null,
+      p_message: payload.message || null,
+      p_age: payload.age ? Number(payload.age) : null,
+    }),
+  });
 }
