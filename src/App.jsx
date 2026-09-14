@@ -54,6 +54,7 @@ import {
   uploadProfilePhoto,
   listCelebrateRsvps,
   updateCelebrateRsvpStatus,
+  closeCelebrateInvite,
   getMyProfile,
   getCachedAvatarUrl,
   cacheAvatarUrl,
@@ -2413,6 +2414,13 @@ function RequestPage({ requestId, setPage }) {
                   </li>
                 ))}
               </ul>
+              <button type="button" className="mt-4 rounded-full border px-4 py-2 text-sm font-semibold" onClick={async () => {
+                try {
+                  await closeCelebrateInvite(request.id);
+                  window.alert("This invitation is closed.");
+                  window.location.reload();
+                } catch (err) { window.alert(err.message); }
+              }}>Close invitation</button>
             </div>
           )}
           <ReportRequestForm requestId={request.id} />
