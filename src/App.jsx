@@ -1526,8 +1526,8 @@ if (!cancelled) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
         <SectionLabel>Give</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give money where it is needed.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give to a person, or to BSN’s work.</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
       </section>
       {selectedRequest && (
         <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
@@ -1677,7 +1677,7 @@ if (!cancelled) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">A published request, or a BSN outreach. To give things or time, use Giveaways.</p>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
         {storyCampaign ? (
           <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
         ) : (
