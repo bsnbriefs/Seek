@@ -85,7 +85,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -725,12 +725,13 @@ function ThemeToggle() {
 
 function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const moreActive = ["celebrate", "volunteer", "about", "impact"].includes(page);
+  const moreActive = ["volunteer", "about", "impact"].includes(page);
   const items = [
     { id: "home", label: "For You" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
+    { id: "celebrate", label: "Connect & Celebrate" },
     { id: "jobs", label: "Jobs", filter: "job" },
     { id: "mentorship", label: "Mentorship", filter: "mentorship" },
     { id: "counselling", label: "Counselling", filter: "counselling" },
@@ -775,7 +776,6 @@ function FeatureStrip({ page, setPage }) {
             {moreOpen && (
               <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-xl z-20">
                 {[
-                  ["celebrate", "Celebrate"],
                   ["impact", "Impact"],
                   ["volunteer", "Volunteer"],
                   ["about", "About SEEK"],
@@ -810,7 +810,7 @@ function Navbar({ page, setPage, userSession }) {
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "seek-help", label: "Seek Help", icon: HeartHandshake },
-    { id: "celebrate", label: "Celebrate", icon: Users },
+    { id: "celebrate", label: "Connect & Celebrate", icon: Users },
     { id: "give", label: "Help Someone", icon: Wallet },
     { id: "offers", label: "Giveaways", icon: Package },
     { id: "impact", label: "Impact", icon: BadgeCheck },
@@ -870,7 +870,7 @@ function Navbar({ page, setPage, userSession }) {
           {[
             { id: "home", label: "Home", icon: HomeIcon },
             { id: "seek-help", label: "Seek Help", icon: Search },
-            { id: "celebrate", label: "Celebrate", icon: Users },
+            { id: "celebrate", label: "Connect & Celebrate", icon: Users },
             { id: "give", label: "Give", icon: HeartHandshake },
             { id: "offers", label: "Giveaways", icon: Package },
             { id: "impact", label: "Impact", icon: BadgeCheck },
@@ -1106,7 +1106,7 @@ function HomePage({ setPage, userSession }) {
             { id: "jobs", icon: Briefcase, title: "Jobs", text: "Offer or find an opportunity." , filter: "job"},
             { id: "mentorship", icon: Users, title: "Mentorship", text: "Offer or request guidance.", filter: "mentorship" },
             { id: "counselling", icon: HeartHandshake, title: "Counselling", text: "Offer or request support.", filter: "counselling" },
-            { id: "celebrate", icon: Users, title: "Celebrate", text: "Share positive moments." },
+            { id: "celebrate", icon: Users, title: "Connect & Celebrate", text: "Connect with people and celebrate meaningful moments." },
             { id: "impact", icon: BadgeCheck, title: "Impact", text: "See what help made possible." },
           ].map((item) => (
             <button
@@ -3934,6 +3934,101 @@ function pathFromPage(page) {
 try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
 
+function SeekMobileBottomNav({ page, setPage, userSession }) {
+  const [composerOpen, setComposerOpen] = useState(false);
+  const go = (id) => {
+    setComposerOpen(false);
+    setPage(id);
+    window.scrollTo(0, 0);
+  };
+
+  const items = [
+    { id: "home", label: "Home", icon: HomeIcon },
+    { id: "offers", label: "Discover", icon: Search },
+    { id: "notifications", label: "Notifications", icon: Bell, action: () => go(userSession?.access_token ? "my-seek" : "account") },
+    { id: "messages", label: "Messages", icon: Mail, action: () => go(userSession?.access_token ? "my-seek" : "account") },
+  ];
+
+  const actions = [
+    { id: "seek-help", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
+    { id: "give", label: "Give Support", note: "Help a person or cause", icon: HandHeart },
+    { id: "offers", label: "Create Giveaway", note: "Offer goods or support", icon: Package },
+    { id: "offers-job", label: "Offer a Job", note: "Create a job opportunity", icon: Briefcase, filter: "Job opportunity" },
+    { id: "offers-mentorship", label: "Offer Mentorship", note: "Share your experience", icon: Users, filter: "Mentorship" },
+    { id: "celebrate", label: "Connect & Celebrate", note: "Connect with people and moments", icon: Users },
+  ];
+
+  const openAction = (item) => {
+    if (item.filter) {
+      try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {}
+    }
+    go(item.id === "offers-job" || item.id === "offers-mentorship" ? "offers" : item.id);
+  };
+
+  return (
+    <>
+      {composerOpen && (
+        <div className="fixed inset-0 z-[140] lg:hidden" role="dialog" aria-modal="true" aria-label="SEEK quick actions">
+          <button type="button" aria-label="Close quick actions" className="absolute inset-0 bg-[#0D3B3B]/35 backdrop-blur-[2px]" onClick={() => setComposerOpen(false)} />
+          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-white p-4 shadow-2xl border border-[#0D3B3B]/10">
+            <div className="flex items-center justify-between px-2 pb-3">
+              <div>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#1BAA9C]">SEEK</p>
+                <h2 className="font-display font-extrabold text-xl text-[#0D3B3B]">What would you like to do?</h2>
+              </div>
+              <button type="button" onClick={() => setComposerOpen(false)} className="h-9 w-9 rounded-full bg-[#F2F5F3] text-[#0D3B3B] text-xl" aria-label="Close">×</button>
+            </div>
+            <div className="grid grid-cols-2 gap-2">
+              {actions.map((item) => {
+                const Icon = item.icon;
+                return (
+                  <button key={item.id} type="button" onClick={() => openAction(item)} className="rounded-2xl border border-[#0D3B3B]/10 p-3 text-left hover:bg-[#F2F5F3] active:scale-[0.98] transition">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B]"><Icon size={18} /></span>
+                    <span className="mt-2 block text-sm font-bold text-[#0D3B3B]">{item.label}</span>
+                    <span className="mt-0.5 block text-[11px] leading-4 text-[#0D3B3B]/50">{item.note}</span>
+                  </button>
+                );
+              })}
+            </div>
+          </div>
+        </div>
+      )}
+
+      <nav className="fixed inset-x-0 bottom-0 z-[100] lg:hidden border-t border-white/10 bg-[#101415]/[0.97] text-white shadow-[0_-8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} aria-label="SEEK mobile navigation">
+        <div className="relative mx-auto flex h-[4.35rem] max-w-xl items-center justify-around px-3">
+          {items.slice(0, 2).map((item) => {
+            const Icon = item.icon;
+            const active = page === item.id;
+            return (
+              <button key={item.id} type="button" onClick={() => item.action ? item.action() : go(item.id)} className={`flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 ${active ? "text-white" : "text-white/55"}`} aria-label={item.label}>
+                <Icon size={25} strokeWidth={active ? 2.6 : 2} />
+                <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
+              </button>
+            );
+          })}
+
+          <div className="w-16 shrink-0" aria-hidden="true" />
+
+          {items.slice(2).map((item) => {
+            const Icon = item.icon;
+            return (
+              <button key={item.id} type="button" onClick={() => item.action()} className="flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 text-white/55" aria-label={item.label}>
+                <Icon size={25} strokeWidth={2} />
+                <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
+              </button>
+            );
+          })}
+
+          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1598E5] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
+            <Plus size={35} strokeWidth={2.2} />
+          </button>
+        </div>
+      </nav>
+    </>
+  );
+}
+
+
 function CookieBanner() {
   const [open, setOpen] = useState(() => {
     try { return localStorage.getItem("seek_cookie_consent") !== "1"; } catch { return true; }
@@ -4120,7 +4215,7 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
+    <div className="font-body min-h-screen pb-[4.6rem] lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
       <FeatureStrip page={page} setPage={setPage} />
@@ -4145,7 +4240,7 @@ useEffect(() => {
       </div>
 
       {paymentReturn.status !== "idle" && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black/40">
+        <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40">
           <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
             <p className="font-body text-sm font-semibold text-[#0D3B3B]">
               {paymentReturn.status === "checking"
@@ -4198,6 +4293,7 @@ useEffect(() => {
         </div>
       )}
 
+      <SeekMobileBottomNav page={page} setPage={setPage} userSession={userSession} />
       <Footer setPage={setPage} />
     </div>
   );
