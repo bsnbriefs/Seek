@@ -707,6 +707,54 @@ function ThemeToggle() {
   );
 }
 
+
+function FeatureStrip({ page, setPage }) {
+  const moreOpen = page === "celebrate" || page === "volunteer" || page === "about" || page === "impact";
+  const items = [
+    { id: "home", label: "For You" },
+    { id: "seek-help", label: "Seek Help" },
+    { id: "give", label: "Give" },
+    { id: "offers", label: "Giveaways" },
+    { id: "jobs", label: "Jobs", filter: "job" },
+    { id: "mentorship", label: "Mentorship", filter: "mentorship" },
+    { id: "counselling", label: "Counselling", filter: "counselling" },
+    { id: "more", label: "More" },
+  ];
+  const go = (item) => {
+    if (item.filter) {
+      try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {}
+      setPage("offers");
+    } else if (item.id === "more") {
+      setPage("celebrate");
+    } else {
+      setPage(item.id);
+    }
+    window.scrollTo(0, 0);
+  };
+  return (
+    <div className="sticky top-16 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
+      <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1 min-w-max py-2">
+          {items.map((item) => {
+            const active = item.id === "more" ? moreOpen : (page === item.id || (item.filter && page === "offers" && typeof window !== "undefined" && sessionStorage.getItem("seek_offer_filter") === item.filter));
+            return (
+              <button
+                key={item.id}
+                type="button"
+                onClick={() => go(item)}
+                className={`shrink-0 px-3 py-2 text-sm font-semibold rounded-full ${active ? "text-[#0D3B3B] bg-[#0D3B3B]/8" : "text-[#0D3B3B]/55"}`}
+              >
+                {item.label}
+                {active ? <span className="block h-0.5 mt-1 rounded-full bg-[#1BAA9C]" /> : null}
+              </button>
+            );
+          })}
+        </div>
+      </div>
+    </div>
+  );
+}
+
 function Navbar({ page, setPage, userSession }) {
   const [open, setOpen] = useState(false);
   const [avatar, setAvatar] = useState("");
@@ -1296,25 +1344,34 @@ function GiveOfferForm() {
     return (
       <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
         <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you — your giveaway has been received.</h2>
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">We have your giveaway.</h2>
+        <p className="font-body text-[#0D3B3B]/65">Seek will review it. If it is approved, it appears on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
       </div>
     );
   }
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 bg-white">
       <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Who would you like to support?</p>
       <select value={offerRequestId} onChange={(e) => setOfferRequestId(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3">
-        <option value="">General offer (not tied to a specific request)</option>
-        {requests.map((r) => <option key={r.id} value={r.id}>{r.title}</option>)}
+        <option value="">General offer — anyone who needs this</option>
+        <option value="outreach">A BSN Foundation outreach</option>
+        {requests.filter((r) => !CONNECT_CATS.includes(r.category)).map((r) => <option key={r.id} value={r.id}>Support request: {r.title}</option>)}
       </select>
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">What would you like to offer?</p>
       <select required value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]">
-        <option value="">What are you giving?</option>
-        <option value="money">Money</option>
+        <option value="">Choose one</option>
+        <option value="money">Financial support</option>
         <option value="food">Food</option>
-        <option value="clothing">Clothing</option>
-        <option value="items">Items</option>
-        <option value="time">Time / skills</option>
-        <option value="shelter">Shelter / space</option>
+        <option value="items">Goods & supplies</option>
+        <option value="job">Job opportunity</option>
+        <option value="mentorship">Mentorship</option>
+        <option value="counselling">Counselling</option>
+        <option value="education">Education / training</option>
+        <option value="skills">Professional skills / services</option>
+        <option value="transport">Transportation</option>
+        <option value="shelter">Accommodation</option>
+        <option value="other">Other support</option>
       </select>
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="I can provide..." className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
@@ -1324,7 +1381,7 @@ function GiveOfferForm() {
       <Button variant="primary" disabled={!offer.trim() || offerLoading} onClick={async () => {
         setOfferError(""); setOfferLoading(true);
         try {
-          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
+          await submitOffer({ description: offer, category: offerCategory || null, requestId: (offerRequestId && offerRequestId !== 'outreach') ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
           setSubmitted(true);
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
@@ -1336,7 +1393,9 @@ function GiveOfferForm() {
 
 function OffersPage({ setPage }) {
   const [offers, setOffers] = useState([]);
-  const [offerFilter, setOfferFilter] = useState("");
+  const [offerFilter, setOfferFilter] = useState(() => {
+    try { return sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) { return ""; }
+  });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
@@ -1372,7 +1431,7 @@ function OffersPage({ setPage }) {
         {!loading && !error && offers.length === 0 && (
           <p className="font-body text-sm text-[#0D3B3B]/50">No open giveaways yet.</p>
         )}
-        {offers.filter((o) => !offerFilter || o.category === offerFilter).map((offer) => (
+        {offers.filter((o) => !offerFilter || String(o.category || "").toLowerCase() === offerFilter.toLowerCase()).map((offer) => (
           <OfferCard offer={offer} setPage={setPage} />
         ))}
         <div className="pt-8">
@@ -1517,7 +1576,7 @@ if (!cancelled) {
   }
   async function sendOffer() {
     setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer, category: offerCategory || null, requestId: offerRequestId || null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles }); setSubmitted(true); }
+    try { await submitOffer({ description: offer, category: offerCategory || null, requestId: (offerRequestId && offerRequestId !== 'outreach') ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles }); setSubmitted(true); }
     catch (err) { setOfferError(err.message); }
     finally { setOfferLoading(false); }
   }
@@ -1792,6 +1851,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             setLoading(true);
             try {
               setUploadProgress("");
+              if (!form.category) throw new Error("Choose what you need help with.");
               await submitRequest({
                 ...form,
                 onProgress: ({ index, total, name }) => {
@@ -1813,12 +1873,14 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </div>
           <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
-          <Field label="Category">
-            <select required className={inputCls} value={form.category} onChange={set("category")}>
-              <option value="">Choose a category</option>
-              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => <option key={c.id} value={c.label}>{c.label}</option>)}
-            </select>
-          </Field>
+          <div>
+            <p className="text-sm font-semibold text-[#0D3B3B] mb-2">What do you need help with?</p>
+            <div className="flex flex-wrap gap-2">
+              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
+                <button type="button" key={c.id} onClick={() => setForm({ ...form, category: c.label })} className={`rounded-full px-3 py-1.5 text-sm ${form.category === c.label ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15"}`}>{c.label}</button>
+              ))}
+            </div>
+          </div>
           {CONNECT_CATS.includes(form.category) && (
             <p className="text-sm text-[#0D3B3B]/65 rounded-xl bg-[#1BAA9C]/10 p-3">
               This is for company, celebration or learning — not dating. Seek reviews every post before it is public. Do not share your home address here.
@@ -3138,7 +3200,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
 function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
   const [text, setText] = useState(existing || "");
-  const [file, setFile] = useState(null);
+  const [files, setFiles] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
@@ -3153,9 +3215,9 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
           setSaving(true);
           setError("");
           if (text.trim().length < 3) throw new Error("Write a short note about how it went.");
-          if (!file && !existingMedia) throw new Error("Add a photo or video of the experience.");
+          if ((files?.length || 0) + (existingMedia ? 1 : 0) < 3) throw new Error("Add at least 3 photos or short videos.");
           await postRequestPublicUpdate(requestId, text);
-          if (file) await uploadAppreciationMedia(requestId, file);
+          for (const f of files || []) await uploadAppreciationMedia(requestId, f);
           setSaved(true);
           onSaved?.(text.trim());
         } catch (err) {
@@ -3177,10 +3239,12 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         placeholder="What happened, and how did people show up?"
         className="w-full rounded-xl border px-3 py-2 text-sm"
       />
+      <p className="text-xs text-[#0D3B3B]/50">Add at least 3 photos or short videos of how it went. These help Seek tell the outcome.</p>
       <input
         type="file"
+        multiple
         accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
-        onChange={(e) => setFile(e.target.files?.[0] || null)}
+        onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 8))}
         className="block w-full text-sm"
       />
       <p className="text-xs text-[#0D3B3B]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
@@ -3681,6 +3745,7 @@ useEffect(() => {
     <div className="font-body min-h-screen" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
+      <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
       <LiveTicker />
