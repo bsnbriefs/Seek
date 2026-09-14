@@ -1031,7 +1031,17 @@ function HomePage({ setPage, userSession }) {
             <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon.</p>
           ) : (
             <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={(req) => { sessionStorage.setItem("seek_help_request_id", req.id); window.history.pushState({}, "", "/give"); go("give"); }} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={(req) => {
+                if (CONNECT_CATS.includes(req.category)) {
+                  setPage(`request:${req.id}`);
+                  window.history.pushState({}, "", `/request/${req.id}`);
+                  window.scrollTo(0, 0);
+                  return;
+                }
+                sessionStorage.setItem("seek_help_request_id", req.id);
+                window.history.pushState({}, "", "/give");
+                go("give");
+              }} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
             </div>
           )}
         </div>
@@ -1465,6 +1475,11 @@ if (!cancelled) {
   }, []);
 
   function selectRequest(req) {
+    if (CONNECT_CATS.includes(req?.category)) {
+      setPage(`request:${req.id}`);
+      window.history.pushState({}, "", `/request/${req.id}`);
+      return;
+    }
     setSelectedRequest(req);
     setDonating(true);
     setOfferRequestId(req?.id || "");

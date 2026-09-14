@@ -36,6 +36,7 @@ export default function AdminPage() {
   const [session, setSession] = useState(() => getAdminSession());
   const [appeal, setAppeal] = useState({ title: "", amount: "", location: "Nigeria", category: "Financial Assistance", description: "", files: [], name: "BSN Foundation", email: "", phone: "" });
   const [giveaway, setGiveaway] = useState({ description: "", category: "items", city: "", files: [] });
+  const [eventForm, setEventForm] = useState({ title: "", category: "Celebrate & Connect", location: "", description: "", name: "BSN Foundation", email: "", phone: "", files: [] });
   const [shareLink, setShareLink] = useState("");
 
   const [requests, setRequests] = useState([]);
@@ -345,7 +346,7 @@ export default function AdminPage() {
         )}
 
         {adminTab === "post" && (
-        <div className="mb-8 grid gap-4 lg:grid-cols-2">
+        <div className="mb-8 grid gap-4 lg:grid-cols-3">
           <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
             e.preventDefault();
             setError("");
@@ -384,7 +385,37 @@ export default function AdminPage() {
             <input type="file" multiple accept="image/*,video/mp4,video/webm" className="w-full text-sm" onChange={(e) => setGiveaway({ ...giveaway, files: Array.from(e.target.files || []).slice(0, 5) })} />
             <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish giveaway + copy link</button>
           </form>
-          {shareLink && <p className="lg:col-span-2 text-sm font-semibold text-[#1BAA9C]">Published — live. Share: {shareLink}</p>}
+          <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
+            e.preventDefault();
+            setError("");
+            try {
+              const res = await postAdminAppeal({
+                ...eventForm,
+                category: eventForm.category || "Celebrate & Connect",
+                amount: "",
+                description: eventForm.description || eventForm.title,
+              });
+              setShareLink(res.share);
+              if (res.share && navigator.clipboard) await navigator.clipboard.writeText(res.share);
+              await loadRequests();
+            } catch (err) { setError(err.message); }
+          }}>
+            <p className="font-semibold text-[#0D3B3B]">Post a Celebrate event</p>
+            <input required className="w-full rounded-xl border p-3 text-sm" placeholder="Event title" value={eventForm.title} onChange={(e) => setEventForm({ ...eventForm, title: e.target.value })} />
+            <select className="w-full rounded-xl border p-3 text-sm" value={eventForm.category} onChange={(e) => setEventForm({ ...eventForm, category: e.target.value })}>
+              <option>Celebrate & Connect</option>
+              <option>Company / Friends</option>
+              <option>Accompaniment</option>
+              <option>Study companion</option>
+            </select>
+            <input className="w-full rounded-xl border p-3 text-sm" placeholder="City" value={eventForm.location} onChange={(e) => setEventForm({ ...eventForm, location: e.target.value })} />
+            <input required type="email" className="w-full rounded-xl border p-3 text-sm" placeholder="Host email" value={eventForm.email} onChange={(e) => setEventForm({ ...eventForm, email: e.target.value })} />
+            <input required className="w-full rounded-xl border p-3 text-sm" placeholder="Host phone" value={eventForm.phone} onChange={(e) => setEventForm({ ...eventForm, phone: e.target.value })} />
+            <textarea className="w-full rounded-xl border p-3 text-sm" rows={3} placeholder="What people are invited to" value={eventForm.description} onChange={(e) => setEventForm({ ...eventForm, description: e.target.value })} />
+            <input type="file" multiple accept="image/*,video/mp4" className="w-full text-sm" onChange={(e) => setEventForm({ ...eventForm, files: Array.from(e.target.files || []).slice(0, 5) })} />
+            <button className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm">Publish event + copy link</button>
+          </form>
+          {shareLink && <p className="lg:col-span-3 text-sm font-semibold text-[#1BAA9C]">Published — live. Share: {shareLink}</p>}
         </div>
         )}
 
