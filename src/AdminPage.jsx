@@ -189,7 +189,9 @@ export default function AdminPage() {
 
   const searchLower = search.trim().toLowerCase();
 
+  const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
   const filteredRequests = requests.filter((req) => {
+    if (requestFilter === "celebrate") return CONNECT_CATS.includes(req.category);
     if (requestFilter !== "all" && req.status !== requestFilter) return false;
     if (!searchLower) return true;
     const haystack = [
@@ -422,6 +424,7 @@ export default function AdminPage() {
           <div className="flex flex-wrap gap-2">
             {[
               { id: "all", label: "All" },
+              { id: "celebrate", label: "Celebrate" },
               { id: "pending_review", label: "Pending" },
               { id: "published", label: "Published" },
               { id: "verification_required", label: "Needs verification" },
@@ -473,8 +476,8 @@ export default function AdminPage() {
               return (
                 <details key={req.id} className="rounded-2xl bg-white shadow-sm">
                   <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
-                    <span className="font-semibold text-[#0D3B3B]">{req.title || req.need || req.category}</span>
-                    <span className="text-xs text-[#0D3B3B]/50">{req.status}</span>
+                    <span className="font-semibold text-[#0D3B3B] min-w-0 truncate">{req.category ? req.category + " · " : ""}{req.title || req.need || "Request"}</span>
+                    <span className="shrink-0 rounded-full bg-[#0D3B3B]/8 px-2 py-0.5 text-[10px] uppercase tracking-wide text-[#0D3B3B]/60">{req.status}</span>
                   </summary>
                   <div className="px-5 pb-5">
                   <div className="flex flex-wrap items-start justify-between gap-3">
@@ -610,7 +613,7 @@ export default function AdminPage() {
                     }}>Live · copy link</button>
                   )}
 
-                  <div className="mt-5 flex flex-wrap gap-2">
+                  <div className="mt-5 grid grid-cols-2 gap-2">
                     {req.status === "pending_review" && (
                       <>
                         <button
