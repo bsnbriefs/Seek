@@ -1414,3 +1414,22 @@ export async function submitCelebrateRsvp(payload) {
   } catch (_e) {}
   return created;
 }
+
+
+export async function listCelebrateRsvps(requestId) {
+  const session = getUserSession();
+  if (!session?.access_token || !requestId) return [];
+  const rows = await supabaseFetch("rpc/list_celebrate_rsvps", {
+    method: "POST",
+    body: JSON.stringify({ p_request_id: requestId }),
+  }).catch(() => []);
+  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+  return (Array.isArray(rows) ? rows : []).map((row) => ({
+    ...row,
+    photo_url: row.photo_path
+      ? (String(row.photo_path).startsWith("http")
+          ? row.photo_path
+          : base + "/storage/v1/object/public/" + String(row.photo_path).replace(/^\//, ""))
+      : "",
+  }));
+}
