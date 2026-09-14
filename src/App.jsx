@@ -53,6 +53,7 @@ import {
   markOfferInterestStatus,
   uploadProfilePhoto,
   listCelebrateRsvps,
+  updateCelebrateRsvpStatus,
   getMyProfile,
   getCachedAvatarUrl,
   cacheAvatarUrl,
@@ -2391,11 +2392,28 @@ function RequestPage({ requestId, setPage }) {
               <ul className="space-y-3">
                 {hostRsvps.map((row) => (
                   <li key={row.id} className="flex gap-3 items-start">
-                    {row.photo_url ? <img src={row.photo_url} alt="" className="h-14 w-14 rounded-full object-cover" /> : <div className="h-14 w-14 rounded-full bg-[#0D3B3B]/10" />}
-                    <div>
+                    {row.photo_url ? <img src={row.photo_url} alt="" className="h-20 w-20 rounded-xl object-cover" /> : <div className="h-20 w-20 rounded-xl bg-[#0D3B3B]/10" />}
+                    <div className="min-w-0 flex-1">
                       <p className="font-semibold text-[#0D3B3B]">{row.name || row.email}{row.age ? " · " + row.age : ""}</p>
                       <p className="text-sm text-[#0D3B3B]/60">{row.email} {row.phone ? " · " + row.phone : ""}</p>
                       {row.message && <p className="text-sm text-[#0D3B3B]/70 mt-1">{row.message}</p>}
+                      <p className="text-xs uppercase tracking-wide text-[#0D3B3B]/45 mt-1">{row.status || "pending"}</p>
+                      {(!row.status || row.status === "pending") && (
+                        <div className="mt-2 flex gap-2">
+                          <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-3 py-1 text-xs" onClick={async () => {
+                            try {
+                              await updateCelebrateRsvpStatus(row.id, "approved");
+                              setHostRsvps((prev) => prev.map((x) => x.id === row.id ? { ...x, status: "approved" } : x));
+                            } catch (err) { window.alert(err.message); }
+                          }}>Approve</button>
+                          <button type="button" className="rounded-full border px-3 py-1 text-xs" onClick={async () => {
+                            try {
+                              await updateCelebrateRsvpStatus(row.id, "declined");
+                              setHostRsvps((prev) => prev.map((x) => x.id === row.id ? { ...x, status: "declined" } : x));
+                            } catch (err) { window.alert(err.message); }
+                          }}>Decline</button>
+                        </div>
+                      )}
                     </div>
                   </li>
                 ))}
