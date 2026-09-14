@@ -52,6 +52,7 @@ import {
   getOfferInterestCount,
   markOfferInterestStatus,
   uploadProfilePhoto,
+  listCelebrateRsvps,
   getMyProfile,
   getCachedAvatarUrl,
   cacheAvatarUrl,
@@ -2107,6 +2108,7 @@ function RequestPage({ requestId, setPage }) {
     const [helped, setHelped] = useState(false);
     const [donors, setDonors] = useState([]);
     const [showAllDonors, setShowAllDonors] = useState(false);
+    const [hostRsvps, setHostRsvps] = useState([]);
   useEffect(() => {
     if (request?.title) document.title = request.title + " · Seek";
     return () => { document.title = "Seek"; };
@@ -2163,6 +2165,7 @@ function RequestPage({ requestId, setPage }) {
       .catch(() => {});
     loadDonors();
     donorTick = setInterval(loadDonors, 8000);
+    listCelebrateRsvps(matched.id).then((rows) => { if (!cancelled) setHostRsvps(rows || []); }).catch(() => {});
     getRequestEvidence(matched.id)
       .then((files) => {
         if (!cancelled) {
@@ -2382,6 +2385,23 @@ function RequestPage({ requestId, setPage }) {
             </p>
           )}
 
+          {hostRsvps.length > 0 && (
+            <div className="mt-8 rounded-2xl border border-[#0D3B3B]/10 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">People who can be there</p>
+              <ul className="space-y-3">
+                {hostRsvps.map((row) => (
+                  <li key={row.id} className="flex gap-3 items-start">
+                    {row.photo_url ? <img src={row.photo_url} alt="" className="h-14 w-14 rounded-full object-cover" /> : <div className="h-14 w-14 rounded-full bg-[#0D3B3B]/10" />}
+                    <div>
+                      <p className="font-semibold text-[#0D3B3B]">{row.name || row.email}{row.age ? " · " + row.age : ""}</p>
+                      <p className="text-sm text-[#0D3B3B]/60">{row.email} {row.phone ? " · " + row.phone : ""}</p>
+                      {row.message && <p className="text-sm text-[#0D3B3B]/70 mt-1">{row.message}</p>}
+                    </div>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          )}
           <ReportRequestForm requestId={request.id} />
 
           <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
