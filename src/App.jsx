@@ -1,6 +1,8 @@
 import AdminPage from "./AdminPage";
 import NotificationBell from "./NotificationBell";
+import NotificationsPage from "./NotificationsPage";
 import React, { useEffect, useRef, useState } from "react";
+import { supabase } from "./lib/supabaseClient";
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -3899,6 +3901,7 @@ function pageFromPath(pathname) {
   if (path === "/terms") return "terms";
   if (path === "/guidelines") return "guidelines";
   if (path === "/contact") return "contact";
+  if (path === "/notifications") return "notifications";
   if (path === "/my-requests") return "my-requests";
   if (path === "/dashboard" || path === "/my-seek") return "my-seek";
   if (path === "/account") return "account";
@@ -3926,6 +3929,7 @@ function pathFromPage(page) {
     contact: "/contact",
     "my-requests": "/my-requests",
     "my-seek": "/dashboard",
+    notifications: "/notifications",
     account: "/account",
   };
   return map[id] || "/";
@@ -3936,6 +3940,46 @@ try { applySeekTheme(getSeekTheme()); } catch (_e) {}
 
 function SeekMobileBottomNav({ page, setPage, userSession }) {
   const [composerOpen, setComposerOpen] = useState(false);
+  const [unreadNotifications, setUnreadNotifications] = useState(0);
+
+  useEffect(() => {
+    const userId = userSession?.user?.id;
+    const accessToken = userSession?.access_token;
+    const refreshToken = userSession?.refresh_token;
+    if (!userId || !accessToken) {
+      setUnreadNotifications(0);
+      return undefined;
+    }
+    let cancelled = false;
+    let channel = null;
+    const loadCount = async () => {
+      try {
+        const { data, error } = await supabase
+          .from("notifications")
+          .select("id,read_at")
+          .order("created_at", { ascending: false })
+          .limit(100);
+        if (!error && !cancelled) setUnreadNotifications((data || []).filter((item) => !item.read_at).length);
+      } catch (_e) {}
+    };
+    (async () => {
+      try { await supabase.auth.setSession({ access_token: accessToken, refresh_token: refreshToken }); } catch (_e) {}
+      if (cancelled) return;
+      await loadCount();
+      if (cancelled) return;
+      channel = supabase
+        .channel(`notifications-bottom-${userId}`)
+        .on("postgres_changes", { event: "INSERT", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, (payload) => {
+          if (!payload.new?.read_at) setUnreadNotifications((count) => count + 1);
+        })
+        .on("postgres_changes", { event: "UPDATE", schema: "public", table: "notifications", filter: `user_id=eq.${userId}` }, () => { loadCount(); })
+        .subscribe();
+    })();
+    return () => {
+      cancelled = true;
+      if (channel) supabase.removeChannel(channel);
+    };
+  }, [userSession?.access_token, userSession?.user?.id]);
   const go = (id) => {
     setComposerOpen(false);
     setPage(id);
@@ -3945,7 +3989,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const items = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "offers", label: "Discover", icon: Search },
-    { id: "notifications", label: "Notifications", icon: Bell, action: () => go(userSession?.access_token ? "my-seek" : "account") },
+    { id: "notifications", label: "Notifications", icon: Bell, action: () => go(userSession?.access_token ? "notifications" : "account") },
     { id: "messages", label: "Messages", icon: Mail, action: () => go(userSession?.access_token ? "my-seek" : "account") },
   ];
 
@@ -4011,9 +4055,10 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
 
           {items.slice(2).map((item) => {
             const Icon = item.icon;
+            const active = item.id === "notifications" ? page === "notifications" : page === "messages";
             return (
-              <button key={item.id} type="button" onClick={() => item.action()} className="flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 text-white/55" aria-label={item.label}>
-                <Icon size={25} strokeWidth={2} />
+              <button key={item.id} type="button" onClick={() => item.action()} className={`relative flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 ${active ? "text-white" : "text-white/55"}`} aria-label={item.label}>
+                <span className="relative"><Icon size={25} strokeWidth={active ? 2.6 : 2} />{item.id === "notifications" && unreadNotifications > 0 && <span className="absolute -right-2 -top-1 min-w-[15px] h-[15px] px-1 rounded-full bg-[#1598E5] text-white text-[9px] leading-[15px] font-bold text-center">{unreadNotifications > 9 ? "9+" : unreadNotifications}</span>}</span>
                 <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
               </button>
             );
@@ -4204,6 +4249,9 @@ useEffect(() => {
     "my-seek": (
       <MySeekDashboard setPage={setPage} userSession={userSession} />
     ),
+    notifications: (
+      <NotificationsPage setPage={setPage} userSession={userSession} />
+    ),
   };
 
   const isRequestPage = typeof page === "string" && page.startsWith("request:");
@@ -4211,7 +4259,7 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
+  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek", "notifications"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
