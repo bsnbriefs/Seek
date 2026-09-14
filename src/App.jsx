@@ -84,7 +84,7 @@ import {
   Menu, X, ArrowRight, HandHeart, HeartHandshake, Search, ShoppingBag,
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
-  ShieldCheck, BadgeCheck, Clock, MapPin, ChevronRight, Users,
+  ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
   Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon
 } from "lucide-react";
 
