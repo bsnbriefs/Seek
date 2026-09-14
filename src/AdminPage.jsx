@@ -30,6 +30,8 @@ import {
   sendAdminSupportMessage,
   postAdminAppeal,
   postAdminGiveaway,
+  getAdminCelebrateRsvps,
+  updateAdminCelebrateRsvp,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -42,6 +44,7 @@ export default function AdminPage() {
   const [requests, setRequests] = useState([]);
   const [offers, setOffers] = useState([]);
   const [offerInterests, setOfferInterests] = useState([]);
+  const [celebrateRsvps, setCelebrateRsvps] = useState([]);
   const [volunteers, setVolunteers] = useState([]);
   const [requestPrivate, setRequestPrivate] = useState([]);
   const [donations, setDonations] = useState([]);
@@ -79,7 +82,7 @@ export default function AdminPage() {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData, rsvpData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers().catch(() => []),
@@ -90,6 +93,7 @@ export default function AdminPage() {
         getAdminAuditLogs().catch(() => []),
         getAdminSupportConversations().catch(() => []),
         getAdminOfferInterests().catch(() => []),
+        getAdminCelebrateRsvps().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -102,6 +106,7 @@ export default function AdminPage() {
       setAuditLogs(auditData);
       setSupportChats(chatData);
       setOfferInterests(interestData);
+      setCelebrateRsvps(rsvpData || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -1010,7 +1015,37 @@ export default function AdminPage() {
 
         </div>
         )}
-        {adminTab === "volunteers" && (
+        
+        {celebrateRsvps.length > 0 && (
+          <div className="mt-10">
+            <h2 className="text-xl font-semibold mb-4">Celebrate RSVPs</h2>
+            <div className="space-y-3">
+              {celebrateRsvps.map((row) => (
+                <div key={row.id} className="rounded-xl border bg-white p-4 flex gap-3">
+                  {row.photo_url ? <img src={row.photo_url} alt="" className="h-16 w-16 rounded-xl object-cover" /> : <div className="h-16 w-16 rounded-xl bg-slate-100" />}
+                  <div className="min-w-0 flex-1">
+                    <p className="font-semibold">{row.name || row.email} {row.age ? "· " + row.age : ""}</p>
+                    <p className="text-sm text-slate-600">{row.email} {row.phone ? "· " + row.phone : ""}</p>
+                    <p className="text-xs text-slate-400 mt-1">{row.request_title || row.request_id} · {row.status || "pending"}</p>
+                    {row.message && <p className="text-sm mt-1">{row.message}</p>}
+                    {(!row.status || row.status === "pending") && (
+                      <div className="mt-2 flex gap-2">
+                        <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-3 py-1 text-xs" onClick={async () => {
+                          try { await updateAdminCelebrateRsvp(row.id, "approved"); await loadRequests(); } catch (err) { setError(err.message); }
+                        }}>Approve</button>
+                        <button type="button" className="rounded-full border px-3 py-1 text-xs" onClick={async () => {
+                          try { await updateAdminCelebrateRsvp(row.id, "declined"); await loadRequests(); } catch (err) { setError(err.message); }
+                        }}>Decline</button>
+                      </div>
+                    )}
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
+
+{adminTab === "volunteers" && (
         <div>
         <div className="mt-2">
           <h2 className="text-2xl font-semibold mb-4">Volunteers</h2>
