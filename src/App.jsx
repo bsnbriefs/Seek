@@ -709,7 +709,8 @@ function ThemeToggle() {
 
 
 function FeatureStrip({ page, setPage }) {
-  const moreOpen = page === "celebrate" || page === "volunteer" || page === "about" || page === "impact";
+  const [moreOpen, setMoreOpen] = useState(false);
+  const moreActive = ["celebrate", "volunteer", "about", "impact"].includes(page);
   const items = [
     { id: "home", label: "For You" },
     { id: "seek-help", label: "Seek Help" },
@@ -718,25 +719,24 @@ function FeatureStrip({ page, setPage }) {
     { id: "jobs", label: "Jobs", filter: "job" },
     { id: "mentorship", label: "Mentorship", filter: "mentorship" },
     { id: "counselling", label: "Counselling", filter: "counselling" },
-    { id: "more", label: "More" },
   ];
   const go = (item) => {
     if (item.filter) {
       try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {}
       setPage("offers");
-    } else if (item.id === "more") {
-      setPage("celebrate");
     } else {
+      try { sessionStorage.removeItem("seek_offer_filter"); } catch (_e) {}
       setPage(item.id);
     }
+    setMoreOpen(false);
     window.scrollTo(0, 0);
   };
   return (
     <div className="sticky top-16 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
-        <div className="flex gap-1 min-w-max py-2">
+        <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
-            const active = item.id === "more" ? moreOpen : (page === item.id || (item.filter && page === "offers" && typeof window !== "undefined" && sessionStorage.getItem("seek_offer_filter") === item.filter));
+            const active = page === item.id || (item.filter && page === "offers" && typeof window !== "undefined" && sessionStorage.getItem("seek_offer_filter") === item.filter);
             return (
               <button
                 key={item.id}
@@ -745,10 +745,38 @@ function FeatureStrip({ page, setPage }) {
                 className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
               >
                 {item.label}
-                {null}
               </button>
             );
           })}
+          <div className="relative shrink-0">
+            <button
+              type="button"
+              aria-expanded={moreOpen}
+              onClick={() => setMoreOpen((v) => !v)}
+              className={`px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${moreActive || moreOpen ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
+            >
+              More
+            </button>
+            {moreOpen && (
+              <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-xl z-20">
+                {[
+                  ["celebrate", "Celebrate"],
+                  ["impact", "Impact"],
+                  ["volunteer", "Volunteer"],
+                  ["about", "About SEEK"],
+                ].map(([id, label]) => (
+                  <button
+                    key={id}
+                    type="button"
+                    onClick={() => { setMoreOpen(false); setPage(id); window.scrollTo(0, 0); }}
+                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]"
+                  >
+                    {label}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
         </div>
       </div>
     </div>
@@ -933,6 +961,7 @@ function HomePage({ setPage, userSession }) {
   const [sponsors, setSponsors] = useState([]);
   const [liveStats, setLiveStats] = useState(null);
   const [ticker, setTicker] = useState([]);
+  const [stories, setStories] = useState([]);
   useEffect(() => {
     const tick = () => getSeekLiveStats().then(setLiveStats).catch(() => {});
     tick();
@@ -945,13 +974,14 @@ function HomePage({ setPage, userSession }) {
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, crisisRows] = await Promise.all([
+        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, storyRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           listPublishedImpact().catch(() => []),
           listPublicSponsors().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
+          listAppreciationStories().catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
             .then((r) => r.json())
             .then((json) => (Array.isArray(json?.data) ? json.data : []))
@@ -962,6 +992,7 @@ function HomePage({ setPage, userSession }) {
           const mapped = rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4);
           setRequests(mapped);
           setImpactPreview((impactRows || []).slice(0, 3));
+          setStories((storyRows || []).slice(0, 3));
           setSponsors(sponsorRows || []);
           if (stats) setLiveStats(stats);
           const crisis = (Array.isArray(crisisRows) ? crisisRows : []).map((item) => {
@@ -1126,6 +1157,34 @@ function HomePage({ setPage, userSession }) {
           </div>
         </div>
       </section>
+
+      {/* SEEK STORIES */}
+      {stories.length > 0 && (
+        <section className="bg-[#F4F1EA] py-16 sm:py-20">
+          <div className="mx-auto max-w-6xl px-5 sm:px-8">
+            <div className="flex items-end justify-between gap-4 mb-7">
+              <div>
+                <SectionLabel>SEEK Stories</SectionLabel>
+                <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">See the help, not just the ask.</h2>
+                <p className="mt-2 text-sm text-[#0D3B3B]/60 max-w-xl">When a need is met, requesters can share what happened. These stories help the community see the human outcome.</p>
+              </div>
+              <button type="button" onClick={() => go("impact")} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">All stories <ArrowRight size={15} /></button>
+            </div>
+            <div className="grid sm:grid-cols-3 gap-4">
+              {stories.map((story) => (
+                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition">
+                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-24 bg-[#0D3B3B]/5" />}
+                  <div className="p-4">
+                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1BAA9C]">Outcome story</p>
+                    <h3 className="mt-1 font-display font-bold text-lg text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</h3>
+                    <p className="mt-2 text-sm text-[#0D3B3B]/60 line-clamp-3">{story.story || "A requester shared what happened after receiving help."}</p>
+                  </div>
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* PEOPLE WHO NEED HELP */}
       <section className="bg-white py-20">
@@ -1393,6 +1452,7 @@ function OfferCard({ offer, setPage }) {
 function GiveOfferForm() {
   const [offer, setOffer] = useState("");
   const [offerFiles, setOfferFiles] = useState([]);
+  const [offerTarget, setOfferTarget] = useState("general");
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
   const [offerCategory, setOfferCategory] = useState("");
@@ -1403,50 +1463,118 @@ function GiveOfferForm() {
   const [offerLoading, setOfferLoading] = useState(false);
   const [requests, setRequests] = useState([]);
   useEffect(() => {
-    listPublishedRequests().then((rows) => setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)))).catch(() => {});
+    listPublishedRequests().then((rows) => setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).filter((r) => !CONNECT_CATS.includes(r.category)))).catch(() => {});
   }, []);
+
+  const targetOptions = [
+    { id: "general", title: "General offer", desc: "Anyone who needs this", icon: HandHeart },
+    { id: "request", title: "Support a SEEK request", desc: "Choose an existing public request", icon: Search },
+    { id: "outreach", title: "BSN Foundation outreach", desc: "Support a Foundation outreach", icon: BadgeCheck },
+  ];
+  const offerTypes = [
+    ["money", "Financial support", Wallet],
+    ["food", "Food", Utensils],
+    ["items", "Goods & supplies", Package],
+    ["job", "Job opportunity", Briefcase],
+    ["mentorship", "Mentorship", Users],
+    ["counselling", "Counselling", HeartHandshake],
+    ["education", "Education / training", GraduationCap],
+    ["skills", "Professional skills / services", Handshake],
+    ["transport", "Transportation", Bus],
+    ["shelter", "Accommodation", HomeIcon],
+    ["other", "Other support", MoreHorizontal],
+  ];
+
   if (submitted) {
     return (
       <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
         <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
         <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">We have your giveaway.</h2>
-        <p className="font-body text-[#0D3B3B]/65">Seek will review it. If it is approved, it appears on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
+        <p className="font-body text-[#0D3B3B]/65">SEEK will review it. If approved, it can appear on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
       </div>
     );
   }
+
   return (
-    <div className="rounded-3xl border border-[#0D3B3B]/8 p-8 bg-white">
+    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white">
       <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Who would you like to support?</p>
-      <select value={offerRequestId} onChange={(e) => setOfferRequestId(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3">
-        <option value="">General offer — anyone who needs this</option>
-        <option value="outreach">A BSN Foundation outreach</option>
-        {requests.filter((r) => !CONNECT_CATS.includes(r.category)).map((r) => <option key={r.id} value={r.id}>Support request: {r.title}</option>)}
-      </select>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">What would you like to offer?</p>
-      <select required value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]">
-        <option value="">Choose one</option>
-        <option value="money">Financial support</option>
-        <option value="food">Food</option>
-        <option value="items">Goods & supplies</option>
-        <option value="job">Job opportunity</option>
-        <option value="mentorship">Mentorship</option>
-        <option value="counselling">Counselling</option>
-        <option value="education">Education / training</option>
-        <option value="skills">Professional skills / services</option>
-        <option value="transport">Transportation</option>
-        <option value="shelter">Accommodation</option>
-        <option value="other">Other support</option>
-      </select>
+      <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">Start by choosing who or what your offer is for.</p>
+
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Who would you like to support?</p>
+      <div className="grid sm:grid-cols-3 gap-3 mb-6">
+        {targetOptions.map((item) => {
+          const Icon = item.icon;
+          const active = offerTarget === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => { setOfferTarget(item.id); if (item.id !== "request") setOfferRequestId(""); }}
+              className={`text-left rounded-2xl border p-4 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 ring-2 ring-[#1BAA9C]/15" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B] mb-3"><Icon size={18} /></span>
+              <span className="block font-display font-bold text-sm text-[#0D3B3B]">{item.title}</span>
+              <span className="block mt-1 text-xs leading-relaxed text-[#0D3B3B]/55">{item.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {offerTarget === "request" && (
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Choose the request</p>
+          {requests.length === 0 ? (
+            <p className="rounded-2xl bg-[#F2F5F3] p-4 text-sm text-[#0D3B3B]/60">There are no eligible published requests to choose from right now.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
+              {requests.map((r) => {
+                const active = offerRequestId === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setOfferRequestId(r.id)}
+                    className={`rounded-xl border p-3 text-left transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
+                  >
+                    <span className="block text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{r.category}</span>
+                    <span className="block mt-1 text-sm font-semibold text-[#0D3B3B] line-clamp-2">{r.title}</span>
+                    {r.location && <span className="block mt-1 text-xs text-[#0D3B3B]/45">{r.location}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What would you like to offer?</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
+        {offerTypes.map(([id, label, Icon]) => {
+          const active = offerCategory === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setOfferCategory(id)}
+              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
+            >
+              <Icon size={16} className="shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold leading-tight">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="I can provide..." className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
+      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
       <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-3" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
-      <Button variant="primary" disabled={!offer.trim() || offerLoading} onClick={async () => {
+      <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-4" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
+      <p className="text-xs text-[#0D3B3B]/45 mb-4">Add a photo or short video if it helps people understand your offer.</p>
+      <Button variant="primary" disabled={!offer.trim() || !offerCategory || (offerTarget === "request" && !offerRequestId) || offerLoading} onClick={async () => {
         setOfferError(""); setOfferLoading(true);
         try {
-          await submitOffer({ description: offer, category: offerCategory || null, requestId: (offerRequestId && offerRequestId !== 'outreach') ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
+          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
           setSubmitted(true);
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
@@ -2930,7 +3058,7 @@ function ImpactStoryPage({ impactId, setPage }) {
           )
         ))}
         <div className="flex flex-wrap gap-3">
-          <Button variant="primary" onClick={() => setDonateOpen(true)}>Donate to support this work</Button>
+          <Button variant="primary" onClick={() => { if (String(impactId).startsWith("thanks-")) { setPage("give"); window.scrollTo(0, 0); } else { setDonateOpen(true); } }}>{String(impactId).startsWith("thanks-") ? "Support the SEEK community" : "Support this work"}</Button>
           <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
         </div>
         {donateOpen && (
