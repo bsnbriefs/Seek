@@ -1276,6 +1276,7 @@ export async function submitOfferInterest(payload) {
       p_phone: payload.phone || null,
       p_message: payload.message || null,
       p_age: payload.age ? Number(payload.age) : null,
+      p_photo: payload.photo || null,
     }),
   });
 }
@@ -1381,7 +1382,7 @@ export async function getCelebrateRsvpCount(requestId) {
 export async function submitCelebrateRsvp(payload) {
   const session = getUserSession();
   if (!session?.access_token) throw new Error("Sign in first to say you can be there.");
-  return supabaseFetch("rpc/create_celebrate_rsvp", {
+  const created = await supabaseFetch("rpc/create_celebrate_rsvp", {
     method: "POST",
     body: JSON.stringify({
       p_request_id: payload.requestId,
@@ -1390,6 +1391,26 @@ export async function submitCelebrateRsvp(payload) {
       p_phone: payload.phone || null,
       p_message: payload.message || null,
       p_age: payload.age ? Number(payload.age) : null,
+      p_photo: payload.photo || null,
     }),
   });
+  try {
+    await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-celebrate-rsvp`, {
+      method: "POST",
+      headers: {
+        "Content-Type": "application/json",
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: "Bearer " + session.access_token,
+      },
+      body: JSON.stringify({
+        request_id: payload.requestId,
+        name: payload.name,
+        email: payload.email,
+        phone: payload.phone,
+        age: payload.age,
+        message: payload.message,
+      }),
+    });
+  } catch (_e) {}
+  return created;
 }
