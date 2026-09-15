@@ -744,16 +744,15 @@ function ThemeToggle() {
 
 function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
-  const moreActive = ["volunteer", "about", "impact"].includes(page);
+  let currentOfferFilter = "";
+  try { currentOfferFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
+  const moreActive = ["volunteer", "about", "impact", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
   const items = [
     { id: "for-you", label: "For You" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
     { id: "celebrate", label: "Connect & Celebrate" },
-    { id: "jobs", label: "Jobs", filter: "job" },
-    { id: "mentorship", label: "Mentorship", filter: "mentorship" },
-    { id: "counselling", label: "Counselling", filter: "counselling" },
   ];
   const go = (item) => {
     if (item.filter) {
@@ -797,15 +796,24 @@ function FeatureStrip({ page, setPage }) {
             {moreOpen && (
               <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-xl z-20">
                 {[
+                  ["jobs", "Jobs", "job"],
+                  ["mentorship", "Mentorship", "mentorship"],
+                  ["counselling", "Counselling", "counselling"],
                   ["impact", "Impact"],
                   ["volunteer", "Volunteer"],
                   ["organisations", "For organisations"],
                   ["about", "About SEEK"],
-                ].map(([id, label]) => (
+                ].map(([id, label, filter]) => (
                   <button
                     key={id}
                     type="button"
-                    onClick={() => { setMoreOpen(false); setPage(id); window.scrollTo(0, 0); }}
+                    onClick={() => {
+                      if (filter) { try { sessionStorage.setItem("seek_offer_filter", filter); } catch (_e) {} }
+                      else { try { sessionStorage.removeItem("seek_offer_filter"); } catch (_e) {} }
+                      setMoreOpen(false);
+                      setPage(filter ? "offers" : id);
+                      window.scrollTo(0, 0);
+                    }}
                     className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]"
                   >
                     {label}
