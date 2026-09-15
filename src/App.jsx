@@ -2133,7 +2133,7 @@ if (!cancelled) {
             <span className="mt-4 inline-flex text-sm font-bold text-[#1BAA9C]">See open requests →</span>
           </button>
           <button type="button" onClick={() => document.getElementById("bsn-work")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-[#0D3B3B] p-6 sm:p-7 text-left text-white hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><Heart size={21}/></span>
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><HeartHandshake size={21}/></span>
             <h2 className="mt-5 font-display font-bold text-2xl">Support BSN Foundation work</h2>
             <p className="mt-2 text-sm leading-relaxed text-white/65">Support an existing BSN outreach and help fund work beyond an individual SEEK request.</p>
             <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
