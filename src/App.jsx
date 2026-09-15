@@ -43,6 +43,7 @@ import {
   listMyOffers,
   listMyGifts,
   refreshUserSession,
+  getPublicMember,
   listMyOfferInterestsSummary,
   deleteRejectedRequest,
   postRequestPublicUpdate,
@@ -1738,7 +1739,10 @@ function OffersPage({ setPage }) {
         {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading giveaways…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
         {!loading && !error && offers.length === 0 && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">No open giveaways yet.</p>
+          <p className="font-body text-sm text-[#0D3B3B]/50">Nothing open here yet. Use Post a giveaway to add one.</p>
+        )}
+        {!loading && !error && offers.length > 0 && offers.filter((o) => offerFilter && String(o.category || "").toLowerCase() !== offerFilter.toLowerCase()).length === offers.length && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">No {offerFilter} posts yet. Post a giveaway and choose that type.</p>
         )}
         {offers.filter((o) => !offerFilter || String(o.category || "").toLowerCase() === offerFilter.toLowerCase()).map((offer) => (
           <OfferCard offer={offer} setPage={setPage} />
@@ -2398,6 +2402,22 @@ function OrganisationsPage({ setPage }) {
           ))}
         </div>
       </section>
+    </div>
+  );
+}
+
+
+function MemberPage({ memberId, setPage }) {
+  const [member, setMember] = useState(null);
+  useEffect(() => {
+    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "SEEK member" }));
+  }, [memberId]);
+  return (
+    <div className="mx-auto max-w-lg px-5 py-16 text-center">
+      {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
+      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "SEEK member"} <VerifiedBadge /></h1>
+      <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name and photo only. Gifts and contact details stay private.</p>
+      <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm" onClick={() => setPage("home")}>Back</button>
     </div>
   );
 }
@@ -4109,6 +4129,7 @@ function pageFromPath(pathname) {
   if (path === "/notifications") return "notifications";
   if (path === "/dashboard" || path === "/my-seek") return "my-seek";
   if (path === "/account") return "account";
+  if (path.startsWith("/member/")) return "member:" + path.split("/")[2];
   if (path.startsWith("/request/")) return "request:" + path.split("/")[2];
   return "home";
 }
@@ -4117,6 +4138,7 @@ function pathFromPage(page) {
   const id = String(page || "home");
   if (id.startsWith("request:")) return "/request/" + id.split(":")[1];
   if (id.startsWith("impact:") && id !== "impact") return "/impact/" + id.split(":")[1];
+  if (id.startsWith("member:")) return "/member/" + id.split(":")[1];
   const map = {
     home: "/",
     give: "/give",
@@ -4465,6 +4487,8 @@ useEffect(() => {
   const isRequestPage = typeof page === "string" && page.startsWith("request:");
   const requestId = isRequestPage ? page.split(":")[1] : null;
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
+  const isMemberPage = typeof page === "string" && page.startsWith("member:");
+  const memberId = isMemberPage ? page.split(":")[1] : null;
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
   const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
@@ -4487,6 +4511,8 @@ useEffect(() => {
         <AccountPage setPage={setPage} userSession={userSession} setUserSession={setUserSession} />
       ) : isRequestPage ? (
         <RequestPage requestId={requestId} setPage={setPage} />
+      ) : isMemberPage ? (
+        <MemberPage memberId={memberId} setPage={setPage} />
       ) : isImpactStory ? (
         <ImpactStoryPage impactId={impactId} setPage={setPage} />
       ) : (
