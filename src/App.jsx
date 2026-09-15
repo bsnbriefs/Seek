@@ -32,6 +32,7 @@ import {
   verifyDonation,
   listPublishedRequests,
     getRequestEvidence,
+  listLiveSupportCases,
   listMatchedOfferRequestIds,
   mapRequestRow,
   getUserSession,
@@ -1839,651 +1840,153 @@ function GiveOfferForm() {
 }
 
 
+function LiveSupportCard({ request, setPage }) {
+  const [mediaIndex, setMediaIndex] = useState(0);
+  const media = Array.isArray(request.media) ? request.media : [];
+  const current = media[mediaIndex] || null;
+  const amountNeeded = Number(request.amountNeeded) || 0;
+  const amountRaised = Number(request.amountRaised) || 0;
+  const progress = amountNeeded > 0
+    ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100))
+    : 0;
+
+  const goToCase = () => {
+    setPage(`request:${request.id}`);
+    window.history.pushState({}, "", `/request/${request.id}`);
+    window.scrollTo(0, 0);
+  };
+
+  return (
+    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)]">
+      <div className="relative bg-[#101415] aspect-[4/5] sm:aspect-[4/4.7] overflow-hidden">
+        {current?.media_kind === "video" ? (
+          <video
+            key={current.public_url}
+            src={current.public_url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+            aria-label={request.title || "SEEK support case video"}
+          />
+        ) : current?.public_url ? (
+          <img
+            key={current.public_url}
+            src={current.public_url}
+            alt={request.title || "SEEK support case"}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
+            <div>
+              <HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" />
+              <p className="font-display text-xl font-bold">Support is needed</p>
+              <p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-4 bg-gradient-to-b from-black/55 to-transparent">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0D3B3B]">Live Support</span>
+          {media.length > 1 && <span className="rounded-full bg-black/45 px-3 py-1 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
+        </div>
+
+        {media.length > 1 && (
+          <>
+            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
+            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
+          </>
+        )}
+
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/80 via-black/35 to-transparent text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
+          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
+          {request.description && <p className="mt-2 text-sm leading-5 text-white/80 line-clamp-3">{request.description}</p>}
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        {amountNeeded > 0 ? (
+          <div>
+            <div className="flex items-end justify-between gap-3 text-sm">
+              <div>
+                <p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p>
+                <p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p>
+              </div>
+              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C] transition-all" style={{ width: `${progress}%` }} /></div>
+          </div>
+        ) : <p className="text-sm text-[#0D3B3B]/55">Open the case to see the kind of support needed.</p>}
+
+        <div className="mt-5 flex gap-2">
+          <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white hover:bg-[#123f3f]">Support this case</button>
+          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B] hover:border-[#1BAA9C]">View Case</button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
 function ForYouPage({ setPage }) {
-  const [requests, setRequests] = useState([]);
-  const [offers, setOffers] = useState([]);
+  const [cases, setCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState("all");
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
+    const load = async () => {
       try {
-        const [requestRows, offerRows] = await Promise.all([
-          listPublishedRequests(8),
-          listPublicOffers(),
-        ]);
-        if (cancelled) return;
-        setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
-        setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
+        setLoading(true);
+        setError("");
+        const rows = await listLiveSupportCases(16);
+        if (!cancelled) setCases(Array.isArray(rows) ? rows : []);
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
+        if (!cancelled) setError(err?.message || "Could not load Live Support right now.");
       } finally {
         if (!cancelled) setLoading(false);
       }
-    })();
-    return () => { cancelled = true; };
+    };
+    load();
+    const refresh = window.setInterval(load, 60000);
+    return () => { cancelled = true; window.clearInterval(refresh); };
   }, []);
-
-  const visibleRequests = tab === "give" ? [] : requests;
-  const visibleOffers = tab === "help" ? [] : offers;
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-
-  const doors = [
-    {
-      id: "seek-help",
-      title: "I need help",
-      text: "Ask the community for practical or financial support.",
-      action: "Ask for help",
-    },
-    {
-      id: "give",
-      title: "I want to help",
-      text: "Support an open request or give directly through SEEK.",
-      action: "Help someone",
-    },
-    {
-      id: "offers",
-      title: "I have something to give",
-      text: "Share a giveaway, job, skill, mentorship or counselling offer.",
-      action: "Give something",
-    },
-    {
-      id: "celebrate",
-      title: "I want to connect",
-      text: "Meet the community through Celebrate & Connect — not dating.",
-      action: "Connect & celebrate",
-    },
-  ];
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
+      <section className="mx-auto max-w-2xl px-4 sm:px-6 pt-8 sm:pt-12 pb-16">
+        <div className="mb-7 text-center">
           <SectionLabel>For You</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
-            Welcome to SEEK.
-          </h1>
-          <p className="mt-4 font-body text-lg sm:text-xl leading-relaxed text-[#0D3B3B]/68 max-w-2xl">
-            SEEK is about people helping people. You can ask for help, support someone,
-            share something useful, or connect with the community.
-          </p>
-          <p className="mt-3 font-body text-sm sm:text-base text-[#0D3B3B]/52 max-w-2xl">
-            There is no single way to show up. Start with what you need or what you have to give.
-          </p>
+          <h1 className="mt-1 font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Live Support</h1>
+          <p className="mt-2 text-sm sm:text-base leading-relaxed text-[#0D3B3B]/58">Real SEEK cases that have been reviewed and opened for community support.</p>
         </div>
 
-        <div className="mt-8 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl">
-          {doors.map((door) => (
-            <button
-              key={door.id}
-              type="button"
-              onClick={() => go(door.id)}
-              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-6 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-display font-bold text-xl text-[#0D3B3B]">{door.title}</h2>
-                  <p className="mt-2 font-body text-sm leading-relaxed text-[#0D3B3B]/60">{door.text}</p>
-                </div>
-                <ArrowRight size={18} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
-              </div>
-              <span className="mt-4 inline-flex text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
-        <div className="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <SectionLabel>What's happening on SEEK</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See where you can show up today.</h2>
+        {loading ? (
+          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/10 p-8 text-center text-sm text-[#0D3B3B]/55">Loading Live Support…</div>
+        ) : error ? (
+          <div className="rounded-[2rem] bg-white border border-red-200 p-8 text-center text-sm text-red-700">{error}</div>
+        ) : cases.length === 0 ? (
+          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/10 p-8 text-center">
+            <HandHeart size={36} className="mx-auto text-[#1BAA9C]" />
+            <h2 className="mt-3 font-display font-bold text-xl text-[#0D3B3B]">No Live Support cases yet</h2>
+            <p className="mt-2 text-sm text-[#0D3B3B]/55">When approved cases are published, they will appear here.</p>
+            <button type="button" onClick={() => setPage("seek-help")} className="mt-5 rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">Ask for help</button>
           </div>
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-7">
-          {[
-            ["all", "Everything"],
-            ["help", "People who need help"],
-            ["give", "People offering help"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTab(id)}
-              className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold border transition ${tab === id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
-        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
-
-        {!loading && !error && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {tab !== "give" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Seek Help</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h3>
-                  </div>
-                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleRequests.slice(0, 4).map((req) => (
-                    <RequestCard key={req.id} req={req} onHelp={() => go(`request:${req.id}`)} onView={() => go(`request:${req.id}`)} />
-                  ))}
-                  {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
-                </div>
-              </div>
-            )}
-
-            {tab !== "help" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Giveaways</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h3>
-                  </div>
-                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleOffers.slice(0, 4).map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} setPage={setPage} />
-                  ))}
-                  {visibleOffers.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open giveaways are showing right now.</div>}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-10 grid sm:grid-cols-3 gap-3">
-          {[
-            ["jobs", "Jobs", "Find opportunities shared through SEEK."],
-            ["mentorship", "Mentorship", "Offer or find guidance and experience."],
-            ["counselling", "Counselling", "Find people offering counselling support."],
-          ].map(([id, label, text]) => (
-            <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:border-[#1BAA9C]/45 transition">
-              <h3 className="font-display font-bold text-lg text-[#0D3B3B]">{label}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">{text}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore <ArrowRight size={14} /></span>
-            </button>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function OffersPage({ setPage }) {
-  const [offers, setOffers] = useState([]);
-  const [offerFilter, setOfferFilter] = useState(() => {
-    try { return sessionStorage.getItem("seek_offer_filter") || "all"; } catch (_e) { return "all"; }
-  });
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [q, setQ] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const rows = await listPublicOffers();
-        if (!cancelled) setOffers(Array.isArray(rows) ? rows : []);
-      } catch (err) {
-        if (!cancelled) setError(err.message || "Could not load giveaways.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const typeOf = (offer) => {
-    const value = String(offer?.category || "").trim().toLowerCase();
-    if (value.includes("job")) return "job";
-    if (value.includes("mentor")) return "mentorship";
-    if (value.includes("counsel")) return "counselling";
-    return "goods";
-  };
-
-  const filteredOffers = offers.filter((offer) => {
-    const type = typeOf(offer);
-    const matchesType = offerFilter === "all" || type === offerFilter;
-    const haystack = [offer.description, offer.category, offer.city].filter(Boolean).join(" ").toLowerCase();
-    return matchesType && (!q.trim() || haystack.includes(q.trim().toLowerCase()));
-  });
-
-  const tabs = [
-    ["all", "All"],
-    ["goods", "Goods"],
-    ["job", "Jobs"],
-    ["mentorship", "Mentorship"],
-    ["counselling", "Counselling"],
-  ];
-
-  const selectFilter = (value) => {
-    setOfferFilter(value);
-    try { sessionStorage.setItem("seek_offer_filter", value === "all" ? "" : value); } catch (_e) {}
-  };
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-14 pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-          <div className="max-w-2xl">
-            <SectionLabel>Giveaways</SectionLabel>
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Have something useful to offer?</h1>
-            <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">
-              Share goods, opportunities, skills or your time. Someone in the SEEK community may need exactly what you can give.
-            </p>
-          </div>
-          <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
-              {tabs.map(([value, label]) => {
-                const active = offerFilter === value;
-                return (
-                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[#1BAA9C] text-white" : "bg-[#F2F5F3] text-[#0D3B3B]/70 hover:bg-[#E7EFEC]")}>
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[#0D3B3B]/10 bg-[#F8FAF9] px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]" />
-          </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
-            <p className="mt-1 text-sm text-[#0D3B3B]/50">Published giveaways from the SEEK community.</p>
-          </div>
-          {!loading && <span className="text-sm font-semibold text-[#0D3B3B]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
-        </div>
-
-        <div className="mt-4 space-y-4">
-          {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/50">Loading giveaways…</div>}
-          {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-600">{error}</div>}
-          {!loading && !error && filteredOffers.length === 0 && (
-            <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
-              <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">There are no published giveaways matching this filter right now. You can be the first to offer something useful.</p>
-              <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Post a giveaway</button>
-            </div>
-          )}
-          {!loading && !error && filteredOffers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} setPage={setPage} />
-          ))}
-        </div>
-
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-6 sm:p-8 text-white">
-          <div className="max-w-2xl">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8DE0D5]">Give in your own way</p>
-            <h2 className="mt-2 font-display font-extrabold text-2xl">Goods, jobs, mentorship or counselling</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">These are all part of Giveaways. Choose the type that best describes what you can offer, and SEEK will review it before it goes public.</p>
-          </div>
-          <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Offer something</button>
-        </div>
-
-        <div id="make-offer" className="pt-12 text-left">
-          <GiveOfferForm />
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function GivePage({ setPage }) {
-  const [sponsors, setSponsors] = useState([]);
-  useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
-  const [outreach, setOutreach] = useState(null);
-  const [storyCampaign, setStoryCampaign] = useState(() => {
-    const id = new URLSearchParams(window.location.search).get("outreach");
-    return OUTREACH_CAMPAIGNS.find((c) => c.id === id) || null;
-  });
-  const [categoryFilter, setCategoryFilter] = useState("all");
-  const [searchFilter, setSearchFilter] = useState("");
-  const [locationFilter, setLocationFilter] = useState("all");
-  const [offer, setOffer] = useState("");
-  const [offerFiles, setOfferFiles] = useState([]);
-  const [offerRequestId, setOfferRequestId] = useState("");
-  const [offerContactEmail, setOfferContactEmail] = useState("");
-  const [offerCategory, setOfferCategory] = useState("");
-  const [offerCity, setOfferCity] = useState("");
-const [offerContactPhone, setOfferContactPhone] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [offerError, setOfferError] = useState("");
-  const [offerLoading, setOfferLoading] = useState(false);
-  const [donating, setDonating] = useState(false);
-  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false, coverFee: true });
-  const [paymentError, setPaymentError] = useState("");
-  const [paymentLoading, setPaymentLoading] = useState(false);
-
-  const [requests, setRequests] = useState([]);
-  const [requestsLoading, setRequestsLoading] = useState(true);
-  const [requestsError, setRequestsError] = useState("");
-  const [selectedRequest, setSelectedRequest] = useState(null);
-  const [generalDonation, setGeneralDonation] = useState(false);
-  const [myGifts, setMyGifts] = useState([]);
-  const [giftsLoading, setGiftsLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const session = getUserSession();
-    if (!session?.access_token) { setMyGifts([]); return () => { cancelled = true; }; }
-    setGiftsLoading(true);
-    listMyGifts().then((rows) => {
-      if (!cancelled) setMyGifts(Array.isArray(rows) ? rows : []);
-    }).catch(() => {
-      if (!cancelled) setMyGifts([]);
-    }).finally(() => {
-      if (!cancelled) setGiftsLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, []);
-
-  useEffect(() => {
-    let cancelled = false;
-    let donorTick;
-    (async () => {
-      try {
-        const [rows, matchedIds] = await Promise.all([
-  listPublishedRequests(),
-  listMatchedOfferRequestIds(),
-]);
-const matchedSet = new Set(matchedIds);
-if (!cancelled) {
-  setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
-}
-      } catch (err) {
-        if (!cancelled) setRequestsError(err.message);
-      } finally {
-        if (!cancelled) setRequestsLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const [campaign, setCampaign] = useState(null);
-  useEffect(() => {
-    try {
-      const raw = sessionStorage.getItem("seek_campaign");
-      if (!raw) return;
-      const c = JSON.parse(raw);
-      sessionStorage.removeItem("seek_campaign");
-      setCampaign(c);
-      setPayment((prev) => ({ ...prev, amount: String(c.amount || prev.amount || "") }));
-      setDonating(true);
-    } catch (_e) {}
-  }, []);
-
-  function selectRequest(req) {
-    if (CONNECT_CATS.includes(req?.category)) {
-      setPage(`request:${req.id}`);
-      window.history.pushState({}, "", `/request/${req.id}`);
-      return;
-    }
-    setSelectedRequest(req);
-    setDonating(true);
-    setOfferRequestId(req?.id || "");
-    document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
-  }
-
-  useEffect(() => {
-    const wanted = sessionStorage.getItem("seek_help_request_id");
-    if (!wanted || !requests.length) return;
-    const match = requests.find((r) => r.id === wanted);
-    if (match) {
-      sessionStorage.removeItem("seek_help_request_id");
-      selectRequest(match);
-    }
-  }, [requests]);
-
-  async function startDonation(e) {
-    e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
-    try {
-      const result = await initializeDonation({
-        amount: Number(payment.amount),
-        email: payment.email,
-        requestId: selectedRequest?.id || null,
-        anonymous: payment.anonymous,
-        donorName: campaign ? ((payment.name || "Supporter") + " · " + campaign.title) : (payment.name || ""),
-        coverFee: payment.coverFee !== false,
-        callbackUrl: window.location.origin,
-      });
-      window.location.href = result.authorization_url;
-    }
-    catch (err) { setPaymentError(err.message); } finally { setPaymentLoading(false); }
-  }
-  async function sendOffer() {
-    setOfferError(""); setOfferLoading(true);
-    try { await submitOffer({ description: offer, category: offerCategory || null, requestId: (offerRequestId && offerRequestId !== 'outreach') ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles }); setSubmitted(true); }
-    catch (err) { setOfferError(err.message); }
-    finally { setOfferLoading(false); }
-  }
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
-          <SectionLabel>Give</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give where it matters to you.</h1>
-          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Support a person whose request has been published, or support BSN Foundation work. If what you have to give is goods, a job, mentorship or counselling, head to Giveaways instead.</p>
-        </div>
-
-        <div className="mt-8 grid md:grid-cols-2 gap-4">
-          <button type="button" onClick={() => document.getElementById("help-someone")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 sm:p-7 text-left hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><HeartHandshake size={21}/></span>
-            <h2 className="mt-5 font-display font-bold text-2xl text-[#0D3B3B]">Help someone directly</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">Choose a published request and make a financial contribution through the existing secure Paystack flow.</p>
-            <span className="mt-4 inline-flex text-sm font-bold text-[#1BAA9C]">See open requests →</span>
-          </button>
-          <button type="button" onClick={() => document.getElementById("bsn-work")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-[#0D3B3B] p-6 sm:p-7 text-left text-white hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><HeartHandshake size={21}/></span>
-            <h2 className="mt-5 font-display font-bold text-2xl">Support BSN Foundation work</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">Support an existing BSN outreach and help fund work beyond an individual SEEK request.</p>
-            <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
-          </button>
-        </div>
-
-        {getUserSession()?.access_token && (
-          <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your confirmed gifts stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
-              <div className="sm:text-right"><p className="text-xs text-[#0D3B3B]/45">Successful gifts</p><p className="font-display font-extrabold text-2xl text-[#0D3B3B]">{giftsLoading ? "—" : myGifts.length}</p></div>
-            </div>
-            {myGifts.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{myGifts.slice(0,3).map((g) => <span key={g.id} className="rounded-full bg-white border border-[#0D3B3B]/8 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B]/70">₦{Number(g.amount || 0).toLocaleString()}</span>)}</div>}
-          </div>
-        )}
-      </section>
-      {selectedRequest && (
-        <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
-          <p className="font-display font-semibold text-[#0D3B3B]">Helping: {selectedRequest.title}</p>
-          <button type="button" className="text-xs text-[#1BAA9C]" onClick={() => setSelectedRequest(null)}>Choose a different request</button>
-        </div>
-      )}
-
-      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
-        <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
-          <div className="max-w-2xl">
-            <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#8DE3C5]">Support a need</p>
-            <h2 className="font-display font-extrabold text-3xl mt-2">Give directly to the Seek community.</h2>
-            <p className="font-body mt-3 text-white/70">
-              {selectedRequest
-                ? <>Donating toward <span className="font-semibold text-white">{selectedRequest.title}</span> ({selectedRequest.location}).</>
-                : "Choose a request below to support it directly, or give a general donation to the wider Seek community."}
-            </p>
-            {!donating ? (
-              <Button variant="primary" className="mt-6 !bg-[#63C167] !text-[#0D3B3B]" onClick={() => { setSelectedRequest(null); setDonating(true); }}>
-                Give a general donation <ArrowRight size={16} />
-              </Button>
-            ) : (
-              <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-3 flex flex-wrap gap-2">
-                  {[1000, 2000, 5000, 10000].map((n) => (
-                    <button key={n} type="button" className={"rounded-full px-3 py-1.5 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#63C167] text-[#0D3B3B]" : "bg-white/15 text-white")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
-                      ₦{n.toLocaleString()}
-                    </button>
-                  ))}
-                </div>
-                <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                {!payment.anonymous && (
-                  <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show publicly" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                )}
-                <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
-                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Cover Seek’s 5% so the request keeps the full amount</label>
-                {payment.amount && (
-                  <p className="sm:col-span-3 text-sm text-white/70">
-                    You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}
-                    {payment.coverFee !== false ? " (includes ₦" + Math.round(Number(payment.amount) * 0.05).toLocaleString() + " for Seek)" : ""}
-                  </p>
-                )}
-                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
-                {selectedRequest && (
-                  <button type="button" onClick={() => { setSelectedRequest(null); }} className="sm:col-span-3 text-left text-sm text-white/70 underline underline-offset-2 hover:text-white">
-                    Give a general donation instead
-                  </button>
-                )}
-                {paymentError && <p className="sm:col-span-3 text-sm text-red-200">{paymentError}</p>}
-              </form>
-            )}
-          </div>
-        </div>
-      </section>}
-
-      <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="mb-4">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Help someone directly</p>
-          <h2 className="mt-1 font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55">Choose a published request to support. You can donate without creating an account.</p>
-        </div>
-        {!selectedRequest && !generalDonation && (
-          <button
-            type="button"
-            className="mb-4 text-sm font-semibold text-[#1BAA9C]"
-            onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
-          >
-            Or give a general donation
-          </button>
-        )}
-        <input
-          value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
-          placeholder="Search requests"
-          className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-sm"
-        />
-        <div className="mb-3 flex flex-wrap gap-2">
-          {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
-            <button
-              key={cat}
-              type="button"
-              onClick={() => setCategoryFilter(cat)}
-              className={`rounded-full px-3 py-1.5 text-sm ${categoryFilter === cat ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
-            >
-              {cat === "all" ? "All categories" : cat}
-            </button>
-          ))}
-        </div>
-        <div className="mb-6 flex flex-wrap gap-2">
-          {["all", ...Array.from(new Set(requests.map((r) => r.location).filter(Boolean)))].map((loc) => (
-            <button
-              key={loc}
-              type="button"
-              onClick={() => setLocationFilter(loc)}
-              className={`rounded-full px-3 py-1.5 text-sm ${locationFilter === loc ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
-            >
-              {loc === "all" ? "All locations" : loc}
-            </button>
-          ))}
-        </div>
-        {requestsLoading ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
-        ) : requestsError ? (
-          <p className="font-body text-sm text-red-600">{requestsError}</p>
-        ) : requests.length === 0 ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
         ) : (
-          (() => {
-            const visible = requests.filter((r) => {
-              const q = searchFilter.trim().toLowerCase();
-              const matchesCat = (categoryFilter === "all" || r.category === categoryFilter) && !CONNECT_CATS.includes(r.category);
-              const matchesLoc = locationFilter === "all" || r.location === locationFilter;
-              const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
-              return matchesCat && matchesLoc && matchesQ;
-            });
-            return (
-              <>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="font-body text-sm text-[#0D3B3B]/55">
-                    Showing {visible.length} of {requests.length}
-                  </p>
-                  {(categoryFilter !== "all" || locationFilter !== "all" || searchFilter.trim()) && (
-                    <button
-                      type="button"
-                      className="text-sm font-semibold text-[#1BAA9C]"
-                      onClick={() => {
-                        setCategoryFilter("all");
-                        setLocationFilter("all");
-                        setSearchFilter("");
-                      }}
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                </div>
-                {visible.length === 0 ? (
-                  <p className="font-body text-sm text-[#0D3B3B]/50">No requests match those filters.</p>
-                ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {visible.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
-                  </div>
-                )}
-              </>
-            );
-          })()
-        )}
-      </section>
-
-      <section id="bsn-work" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
-        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
-        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
-        {storyCampaign ? (
-          <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {OUTREACH_CAMPAIGNS.map((c) => (
-              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="text-left rounded-3xl overflow-hidden bg-white border border-[#0D3B3B]/8 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition">
-                {c.photos?.[0] && <img src={c.photos[0]} alt="" className="h-36 w-full object-cover" />}
-                <div className="p-4">
-                  <span className="block font-display font-bold text-lg text-[#0D3B3B]">{c.title}</span>
-                  <span className="block text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</span>
-                  {c.budget ? <p className="mt-2 text-xs font-semibold text-[#0D3B3B]/55">Annual budget ₦{Number(c.budget).toLocaleString()} </p> : null}
-                  <span className="mt-3 inline-flex text-sm font-semibold text-[#1BAA9C]">See this work →</span>
-                </div>
-              </button>
-            ))}
+          <div className="space-y-6">
+            {cases.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
           </div>
         )}
-        {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
+
+        <div className="mt-8 rounded-2xl border border-[#0D3B3B]/10 bg-white/75 p-4 text-center text-xs leading-5 text-[#0D3B3B]/50">SEEK reviews public requests before they appear here. Fulfilled cases leave Live Support and can continue into outcome and appreciation stories.</div>
       </section>
     </div>
   );
 }
-
 
 /* ---------------- Seek Help Page ---------------- */
 
@@ -4114,14 +3617,11 @@ function AccountUsernameForm({ onSaved } = {}) {
       e.preventDefault();
       setSaving(true); setHint("");
       try {
-        await updateMyUsername({ username, full_name: name, bio });
-        const refreshed = await getMyProfile();
-        if (refreshed) {
-          setUsername(refreshed.username || username);
-          setName(refreshed.full_name || name);
-          setBio(refreshed.bio || bio);
-          if (typeof onSaved === "function") onSaved(refreshed);
-        }
+        const saved = await updateMyUsername({ username, full_name: name, bio });
+        setUsername(saved?.username || username);
+        setName(saved?.full_name ?? name);
+        setBio(saved?.bio ?? bio);
+        if (typeof onSaved === "function") onSaved(saved);
         setHint("Profile saved.");
       } catch (err) {
         setHint(err.message || "Could not save.");
