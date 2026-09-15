@@ -620,8 +620,11 @@ export async function userSignIn(email, password) {
   const session = {
     access_token: data.access_token,
     refresh_token: data.refresh_token,
-    user: data.user,
+    user: data.user || { id: data.user?.id, email: email },
   };
+  if (!session.user || !session.user.id) {
+    session.user = { email: email, id: data.user?.id || "" };
+  }
 
   setUserSession(session);
 
