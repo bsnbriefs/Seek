@@ -889,6 +889,60 @@ function ThemeToggle() {
 }
 
 
+
+function CaseDonateSheet({ request, onClose }) {
+  const [name, setName] = useState("");
+  const [email, setEmail] = useState("");
+  const [amount, setAmount] = useState(request?.amountNeeded ? Math.min(Number(request.amountNeeded), 5000) : 2000);
+  const [anonymous, setAnonymous] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  if (!request) return null;
+  return (
+    <div className="fixed inset-0 z-[80] bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setError("");
+          setLoading(true);
+          try {
+            const result = await initializeDonation({
+              amount: Number(amount),
+              email,
+              requestId: request.id,
+              anonymous,
+              donorName: anonymous ? "Anonymous" : (name || "Supporter"),
+              coverFee: true,
+              callbackUrl: window.location.origin + "/request/" + request.id,
+            });
+            window.location.href = result.authorization_url;
+          } catch (err) {
+            setError(err.message || "Payment could not start.");
+            setLoading(false);
+          }
+        }}
+        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+      >
+        <p className="text-[10px] uppercase tracking-widest text-[#1BAA9C] font-bold">Support this case</p>
+        <h3 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">{request.title || "This SEEK request"}</h3>
+        <input required className="mt-4 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+        <input required type="email" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
+        <input required inputMode="numeric" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount in naira" />
+        <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
+          <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
+          Give anonymously
+        </label>
+        {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
+        <div className="mt-5 flex gap-2">
+          <button type="button" onClick={onClose} className="flex-1 rounded-full border py-3 text-sm font-bold">Cancel</button>
+          <button type="submit" disabled={loading} className="flex-1 rounded-full bg-[#0D3B3B] text-white py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Continue to Paystack"}</button>
+        </div>
+      </form>
+    </div>
+  );
+}
+
 function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
   let currentOfferFilter = "";
@@ -1024,11 +1078,11 @@ function Navbar({ page, setPage, userSession }) {
         <div className="hidden lg:flex items-center gap-3">
           <NotificationBell userSession={userSession} setPage={setPage} />
           <button
-            onClick={() => go(userSession?.access_token ? "account" : "account")}
+            onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
           >
             {avatar && <img loading="lazy" decoding="async" src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
-            {userSession?.access_token ? "Account" : "Sign in"}
+            {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
@@ -1067,8 +1121,8 @@ function Navbar({ page, setPage, userSession }) {
               <User size={16} /> My SEEK
             </button>
           )}
-          <button onClick={() => go("account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
-            {userSession?.access_token ? "Account" : "Sign in"}
+          <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
+            {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
         </div>
       )}
@@ -1683,6 +1737,7 @@ function GiveOfferForm() {
 function LiveSupportCard({ request, setPage }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [muted, setMuted] = useState(true);
+  const [donateOpen, setDonateOpen] = useState(false);
   const media = Array.isArray(request.media) ? request.media : [];
   const current = media[mediaIndex] || null;
   const amountNeeded = Number(request.amountNeeded) || 0;
@@ -1698,12 +1753,7 @@ function LiveSupportCard({ request, setPage }) {
     window.scrollTo(0, 0);
   };
 
-  const supportCase = () => {
-    try { sessionStorage.setItem("seek_help_request_id", request.id); } catch (_e) {}
-    setPage("give");
-    window.history.pushState({}, "", "/give");
-    window.scrollTo(0, 0);
-  };
+  const supportCase = () => setDonateOpen(true);
 
   return (
     <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)] snap-start">
@@ -1749,10 +1799,10 @@ function LiveSupportCard({ request, setPage }) {
       </div>
 
       <div className="bg-white p-5 sm:p-6">
-        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
-        <CommunityInteractions targetType="request" targetId={request.id} compact />
+        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-4 flex gap-2"><button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button><button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View Case</button></div>
       </div>
+      {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
     </article>
   );
 }
@@ -4205,14 +4255,14 @@ function MySeekDashboard({ setPage, userSession }) {
                   <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
                 </div>
               </div>
-              <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Profile</button>
+              <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Edit profile</button>
             </div>
-            <div className="mt-7 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
+            <p className="mt-5 text-sm text-white/70">Your SEEK journey</p>
+            <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
               <span><strong className="text-white">{requests.length}</strong> requests</span>
               <span><strong className="text-white">{offers.length}</strong> giveaways</span>
-              <span><strong className="text-white">{interests.length}</strong> interests</span>
-              <span><strong className="text-white">{unreadNotifications}</strong> unread</span>
-              <span><strong className="text-white">{gifts.length}</strong> gifts sent</span>
+              <span><strong className="text-white">{gifts.length}</strong> gifts</span>
+              <span><strong className="text-white">{unreadNotifications}</strong> new messages</span>
             </div>
           </div>
         </div>
@@ -4665,13 +4715,13 @@ function LiveTicker() {
   }, []);
   if (!items.length) return null;
   return (
-    <div className="sticky top-16 z-[105] border-b border-[#0D3B3B]/10 bg-[#0D3B3B] text-white overflow-hidden">
-      <div className="flex items-center gap-3 px-3 py-2">
-        <span className="seek-live-blink shrink-0 text-[10px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-2 py-1 rounded">Live</span>
+    <div className="sticky top-16 z-[105] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
+      <div className="flex items-center gap-2 px-3 py-1">
+        <span className="seek-live-blink shrink-0 text-[9px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-1.5 py-0.5 rounded">Live</span>
         <div className="overflow-hidden flex-1">
           <div className="seek-ticker-track">
             {[...items, ...items].map((item, i) => (
-              <span key={i} className="text-sm font-body text-white/90">{item}</span>
+              <span key={i} className="text-xs font-body text-white/80">{item}</span>
             ))}
           </div>
         </div>
@@ -5082,7 +5132,7 @@ useEffect(() => {
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      {page !== "home" && <LiveTicker />}
+      <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
