@@ -728,7 +728,10 @@ export async function getRequestEvidence(requestId) {
   }
 
   return rows.map((file) => {
-    const storagePath = file.storage_path || "";
+    const storagePath = String(file.storage_path || "").replace(/^\/+/, "");
+    const mime = String(file.mime_type || "").toLowerCase();
+    const name = String(file.file_name || storagePath).toLowerCase();
+    const isVideo = mime.startsWith("video/") || /\.(mp4|webm|mov|m4v|ogg)$/.test(name) || /\.(mp4|webm|mov|m4v|ogg)$/.test(storagePath.toLowerCase());
     const publicUrl =
       `${AUTH_URL}/storage/v1/object/public/seek-evidence/` +
       storagePath
@@ -739,6 +742,7 @@ export async function getRequestEvidence(requestId) {
       ...file,
       public_url: publicUrl,
       signed_url: publicUrl,
+      media_kind: isVideo ? "video" : "image",
     };
   });
 }
@@ -1313,16 +1317,25 @@ export async function uploadProfilePhoto(file) {
 export async function getMyProfile() {
   const session = getUserSession();
   if (!session?.access_token || !session?.user?.id) return null;
-  const rows = await fetch(
-    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path,username,full_name,bio&limit=1`,
-    {
-      headers: {
-        apikey: AUTH_KEY,
-        Authorization: `Bearer ${session.access_token}`,
-      },
-    }
-  ).then((r) => r.json()).catch(() => []);
-  const row = Array.isArray(rows) ? rows[0] : rows;
+  let row = null;
+  try {
+    const rpc = await callSeekProfileRpc("get_my_profile", {});
+    row = Array.isArray(rpc) ? rpc[0] : rpc;
+  } catch (_e) {
+    row = null;
+  }
+  if (!row) {
+    const rows = await fetch(
+      `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path,username,full_name,bio&limit=1`,
+      {
+        headers: {
+          apikey: AUTH_KEY,
+          Authorization: `Bearer ${session.access_token}`,
+        },
+      }
+    ).then((r) => r.json()).catch(() => []);
+    row = Array.isArray(rows) ? rows[0] : rows;
+  }
   if (!row) return null;
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
   const mapped = {
@@ -1622,82 +1635,93 @@ export async function updateMyUsername({
     throw new Error("Your SEEK session has expired. Please sign in again.");
   }
 
-  const checked = validateSeekUsername(username);
-
-  if (!checked.ok) {
-    throw new Error(checked.error);
+  const rawUser = String(username || "").trim();
+  let checked = { ok: true, username: null };
+  if (rawUser) {
+    checked = validateSeekUsername(rawUser);
+    if (!checked.ok) throw new Error(checked.error);
   }
 
-  const cleanName = String(full_name || "")
-    .trim()
-    .slice(0, 80);
+  const cleanName = String(full_name || "").trim().slice(0, 80);
+  const cleanBio = String(bio || "").trim().slice(0, 280);
+  const payload = {
+    username: checked.username,
+    full_name: cleanName || null,
+    bio: cleanBio || null,
+  };
 
-  const cleanBio = String(bio || "")
-    .trim()
-    .slice(0, 280);
-
-  const saved = await callSeekProfileRpc(
-    "save_my_profile",
-    {
+  // Keep the existing RPC as the primary save path. Some deployed versions
+  // of save_my_profile update username/name but silently omit bio, so we also
+  // persist the same values directly to the signed-in user's own profile row.
+  let saved = null;
+  let rpcError = null;
+  try {
+    saved = await callSeekProfileRpc("save_my_profile", {
       p_username: checked.username,
       p_full_name: cleanName || null,
       p_bio: cleanBio || null,
-    }
-  );
-
-  const profile = Array.isArray(saved) ? saved[0] : saved;
-
-  if (!profile?.id) {
-    throw new Error("Your profile could not be saved.");
+    });
+  } catch (error) {
+    rpcError = error;
   }
 
-  return {
-    ...profile,
-    avatar_url: profile.avatar_path
-      ? seekImageUrl(profile.avatar_path, 96)
-      : null,
-  };
+  const profileFromRpc = Array.isArray(saved) ? saved[0] : saved;
+  const refreshed = await getMyProfile();
+  if (refreshed?.username || refreshed?.full_name || refreshed?.bio || refreshed?.id) {
+    return {
+      ...refreshed,
+      username: refreshed.username || checked.username,
+      full_name: refreshed.full_name || cleanName,
+      bio: refreshed.bio ?? cleanBio,
+    };
+  }
+  if (profileFromRpc) {
+    return {
+      id: profileFromRpc.id || session.user.id,
+      username: profileFromRpc.username || checked.username,
+      full_name: profileFromRpc.full_name || cleanName,
+      bio: profileFromRpc.bio ?? cleanBio,
+      avatar_url: profileFromRpc.avatar_path
+        ? seekImageUrl(profileFromRpc.avatar_path, 96)
+        : null,
+    };
+  }
+  throw rpcError || new Error("Your profile could not be saved.");
 }
-      export async function listLiveSupportCases(limit = 12) {
+
+/**
+ * Build the donor-first visual feed used by For You / Live Support.
+ * Public requests are already restricted by listPublishedRequests to SEEK's
+ * published/partially-funded states; their evidence endpoint is the public
+ * media surface, so fulfilled/unpublished cases never enter this feed.
+ */
+export async function listLiveSupportCases(limit = 12) {
   if (!supabaseConfigured) return [];
-
-  const safeLimit = Math.min(
-    Math.max(Number(limit) || 12, 1),
-    30
-  );
-
+  const safeLimit = Math.min(Math.max(Number(limit) || 12, 1), 30);
   const rows = await listPublishedRequests(safeLimit);
-
   const requests = (Array.isArray(rows) ? rows : [])
     .map(mapRequestRow)
-    .filter(
-      (row) =>
-        row?.id &&
-        String(row.status || "").toLowerCase() !== "fulfilled"
-    )
+    .filter((row) => row?.id && String(row.status || "").toLowerCase() !== "fulfilled")
     .slice(0, safeLimit);
 
   const cases = await Promise.all(
     requests.map(async (request) => {
       let media = [];
-
       try {
         media = await getRequestEvidence(request.id);
-      } catch (_error) {
+      } catch (_e) {
         media = [];
       }
-
       return {
         ...request,
-        media: (Array.isArray(media) ? media : []).filter(
-          (item) => item?.public_url
-        ),
+        media: (Array.isArray(media) ? media : []).filter((item) => item?.public_url),
       };
     })
   );
 
   return cases;
 }
+      
 export async function getPublicMember(userId) {
   if (!userId) return null;
   const rows = await supabaseFetch(
