@@ -3261,6 +3261,15 @@ function ImpactPage({ setPage }) {
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
         {[["Help raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"], ["Gifts received", liveStats?.donationCount ?? "—"], ["Published stories", thanks.length], ["Impact posts", posts.length]].map(([label,value]) => <div key={label} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]">{value}</p></div>)}
       </section>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8">
+        <p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45 mb-2">Related UN goals</p>
+        <p className="text-sm text-[#0D3B3B]/60 mb-3">BSN’s published work sits next to these goals. These labels are not a claim that SEEK has fulfilled an SDG.</p>
+        <div className="flex flex-wrap gap-2">
+          {["SDG 1 No poverty", "SDG 2 Zero hunger", "SDG 3 Good health", "SDG 4 Quality education", "SDG 5 Gender equality"].map((s) => (
+            <span key={s} className="rounded-full border border-[#0D3B3B]/15 px-3 py-1 text-xs font-semibold text-[#0D3B3B]">{s}</span>
+          ))}
+        </div>
+      </section>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
         {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
         {error && <p className="font-body text-sm text-red-600">{error}</p>}
