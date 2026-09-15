@@ -62,6 +62,8 @@ import {
   updateCelebrateRsvpStatus,
   closeCelebrateInvite,
   getMyProfile,
+  saveMyProfile,
+  checkSeekUsernameAvailability,
   getCachedAvatarUrl,
   cacheAvatarUrl,
   listAppreciationStories,
@@ -2999,15 +3001,48 @@ function OrganisationsPage({ setPage }) {
 
 function MemberPage({ memberId, setPage }) {
   const [member, setMember] = useState(null);
+  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "SEEK member" }));
+    let cancelled = false;
+    setLoading(true);
+    getPublicMember(memberId).then((row) => {
+      if (!cancelled) setMember(row);
+    }).catch(() => {
+      if (!cancelled) setMember(null);
+    }).finally(() => {
+      if (!cancelled) setLoading(false);
+    });
+    return () => { cancelled = true; };
   }, [memberId]);
+
+  if (loading) {
+    return <div className="mx-auto max-w-lg px-5 py-20 text-center text-sm text-[#0D3B3B]/50">Loading profile…</div>;
+  }
+  if (!member) {
+    return (
+      <div className="mx-auto max-w-lg px-5 py-20 text-center">
+        <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />
+        <h1 className="mt-5 font-display font-extrabold text-2xl text-[#0D3B3B]">Profile not found</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/60">This SEEK username may not exist or may have been changed.</p>
+        <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm font-semibold" onClick={() => setPage("home")}>Back to SEEK</button>
+      </div>
+    );
+  }
+
+  const name = member.name || member.full_name || member.username || "SEEK member";
   return (
-    <div className="mx-auto max-w-lg px-5 py-16 text-center">
-      {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
-      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "SEEK member"} <VerifiedBadge /></h1>
-      <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name and photo only. Gifts and contact details stay private.</p>
-      <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm" onClick={() => setPage("home")}>Back</button>
+    <div style={{ background: C.bg }} className="min-h-[70vh]">
+      <section className="mx-auto max-w-lg px-5 py-14 sm:py-20 text-center">
+        {member.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-24 w-24 rounded-full object-cover border-4 border-white shadow-sm" /> : <div className="mx-auto h-24 w-24 rounded-full bg-[#0D3B3B]/10 flex items-center justify-center text-2xl font-display font-bold text-[#0D3B3B]/35">{String(name).charAt(0).toUpperCase()}</div>}
+        <div className="mt-5 flex items-center justify-center gap-2">
+          <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-[#0D3B3B]">{name}</h1>
+          <VerifiedBadge />
+        </div>
+        <p className="mt-1 text-sm font-semibold text-[#1BAA9C]">@{member.username || memberId}</p>
+        {member.bio && <p className="mt-4 text-sm leading-6 text-[#0D3B3B]/65">{member.bio}</p>}
+        <p className="mt-5 text-xs text-[#0D3B3B]/45">Public SEEK profile</p>
+        <button type="button" className="mt-6 rounded-full border border-[#0D3B3B]/12 px-5 py-2.5 text-sm font-semibold text-[#0D3B3B]" onClick={() => setPage("home")}>Back to SEEK</button>
+      </section>
     </div>
   );
 }
@@ -4096,29 +4131,115 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [profile, setProfile] = useState(null);
+  const [profileLoading, setProfileLoading] = useState(false);
+  const [editingProfile, setEditingProfile] = useState(false);
+  const [username, setUsername] = useState("");
+  const [fullName, setFullName] = useState("");
+  const [bio, setBio] = useState("");
+  const [profileError, setProfileError] = useState("");
+  const [profileMessage, setProfileMessage] = useState("");
+  const [checkingUsername, setCheckingUsername] = useState(false);
+
+  useEffect(() => {
+    if (!userSession?.access_token) return;
+    let cancelled = false;
+    setProfileLoading(true);
+    getMyProfile().then((row) => {
+      if (cancelled) return;
+      setProfile(row || null);
+      setUsername(row?.username || "");
+      setFullName(row?.full_name || userSession.user?.user_metadata?.full_name || "");
+      setBio(row?.bio || "");
+    }).catch(() => {}).finally(() => {
+      if (!cancelled) setProfileLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, [userSession]);
 
   if (userSession?.access_token) {
-    const displayName = userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+    const publicUsername = profile?.username || "";
+
+    async function saveProfile(e) {
+      e.preventDefault();
+      setProfileError(""); setProfileMessage(""); setCheckingUsername(true);
+      try {
+        const availability = await checkSeekUsernameAvailability(username);
+        if (!availability.available) throw new Error(availability.error || "That username is already taken.");
+        const saved = await saveMyProfile({ username: availability.username, full_name: fullName, bio });
+        setProfile(saved || { ...profile, username: availability.username, full_name: fullName, bio });
+        setUsername(availability.username);
+        setEditingProfile(false);
+        setProfileMessage("Profile updated.");
+      } catch (err) {
+        setProfileError(err.message || "Could not update your profile.");
+      } finally { setCheckingUsername(false); }
+    }
+
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
           <div className="rounded-[2rem] bg-[#0D3B3B] text-white p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="shrink-0"><AccountAvatar /></div>
-              <div className="min-w-0">
+              <div className="min-w-0 flex-1">
                 <SectionLabel>Profile</SectionLabel>
-                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName}</h1>
-                <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <VerifiedBadge /></h1>
+                <p className="mt-1 text-sm text-white/65 truncate">{publicUsername ? `@${publicUsername}` : "Choose your SEEK username"}</p>
+                <p className="mt-1 text-sm text-white/50 truncate">{userSession.user?.email}</p>
               </div>
+              <button type="button" onClick={() => { setEditingProfile((v) => !v); setProfileError(""); setProfileMessage(""); }} className="shrink-0 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold hover:bg-white/15 transition">
+                {editingProfile ? "Close" : "Edit profile"}
+              </button>
             </div>
-            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
-              <strong className="text-white">Your public profile</strong><br />
-              Only your name and photo are intended to be public. Your gifts, requests, notifications and contact details stay private to your account.
-            </div>
+
+            {editingProfile ? (
+              <form onSubmit={saveProfile} className="mt-6 rounded-2xl bg-white p-5 sm:p-6 text-[#0D3B3B] space-y-4">
+                <div>
+                  <label className="block text-xs font-bold uppercase tracking-widest text-[#0D3B3B]/50 mb-2">Username</label>
+                  <div className="flex items-center rounded-xl border border-[#0D3B3B]/10 bg-[#F7FAF8] overflow-hidden focus-within:ring-2 focus-within:ring-[#1BAA9C]/20">
+                    <span className="px-3 text-[#1BAA9C] font-bold">@</span>
+                    <input required minLength={3} maxLength={24} value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} className="w-full bg-transparent py-3 pr-3 outline-none" placeholder="yourusername" autoCapitalize="none" autoCorrect="off" />
+                  </div>
+                  <p className="mt-1 text-xs text-[#0D3B3B]/50">3–24 characters. Lowercase letters, numbers and underscores only.</p>
+                </div>
+                <Field label="Name">
+                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={80} className={inputCls} placeholder="Your name" />
+                </Field>
+                <Field label="About you (optional)">
+                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={240} rows={3} className={inputCls} placeholder="A short introduction about you or what you do on SEEK." />
+                </Field>
+                {profileError && <p className="text-sm text-red-600">{profileError}</p>}
+                <div className="flex flex-wrap items-center gap-3">
+                  <Button disabled={checkingUsername} type="submit" variant="primary">{checkingUsername ? "Checking…" : "Save profile"}</Button>
+                  <button type="button" onClick={() => setEditingProfile(false)} className="rounded-full border border-[#0D3B3B]/10 px-4 py-2 text-sm font-semibold">Cancel</button>
+                </div>
+              </form>
+            ) : (
+              <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
+                <strong className="text-white">Your public profile</strong><br />
+                {publicUsername ? <>People can find you at <span className="font-semibold text-white">@{publicUsername}</span>. Your email, gifts, requests and notifications remain private.</> : <>Set a unique username so people can recognise and find your public SEEK profile.</>}
+                {profile?.bio && <p className="mt-3 text-white/70">{profile.bio}</p>}
+              </div>
+            )}
           </div>
+
+          {(profileMessage || profileLoading) && <p className="mt-3 px-1 text-sm text-[#168F84]">{profileLoading ? "Loading profile…" : profileMessage}</p>}
+
+          {publicUsername && (
+            <div className="mt-5 rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
+              <div>
+                <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Public profile</p>
+                <p className="mt-1 text-sm text-[#0D3B3B]/60">Your public SEEK identity</p>
+              </div>
+              <button type="button" onClick={() => setPage("member:" + publicUsername)} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E8F6F2] px-4 py-2 text-sm font-semibold text-[#168F84]">
+                View public profile <ArrowUpRight size={15} />
+              </button>
+            </div>
+          )}
 
           <div className="mt-5 grid sm:grid-cols-2 gap-3">
             <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
@@ -4153,9 +4274,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError("");
-    setMessage("");
-    setLoading(true);
+    setError(""); setMessage(""); setLoading(true);
     try {
       if (mode === "signup") {
         const result = await userSignUp(email, password);
@@ -4177,11 +4296,8 @@ function AccountPage({ setPage, userSession, setUserSession }) {
         if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
         setPage(back);
       }
-    } catch (err) {
-      setError(err.message || "Something went wrong.");
-    } finally {
-      setLoading(false);
-    }
+    } catch (err) { setError(err.message || "Something went wrong."); }
+    finally { setLoading(false); }
   }
 
   return (
@@ -4189,86 +4305,21 @@ function AccountPage({ setPage, userSession, setUserSession }) {
       <section className="mx-auto max-w-md px-5 py-16">
         <div className="text-center mb-8">
           <SectionLabel>Account</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">
-            {mode === "signin" ? "Sign in" : "Create account"}
-          </h1>
-          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
-            Sign in to see your requests, updates, and activity.
-          </p>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">{mode === "signin" ? "Sign in" : "Create account"}</h1>
+          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">Sign in to see your requests, updates, and activity.</p>
         </div>
-
-        <form
-          onSubmit={handleSubmit}
-          className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
-        >
-          <Field label="Email">
-            <input
-              required
-              type="email"
-              className={inputCls}
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
-              placeholder="you@example.com"
-            />
-          </Field>
-          <Field label="Password">
-            <input
-              required
-              type="password"
-              minLength={6}
-              className={inputCls}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-            />
-          </Field>
-
+        <form onSubmit={handleSubmit} className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4">
+          <Field label="Email"><input required type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></Field>
+          <Field label="Password"><input required type="password" minLength={6} className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" /></Field>
           {error && <p className="text-sm text-red-600">{error}</p>}
           {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
-
-          <Button disabled={loading} type="submit" variant="primary" className="w-full">
-            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
-          </Button>
-
-          <p className="text-center text-sm text-[#0D3B3B]/55">
-            {mode === "signin" ? (
-              <>
-                No account?{" "}
-                <button
-                  type="button"
-                  className="font-semibold text-[#1BAA9C]"
-                  onClick={() => {
-                    setMode("signup");
-                    setError("");
-                    setMessage("");
-                  }}
-                >
-                  Sign up
-                </button>
-              </>
-            ) : (
-              <>
-                Already have an account?{" "}
-                <button
-                  type="button"
-                  className="font-semibold text-[#1BAA9C]"
-                  onClick={() => {
-                    setMode("signin");
-                    setError("");
-                    setMessage("");
-                  }}
-                >
-                  Sign in
-                </button>
-              </>
-            )}
-          </p>
+          <Button disabled={loading} type="submit" variant="primary">{loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</Button>
+          <p className="text-center text-sm text-[#0D3B3B]/55">{mode === "signin" ? <>No account? <button type="button" className="font-semibold text-[#1BAA9C]" onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Sign up</button></> : <>Already have an account? <button type="button" className="font-semibold text-[#1BAA9C]" onClick={() => { setMode("signin"); setError(""); setMessage(""); }}>Sign in</button></>}</p>
         </form>
       </section>
     </div>
   );
 }
-
 
 /* ---------------- My SEEK Dashboard ---------------- */
 
@@ -4334,6 +4385,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
   const avatar = profile?.avatar_url || "";
   const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+  const username = profile?.username || "";
   const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
 
   const go = (page, path = null) => {
@@ -4371,7 +4423,7 @@ function MySeekDashboard({ setPage, userSession }) {
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
                   <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {firstName} 👋</h1>
-                  <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+                  <p className="mt-1 text-sm text-white/65 truncate">{username ? `@${username}` : userSession.user?.email}</p>
                 </div>
               </div>
               <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Profile</button>
