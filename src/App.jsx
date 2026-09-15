@@ -746,7 +746,7 @@ function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
   const moreActive = ["volunteer", "about", "impact"].includes(page);
   const items = [
-    { id: "home", label: "For You" },
+    { id: "for-you", label: "For You" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
@@ -1668,6 +1668,130 @@ function GiveOfferForm() {
         finally { setOfferLoading(false); }
       }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
       {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
+    </div>
+  );
+}
+
+
+function ForYouPage({ setPage }) {
+  const [requests, setRequests] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [requestRows, offerRows] = await Promise.all([
+          listPublishedRequests(8),
+          listPublicOffers(),
+        ]);
+        if (cancelled) return;
+        setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
+        setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
+      } catch (err) {
+        if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleRequests = tab === "give" ? [] : requests;
+  const visibleOffers = tab === "help" ? [] : offers;
+
+  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-8">
+        <div className="max-w-3xl">
+          <SectionLabel>For You</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">What can you do today?</h1>
+          <p className="mt-4 font-body text-lg text-[#0D3B3B]/65 max-w-2xl">
+            See people who need help and people offering something useful. Choose where you want to show up.
+          </p>
+        </div>
+
+        <div className="mt-8 flex gap-2 overflow-x-auto scrollbar-none pb-1">
+          {[
+            ["all", "Everything"],
+            ["help", "People who need help"],
+            ["give", "People offering help"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold border transition ${tab === id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
+        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
+
+        {!loading && !error && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {tab !== "give" && (
+              <div>
+                <div className="flex items-end justify-between gap-3 mb-4">
+                  <div>
+                    <SectionLabel>Seek Help</SectionLabel>
+                    <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h2>
+                  </div>
+                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">Ask for help</button>
+                </div>
+                <div className="space-y-3">
+                  {visibleRequests.slice(0, 4).map((req) => (
+                    <RequestCard key={req.id} req={req} onHelp={() => go(`request:${req.id}`)} onView={() => go(`request:${req.id}`)} />
+                  ))}
+                  {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
+                </div>
+                {visibleRequests.length > 4 && <button type="button" onClick={() => go("give")} className="mt-4 text-sm font-semibold text-[#1BAA9C]">See more ways to help <ArrowRight size={14} className="inline" /></button>}
+              </div>
+            )}
+
+            {tab !== "help" && (
+              <div>
+                <div className="flex items-end justify-between gap-3 mb-4">
+                  <div>
+                    <SectionLabel>Giveaways</SectionLabel>
+                    <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h2>
+                  </div>
+                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See giveaways</button>
+                </div>
+                <div className="space-y-3">
+                  {visibleOffers.slice(0, 4).map((offer) => (
+                    <OfferCard key={offer.id} offer={offer} setPage={setPage} />
+                  ))}
+                  {visibleOffers.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open giveaways are showing right now.</div>}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-10 rounded-3xl bg-[#0D3B3B] text-white p-6 sm:p-8">
+          <div className="max-w-2xl">
+            <SectionLabel>More ways to show up</SectionLabel>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl">Help does not always mean money.</h2>
+            <p className="mt-2 text-white/70 text-sm sm:text-base">Offer a job, share a skill, mentor someone, or offer counselling through the same Giveaways system.</p>
+            <div className="mt-5 flex flex-wrap gap-2">
+              {[['offers','Giveaways'],['jobs','Jobs'],['mentorship','Mentorship'],['counselling','Counselling'],['celebrate','Connect & Celebrate']].map(([id,label]) => (
+                <button key={id} type="button" onClick={() => go(id)} className="rounded-full bg-white/10 border border-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">{label}</button>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
     </div>
   );
 }
@@ -4085,6 +4209,7 @@ function pageFromPath(pathname) {
   if (path === "/admin") return "admin";
   if (path === "/volunteer") return "volunteer";
   if (path === "/give") return "give";
+  if (path === "/for-you") return "for-you";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
   if (path === "/celebrate") return "celebrate";
@@ -4112,6 +4237,7 @@ function pathFromPage(page) {
   if (id.startsWith("member:")) return "/member/" + id.split(":")[1];
   const map = {
     home: "/",
+    "for-you": "/for-you",
     give: "/give",
     offers: "/offers",
     admin: "/admin",
@@ -4420,6 +4546,7 @@ useEffect(() => {
 
   const pages = {
     home: <HomePage setPage={setPage} userSession={userSession} />,
+    "for-you": <ForYouPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
@@ -4472,7 +4599,8 @@ useEffect(() => {
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      <LiveTicker />
+      {page !== "home" && <LiveTicker />}
+
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
