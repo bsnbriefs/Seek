@@ -4114,9 +4114,15 @@ function AccountUsernameForm({ onSaved } = {}) {
       e.preventDefault();
       setSaving(true); setHint("");
       try {
-        const saved = await updateMyUsername({ username, full_name: name, bio });
+        await updateMyUsername({ username, full_name: name, bio });
+        const refreshed = await getMyProfile();
+        if (refreshed) {
+          setUsername(refreshed.username || username);
+          setName(refreshed.full_name || name);
+          setBio(refreshed.bio || bio);
+          if (typeof onSaved === "function") onSaved(refreshed);
+        }
         setHint("Profile saved.");
-        if (typeof onSaved === "function") onSaved(saved);
       } catch (err) {
         setHint(err.message || "Could not save.");
       } finally { setSaving(false); }
