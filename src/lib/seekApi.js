@@ -1658,25 +1658,7 @@ export async function updateMyUsername({
       : null,
   };
 }
-      p_full_name: cleanName || null,
-      p_bio: cleanBio || null,
-    }),
-  });
-
-  const saved = Array.isArray(rows) ? rows[0] : rows;
-
-  if (!saved?.id) {
-    throw new Error("Your profile could not be saved.");
-  }
-
-  return {
-    ...saved,
-    avatar_url: saved.avatar_path
-      ? seekImageUrl(saved.avatar_path, 96)
-      : null,
-  };
-}
-
+      
 export async function getPublicMember(userId) {
   if (!userId) return null;
   const rows = await supabaseFetch(
