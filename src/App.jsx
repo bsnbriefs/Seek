@@ -3402,7 +3402,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           setMode("signin");
         } else {
           setUserSession(result);
-          const back = sessionStorage.getItem("seek_return") || "my-requests";
+          const back = sessionStorage.getItem("seek_return") || "home";
           sessionStorage.removeItem("seek_return");
           if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
           setPage(back);
@@ -3410,7 +3410,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
       } else {
         const session = await userSignIn(email, password);
         setUserSession(session);
-        const back = sessionStorage.getItem("seek_return") || "my-requests";
+        const back = sessionStorage.getItem("seek_return") || "home";
         sessionStorage.removeItem("seek_return");
         if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
         setPage(back);
@@ -3535,7 +3535,7 @@ function MySeekDashboard({ setPage, userSession }) {
 
         if (cancelled) return;
 
-        const mappedRequests = (requestRows || []).map(mapRequestRow);
+        const mappedRequests = (Array.isArray(requestRows) ? requestRows : []).map((row) => row && row.id ? mapRequestRow(row) : null).filter(Boolean);
         const mappedOffers = Array.isArray(offerRows) ? offerRows : [];
         setRequests(mappedRequests);
         setOffers(mappedOffers);
@@ -3788,7 +3788,7 @@ function MyRequestsPage({ setPage, userSession }) {
         setLoading(true);
         setError("");
         const rows = await listMyRequests();
-        if (!cancelled) setItems(rows.map(mapRequestRow));
+        if (!cancelled) setItems(Array.isArray(rows) ? rows.map(mapRequestRow) : []);
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load your requests.");
       } finally {
