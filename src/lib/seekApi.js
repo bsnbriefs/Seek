@@ -1520,3 +1520,18 @@ export async function listMyGifts() {
   if (!response.ok) return [];
   return (Array.isArray(data) ? data : []).filter((row) => String(row.status || "successful") === "successful");
 }
+
+
+export async function getPublicMember(userId) {
+  if (!userId) return null;
+  const row = await supabaseFetch(
+    "profiles?id=eq." + encodeURIComponent(userId) + "&select=id,full_name,avatar_url,avatar_path&limit=1"
+  ).catch(() => []);
+  const item = Array.isArray(row) ? row[0] : row;
+  if (!item) return { id: userId, name: "SEEK member", avatar_url: "" };
+  return {
+    id: item.id || userId,
+    name: item.full_name || "SEEK member",
+    avatar_url: item.avatar_url || "",
+  };
+}
