@@ -1503,3 +1503,20 @@ export async function listMyOfferInterestsSummary(offerIds) {
   if (!response.ok) return [];
   return Array.isArray(data) ? data : [];
 }
+
+
+export async function listMyGifts() {
+  const session = getUserSession();
+  if (!session?.access_token) return [];
+  const email = session.user?.email;
+  if (!email) return [];
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const response = await fetch(
+    url + "/rest/v1/donations?or=(email.eq." + encodeURIComponent(email) + ",donor_email.eq." + encodeURIComponent(email) + ")&select=id,amount,status,created_at,request_id,donor_name&order=created_at.desc&limit=40",
+    { headers: { apikey: key, Authorization: "Bearer " + session.access_token } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) return [];
+  return (Array.isArray(data) ? data : []).filter((row) => String(row.status || "successful") === "successful");
+}
