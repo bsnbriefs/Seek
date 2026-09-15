@@ -1315,28 +1315,23 @@ export async function uploadProfilePhoto(file) {
 }
 
 export async function getMyProfile() {
-  const session = getUserSession();
+  const session = (await refreshUserSession()) || getUserSession();
   if (!session?.access_token || !session?.user?.id) return null;
-  let row = null;
+
   try {
     const rpc = await callSeekProfileRpc("get_my_profile", {});
-    row = Array.isArray(rpc) ? rpc[0] : rpc;
+    const row = Array.isArray(rpc) ? rpc[0] : rpc;
+    if (!row) return null;
+
+    const mapped = {
+      ...row,
+      avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
+    };
+    if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
+    return mapped;
   } catch (_e) {
-    row = null;
+    return null;
   }
-  if (!row) {
-    const rows = await fetch(
-      `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path,username,full_name,bio&limit=1`,
-      {
-        headers: {
-          apikey: AUTH_KEY,
-          Authorization: `Bearer ${session.access_token}`,
-        },
-      }
-    ).then((r) => r.json()).catch(() => []);
-    row = Array.isArray(rows) ? rows[0] : rows;
-  }
-  if (!row) return null;
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
   const mapped = {
     ...row,
