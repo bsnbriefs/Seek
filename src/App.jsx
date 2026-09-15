@@ -2268,7 +2268,114 @@ function ChoiceChips({ value, onChange, options }) {
 
 const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
 
-function SeekHelpPage() {
+function SeekHelpPage({ setPage }) {
+  const [requests, setRequests] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [category, setCategory] = useState("All");
+  const [search, setSearch] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublishedRequests(60);
+        if (cancelled) return;
+        setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)));
+      } catch (err) {
+        if (!cancelled) setError(err?.message || "Could not load open requests.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const categories = [
+    "All",
+    ...Array.from(new Set(requests.map((r) => r.category).filter((v) => v && !CONNECT_CATS.includes(v))))
+  ];
+  const visible = requests.filter((req) => {
+    if (CONNECT_CATS.includes(req.category)) return false;
+    const categoryMatch = category === "All" || req.category === category;
+    const q = search.trim().toLowerCase();
+    const searchMatch = !q || [req.title, req.category, req.location, req.description, req.need].filter(Boolean).join(" ").toLowerCase().includes(q);
+    return categoryMatch && searchMatch;
+  });
+
+  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
+        <div className="max-w-3xl">
+          <SectionLabel>Seek Help</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
+            Someone in the SEEK community may be able to help.
+          </h1>
+          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65 max-w-2xl">
+            Browse requests that have been reviewed and published by SEEK. If you can help, open a request and choose how you would like to show up.
+          </p>
+          <div className="mt-6 flex flex-wrap gap-3">
+            <Button variant="primary" onClick={() => go("seek-help-form")}>I need help</Button>
+            <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
+          </div>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 mb-7">
+          <div className="flex flex-col sm:flex-row gap-3">
+            <div className="relative flex-1">
+              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0D3B3B]/40" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requests" className="w-full rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] py-3.5 pl-11 pr-4 text-sm text-[#0D3B3B] focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]" />
+            </div>
+          </div>
+          <div className="mt-4 flex gap-2 overflow-x-auto scrollbar-none pb-1">
+            {categories.map((item) => (
+              <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold border ${category === item ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}>{item}</button>
+            ))}
+          </div>
+        </div>
+
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <SectionLabel>Open requests</SectionLabel>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">People asking for help</h2>
+          </div>
+          <span className="text-sm text-[#0D3B3B]/45">{loading ? "Loading…" : `${visible.length} ${visible.length === 1 ? "request" : "requests"}`}</span>
+        </div>
+
+        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-sm text-[#0D3B3B]/55">Loading open requests…</div>}
+        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
+        {!loading && !error && visible.length > 0 && (
+          <div className="grid md:grid-cols-2 gap-5">
+            {visible.map((req) => (
+              <RequestCard key={req.id} req={req} onView={() => go(`request:${req.id}`)} onHelp={() => go(`request:${req.id}`)} />
+            ))}
+          </div>
+        )}
+        {!loading && !error && visible.length === 0 && (
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-10 text-center">
+            <h3 className="font-display font-bold text-xl text-[#0D3B3B]">No open requests match that.</h3>
+            <p className="mt-2 text-sm text-[#0D3B3B]/55">Try another category or search, or check back soon.</p>
+            <button type="button" onClick={() => { setCategory("All"); setSearch(""); }} className="mt-5 text-sm font-semibold text-[#1BAA9C]">Clear filters</button>
+          </div>
+        )}
+
+        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-7 sm:p-9 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+          <div>
+            <p className="font-display font-bold text-2xl">Need help yourself?</p>
+            <p className="mt-2 text-sm text-white/65 max-w-xl">Tell SEEK what you need. Requests are reviewed before they are published.</p>
+          </div>
+          <button type="button" onClick={() => go("seek-help-form")} className="shrink-0 rounded-full bg-[#1BAA9C] px-5 py-3 text-sm font-bold text-white hover:bg-[#159789]">Ask for help</button>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function SeekHelpRequestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
@@ -4279,6 +4386,7 @@ function pageFromPath(pathname) {
   if (path === "/for-you") return "for-you";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
+  if (path === "/seek-help/request") return "seek-help-form";
   if (path === "/celebrate") return "celebrate";
   if (path === "/about") return "about";
   if (path === "/organisations") return "organisations";
@@ -4309,6 +4417,7 @@ function pathFromPage(page) {
     offers: "/offers",
     admin: "/admin",
     "seek-help": "/seek-help",
+    "seek-help-form": "/seek-help/request",
     celebrate: "/celebrate",
     volunteer: "/volunteer",
     about: "/about",
@@ -4621,7 +4730,8 @@ useEffect(() => {
     counselling: <OffersPage setPage={setPage} />,
     more: <CelebratePage setPage={setPage} />,
     admin: <AdminPage />,
-    "seek-help": <SeekHelpPage />,
+    "seek-help": <SeekHelpPage setPage={setPage} />,
+    "seek-help-form": <SeekHelpRequestPage />,
     celebrate: <CelebratePage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
@@ -4656,7 +4766,7 @@ useEffect(() => {
   const memberId = isMemberPage ? page.split(":")[1] : null;
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
+  const gatedPages = ["seek-help-form", "celebrate", "my-requests", "my-seek"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
