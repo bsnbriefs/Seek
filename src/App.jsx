@@ -796,6 +796,7 @@ function FeatureStrip({ page, setPage }) {
                 {[
                   ["impact", "Impact"],
                   ["volunteer", "Volunteer"],
+                  ["organisations", "For organisations"],
                   ["about", "About SEEK"],
                 ].map(([id, label]) => (
                   <button
@@ -2370,6 +2371,35 @@ function VolunteerPage() {
 
 /* ---------------- About Page ---------------- */
 
+
+function OrganisationsPage({ setPage }) {
+  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+  const items = [
+    { t: "Sponsor a published request", d: "Choose a live Seek request and give toward it.", id: "give" },
+    { t: "Fund a BSN outreach", d: "Pad a Girl Child, school, hospital or food drive.", id: "give" },
+    { t: "Offer jobs or internships", d: "Post a role on Giveaways so people can apply.", id: "offers" },
+    { t: "Provide goods or services", d: "Stock, transport, training or professional time.", id: "offers" },
+    { t: "Volunteer as a team", d: "Put your staff on the volunteer list.", id: "volunteer" },
+  ];
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 pt-16 pb-16">
+        <SectionLabel>SEEK for organisations</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Companies, NGOs and churches can give through Seek.</h1>
+        <p className="mt-4 font-body text-[#0D3B3B]/65">This is not a second website. You use the same Give and Giveaways paths. Seek reviews what goes public.</p>
+        <div className="mt-8 grid gap-3">
+          {items.map((item) => (
+            <button key={item.t} type="button" onClick={() => go(item.id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left">
+              <p className="font-display font-bold text-[#0D3B3B]">{item.t}</p>
+              <p className="mt-1 text-sm text-[#0D3B3B]/60">{item.d}</p>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function AboutPage({ setPage }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   return (
@@ -2604,6 +2634,7 @@ function RequestPage({ requestId, setPage }) {
           </span>
           <UrgencyBadge level={request.urgency} />
           <VerificationBadge status={request.status} />
+          <span className="text-xs font-semibold text-[#0D3B3B]/50">{formatSeekStatus(request.status)}</span>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">
@@ -4037,6 +4068,7 @@ function pageFromPath(pathname) {
   if (path === "/seek-help") return "seek-help";
   if (path === "/celebrate") return "celebrate";
   if (path === "/about") return "about";
+  if (path === "/organisations") return "organisations";
   if (path === "/impact") return "impact";
   if (path.startsWith("/impact/")) return "impact:" + path.split("/")[2];
   if (path === "/privacy") return "privacy";
@@ -4064,6 +4096,7 @@ function pathFromPage(page) {
     celebrate: "/celebrate",
     volunteer: "/volunteer",
     about: "/about",
+    organisations: "/organisations",
     impact: "/impact",
     privacy: "/privacy",
     terms: "/terms",
@@ -4370,6 +4403,7 @@ useEffect(() => {
     celebrate: <CelebratePage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
+    organisations: <OrganisationsPage setPage={setPage} />,
     impact: <ImpactPage setPage={setPage} />,
     privacy: <LegalPage title="Privacy" setPage={setPage} />,
     terms: <LegalPage title="Terms" setPage={setPage} />,
