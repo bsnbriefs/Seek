@@ -2018,6 +2018,23 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [requestsError, setRequestsError] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [generalDonation, setGeneralDonation] = useState(false);
+  const [myGifts, setMyGifts] = useState([]);
+  const [giftsLoading, setGiftsLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const session = getUserSession();
+    if (!session?.access_token) { setMyGifts([]); return () => { cancelled = true; }; }
+    setGiftsLoading(true);
+    listMyGifts().then((rows) => {
+      if (!cancelled) setMyGifts(Array.isArray(rows) ? rows : []);
+    }).catch(() => {
+      if (!cancelled) setMyGifts([]);
+    }).finally(() => {
+      if (!cancelled) setGiftsLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -2101,10 +2118,37 @@ if (!cancelled) {
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
-        <SectionLabel>Give</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give to a person, or to BSN’s work.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
+        <div className="max-w-3xl">
+          <SectionLabel>Give</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give where it matters to you.</h1>
+          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Support a person whose request has been published, or support BSN Foundation work. If what you have to give is goods, a job, mentorship or counselling, head to Giveaways instead.</p>
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-2 gap-4">
+          <button type="button" onClick={() => document.getElementById("help-someone")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 sm:p-7 text-left hover:-translate-y-0.5 hover:shadow-md transition">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><HeartHandshake size={21}/></span>
+            <h2 className="mt-5 font-display font-bold text-2xl text-[#0D3B3B]">Help someone directly</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">Choose a published request and make a financial contribution through the existing secure Paystack flow.</p>
+            <span className="mt-4 inline-flex text-sm font-bold text-[#1BAA9C]">See open requests →</span>
+          </button>
+          <button type="button" onClick={() => document.getElementById("bsn-work")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-[#0D3B3B] p-6 sm:p-7 text-left text-white hover:-translate-y-0.5 hover:shadow-md transition">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><Heart size={21}/></span>
+            <h2 className="mt-5 font-display font-bold text-2xl">Support BSN Foundation work</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/65">Support an existing BSN outreach and help fund work beyond an individual SEEK request.</p>
+            <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
+          </button>
+        </div>
+
+        {getUserSession()?.access_token && (
+          <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your confirmed gifts stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
+              <div className="sm:text-right"><p className="text-xs text-[#0D3B3B]/45">Successful gifts</p><p className="font-display font-extrabold text-2xl text-[#0D3B3B]">{giftsLoading ? "—" : myGifts.length}</p></div>
+            </div>
+            {myGifts.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{myGifts.slice(0,3).map((g) => <span key={g.id} className="rounded-full bg-white border border-[#0D3B3B]/8 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B]/70">₦{Number(g.amount || 0).toLocaleString()}</span>)}</div>}
+          </div>
+        )}
       </section>
       {selectedRequest && (
         <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
@@ -2162,8 +2206,12 @@ if (!cancelled) {
         </div>
       </section>}
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
+      <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <div className="mb-4">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Help someone directly</p>
+          <h2 className="mt-1 font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
+          <p className="mt-1 text-sm text-[#0D3B3B]/55">Choose a published request to support. You can donate without creating an account.</p>
+        </div>
         {!selectedRequest && !generalDonation && (
           <button
             type="button"
@@ -2251,7 +2299,7 @@ if (!cancelled) {
         )}
       </section>
 
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
+      <section id="bsn-work" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
