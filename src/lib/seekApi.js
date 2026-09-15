@@ -1469,3 +1469,37 @@ export async function closeCelebrateInvite(requestId) {
     body: JSON.stringify({ p_request_id: requestId }),
   });
 }
+
+
+export async function listMyOffers() {
+  const session = getUserSession();
+  if (!session?.access_token) return [];
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const uid = session.user?.id;
+  if (!uid) return [];
+  const response = await fetch(
+    url + "/rest/v1/offers?created_by=eq." + encodeURIComponent(uid) + "&select=id,description,created_at,status,category,city,created_by&order=created_at.desc&limit=80",
+    { headers: { apikey: key, Authorization: "Bearer " + session.access_token } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) return [];
+  return Array.isArray(data) ? data : [];
+}
+
+export async function listMyOfferInterestsSummary(offerIds) {
+  const session = getUserSession();
+  if (!session?.access_token) return [];
+  const ids = (Array.isArray(offerIds) ? offerIds : []).filter(Boolean);
+  if (!ids.length) return [];
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const list = ids.map((id) => '"' + id + '"').join(",");
+  const response = await fetch(
+    url + "/rest/v1/offer_interest?offer_id=in.(" + list + ")&select=id,offer_id,name,email,status,created_at",
+    { headers: { apikey: key, Authorization: "Bearer " + session.access_token } }
+  );
+  const data = await response.json().catch(() => []);
+  if (!response.ok) return [];
+  return Array.isArray(data) ? data : [];
+}
