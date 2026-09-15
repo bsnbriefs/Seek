@@ -1560,8 +1560,10 @@ function OfferCard({ offer, setPage }) {
           Share
         </button>
       </div>
-      {!isOwner && <ReportContentForm targetType="offer" targetId={offer.id} label="Report this giveaway" />
-      <CommunityInteractions targetType="offer" targetId={offer.id} compact />}
+      {!isOwner && (
+        <ReportContentForm targetType="offer" targetId={offer.id} label="Report this giveaway" />
+      )}
+      <CommunityInteractions targetType="offer" targetId={offer.id} compact />
 
       {isOwner && ownerRows.length > 0 && (
         <div className="mt-4 rounded-xl bg-[#F4F1EA] p-3 space-y-2">
