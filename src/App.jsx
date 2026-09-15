@@ -3641,13 +3641,18 @@ function AccountUsernameForm({ onSaved } = {}) {
       e.preventDefault();
       setSaving(true); setHint("");
       try {
-        await updateMyUsername({ username, full_name: name, bio });
-        const refreshed = await getMyProfile();
+        const saved = await updateMyUsername({ username, full_name: name, bio });
+        const refreshed = saved || await getMyProfile();
         if (refreshed) {
-          setUsername(refreshed.username || username);
-          setName(refreshed.full_name || name);
-          setBio(refreshed.bio || bio);
-          if (typeof onSaved === "function") onSaved(refreshed);
+          const nextUsername = refreshed.username || username;
+          const nextName = refreshed.full_name || name;
+          const nextBio = refreshed.bio ?? bio;
+          setUsername(nextUsername);
+          setName(nextName);
+          setBio(nextBio);
+          if (typeof onSaved === "function") {
+            onSaved({ ...refreshed, username: nextUsername, full_name: nextName, bio: nextBio });
+          }
         }
         setHint("Profile saved.");
       } catch (err) {
@@ -4650,7 +4655,7 @@ function InstallSeekPrompt() {
   );
 }
 
-export default function App() {
+function AppContent() {
   useEffect(() => {
     document.documentElement.classList.remove("seek-dark");
     try { localStorage.removeItem("seek_theme"); } catch (_e) {}
@@ -4878,3 +4883,13 @@ useEffect(() => {
     </div>
   );
 }
+
+function App() {
+  return (
+    <ErrorBoundary>
+      <AppContent />
+    </ErrorBoundary>
+  );
+}
+
+export default App;
