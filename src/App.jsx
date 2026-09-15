@@ -31,7 +31,9 @@ import {
   initializeDonation,
   verifyDonation,
   listPublishedRequests,
-    getRequestEvidence,
+  getRequestEvidence,
+  listLiveSupportCases,
+  uploadRequestEvidence,
   listMatchedOfferRequestIds,
   mapRequestRow,
   getUserSession,
@@ -1841,13 +1843,15 @@ function GiveOfferForm() {
 
 function LiveSupportCard({ request, setPage }) {
   const [mediaIndex, setMediaIndex] = useState(0);
+  const [muted, setMuted] = useState(true);
   const media = Array.isArray(request.media) ? request.media : [];
   const current = media[mediaIndex] || null;
   const amountNeeded = Number(request.amountNeeded) || 0;
   const amountRaised = Number(request.amountRaised) || 0;
-  const progress = amountNeeded > 0
-    ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100))
-    : 0;
+  const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
+  const member = request.member || {};
+  const displayName = member.name || request.full_name || request.name || "SEEK member";
+  const username = member.username ? `@${member.username}` : "";
 
   const goToCase = () => {
     setPage(`request:${request.id}`);
@@ -1855,78 +1859,60 @@ function LiveSupportCard({ request, setPage }) {
     window.scrollTo(0, 0);
   };
 
+  const supportCase = () => {
+    try { sessionStorage.setItem("seek_help_request_id", request.id); } catch (_e) {}
+    setPage("give");
+    window.history.pushState({}, "", "/give");
+    window.scrollTo(0, 0);
+  };
+
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)] snap-start">
-      <div className="relative bg-[#101415] aspect-[4/5] sm:aspect-[4/4.7] overflow-hidden">
+    <article className="overflow-hidden rounded-[2rem] bg-black shadow-[0_18px_55px_rgba(13,59,59,0.18)] snap-start">
+      <div className="relative bg-[#101415] aspect-[9/14] sm:aspect-[4/5] overflow-hidden">
         {current?.media_kind === "video" ? (
-          <video
-            key={current.public_url}
-            src={current.public_url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            controls
-            preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
-            aria-label={request.title || "SEEK support case video"}
-          />
+          <video key={current.public_url} src={current.public_url} autoPlay muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={request.title || "SEEK support video"} />
         ) : current?.public_url ? (
-          <img
-            key={current.public_url}
-            src={current.public_url}
-            alt={request.title || "SEEK support case"}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
+          <img key={current.public_url} src={current.public_url} alt={request.title || "SEEK support case"} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
-            <div>
-              <HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" />
-              <p className="font-display text-xl font-bold">Support is needed</p>
-              <p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p>
-            </div>
+            <div><HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" /><p className="font-display text-xl font-bold">Support is needed</p><p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p></div>
           </div>
         )}
 
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-4 bg-gradient-to-b from-black/55 to-transparent">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0D3B3B]">Live Support</span>
-          {media.length > 1 && <span className="rounded-full bg-black/45 px-3 py-1 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
+        <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white">
+          <div className="flex items-center gap-3">
+            {member.avatar_url || request.avatarUrl || request.avatar_url ? <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
+            <div className="min-w-0 flex-1">
+              <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
+              <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
+            </div>
+            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">Live Support</span>
+          </div>
+        </div>
+
+        <div className="absolute right-3 bottom-24 flex flex-col gap-2">
+          {current?.media_kind === "video" && <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={() => setMuted((v) => !v)} className="h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>}
+          {media.length > 1 && <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
         </div>
 
         {media.length > 1 && (
           <>
-            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
-            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
+            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
+            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
           </>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/80 via-black/35 to-transparent text-white">
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
           <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
-          {request.description && <p className="mt-2 text-sm leading-5 text-white/80 line-clamp-3">{request.description}</p>}
+          {request.description && <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p>}
         </div>
       </div>
 
-      <div className="p-5 sm:p-6">
-        {amountNeeded > 0 ? (
-          <div>
-            <div className="flex items-end justify-between gap-3 text-sm">
-              <div>
-                <p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p>
-                <p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p>
-              </div>
-              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C] transition-all" style={{ width: `${progress}%` }} /></div>
-          </div>
-        ) : <p className="text-sm text-[#0D3B3B]/55">Open the case to see the kind of support needed.</p>}
-
-        <div className="mt-5 flex gap-2">
-          <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white hover:bg-[#123f3f]">Support this case</button>
-          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B] hover:border-[#1BAA9C]">View Case</button>
-        </div>
+      <div className="bg-white p-5 sm:p-6">
+        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
+        <CommunityInteractions targetType="request" targetId={request.id} compact />
+        <div className="mt-4 flex gap-2"><button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button><button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View Case</button></div>
       </div>
     </article>
   );
@@ -1935,6 +1921,7 @@ function LiveSupportCard({ request, setPage }) {
 function ForYouPage({ setPage }) {
   const [requests, setRequests] = useState([]);
   const [offers, setOffers] = useState([]);
+  const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
   const [tab, setTab] = useState("all");
@@ -1943,13 +1930,15 @@ function ForYouPage({ setPage }) {
     let cancelled = false;
     (async () => {
       try {
-        const [requestRows, offerRows] = await Promise.all([
+        const [requestRows, offerRows, liveRows] = await Promise.all([
           listPublishedRequests(8),
           listPublicOffers(),
+          listLiveSupportCases(12).catch(() => []),
         ]);
         if (cancelled) return;
         setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
         setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
+        setLiveCases((Array.isArray(liveRows) ? liveRows : []).filter((item) => Array.isArray(item.media) && item.media.length > 0));
       } catch (err) {
         if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
       } finally {
@@ -2026,6 +2015,26 @@ function ForYouPage({ setPage }) {
             </button>
           ))}
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-12">
+        <div className="max-w-2xl mb-6">
+          <SectionLabel>Live Support</SectionLabel>
+          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Real stories. Real needs. Real people.</h2>
+          <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#0D3B3B]/60">Approved photos and videos from public SEEK requests, so the community can see the story behind a need and choose how to show up.</p>
+        </div>
+        {liveCases.length > 0 ? (
+          <div className="mx-auto max-w-2xl space-y-7">
+            {liveCases.map((item) => <LiveSupportCard key={item.id} request={item} setPage={setPage} />)}
+          </div>
+        ) : (
+          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/8 p-7 sm:p-10 text-center">
+            <HandHeart size={34} className="mx-auto text-[#1BAA9C] mb-3" />
+            <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Live Support is getting ready.</h3>
+            <p className="mt-2 text-sm text-[#0D3B3B]/55 max-w-md mx-auto">When an approved public request has photo or video evidence, its story can appear here.</p>
+            <button type="button" onClick={() => go("seek-help")} className="mt-5 rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">Ask for help</button>
+          </div>
+        )}
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
@@ -4624,6 +4633,44 @@ function MySeekDashboard({ setPage, userSession }) {
 /* ---------------- My Requests Page ---------------- */
 
 
+function RequestEvidencePostForm({ requestId, onSaved }) {
+  const [files, setFiles] = useState([]);
+  const [caption, setCaption] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [message, setMessage] = useState("");
+  const [error, setError] = useState("");
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError(""); setMessage("");
+    if (!files.length) { setError("Choose at least one photo or video."); return; }
+    try {
+      setSaving(true);
+      if (caption.trim()) await postRequestPublicUpdate(requestId, caption.trim());
+      for (const file of files.slice(0, 5)) await uploadRequestEvidence(requestId, file);
+      setFiles([]); setCaption(""); setMessage("Your evidence was submitted for SEEK review. Once approved, it can appear in Live Support.");
+      onSaved?.();
+    } catch (err) {
+      setError(err?.message || "Could not upload your evidence.");
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <form onSubmit={submit} className="mt-5 rounded-2xl border border-[#1BAA9C]/15 bg-[#1BAA9C]/5 p-4 space-y-3">
+      <div>
+        <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">Share your evidence</p>
+        <p className="mt-1 text-sm text-[#0D3B3B]/65">Post a photo or short video showing your story or what support looks like. SEEK reviews media before it becomes public.</p>
+      </div>
+      <textarea value={caption} maxLength={280} rows={3} onChange={(e) => setCaption(e.target.value)} placeholder="Add a short caption or update (optional)" className="w-full rounded-xl border bg-white px-3 py-2 text-sm" />
+      <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime" onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 5))} className="block w-full text-sm" />
+      {files.length > 0 && <p className="text-xs text-[#0D3B3B]/50">{files.length} file{files.length === 1 ? "" : "s"} selected.</p>}
+      {message && <p className="text-sm text-[#168F84]">{message}</p>}
+      {error && <p className="text-sm text-red-600">{error}</p>}
+      <button type="submit" disabled={saving} className="rounded-full bg-[#0D3B3B] px-4 py-2.5 text-sm font-bold text-white">{saving ? "Uploading…" : "Submit evidence"}</button>
+    </form>
+  );
+}
+
 function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
   const [text, setText] = useState(existing || "");
   const [files, setFiles] = useState([]);
@@ -4885,6 +4932,9 @@ function MyRequestsPage({ setPage, userSession }) {
                   </button>
                 )}
               </div>
+              {["published", "partially_funded"].includes(req.status) && (
+                <RequestEvidencePostForm requestId={req.id} />
+              )}
               {req.status === "fulfilled" && (
                 <RequesterUpdateForm
                   requestId={req.id}
