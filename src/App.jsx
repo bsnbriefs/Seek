@@ -1702,21 +1702,82 @@ function ForYouPage({ setPage }) {
 
   const visibleRequests = tab === "give" ? [] : requests;
   const visibleOffers = tab === "help" ? [] : offers;
-
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+
+  const doors = [
+    {
+      id: "seek-help",
+      title: "I need help",
+      text: "Ask the community for practical or financial support.",
+      action: "Ask for help",
+    },
+    {
+      id: "give",
+      title: "I want to help",
+      text: "Support an open request or give directly through SEEK.",
+      action: "Help someone",
+    },
+    {
+      id: "offers",
+      title: "I have something to give",
+      text: "Share a giveaway, job, skill, mentorship or counselling offer.",
+      action: "Give something",
+    },
+    {
+      id: "celebrate",
+      title: "I want to connect",
+      text: "Meet the community through Celebrate & Connect — not dating.",
+      action: "Connect & celebrate",
+    },
+  ];
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-8">
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
         <div className="max-w-3xl">
           <SectionLabel>For You</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">What can you do today?</h1>
-          <p className="mt-4 font-body text-lg text-[#0D3B3B]/65 max-w-2xl">
-            See people who need help and people offering something useful. Choose where you want to show up.
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
+            Welcome to SEEK.
+          </h1>
+          <p className="mt-4 font-body text-lg sm:text-xl leading-relaxed text-[#0D3B3B]/68 max-w-2xl">
+            SEEK is about people helping people. You can ask for help, support someone,
+            share something useful, or connect with the community.
+          </p>
+          <p className="mt-3 font-body text-sm sm:text-base text-[#0D3B3B]/52 max-w-2xl">
+            There is no single way to show up. Start with what you need or what you have to give.
           </p>
         </div>
 
-        <div className="mt-8 flex gap-2 overflow-x-auto scrollbar-none pb-1">
+        <div className="mt-8 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl">
+          {doors.map((door) => (
+            <button
+              key={door.id}
+              type="button"
+              onClick={() => go(door.id)}
+              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-6 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-display font-bold text-xl text-[#0D3B3B]">{door.title}</h2>
+                  <p className="mt-2 font-body text-sm leading-relaxed text-[#0D3B3B]/60">{door.text}</p>
+                </div>
+                <ArrowRight size={18} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
+              </div>
+              <span className="mt-4 inline-flex text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <SectionLabel>What's happening on SEEK</SectionLabel>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See where you can show up today.</h2>
+          </div>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-7">
           {[
             ["all", "Everything"],
             ["help", "People who need help"],
@@ -1732,9 +1793,7 @@ function ForYouPage({ setPage }) {
             </button>
           ))}
         </div>
-      </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
         {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
         {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
 
@@ -1745,9 +1804,9 @@ function ForYouPage({ setPage }) {
                 <div className="flex items-end justify-between gap-3 mb-4">
                   <div>
                     <SectionLabel>Seek Help</SectionLabel>
-                    <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h2>
+                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h3>
                   </div>
-                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">Ask for help</button>
+                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
                 </div>
                 <div className="space-y-3">
                   {visibleRequests.slice(0, 4).map((req) => (
@@ -1755,7 +1814,6 @@ function ForYouPage({ setPage }) {
                   ))}
                   {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
                 </div>
-                {visibleRequests.length > 4 && <button type="button" onClick={() => go("give")} className="mt-4 text-sm font-semibold text-[#1BAA9C]">See more ways to help <ArrowRight size={14} className="inline" /></button>}
               </div>
             )}
 
@@ -1764,9 +1822,9 @@ function ForYouPage({ setPage }) {
                 <div className="flex items-end justify-between gap-3 mb-4">
                   <div>
                     <SectionLabel>Giveaways</SectionLabel>
-                    <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h2>
+                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h3>
                   </div>
-                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See giveaways</button>
+                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
                 </div>
                 <div className="space-y-3">
                   {visibleOffers.slice(0, 4).map((offer) => (
@@ -1779,17 +1837,18 @@ function ForYouPage({ setPage }) {
           </div>
         )}
 
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] text-white p-6 sm:p-8">
-          <div className="max-w-2xl">
-            <SectionLabel>More ways to show up</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl">Help does not always mean money.</h2>
-            <p className="mt-2 text-white/70 text-sm sm:text-base">Offer a job, share a skill, mentor someone, or offer counselling through the same Giveaways system.</p>
-            <div className="mt-5 flex flex-wrap gap-2">
-              {[['offers','Giveaways'],['jobs','Jobs'],['mentorship','Mentorship'],['counselling','Counselling'],['celebrate','Connect & Celebrate']].map(([id,label]) => (
-                <button key={id} type="button" onClick={() => go(id)} className="rounded-full bg-white/10 border border-white/15 px-4 py-2 text-sm font-semibold hover:bg-white/15">{label}</button>
-              ))}
-            </div>
-          </div>
+        <div className="mt-10 grid sm:grid-cols-3 gap-3">
+          {[
+            ["jobs", "Jobs", "Find opportunities shared through SEEK."],
+            ["mentorship", "Mentorship", "Offer or find guidance and experience."],
+            ["counselling", "Counselling", "Find people offering counselling support."],
+          ].map(([id, label, text]) => (
+            <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:border-[#1BAA9C]/45 transition">
+              <h3 className="font-display font-bold text-lg text-[#0D3B3B]">{label}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">{text}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore <ArrowRight size={14} /></span>
+            </button>
+          ))}
         </div>
       </section>
     </div>
