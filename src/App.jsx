@@ -92,7 +92,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User
 } from "lucide-react";
 
 /* ---------------------------------------------------------
