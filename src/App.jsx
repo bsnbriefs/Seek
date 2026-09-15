@@ -1340,34 +1340,6 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
-      {/* SEEK STORIES */}
-      {stories.length > 0 && (
-        <section className="bg-[#F4F1EA] py-16 sm:py-20">
-          <div className="mx-auto max-w-6xl px-5 sm:px-8">
-            <div className="flex items-end justify-between gap-4 mb-7">
-              <div>
-                <SectionLabel>SEEK Stories</SectionLabel>
-                <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">See the help, not just the ask.</h2>
-                <p className="mt-2 text-sm text-[#0D3B3B]/60 max-w-xl">When a need is met, requesters can share what happened. These stories help the community see the human outcome.</p>
-              </div>
-              <button type="button" onClick={() => go("impact")} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">All stories <ArrowRight size={15} /></button>
-            </div>
-            <div className="grid sm:grid-cols-3 gap-4">
-              {stories.map((story) => (
-                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden hover:-translate-y-0.5 hover:shadow-md transition">
-                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-24 bg-[#0D3B3B]/5" />}
-                  <div className="p-4">
-                    <p className="text-[11px] font-semibold uppercase tracking-wide text-[#1BAA9C]">Outcome story</p>
-                    <h3 className="mt-1 font-display font-bold text-lg text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</h3>
-                    <p className="mt-2 text-sm text-[#0D3B3B]/60 line-clamp-3">{story.story || "A requester shared what happened after receiving help."}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
-
       {/* PEOPLE WHO NEED HELP */}
       <section className="bg-white py-20">
         <div className="mx-auto max-w-6xl px-5 sm:px-8">
@@ -1842,10 +1814,10 @@ function GiveOfferForm() {
 
 
 function LiveSupportCard({ request, setPage }) {
-  const [mediaIndex, setMediaIndex] = useState(0);
   const [muted, setMuted] = useState(true);
-  const media = Array.isArray(request.media) ? request.media : [];
-  const current = media[mediaIndex] || null;
+  const media = (Array.isArray(request.media) ? request.media : [])
+    .filter((item) => item?.media_kind === "video" && item?.public_url);
+  const current = media[0] || null;
   const amountNeeded = Number(request.amountNeeded) || 0;
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
@@ -1867,80 +1839,108 @@ function LiveSupportCard({ request, setPage }) {
   };
 
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-black shadow-[0_18px_55px_rgba(13,59,59,0.18)] snap-start">
-      <div className="relative bg-[#101415] aspect-[9/14] sm:aspect-[4/5] overflow-hidden">
-        {current?.media_kind === "video" ? (
-          <video key={current.public_url} src={current.public_url} autoPlay muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={request.title || "SEEK support video"} />
-        ) : current?.public_url ? (
-          <img key={current.public_url} src={current.public_url} alt={request.title || "SEEK support case"} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
+    <article className="w-full max-w-[390px] mx-auto overflow-hidden rounded-[1.6rem] bg-white border border-[#0D3B3B]/10 shadow-[0_12px_35px_rgba(13,59,59,0.10)]">
+      <div className="relative aspect-[4/5] overflow-hidden bg-[#101415]">
+        {current ? (
+          <video
+            key={current.public_url}
+            src={current.public_url}
+            autoPlay
+            muted={muted}
+            loop
+            playsInline
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+            aria-label={request.title || "SEEK support video"}
+          />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
-            <div><HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" /><p className="font-display text-xl font-bold">Support is needed</p><p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p></div>
+            <div><HandHeart size={36} className="mx-auto mb-3 text-[#8DE3C5]" /><p className="font-display text-lg font-bold">Support is needed</p></div>
           </div>
         )}
 
-        <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white">
+        <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 to-transparent text-white">
           <div className="flex items-center gap-3">
-            {member.avatar_url || request.avatarUrl || request.avatar_url ? <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
+            {member.avatar_url || request.avatarUrl || request.avatar_url ? (
+              <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/80" />
+            ) : (
+              <div className="h-10 w-10 rounded-full bg-white/20 border-2 border-white/60" />
+            )}
             <div className="min-w-0 flex-1">
-              <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
+              <p className="font-display font-bold leading-tight truncate">{displayName}</p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
             </div>
-            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">Live Support</span>
+            <span className="rounded-full bg-black/40 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] backdrop-blur">SEEK</span>
           </div>
         </div>
 
-        <div className="absolute right-3 bottom-24 flex flex-col gap-2">
-          {current?.media_kind === "video" && <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={() => setMuted((v) => !v)} className="h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>}
-          {media.length > 1 && <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
-        </div>
-
-        {media.length > 1 && (
-          <>
-            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
-            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
-          </>
+        {current?.media_kind === "video" && (
+          <button
+            type="button"
+            aria-label={muted ? "Turn sound on" : "Mute video"}
+            onClick={() => setMuted((v) => !v)}
+            className="absolute right-3 bottom-3 h-10 w-10 rounded-full bg-black/55 text-white backdrop-blur"
+          >
+            {muted ? "🔇" : "🔊"}
+          </button>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
-          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
-          {request.description && <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p>}
+        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/90 via-black/45 to-transparent text-white">
+          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8DE3C5]">
+            {request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}
+          </p>
+          <h2 className="mt-1 font-display text-xl sm:text-2xl font-extrabold leading-tight line-clamp-2">
+            {request.title || "A SEEK community member needs support"}
+          </h2>
+          {request.description && (
+            <p className="mt-1.5 text-xs sm:text-sm leading-5 text-white/80 line-clamp-2">{request.description}</p>
+          )}
         </div>
       </div>
 
-      <div className="bg-white p-5 sm:p-6">
-        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
+      <div className="p-4 sm:p-5">
+        {amountNeeded > 0 && (
+          <div>
+            <div className="flex items-center justify-between gap-3 text-xs">
+              <span className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</span>
+              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
+            </div>
+            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#0D3B3B]/10">
+              <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} />
+            </div>
+          </div>
+        )}
         <CommunityInteractions targetType="request" targetId={request.id} compact />
-        <div className="mt-4 flex gap-2"><button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button><button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View Case</button></div>
+        <div className="mt-3 flex gap-2">
+          <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-xs font-bold text-white">Support</button>
+          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-xs font-bold text-[#0D3B3B]">View case</button>
+        </div>
       </div>
     </article>
   );
 }
 
 function ForYouPage({ setPage }) {
-  const [requests, setRequests] = useState([]);
-  const [offers, setOffers] = useState([]);
   const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [tab, setTab] = useState("all");
 
   useEffect(() => {
     let cancelled = false;
     (async () => {
       try {
-        const [requestRows, offerRows, liveRows] = await Promise.all([
-          listPublishedRequests(8),
-          listPublicOffers(),
-          listLiveSupportCases(12).catch(() => []),
-        ]);
+        const liveRows = await listLiveSupportCases(18);
         if (cancelled) return;
-        setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
-        setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
-        setLiveCases((Array.isArray(liveRows) ? liveRows : []).filter((item) => Array.isArray(item.media) && item.media.length > 0));
+        const videoCases = (Array.isArray(liveRows) ? liveRows : [])
+          .map((item) => ({
+            ...item,
+            media: (Array.isArray(item.media) ? item.media : [])
+              .filter((media) => media?.media_kind === "video" && media?.public_url),
+          }))
+          .filter((item) => item.media.length > 0);
+        setLiveCases(videoCases);
       } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
+        if (!cancelled) setError(err?.message || "Could not load SEEK videos.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -1948,8 +1948,6 @@ function ForYouPage({ setPage }) {
     return () => { cancelled = true; };
   }, []);
 
-  const visibleRequests = tab === "give" ? [] : requests;
-  const visibleOffers = tab === "help" ? [] : offers;
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
 
   const doors = [
@@ -1974,150 +1972,85 @@ function ForYouPage({ setPage }) {
     {
       id: "celebrate",
       title: "I want to connect",
-      text: "Meet the community through Celebrate & Connect — not dating.",
+      text: "Connect with the community through Celebrate & Connect — not dating.",
       action: "Connect & celebrate",
     },
   ];
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 sm:pt-14 pb-9">
+        <div className="max-w-2xl">
           <SectionLabel>For You</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
-            Welcome to SEEK.
+          <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-[#0D3B3B] leading-tight">
+            Start with people.
           </h1>
-          <p className="mt-4 font-body text-lg sm:text-xl leading-relaxed text-[#0D3B3B]/68 max-w-2xl">
-            SEEK is about people helping people. You can ask for help, support someone,
-            share something useful, or connect with the community.
-          </p>
-          <p className="mt-3 font-body text-sm sm:text-base text-[#0D3B3B]/52 max-w-2xl">
-            There is no single way to show up. Start with what you need or what you have to give.
+          <p className="mt-3 font-body text-base sm:text-lg leading-relaxed text-[#0D3B3B]/65 max-w-xl">
+            See a little of what is happening on SEEK, then choose how you want to show up.
           </p>
         </div>
 
-        <div className="mt-8 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl">
+        <div className="mt-7 grid sm:grid-cols-2 gap-3 max-w-3xl">
           {doors.map((door) => (
             <button
               key={door.id}
               type="button"
               onClick={() => go(door.id)}
-              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-6 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
+              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
             >
               <div className="flex items-start justify-between gap-4">
                 <div>
-                  <h2 className="font-display font-bold text-xl text-[#0D3B3B]">{door.title}</h2>
-                  <p className="mt-2 font-body text-sm leading-relaxed text-[#0D3B3B]/60">{door.text}</p>
+                  <h2 className="font-display font-bold text-lg sm:text-xl text-[#0D3B3B]">{door.title}</h2>
+                  <p className="mt-1.5 font-body text-sm leading-relaxed text-[#0D3B3B]/58">{door.text}</p>
                 </div>
-                <ArrowRight size={18} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
+                <ArrowRight size={17} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
               </div>
-              <span className="mt-4 inline-flex text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
+              <span className="mt-3 inline-flex text-xs sm:text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
             </button>
           ))}
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-12">
-        <div className="max-w-2xl mb-6">
-          <SectionLabel>Live Support</SectionLabel>
-          <h2 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Real stories. Real needs. Real people.</h2>
-          <p className="mt-3 text-sm sm:text-base leading-relaxed text-[#0D3B3B]/60">Approved photos and videos from public SEEK requests, so the community can see the story behind a need and choose how to show up.</p>
-        </div>
-        {liveCases.length > 0 ? (
-          <div className="mx-auto max-w-2xl space-y-7">
-            {liveCases.map((item) => <LiveSupportCard key={item.id} request={item} setPage={setPage} />)}
-          </div>
-        ) : (
-          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/8 p-7 sm:p-10 text-center">
-            <HandHeart size={34} className="mx-auto text-[#1BAA9C] mb-3" />
-            <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Live Support is getting ready.</h3>
-            <p className="mt-2 text-sm text-[#0D3B3B]/55 max-w-md mx-auto">When an approved public request has photo or video evidence, its story can appear here.</p>
-            <button type="button" onClick={() => go("seek-help")} className="mt-5 rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">Ask for help</button>
-          </div>
-        )}
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
         <div className="flex items-end justify-between gap-4 mb-5">
           <div>
-            <SectionLabel>What's happening on SEEK</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See where you can show up today.</h2>
+            <SectionLabel>SEEK Videos</SectionLabel>
+            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-[#0D3B3B]">
+              Real people. Real stories.
+            </h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/58 max-w-xl">
+              Short video updates shared by SEEK members and approved for the community.
+            </p>
           </div>
         </div>
 
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-7">
-          {[
-            ["all", "Everything"],
-            ["help", "People who need help"],
-            ["give", "People offering help"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTab(id)}
-              className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold border transition ${tab === id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
-        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
-
-        {!loading && !error && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {tab !== "give" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Seek Help</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h3>
-                  </div>
-                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleRequests.slice(0, 4).map((req) => (
-                    <RequestCard key={req.id} req={req} onHelp={() => go(`request:${req.id}`)} onView={() => go(`request:${req.id}`)} />
-                  ))}
-                  {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
-                </div>
-              </div>
-            )}
-
-            {tab !== "help" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Giveaways</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h3>
-                  </div>
-                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleOffers.slice(0, 4).map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} setPage={setPage} />
-                  ))}
-                  {visibleOffers.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open giveaways are showing right now.</div>}
-                </div>
-              </div>
-            )}
+        {loading && (
+          <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">
+            Loading SEEK videos…
           </div>
         )}
 
-        <div className="mt-10 grid sm:grid-cols-3 gap-3">
-          {[
-            ["jobs", "Jobs", "Find opportunities shared through SEEK."],
-            ["mentorship", "Mentorship", "Offer or find guidance and experience."],
-            ["counselling", "Counselling", "Find people offering counselling support."],
-          ].map(([id, label, text]) => (
-            <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:border-[#1BAA9C]/45 transition">
-              <h3 className="font-display font-bold text-lg text-[#0D3B3B]">{label}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">{text}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore <ArrowRight size={14} /></span>
-            </button>
-          ))}
-        </div>
+        {error && (
+          <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>
+        )}
+
+        {!loading && !error && liveCases.length === 0 && (
+          <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-7 sm:p-9 text-center">
+            <HandHeart size={32} className="mx-auto text-[#1BAA9C] mb-3" />
+            <h3 className="font-display font-bold text-lg text-[#0D3B3B]">No videos yet.</h3>
+            <p className="mt-2 text-sm text-[#0D3B3B]/55 max-w-md mx-auto">
+              Approved video updates will appear here as members share their stories.
+            </p>
+          </div>
+        )}
+
+        {!loading && !error && liveCases.length > 0 && (
+          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
+            {liveCases.map((item) => (
+              <LiveSupportCard key={item.id} request={item} setPage={setPage} />
+            ))}
+          </div>
+        )}
       </section>
     </div>
   );
