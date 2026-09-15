@@ -3807,30 +3807,50 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   const [message, setMessage] = useState("");
 
   if (userSession?.access_token) {
+    const displayName = userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
     return (
-      <div style={{ background: C.bg }} className="min-h-[60vh]">
-        <section className="mx-auto max-w-md px-5 py-16 text-center">
-          <SectionLabel>Account</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B] mb-2">
-            Keep track of your requests.
-          </h1>
-          <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
-            <span className="inline-flex items-center justify-center gap-1.5">{userSession.user?.email} <SeekVerifiedCheck /></span>
-            <AccountAvatar />
-          </p>
-          <div className="flex flex-col gap-3">
-            <Button variant="primary" onClick={() => setPage("my-requests")}>
-              My requests <ArrowRight size={16} />
-            </Button>
-            <Button
-              variant="secondary"
-              onClick={() => {
-                userLogout();
-                setUserSession(null);
-              }}
-            >
-              Sign out
-            </Button>
+      <div style={{ background: C.bg }} className="min-h-[70vh]">
+        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
+          <div className="rounded-[2rem] bg-[#0D3B3B] text-white p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="shrink-0"><AccountAvatar /></div>
+              <div className="min-w-0">
+                <SectionLabel>Profile</SectionLabel>
+                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName}</h1>
+                <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+              </div>
+            </div>
+            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
+              <strong className="text-white">Your public profile</strong><br />
+              Only your name and photo are intended to be public. Your gifts, requests, notifications and contact details stay private to your account.
+            </div>
+          </div>
+
+          <div className="mt-5 grid sm:grid-cols-2 gap-3">
+            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your space</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My SEEK</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/55">See your requests, giving, giveaways, interests and activity.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open My SEEK <ArrowRight size={15} /></span>
+            </button>
+            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Requests</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My requests</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/55">View and manage requests connected to your account.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">View requests <ArrowRight size={15} /></span>
+            </button>
+            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Updates</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Notifications</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/55">Keep up with responses, interests and other SEEK updates.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open notifications <ArrowRight size={15} /></span>
+            </button>
+            <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Account</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Keep your account secure</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/55">Your email is used for account activity and private updates.</p>
+              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]">Sign out</button>
+            </div>
           </div>
         </section>
       </div>
