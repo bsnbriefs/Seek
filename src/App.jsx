@@ -508,43 +508,100 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
       await addCommunityComment({ targetType, targetId, body: comment });
       setComment("");
       setOpen(true);
-      setNotice("Your comment is now part of the community conversation.");
+      setNotice("Comment posted.");
       await load();
     } catch (err) {
       setError(err?.message || "Could not post your comment.");
     } finally { setSaving(false); }
   };
 
+  const totalReactions = COMMUNITY_REACTIONS.reduce(
+    (sum, reaction) => sum + Number(data.reactions?.[reaction.key] || 0),
+    0
+  );
+  const commentsCount = data.comments?.length || 0;
+
   return (
-    <div className={`${compact ? "mt-4" : "mt-7"} rounded-2xl border border-[#0D3B3B]/8 bg-[#F8FAF8] p-4 sm:p-5`}>
-      <div className="flex flex-wrap items-center gap-2">
-        {COMMUNITY_REACTIONS.map((reaction) => (
-          <button key={reaction.key} type="button" onClick={() => react(reaction.key)} className="rounded-full bg-white border border-[#0D3B3B]/10 px-3 py-2 text-sm font-semibold text-[#0D3B3B] hover:border-[#1BAA9C] transition">
-            <span className="mr-1.5" aria-hidden="true">{reaction.emoji}</span>{reaction.label} <span className="ml-1 text-[#0D3B3B]/45">{data.reactions?.[reaction.key] || 0}</span>
-          </button>
-        ))}
-        <button type="button" onClick={() => setOpen((v) => !v)} className="rounded-full px-3 py-2 text-sm font-semibold text-[#1BAA9C] hover:bg-white">
-          {open ? "Hide comments" : `Comments${data.comments?.length ? ` (${data.comments.length})` : ""}`}
+    <div className={`${compact ? "mt-4" : "mt-6"}`}>
+      <div className="flex items-center gap-2 border-t border-[#0D3B3B]/8 pt-3">
+        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scrollbar-hide">
+          {COMMUNITY_REACTIONS.map((reaction) => {
+            const count = Number(data.reactions?.[reaction.key] || 0);
+            return (
+              <button
+                key={reaction.key}
+                type="button"
+                onClick={() => react(reaction.key)}
+                aria-label={`${reaction.label}${count ? `, ${count}` : ""}`}
+                title={reaction.label}
+                className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-[#0D3B3B]/65 transition hover:bg-[#F2F7F5] hover:text-[#0D3B3B] active:scale-95"
+              >
+                <span aria-hidden="true" className="text-[17px] leading-none">{reaction.emoji}</span>
+                {count > 0 && <span className="text-xs font-semibold tabular-nums">{count}</span>}
+              </button>
+            );
+          })}
+        </div>
+
+        <button
+          type="button"
+          onClick={() => { setOpen((v) => !v); setError(""); setNotice(""); }}
+          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${open ? "bg-[#E8F6F2] text-[#168F84]" : "text-[#0D3B3B]/55 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
+        >
+          {commentsCount > 0 ? `Comments ${commentsCount}` : "Comment"}
         </button>
       </div>
-      {(error || notice) && <p className={`mt-3 text-xs ${error ? "text-red-600" : "text-[#1BAA9C]"}`}>{error || notice}</p>}
+
+      {(error || notice) && (
+        <p className={`mt-2 px-1 text-xs ${error ? "text-red-600" : "text-[#168F84]"}`}>
+          {error || notice}
+        </p>
+      )}
+
       {open && (
-        <div className="mt-4 space-y-4">
-          <form onSubmit={submitComment} className="flex flex-col sm:flex-row gap-2">
-            <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} rows={2} placeholder="Leave a kind, useful comment…" className="flex-1 rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2.5 text-sm text-[#0D3B3B] focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]" />
-            <button disabled={saving || !comment.trim()} type="submit" className="self-end sm:self-stretch rounded-xl bg-[#0D3B3B] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-40">{saving ? "Posting…" : "Comment"}</button>
+        <div className="mt-3 rounded-2xl bg-[#F7FAF8] p-3 sm:p-4">
+          <form onSubmit={submitComment} className="flex gap-2">
+            <textarea
+              value={comment}
+              onChange={(e) => setComment(e.target.value)}
+              maxLength={500}
+              rows={2}
+              placeholder="Write something kind or useful…"
+              className="min-w-0 flex-1 resize-none rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2.5 text-sm text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]/30"
+            />
+            <button
+              disabled={saving || !comment.trim()}
+              type="submit"
+              className="self-end rounded-xl bg-[#0D3B3B] px-3.5 py-2.5 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-35"
+            >
+              {saving ? "…" : "Post"}
+            </button>
           </form>
-          <p className="text-[11px] text-[#0D3B3B]/45">Keep it kind and useful. Do not post private contact details, payment credentials or sensitive information.</p>
-          {data.comments?.length ? data.comments.map((item) => (
-            <div key={item.id} className="rounded-xl bg-white border border-[#0D3B3B]/8 p-3">
-              <div className="flex items-center gap-2">
-                {item.avatar_url ? <img src={item.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" /> : <div className="h-7 w-7 rounded-full bg-[#0D3B3B]/10" />}
-                <span className="text-sm font-semibold text-[#0D3B3B]">{item.display_name || "SEEK member"}</span>
-                <span className="text-[11px] text-[#0D3B3B]/35">{daysPosted(item.created_at)}</span>
-              </div>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/75 whitespace-pre-wrap">{item.body}</p>
+
+          <p className="mt-2 px-1 text-[10px] leading-relaxed text-[#0D3B3B]/40">
+            Keep it kind. Never post private contact details, payment credentials or sensitive information.
+          </p>
+
+          {commentsCount > 0 ? (
+            <div className="mt-3 space-y-2">
+              {data.comments.map((item) => (
+                <div key={item.id} className="rounded-xl bg-white px-3 py-2.5">
+                  <div className="flex items-center gap-2">
+                    {item.avatar_url ? (
+                      <img src={item.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
+                    ) : (
+                      <div className="h-6 w-6 rounded-full bg-[#DDEBE7]" />
+                    )}
+                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "SEEK member"}</span>
+                    <span className="text-[10px] text-[#0D3B3B]/30">{daysPosted(item.created_at)}</span>
+                  </div>
+                  <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[#0D3B3B]/72 whitespace-pre-wrap">{item.body}</p>
+                </div>
+              ))}
             </div>
-          )) : <p className="text-sm text-[#0D3B3B]/50">No comments yet. Be the first to encourage this person.</p>}
+          ) : (
+            <p className="mt-3 px-1 text-xs text-[#0D3B3B]/45">Be the first to encourage this person.</p>
+          )}
         </div>
       )}
     </div>
