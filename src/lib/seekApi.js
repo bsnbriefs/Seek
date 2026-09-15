@@ -1535,42 +1535,91 @@ export function validateSeekUsername(value) {
   return { ok: true, username };
 }
 
+async function callSeekProfileRpc(functionName, body) {
+  const session = (await refreshUserSession()) || getUserSession();
+
+  if (!session?.access_token || !session?.user?.id) {
+    throw new Error("Your SEEK session has expired. Please sign in again.");
+  }
+
+  const response = await fetch(
+    `${AUTH_URL}/rest/v1/rpc/${functionName}`,
+    {
+      method: "POST",
+      headers: {
+        apikey: AUTH_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify(body),
+    }
+  );
+
+  const data = await response.json().catch(() => null);
+
+  if (!response.ok) {
+    throw new Error(
+      data?.message ||
+      data?.hint ||
+      data?.details ||
+      data?.error_description ||
+      "SEEK could not update your profile."
+    );
+  }
+
+  return data;
+}
+
 export async function checkUsernameAvailable(value, currentUserId) {
   const checked = validateSeekUsername(value);
   if (!checked.ok) return checked;
 
-  const rows = await supabaseFetch("rpc/check_seek_username", {
-    method: "POST",
-    body: JSON.stringify({
-      p_username: checked.username,
-    }),
-  }).catch(() => null);
+  try {
+    const available = await callSeekProfileRpc(
+      "check_seek_username",
+      {
+        p_username: checked.username,
+      }
+    );
 
-  const available = Array.isArray(rows) ? rows[0] : rows;
+    const result = Array.isArray(available)
+      ? available[0]
+      : available;
 
-  if (
-    available === false ||
-    available === "false" ||
-    available?.available === false
-  ) {
+    if (
+      result === false ||
+      result === "false" ||
+      result?.available === false
+    ) {
+      return {
+        ok: false,
+        username: checked.username,
+        error: "That username is taken.",
+      };
+    }
+
+    return {
+      ok: true,
+      username: checked.username,
+    };
+  } catch (error) {
     return {
       ok: false,
       username: checked.username,
-      error: "That username is taken.",
+      error: error?.message || "Could not check username availability.",
     };
   }
-
-  return {
-    ok: true,
-    username: checked.username,
-  };
 }
 
-export async function updateMyUsername({ username, full_name, bio }) {
-  const session = getUserSession();
+export async function updateMyUsername({
+  username,
+  full_name,
+  bio,
+}) {
+  const session = (await refreshUserSession()) || getUserSession();
 
   if (!session?.access_token || !session?.user?.id) {
-    throw new Error("Sign in to edit your profile.");
+    throw new Error("Your SEEK session has expired. Please sign in again.");
   }
 
   const checked = validateSeekUsername(username);
@@ -1579,13 +1628,36 @@ export async function updateMyUsername({ username, full_name, bio }) {
     throw new Error(checked.error);
   }
 
-  const cleanName = String(full_name || "").trim().slice(0, 80);
-  const cleanBio = String(bio || "").trim().slice(0, 280);
+  const cleanName = String(full_name || "")
+    .trim()
+    .slice(0, 80);
 
-  const rows = await supabaseFetch("rpc/save_my_profile", {
-    method: "POST",
-    body: JSON.stringify({
+  const cleanBio = String(bio || "")
+    .trim()
+    .slice(0, 280);
+
+  const saved = await callSeekProfileRpc(
+    "save_my_profile",
+    {
       p_username: checked.username,
+      p_full_name: cleanName || null,
+      p_bio: cleanBio || null,
+    }
+  );
+
+  const profile = Array.isArray(saved) ? saved[0] : saved;
+
+  if (!profile?.id) {
+    throw new Error("Your profile could not be saved.");
+  }
+
+  return {
+    ...profile,
+    avatar_url: profile.avatar_path
+      ? seekImageUrl(profile.avatar_path, 96)
+      : null,
+  };
+}
       p_full_name: cleanName || null,
       p_bio: cleanBio || null,
     }),
