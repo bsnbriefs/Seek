@@ -1658,7 +1658,46 @@ export async function updateMyUsername({
       : null,
   };
 }
-      
+      export async function listLiveSupportCases(limit = 12) {
+  if (!supabaseConfigured) return [];
+
+  const safeLimit = Math.min(
+    Math.max(Number(limit) || 12, 1),
+    30
+  );
+
+  const rows = await listPublishedRequests(safeLimit);
+
+  const requests = (Array.isArray(rows) ? rows : [])
+    .map(mapRequestRow)
+    .filter(
+      (row) =>
+        row?.id &&
+        String(row.status || "").toLowerCase() !== "fulfilled"
+    )
+    .slice(0, safeLimit);
+
+  const cases = await Promise.all(
+    requests.map(async (request) => {
+      let media = [];
+
+      try {
+        media = await getRequestEvidence(request.id);
+      } catch (_error) {
+        media = [];
+      }
+
+      return {
+        ...request,
+        media: (Array.isArray(media) ? media : []).filter(
+          (item) => item?.public_url
+        ),
+      };
+    })
+  );
+
+  return cases;
+}
 export async function getPublicMember(userId) {
   if (!userId) return null;
   const rows = await supabaseFetch(
