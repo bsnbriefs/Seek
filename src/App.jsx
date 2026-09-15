@@ -44,6 +44,8 @@ import {
   listMyGifts,
   refreshUserSession,
   getPublicMember,
+  updateMyUsername,
+  checkUsernameAvailable,
   listMyOfferInterestsSummary,
   deleteRejectedRequest,
   postRequestPublicUpdate,
@@ -62,8 +64,6 @@ import {
   updateCelebrateRsvpStatus,
   closeCelebrateInvite,
   getMyProfile,
-  saveMyProfile,
-  checkSeekUsernameAvailability,
   getCachedAvatarUrl,
   cacheAvatarUrl,
   listAppreciationStories,
@@ -84,8 +84,6 @@ import {
 import {
   listMyNotifications,
 } from "./lib/notificationApi";
-import { listCommunityInteractions, addCommunityReaction, addCommunityComment } from "./lib/communityApi";
-import { getSeekViewCount, recordSeekView } from "./lib/viewApi";
 
 import {
   adminLogin,
@@ -99,7 +97,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -470,147 +468,6 @@ function CategoryCard({ cat, onClick }) {
   );
 }
 
-
-const COMMUNITY_REACTIONS = [
-  { key: "support", emoji: "❤️", label: "Support" },
-  { key: "encourage", emoji: "🙏", label: "Encourage" },
-  { key: "celebrate", emoji: "🎉", label: "Celebrate" },
-  { key: "help", emoji: "🤝", label: "I can help" },
-];
-
-function CommunityInteractions({ targetType, targetId, compact = false }) {
-  const [data, setData] = useState({ comments: [], reactions: {}, userReaction: null });
-  const [open, setOpen] = useState(false);
-  const [comment, setComment] = useState("");
-  const [saving, setSaving] = useState(false);
-  const [error, setError] = useState("");
-  const [notice, setNotice] = useState("");
-
-  const load = async () => {
-    if (!targetType || !targetId) return;
-    const next = await listCommunityInteractions(targetType, targetId);
-    setData(next || { comments: [], reactions: {}, userReaction: null });
-  };
-
-  useEffect(() => { load(); }, [targetType, targetId]);
-
-  const react = async (reactionType) => {
-    setError(""); setNotice("");
-    try {
-      await addCommunityReaction({ targetType, targetId, reactionType });
-      await load();
-    } catch (err) {
-      setError(err?.message || "Please sign in to react.");
-    }
-  };
-
-  const submitComment = async (e) => {
-    e.preventDefault();
-    setError(""); setNotice(""); setSaving(true);
-    try {
-      await addCommunityComment({ targetType, targetId, body: comment });
-      setComment("");
-      setOpen(true);
-      setNotice("Comment posted.");
-      await load();
-    } catch (err) {
-      setError(err?.message || "Could not post your comment.");
-    } finally { setSaving(false); }
-  };
-
-  const totalReactions = COMMUNITY_REACTIONS.reduce(
-    (sum, reaction) => sum + Number(data.reactions?.[reaction.key] || 0),
-    0
-  );
-  const commentsCount = data.comments?.length || 0;
-
-  return (
-    <div className={`${compact ? "mt-4" : "mt-6"}`}>
-      <div className="flex items-center gap-2 border-t border-[#0D3B3B]/8 pt-3">
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scrollbar-hide">
-          {COMMUNITY_REACTIONS.map((reaction) => {
-            const count = Number(data.reactions?.[reaction.key] || 0);
-            return (
-              <button
-                key={reaction.key}
-                type="button"
-                onClick={() => react(reaction.key)}
-                aria-label={`${reaction.label}${count ? `, ${count}` : ""}`}
-                title={reaction.label}
-                className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm transition active:scale-95 ${data.userReaction === reaction.key ? "bg-[#E8F6F2] text-[#168F84] ring-1 ring-[#168F84]/20" : "text-[#0D3B3B]/65 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
-              >
-                <span aria-hidden="true" className="text-[17px] leading-none">{reaction.emoji}</span>
-                {count > 0 && <span className="text-xs font-semibold tabular-nums">{count}</span>}
-              </button>
-            );
-          })}
-        </div>
-
-        <button
-          type="button"
-          onClick={() => { setOpen((v) => !v); setError(""); setNotice(""); }}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${open ? "bg-[#E8F6F2] text-[#168F84]" : "text-[#0D3B3B]/55 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
-        >
-          {commentsCount > 0 ? `Comments ${commentsCount}` : "Comment"}
-        </button>
-      </div>
-
-      {(error || notice) && (
-        <p className={`mt-2 px-1 text-xs ${error ? "text-red-600" : "text-[#168F84]"}`}>
-          {error || notice}
-        </p>
-      )}
-
-      {open && (
-        <div className="mt-3 rounded-2xl bg-[#F7FAF8] p-3 sm:p-4">
-          <form onSubmit={submitComment} className="flex gap-2">
-            <textarea
-              value={comment}
-              onChange={(e) => setComment(e.target.value)}
-              maxLength={500}
-              rows={2}
-              placeholder="Write something kind or useful…"
-              className="min-w-0 flex-1 resize-none rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2.5 text-sm text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]/30"
-            />
-            <button
-              disabled={saving || !comment.trim()}
-              type="submit"
-              className="self-end rounded-xl bg-[#0D3B3B] px-3.5 py-2.5 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-35"
-            >
-              {saving ? "…" : "Post"}
-            </button>
-          </form>
-
-          <p className="mt-2 px-1 text-[10px] leading-relaxed text-[#0D3B3B]/40">
-            Keep it kind. Never post private contact details, payment credentials or sensitive information.
-          </p>
-
-          {commentsCount > 0 ? (
-            <div className="mt-3 space-y-2">
-              {data.comments.map((item) => (
-                <div key={item.id} className="rounded-xl bg-white px-3 py-2.5">
-                  <div className="flex items-center gap-2">
-                    {item.avatar_url ? (
-                      <img src={item.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
-                    ) : (
-                      <div className="h-6 w-6 rounded-full bg-[#DDEBE7]" />
-                    )}
-                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "SEEK member"}</span>
-                    <span className="text-[10px] text-[#0D3B3B]/30">{daysPosted(item.created_at)}</span>
-                  </div>
-                  <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[#0D3B3B]/72 whitespace-pre-wrap">{item.body}</p>
-                </div>
-              ))}
-            </div>
-          ) : (
-            <p className="mt-3 px-1 text-xs text-[#0D3B3B]/45">Be the first to encourage this person.</p>
-          )}
-        </div>
-      )}
-    </div>
-  );
-}
-
 function RequestCard({ req, onHelp, onView }) {
   return (
     <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
@@ -889,15 +746,16 @@ function ThemeToggle() {
 
 function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
-  let currentOfferFilter = "";
-  try { currentOfferFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
-  const moreActive = ["volunteer", "about", "impact", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
+  const moreActive = ["volunteer", "about", "impact"].includes(page);
   const items = [
-    { id: "for-you", label: "For You" },
+    { id: "home", label: "For You" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
     { id: "celebrate", label: "Connect & Celebrate" },
+    { id: "jobs", label: "Jobs", filter: "job" },
+    { id: "mentorship", label: "Mentorship", filter: "mentorship" },
+    { id: "counselling", label: "Counselling", filter: "counselling" },
   ];
   const go = (item) => {
     if (item.filter) {
@@ -941,24 +799,15 @@ function FeatureStrip({ page, setPage }) {
             {moreOpen && (
               <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-xl z-20">
                 {[
-                  ["jobs", "Jobs", "job"],
-                  ["mentorship", "Mentorship", "mentorship"],
-                  ["counselling", "Counselling", "counselling"],
                   ["impact", "Impact"],
                   ["volunteer", "Volunteer"],
                   ["organisations", "For organisations"],
                   ["about", "About SEEK"],
-                ].map(([id, label, filter]) => (
+                ].map(([id, label]) => (
                   <button
                     key={id}
                     type="button"
-                    onClick={() => {
-                      if (filter) { try { sessionStorage.setItem("seek_offer_filter", filter); } catch (_e) {} }
-                      else { try { sessionStorage.removeItem("seek_offer_filter"); } catch (_e) {} }
-                      setMoreOpen(false);
-                      setPage(filter ? "offers" : id);
-                      window.scrollTo(0, 0);
-                    }}
+                    onClick={() => { setMoreOpen(false); setPage(id); window.scrollTo(0, 0); }}
                     className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]"
                   >
                     {label}
@@ -1523,7 +1372,6 @@ function OfferCard({ offer, setPage }) {
   const [open, setOpen] = useState(false);
   const [ownerRows, setOwnerRows] = useState([]);
   const [interestCount, setInterestCount] = useState(Number(offer.interest_count || 0));
-  const [viewCount, setViewCount] = useState(Number(offer.view_count || 0));
   const [closed, setClosed] = useState(String(offer.status || "").toLowerCase() === "closed");
   const session = getUserSession();
   const isOwner = Boolean(session?.user?.id && offer.created_by && session.user.id === offer.created_by);
@@ -1532,11 +1380,6 @@ function OfferCard({ offer, setPage }) {
     if (!isOwner) return;
     listMyOfferInterests(offer.id).then(setOwnerRows).catch(() => setOwnerRows([]));
   }, [isOwner, offer.id]);
-  useEffect(() => {
-    let cancelled = false;
-    recordSeekView("offer", offer.id).then((count) => { if (!cancelled) setViewCount(Number(count || 0)); });
-    return () => { cancelled = true; };
-  }, [offer.id]);
   const [media, setMedia] = useState(offer.media || []);
   const [apply, setApply] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -1578,10 +1421,7 @@ function OfferCard({ offer, setPage }) {
             </p>
           )}
           <p className="mt-1 font-body text-[#0D3B3B] leading-relaxed">{offer.description}</p>
-          <div className="mt-2 flex items-center gap-3 text-xs text-[#0D3B3B]/45">
-            <span>{daysPosted(offer.created_at)}</span>
-            <span className="inline-flex items-center gap-1"><Eye size={13} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
-          </div>
+          <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
           {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#0D3B3B]">Posted by Admin</p>}
         </div>
       </div>
@@ -1629,10 +1469,6 @@ function OfferCard({ offer, setPage }) {
           Share
         </button>
       </div>
-      {!isOwner && (
-        <ReportContentForm targetType="offer" targetId={offer.id} label="Report this giveaway" />
-      )}
-      <CommunityInteractions targetType="offer" targetId={offer.id} compact />
 
       {isOwner && ownerRows.length > 0 && (
         <div className="mt-4 rounded-xl bg-[#F4F1EA] p-3 space-y-2">
@@ -1838,204 +1674,23 @@ function GiveOfferForm() {
   );
 }
 
-
-function ForYouPage({ setPage }) {
-  const [requests, setRequests] = useState([]);
-  const [offers, setOffers] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [tab, setTab] = useState("all");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const [requestRows, offerRows] = await Promise.all([
-          listPublishedRequests(8),
-          listPublicOffers(),
-        ]);
-        if (cancelled) return;
-        setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
-        setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const visibleRequests = tab === "give" ? [] : requests;
-  const visibleOffers = tab === "help" ? [] : offers;
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-
-  const doors = [
-    {
-      id: "seek-help",
-      title: "I need help",
-      text: "Ask the community for practical or financial support.",
-      action: "Ask for help",
-    },
-    {
-      id: "give",
-      title: "I want to help",
-      text: "Support an open request or give directly through SEEK.",
-      action: "Help someone",
-    },
-    {
-      id: "offers",
-      title: "I have something to give",
-      text: "Share a giveaway, job, skill, mentorship or counselling offer.",
-      action: "Give something",
-    },
-    {
-      id: "celebrate",
-      title: "I want to connect",
-      text: "Meet the community through Celebrate & Connect — not dating.",
-      action: "Connect & celebrate",
-    },
-  ];
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
-          <SectionLabel>For You</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
-            Welcome to SEEK.
-          </h1>
-          <p className="mt-4 font-body text-lg sm:text-xl leading-relaxed text-[#0D3B3B]/68 max-w-2xl">
-            SEEK is about people helping people. You can ask for help, support someone,
-            share something useful, or connect with the community.
-          </p>
-          <p className="mt-3 font-body text-sm sm:text-base text-[#0D3B3B]/52 max-w-2xl">
-            There is no single way to show up. Start with what you need or what you have to give.
-          </p>
-        </div>
-
-        <div className="mt-8 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl">
-          {doors.map((door) => (
-            <button
-              key={door.id}
-              type="button"
-              onClick={() => go(door.id)}
-              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-6 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-display font-bold text-xl text-[#0D3B3B]">{door.title}</h2>
-                  <p className="mt-2 font-body text-sm leading-relaxed text-[#0D3B3B]/60">{door.text}</p>
-                </div>
-                <ArrowRight size={18} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
-              </div>
-              <span className="mt-4 inline-flex text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
-            </button>
-          ))}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
-        <div className="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <SectionLabel>What's happening on SEEK</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See where you can show up today.</h2>
-          </div>
-        </div>
-
-        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-7">
-          {[
-            ["all", "Everything"],
-            ["help", "People who need help"],
-            ["give", "People offering help"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setTab(id)}
-              className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold border transition ${tab === id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-
-        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
-        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
-
-        {!loading && !error && (
-          <div className="grid lg:grid-cols-2 gap-8">
-            {tab !== "give" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Seek Help</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h3>
-                  </div>
-                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleRequests.slice(0, 4).map((req) => (
-                    <RequestCard key={req.id} req={req} onHelp={() => go(`request:${req.id}`)} onView={() => go(`request:${req.id}`)} />
-                  ))}
-                  {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
-                </div>
-              </div>
-            )}
-
-            {tab !== "help" && (
-              <div>
-                <div className="flex items-end justify-between gap-3 mb-4">
-                  <div>
-                    <SectionLabel>Giveaways</SectionLabel>
-                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h3>
-                  </div>
-                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-                </div>
-                <div className="space-y-3">
-                  {visibleOffers.slice(0, 4).map((offer) => (
-                    <OfferCard key={offer.id} offer={offer} setPage={setPage} />
-                  ))}
-                  {visibleOffers.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open giveaways are showing right now.</div>}
-                </div>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div className="mt-10 grid sm:grid-cols-3 gap-3">
-          {[
-            ["jobs", "Jobs", "Find opportunities shared through SEEK."],
-            ["mentorship", "Mentorship", "Offer or find guidance and experience."],
-            ["counselling", "Counselling", "Find people offering counselling support."],
-          ].map(([id, label, text]) => (
-            <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:border-[#1BAA9C]/45 transition">
-              <h3 className="font-display font-bold text-lg text-[#0D3B3B]">{label}</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">{text}</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore <ArrowRight size={14} /></span>
-            </button>
-          ))}
-        </div>
-      </section>
-    </div>
-  );
-}
-
 function OffersPage({ setPage }) {
   const [offers, setOffers] = useState([]);
   const [offerFilter, setOfferFilter] = useState(() => {
-    try { return sessionStorage.getItem("seek_offer_filter") || "all"; } catch (_e) { return "all"; }
+    try { return sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) { return ""; }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [q, setQ] = useState("");
-
+  const [statusFilter, setStatusFilter] = useState("all");
   useEffect(() => {
     let cancelled = false;
+    let donorTick;
     (async () => {
       try {
         const rows = await listPublicOffers();
-        if (!cancelled) setOffers(Array.isArray(rows) ? rows : []);
+        if (!cancelled) setOffers(rows);
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load giveaways.");
       } finally {
@@ -2044,100 +1699,55 @@ function OffersPage({ setPage }) {
     })();
     return () => { cancelled = true; };
   }, []);
-
-  const typeOf = (offer) => {
-    const value = String(offer?.category || "").trim().toLowerCase();
-    if (value.includes("job")) return "job";
-    if (value.includes("mentor")) return "mentorship";
-    if (value.includes("counsel")) return "counselling";
-    return "goods";
-  };
-
-  const filteredOffers = offers.filter((offer) => {
-    const type = typeOf(offer);
-    const matchesType = offerFilter === "all" || type === offerFilter;
-    const haystack = [offer.description, offer.category, offer.city].filter(Boolean).join(" ").toLowerCase();
-    return matchesType && (!q.trim() || haystack.includes(q.trim().toLowerCase()));
-  });
-
-  const tabs = [
-    ["all", "All"],
-    ["goods", "Goods"],
-    ["job", "Jobs"],
-    ["mentorship", "Mentorship"],
-    ["counselling", "Counselling"],
-  ];
-
-  const selectFilter = (value) => {
-    setOfferFilter(value);
-    try { sessionStorage.setItem("seek_offer_filter", value === "all" ? "" : value); } catch (_e) {}
-  };
-
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-14 pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-          <div className="max-w-2xl">
-            <SectionLabel>Giveaways</SectionLabel>
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Have something useful to offer?</h1>
-            <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">
-              Share goods, opportunities, skills or your time. Someone in the SEEK community may need exactly what you can give.
-            </p>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
+        <SectionLabel>Offers</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{offerFilter === "job" ? "Jobs" : offerFilter === "mentorship" ? "Mentorship" : offerFilter === "counselling" ? "Counselling" : "Giveaways"}</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
+          {offerFilter === "job" ? "Open roles people have posted on Seek. Indicate interest to apply." : offerFilter === "mentorship" ? "People offering guidance. Indicate interest to be introduced." : offerFilter === "counselling" ? "People offering counselling support. Indicate interest to be introduced." : "Food, time, goods, skills people are ready to give. Seek keeps details private until there is a fit."}
+        </p>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
+        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading giveaways…</p>}
+        {error && <p className="font-body text-sm text-red-600">{error}</p>}
+        {!loading && !error && offers.length === 0 && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">Nothing open here yet. Use Post a giveaway to add one.</p>
+        )}
+        {!loading && !error && offers.length > 0 && offers.filter((o) => offerFilter && String(o.category || "").toLowerCase() !== offerFilter.toLowerCase()).length === offers.length && (
+          <p className="font-body text-sm text-[#0D3B3B]/50">No {offerFilter} posts yet. Post a giveaway and choose that type.</p>
+        )}
+        {offers.filter((o) => !offerFilter || String(o.category || "").toLowerCase() === offerFilter.toLowerCase()).map((offer) => (
+          <OfferCard offer={offer} setPage={setPage} />
+        ))}
+        <div className="pt-8">
+          <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
+          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-left">
+            {[
+              { icon: Wallet, label: "Money", id: "money" },
+              { icon: Utensils, label: "Food", id: "food" },
+              { icon: Shirt, label: "Clothing", id: "clothing" },
+              { icon: Package, label: "Items", id: "items" },
+              { icon: HeartHandshake, label: "Time / skills", id: "time" },
+              { icon: HomeIcon, label: "Shelter / space", id: "shelter" },
+            ].map((item) => {
+              const Icon = item.icon;
+              const active = offerFilter === item.id;
+              return (
+                <button key={item.label} type="button" onClick={() => setOfferFilter(active ? "" : item.id)} className={"rounded-2xl bg-white border p-4 text-left " + (active ? "border-[#1BAA9C]" : "border-[#0D3B3B]/8")}>
+                  <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white mb-2" style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>
+                    <Icon size={18} />
+                  </span>
+                  <p className="font-display font-semibold text-sm text-[#0D3B3B]">{item.label}</p>
+                </button>
+              );
+            })}
           </div>
+        </div>
+        <div className="text-center pt-6">
           <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
         </div>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5">
-          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
-              {tabs.map(([value, label]) => {
-                const active = offerFilter === value;
-                return (
-                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[#1BAA9C] text-white" : "bg-[#F2F5F3] text-[#0D3B3B]/70 hover:bg-[#E7EFEC]")}>
-                    {label}
-                  </button>
-                );
-              })}
-            </div>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[#0D3B3B]/10 bg-[#F8FAF9] px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]" />
-          </div>
-        </div>
-
-        <div className="mt-6 flex items-center justify-between gap-3">
-          <div>
-            <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
-            <p className="mt-1 text-sm text-[#0D3B3B]/50">Published giveaways from the SEEK community.</p>
-          </div>
-          {!loading && <span className="text-sm font-semibold text-[#0D3B3B]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
-        </div>
-
-        <div className="mt-4 space-y-4">
-          {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/50">Loading giveaways…</div>}
-          {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-600">{error}</div>}
-          {!loading && !error && filteredOffers.length === 0 && (
-            <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
-              <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">There are no published giveaways matching this filter right now. You can be the first to offer something useful.</p>
-              <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Post a giveaway</button>
-            </div>
-          )}
-          {!loading && !error && filteredOffers.map((offer) => (
-            <OfferCard key={offer.id} offer={offer} setPage={setPage} />
-          ))}
-        </div>
-
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-6 sm:p-8 text-white">
-          <div className="max-w-2xl">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8DE0D5]">Give in your own way</p>
-            <h2 className="mt-2 font-display font-extrabold text-2xl">Goods, jobs, mentorship or counselling</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">These are all part of Giveaways. Choose the type that best describes what you can offer, and SEEK will review it before it goes public.</p>
-          </div>
-          <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Offer something</button>
-        </div>
-
-        <div id="make-offer" className="pt-12 text-left">
+        <div id="make-offer" className="pt-10 text-left">
           <GiveOfferForm />
         </div>
       </section>
@@ -2176,23 +1786,6 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [requestsError, setRequestsError] = useState("");
   const [selectedRequest, setSelectedRequest] = useState(null);
   const [generalDonation, setGeneralDonation] = useState(false);
-  const [myGifts, setMyGifts] = useState([]);
-  const [giftsLoading, setGiftsLoading] = useState(false);
-
-  useEffect(() => {
-    let cancelled = false;
-    const session = getUserSession();
-    if (!session?.access_token) { setMyGifts([]); return () => { cancelled = true; }; }
-    setGiftsLoading(true);
-    listMyGifts().then((rows) => {
-      if (!cancelled) setMyGifts(Array.isArray(rows) ? rows : []);
-    }).catch(() => {
-      if (!cancelled) setMyGifts([]);
-    }).finally(() => {
-      if (!cancelled) setGiftsLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -2276,37 +1869,10 @@ if (!cancelled) {
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
-          <SectionLabel>Give</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give where it matters to you.</h1>
-          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Support a person whose request has been published, or support BSN Foundation work. If what you have to give is goods, a job, mentorship or counselling, head to Giveaways instead.</p>
-        </div>
-
-        <div className="mt-8 grid md:grid-cols-2 gap-4">
-          <button type="button" onClick={() => document.getElementById("help-someone")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 sm:p-7 text-left hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><HeartHandshake size={21}/></span>
-            <h2 className="mt-5 font-display font-bold text-2xl text-[#0D3B3B]">Help someone directly</h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">Choose a published request and make a financial contribution through the existing secure Paystack flow.</p>
-            <span className="mt-4 inline-flex text-sm font-bold text-[#1BAA9C]">See open requests →</span>
-          </button>
-          <button type="button" onClick={() => document.getElementById("bsn-work")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-[#0D3B3B] p-6 sm:p-7 text-left text-white hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><HeartHandshake size={21}/></span>
-            <h2 className="mt-5 font-display font-bold text-2xl">Support BSN Foundation work</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">Support an existing BSN outreach and help fund work beyond an individual SEEK request.</p>
-            <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
-          </button>
-        </div>
-
-        {getUserSession()?.access_token && (
-          <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
-            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your confirmed gifts stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
-              <div className="sm:text-right"><p className="text-xs text-[#0D3B3B]/45">Successful gifts</p><p className="font-display font-extrabold text-2xl text-[#0D3B3B]">{giftsLoading ? "—" : myGifts.length}</p></div>
-            </div>
-            {myGifts.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{myGifts.slice(0,3).map((g) => <span key={g.id} className="rounded-full bg-white border border-[#0D3B3B]/8 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B]/70">₦{Number(g.amount || 0).toLocaleString()}</span>)}</div>}
-          </div>
-        )}
+      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 pb-14 text-center">
+        <SectionLabel>Give</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give to a person, or to BSN’s work.</h1>
+        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
       </section>
       {selectedRequest && (
         <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
@@ -2364,12 +1930,8 @@ if (!cancelled) {
         </div>
       </section>}
 
-      <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="mb-4">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Help someone directly</p>
-          <h2 className="mt-1 font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55">Choose a published request to support. You can donate without creating an account.</p>
-        </div>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Open requests</h2>
         {!selectedRequest && !generalDonation && (
           <button
             type="button"
@@ -2457,7 +2019,7 @@ if (!cancelled) {
         )}
       </section>
 
-      <section id="bsn-work" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
         <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
         <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
@@ -2517,114 +2079,7 @@ function ChoiceChips({ value, onChange, options }) {
 
 const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
 
-function SeekHelpPage({ setPage }) {
-  const [requests, setRequests] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-  const [category, setCategory] = useState("All");
-  const [search, setSearch] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    (async () => {
-      try {
-        const rows = await listPublishedRequests(60);
-        if (cancelled) return;
-        setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)));
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load open requests.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
-    return () => { cancelled = true; };
-  }, []);
-
-  const categories = [
-    "All",
-    ...Array.from(new Set(requests.map((r) => r.category).filter((v) => v && !CONNECT_CATS.includes(v))))
-  ];
-  const visible = requests.filter((req) => {
-    if (CONNECT_CATS.includes(req.category)) return false;
-    const categoryMatch = category === "All" || req.category === category;
-    const q = search.trim().toLowerCase();
-    const searchMatch = !q || [req.title, req.category, req.location, req.description, req.need].filter(Boolean).join(" ").toLowerCase().includes(q);
-    return categoryMatch && searchMatch;
-  });
-
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
-        <div className="max-w-3xl">
-          <SectionLabel>Seek Help</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
-            Someone in the SEEK community may be able to help.
-          </h1>
-          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65 max-w-2xl">
-            Browse requests that have been reviewed and published by SEEK. If you can help, open a request and choose how you would like to show up.
-          </p>
-          <div className="mt-6 flex flex-wrap gap-3">
-            <Button variant="primary" onClick={() => go("seek-help-form")}>I need help</Button>
-            <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
-          </div>
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 mb-7">
-          <div className="flex flex-col sm:flex-row gap-3">
-            <div className="relative flex-1">
-              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0D3B3B]/40" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requests" className="w-full rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] py-3.5 pl-11 pr-4 text-sm text-[#0D3B3B] focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]" />
-            </div>
-          </div>
-          <div className="mt-4 flex gap-2 overflow-x-auto scrollbar-none pb-1">
-            {categories.map((item) => (
-              <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold border ${category === item ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}>{item}</button>
-            ))}
-          </div>
-        </div>
-
-        <div className="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <SectionLabel>Open requests</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">People asking for help</h2>
-          </div>
-          <span className="text-sm text-[#0D3B3B]/45">{loading ? "Loading…" : `${visible.length} ${visible.length === 1 ? "request" : "requests"}`}</span>
-        </div>
-
-        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-sm text-[#0D3B3B]/55">Loading open requests…</div>}
-        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
-        {!loading && !error && visible.length > 0 && (
-          <div className="grid md:grid-cols-2 gap-5">
-            {visible.map((req) => (
-              <RequestCard key={req.id} req={req} onView={() => go(`request:${req.id}`)} onHelp={() => go(`request:${req.id}`)} />
-            ))}
-          </div>
-        )}
-        {!loading && !error && visible.length === 0 && (
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-10 text-center">
-            <h3 className="font-display font-bold text-xl text-[#0D3B3B]">No open requests match that.</h3>
-            <p className="mt-2 text-sm text-[#0D3B3B]/55">Try another category or search, or check back soon.</p>
-            <button type="button" onClick={() => { setCategory("All"); setSearch(""); }} className="mt-5 text-sm font-semibold text-[#1BAA9C]">Clear filters</button>
-          </div>
-        )}
-
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-7 sm:p-9 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
-          <div>
-            <p className="font-display font-bold text-2xl">Need help yourself?</p>
-            <p className="mt-2 text-sm text-white/65 max-w-xl">Tell SEEK what you need. Requests are reviewed before they are published.</p>
-          </div>
-          <button type="button" onClick={() => go("seek-help-form")} className="shrink-0 rounded-full bg-[#1BAA9C] px-5 py-3 text-sm font-bold text-white hover:bg-[#159789]">Ask for help</button>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function SeekHelpRequestPage() {
+function SeekHelpPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
@@ -2745,80 +2200,6 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
 
 function CelebratePage({ setPage }) {
-  const [list, setList] = useState([]);
-  useEffect(() => {
-    let cancelled = false;
-    listPublishedRequests(48)
-      .then((rows) => {
-        const items = (rows || []).map(mapRequestRow).filter((r) => CONNECT_CATS.includes(r.category));
-        if (!cancelled) setList(items);
-      })
-      .catch(() => {});
-    return () => { cancelled = true; };
-  }, []);
-
-  const go = (id) => { setPage && setPage(id); window.scrollTo(0, 0); };
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-14 sm:pt-20 pb-10 text-center">
-        <SectionLabel>Connect & Celebrate</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Good things are worth celebrating.</h1>
-        <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[#0D3B3B]/65">
-          SEEK brings people together around birthdays, graduations, milestones and moments that matter. Connect with the community and celebrate someone — this is about human connection, not dating or fundraising.
-        </p>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-12">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <button type="button" onClick={() => go("celebrate-request")} className="rounded-3xl bg-[#0D3B3B] p-6 text-left text-white hover:shadow-lg transition">
-            <HeartHandshake size={22} className="text-[#63C167]" />
-            <h2 className="mt-4 font-display font-bold text-xl">I want to connect</h2>
-            <p className="mt-2 text-sm leading-6 text-white/65">Share a genuine invitation for company around a meaningful moment.</p>
-          </button>
-          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
-            <Users size={22} className="text-[#1BAA9C]" />
-            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">I want to join</h2>
-            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">See published invitations and find a safe community moment to join.</p>
-          </button>
-          <button type="button" onClick={() => go("impact")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
-            <Sparkles size={22} className="text-[#1BAA9C]" />
-            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">Celebrate what happened</h2>
-            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Explore real community stories and outcomes shared through SEEK.</p>
-          </button>
-        </div>
-      </section>
-
-      <section id="celebrate-invitations" className="bg-white py-14">
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
-            <div>
-              <SectionLabel>Community moments</SectionLabel>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">Open invitations</h2>
-            </div>
-            <button type="button" onClick={() => go("celebrate-request")} className="text-sm font-bold text-[#1BAA9C]">Create an invitation →</button>
-          </div>
-          <div className="grid gap-4 md:grid-cols-2">
-            {list.slice(0, 6).map((req) => (
-              <RequestCard key={req.id} req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} />
-            ))}
-          </div>
-          {!list.length && <div className="rounded-3xl border border-[#0D3B3B]/8 bg-[#F7FAF8] p-8 text-center"><p className="font-display font-bold text-[#0D3B3B]">No published invitations yet.</p><p className="mt-2 text-sm text-[#0D3B3B]/55">Be the first to share a genuine community moment.</p></div>}
-        </div>
-      </section>
-
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 py-14 text-center">
-        <div className="rounded-3xl bg-[#0D3B3B] p-8 sm:p-10 text-white">
-          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#63C167]">A simple boundary</p>
-          <h2 className="mt-3 font-display font-bold text-2xl">Connect with care.</h2>
-          <p className="mt-3 text-sm leading-6 text-white/65">SEEK is not a dating app. Do not share your home address. Meet in public places and use your judgment when connecting with someone new.</p>
-        </div>
-      </section>
-    </div>
-  );
-}
-
-function CelebrateRequestPage({ setPage }) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -3001,48 +2382,17 @@ function OrganisationsPage({ setPage }) {
 
 function MemberPage({ memberId, setPage }) {
   const [member, setMember] = useState(null);
-  const [loading, setLoading] = useState(true);
   useEffect(() => {
-    let cancelled = false;
-    setLoading(true);
-    getPublicMember(memberId).then((row) => {
-      if (!cancelled) setMember(row);
-    }).catch(() => {
-      if (!cancelled) setMember(null);
-    }).finally(() => {
-      if (!cancelled) setLoading(false);
-    });
-    return () => { cancelled = true; };
+    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "SEEK member" }));
   }, [memberId]);
-
-  if (loading) {
-    return <div className="mx-auto max-w-lg px-5 py-20 text-center text-sm text-[#0D3B3B]/50">Loading profile…</div>;
-  }
-  if (!member) {
-    return (
-      <div className="mx-auto max-w-lg px-5 py-20 text-center">
-        <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />
-        <h1 className="mt-5 font-display font-extrabold text-2xl text-[#0D3B3B]">Profile not found</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/60">This SEEK username may not exist or may have been changed.</p>
-        <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm font-semibold" onClick={() => setPage("home")}>Back to SEEK</button>
-      </div>
-    );
-  }
-
-  const name = member.name || member.full_name || member.username || "SEEK member";
   return (
-    <div style={{ background: C.bg }} className="min-h-[70vh]">
-      <section className="mx-auto max-w-lg px-5 py-14 sm:py-20 text-center">
-        {member.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-24 w-24 rounded-full object-cover border-4 border-white shadow-sm" /> : <div className="mx-auto h-24 w-24 rounded-full bg-[#0D3B3B]/10 flex items-center justify-center text-2xl font-display font-bold text-[#0D3B3B]/35">{String(name).charAt(0).toUpperCase()}</div>}
-        <div className="mt-5 flex items-center justify-center gap-2">
-          <h1 className="font-display font-extrabold text-2xl sm:text-3xl text-[#0D3B3B]">{name}</h1>
-          <VerifiedBadge />
-        </div>
-        <p className="mt-1 text-sm font-semibold text-[#1BAA9C]">@{member.username || memberId}</p>
-        {member.bio && <p className="mt-4 text-sm leading-6 text-[#0D3B3B]/65">{member.bio}</p>}
-        <p className="mt-5 text-xs text-[#0D3B3B]/45">Public SEEK profile</p>
-        <button type="button" className="mt-6 rounded-full border border-[#0D3B3B]/12 px-5 py-2.5 text-sm font-semibold text-[#0D3B3B]" onClick={() => setPage("home")}>Back to SEEK</button>
-      </section>
+    <div className="mx-auto max-w-lg px-5 py-16 text-center">
+      {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
+      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "SEEK member"} <VerifiedBadge /></h1>
+      {member?.username ? <p className="mt-1 font-semibold text-[#1BAA9C]">@{member.username}</p> : null}
+      {member?.bio ? <p className="mt-3 text-sm text-[#0D3B3B]/70">{member.bio}</p> : null}
+      <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name, photo and username. Email and gifts stay private.</p>
+      <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm" onClick={() => setPage("home")}>Back</button>
     </div>
   );
 }
@@ -3156,7 +2506,6 @@ function RequestPage({ requestId, setPage }) {
     const [donors, setDonors] = useState([]);
     const [showAllDonors, setShowAllDonors] = useState(false);
     const [hostRsvps, setHostRsvps] = useState([]);
-  const [viewCount, setViewCount] = useState(0);
   useEffect(() => {
     if (request?.title) document.title = request.title + " · Seek";
     return () => { document.title = "Seek"; };
@@ -3191,7 +2540,6 @@ function RequestPage({ requestId, setPage }) {
     setRequest(null);
   } else {
     setRequest(matched);
-    recordSeekView("request", matched.id).then((count) => { if (!cancelled) setViewCount(Number(count || 0)); });
 
     listMatchedOfferRequestIds()
       .then((ids) => { if (!cancelled) setHelped((ids || []).includes(matched.id)); })
@@ -3326,10 +2674,9 @@ function RequestPage({ requestId, setPage }) {
             WhatsApp
           </a>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-[#0D3B3B]/60 font-body mb-6">
-          <span className="inline-flex items-center gap-1.5"><MapPin size={16} /> {request.location}</span>
-          <span className="inline-flex items-center gap-1.5"><Eye size={15} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
-        </div>
+        <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-6">
+          <MapPin size={16} /> {request.location}
+        </p>
 
         <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-8 shadow-sm">
           <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
@@ -3475,7 +2822,6 @@ function RequestPage({ requestId, setPage }) {
             <RequesterUpdateForm requestId={request.id} existing={request.publicUpdate} existingMedia={request.appreciationUrl} onSaved={(text) => setRequest((prev) => prev ? { ...prev, publicUpdate: text } : prev)} />
           )}
           <ReportRequestForm requestId={request.id} />
-          <CommunityInteractions targetType="request" targetId={request.id} />
 
           <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
             {request.status === "fulfilled" ? (
@@ -3619,91 +2965,6 @@ function ReportRequestForm({ requestId }) {
           >
             {loading ? "Sending…" : "Submit report"}
           </button>
-        </form>
-      )}
-    </div>
-  );
-}
-
-
-function ReportContentForm({ targetType, targetId, label = "Report this content" }) {
-  const [open, setOpen] = useState(false);
-  const [reason, setReason] = useState("inappropriate");
-  const [details, setDetails] = useState("");
-  const [email, setEmail] = useState("");
-  const [sent, setSent] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-
-  if (sent) {
-    return <p className="mt-3 text-xs font-semibold text-[#1BAA9C]">Thanks. SEEK will review this report.</p>;
-  }
-
-  return (
-    <div className="mt-3">
-      {!open ? (
-        <button
-          type="button"
-          onClick={() => setOpen(true)}
-          className="text-xs font-semibold text-[#0D3B3B]/45 hover:text-[#0D3B3B]"
-        >
-          Report
-        </button>
-      ) : (
-        <form
-          className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F7FAF8] p-4 space-y-3"
-          onSubmit={async (e) => {
-            e.preventDefault();
-            setLoading(true);
-            setError("");
-            try {
-              await submitSafetyReport({ targetType, targetId, reason, details, email });
-              setSent(true);
-            } catch (err) {
-              setError(err?.message || "Could not submit the report.");
-            } finally {
-              setLoading(false);
-            }
-          }}
-        >
-          <div>
-            <p className="font-display font-semibold text-sm text-[#0D3B3B]">{label}</p>
-            <p className="mt-1 text-xs leading-5 text-[#0D3B3B]/55">Report scams, harmful content, exposed private information or other safety concerns. Please do not include passwords, PINs or OTPs.</p>
-          </div>
-          <select
-            value={reason}
-            onChange={(e) => setReason(e.target.value)}
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
-          >
-            <option value="inappropriate">Inappropriate or harmful content</option>
-            <option value="spam">Spam or scam</option>
-            <option value="privacy">Private information exposed</option>
-            <option value="harassment">Harassment or unsafe behaviour</option>
-            <option value="other">Something else</option>
-          </select>
-          <textarea
-            value={details}
-            onChange={(e) => setDetails(e.target.value)}
-            placeholder="What should SEEK know? (optional)"
-            rows={3}
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
-          />
-          <input
-            type="email"
-            value={email}
-            onChange={(e) => setEmail(e.target.value)}
-            placeholder="Your email (optional)"
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
-          />
-          {error && <p className="text-sm text-red-600">{error}</p>}
-          <div className="flex items-center gap-2">
-            <button type="submit" disabled={loading} className="rounded-full bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white">
-              {loading ? "Sending…" : "Submit report"}
-            </button>
-            <button type="button" disabled={loading} onClick={() => { setOpen(false); setError(""); }} className="rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B]">
-              Cancel
-            </button>
-          </div>
         </form>
       )}
     </div>
@@ -3937,7 +3198,6 @@ function ImpactStoryPage({ impactId, setPage }) {
             <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
         ))}
-        <CommunityInteractions targetType="impact" targetId={post.id} />
         <div className="flex flex-wrap gap-3">
           <Button variant="primary" onClick={() => { if (String(impactId).startsWith("thanks-")) { setPage("give"); window.scrollTo(0, 0); } else { setDonateOpen(true); } }}>{String(impactId).startsWith("thanks-") ? "Support the SEEK community" : "Support this work"}</Button>
           <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
@@ -4126,146 +3386,78 @@ function AccountAvatar() {
   );
 }
 
+
+function AccountUsernameForm() {
+  const [username, setUsername] = useState("");
+  const [name, setName] = useState("");
+  const [bio, setBio] = useState("");
+  const [hint, setHint] = useState("");
+  const [saving, setSaving] = useState(false);
+  useEffect(() => {
+    getMyProfile().then((p) => {
+      if (!p) return;
+      setUsername(p.username || "");
+      setName(p.full_name || "");
+      setBio(p.bio || "");
+    }).catch(() => {});
+  }, []);
+  return (
+    <form className="mt-6 text-left space-y-3" onSubmit={async (e) => {
+      e.preventDefault();
+      setSaving(true); setHint("");
+      try {
+        await updateMyUsername({ username, full_name: name, bio });
+        setHint("Saved.");
+      } catch (err) {
+        setHint(err.message || "Could not save.");
+      } finally { setSaving(false); }
+    }}>
+      <p className="font-display font-semibold text-sm">Public profile</p>
+      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" className="w-full rounded-xl border px-3 py-2 text-sm" />
+      <input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="username" className="w-full rounded-xl border px-3 py-2 text-sm" />
+      <p className="text-xs text-[#0D3B3B]/50">3–24 characters. Letters, numbers, underscore. This becomes /member/username</p>
+      <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={280} placeholder="A short public line (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
+      <button type="submit" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
+      {hint && <p className="text-sm text-[#0D3B3B]/70">{hint}</p>}
+    </form>
+  );
+}
+
 function AccountPage({ setPage, userSession, setUserSession }) {
   const [mode, setMode] = useState("signin"); // signin | signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
-  const [profile, setProfile] = useState(null);
-  const [profileLoading, setProfileLoading] = useState(false);
-  const [editingProfile, setEditingProfile] = useState(false);
-  const [username, setUsername] = useState("");
-  const [fullName, setFullName] = useState("");
-  const [bio, setBio] = useState("");
-  const [profileError, setProfileError] = useState("");
-  const [profileMessage, setProfileMessage] = useState("");
-  const [checkingUsername, setCheckingUsername] = useState(false);
-
-  useEffect(() => {
-    if (!userSession?.access_token) return;
-    let cancelled = false;
-    setProfileLoading(true);
-    getMyProfile().then((row) => {
-      if (cancelled) return;
-      setProfile(row || null);
-      setUsername(row?.username || "");
-      setFullName(row?.full_name || userSession.user?.user_metadata?.full_name || "");
-      setBio(row?.bio || "");
-    }).catch(() => {}).finally(() => {
-      if (!cancelled) setProfileLoading(false);
-    });
-    return () => { cancelled = true; };
-  }, [userSession]);
 
   if (userSession?.access_token) {
-    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
-    const publicUsername = profile?.username || "";
-
-    async function saveProfile(e) {
-      e.preventDefault();
-      setProfileError(""); setProfileMessage(""); setCheckingUsername(true);
-      try {
-        const availability = await checkSeekUsernameAvailability(username);
-        if (!availability.available) throw new Error(availability.error || "That username is already taken.");
-        const saved = await saveMyProfile({ username: availability.username, full_name: fullName, bio });
-        setProfile(saved || { ...profile, username: availability.username, full_name: fullName, bio });
-        setUsername(availability.username);
-        setEditingProfile(false);
-        setProfileMessage("Profile updated.");
-      } catch (err) {
-        setProfileError(err.message || "Could not update your profile.");
-      } finally { setCheckingUsername(false); }
-    }
-
     return (
-      <div style={{ background: C.bg }} className="min-h-[70vh]">
-        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
-          <div className="rounded-[2rem] bg-[#0D3B3B] text-white p-6 sm:p-8">
-            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
-              <div className="shrink-0"><AccountAvatar /></div>
-              <div className="min-w-0 flex-1">
-                <SectionLabel>Profile</SectionLabel>
-                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <VerifiedBadge /></h1>
-                <p className="mt-1 text-sm text-white/65 truncate">{publicUsername ? `@${publicUsername}` : "Choose your SEEK username"}</p>
-                <p className="mt-1 text-sm text-white/50 truncate">{userSession.user?.email}</p>
-              </div>
-              <button type="button" onClick={() => { setEditingProfile((v) => !v); setProfileError(""); setProfileMessage(""); }} className="shrink-0 rounded-full bg-white/10 px-5 py-2.5 text-sm font-semibold hover:bg-white/15 transition">
-                {editingProfile ? "Close" : "Edit profile"}
-              </button>
-            </div>
-
-            {editingProfile ? (
-              <form onSubmit={saveProfile} className="mt-6 rounded-2xl bg-white p-5 sm:p-6 text-[#0D3B3B] space-y-4">
-                <div>
-                  <label className="block text-xs font-bold uppercase tracking-widest text-[#0D3B3B]/50 mb-2">Username</label>
-                  <div className="flex items-center rounded-xl border border-[#0D3B3B]/10 bg-[#F7FAF8] overflow-hidden focus-within:ring-2 focus-within:ring-[#1BAA9C]/20">
-                    <span className="px-3 text-[#1BAA9C] font-bold">@</span>
-                    <input required minLength={3} maxLength={24} value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} className="w-full bg-transparent py-3 pr-3 outline-none" placeholder="yourusername" autoCapitalize="none" autoCorrect="off" />
-                  </div>
-                  <p className="mt-1 text-xs text-[#0D3B3B]/50">3–24 characters. Lowercase letters, numbers and underscores only.</p>
-                </div>
-                <Field label="Name">
-                  <input value={fullName} onChange={(e) => setFullName(e.target.value)} maxLength={80} className={inputCls} placeholder="Your name" />
-                </Field>
-                <Field label="About you (optional)">
-                  <textarea value={bio} onChange={(e) => setBio(e.target.value)} maxLength={240} rows={3} className={inputCls} placeholder="A short introduction about you or what you do on SEEK." />
-                </Field>
-                {profileError && <p className="text-sm text-red-600">{profileError}</p>}
-                <div className="flex flex-wrap items-center gap-3">
-                  <Button disabled={checkingUsername} type="submit" variant="primary">{checkingUsername ? "Checking…" : "Save profile"}</Button>
-                  <button type="button" onClick={() => setEditingProfile(false)} className="rounded-full border border-[#0D3B3B]/10 px-4 py-2 text-sm font-semibold">Cancel</button>
-                </div>
-              </form>
-            ) : (
-              <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
-                <strong className="text-white">Your public profile</strong><br />
-                {publicUsername ? <>People can find you at <span className="font-semibold text-white">@{publicUsername}</span>. Your email, gifts, requests and notifications remain private.</> : <>Set a unique username so people can recognise and find your public SEEK profile.</>}
-                {profile?.bio && <p className="mt-3 text-white/70">{profile.bio}</p>}
-              </div>
-            )}
-          </div>
-
-          {(profileMessage || profileLoading) && <p className="mt-3 px-1 text-sm text-[#168F84]">{profileLoading ? "Loading profile…" : profileMessage}</p>}
-
-          {publicUsername && (
-            <div className="mt-5 rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 flex flex-col sm:flex-row sm:items-center justify-between gap-4">
-              <div>
-                <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Public profile</p>
-                <p className="mt-1 text-sm text-[#0D3B3B]/60">Your public SEEK identity</p>
-              </div>
-              <button type="button" onClick={() => setPage("member:" + publicUsername)} className="inline-flex items-center justify-center gap-2 rounded-full bg-[#E8F6F2] px-4 py-2 text-sm font-semibold text-[#168F84]">
-                View public profile <ArrowUpRight size={15} />
-              </button>
-            </div>
-          )}
-
-          <div className="mt-5 grid sm:grid-cols-2 gap-3">
-            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your space</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My SEEK</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">See your requests, giving, giveaways, interests and activity.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open My SEEK <ArrowRight size={15} /></span>
-            </button>
-            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Requests</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My requests</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">View and manage requests connected to your account.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">View requests <ArrowRight size={15} /></span>
-            </button>
-            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Updates</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Notifications</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">Keep up with responses, interests and other SEEK updates.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open notifications <ArrowRight size={15} /></span>
-            </button>
-            <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Account</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Keep your account secure</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">Your email is used for account activity and private updates.</p>
-              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]">Sign out</button>
-            </div>
+      <div style={{ background: C.bg }} className="min-h-[60vh]">
+        <section className="mx-auto max-w-md px-5 py-16 text-center">
+          <SectionLabel>Account</SectionLabel>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B] mb-2">
+            Keep track of your requests.
+          </h1>
+          <p className="font-body text-sm text-[#0D3B3B]/60 mb-8">
+            <span className="inline-flex items-center justify-center gap-1.5">{userSession.user?.email} <SeekVerifiedCheck /></span>
+            <AccountAvatar />
+            <AccountUsernameForm />
+          </p>
+          <div className="flex flex-col gap-3">
+            <Button variant="primary" onClick={() => setPage("my-requests")}>
+              My requests <ArrowRight size={16} />
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                userLogout();
+                setUserSession(null);
+              }}
+            >
+              Sign out
+            </Button>
           </div>
         </section>
       </div>
@@ -4274,7 +3466,9 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
   async function handleSubmit(e) {
     e.preventDefault();
-    setError(""); setMessage(""); setLoading(true);
+    setError("");
+    setMessage("");
+    setLoading(true);
     try {
       if (mode === "signup") {
         const result = await userSignUp(email, password);
@@ -4296,8 +3490,11 @@ function AccountPage({ setPage, userSession, setUserSession }) {
         if (String(back).startsWith("request:")) window.history.pushState({}, "", "/request/" + back.split(":")[1]);
         setPage(back);
       }
-    } catch (err) { setError(err.message || "Something went wrong."); }
-    finally { setLoading(false); }
+    } catch (err) {
+      setError(err.message || "Something went wrong.");
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -4305,21 +3502,86 @@ function AccountPage({ setPage, userSession, setUserSession }) {
       <section className="mx-auto max-w-md px-5 py-16">
         <div className="text-center mb-8">
           <SectionLabel>Account</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">{mode === "signin" ? "Sign in" : "Create account"}</h1>
-          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">Sign in to see your requests, updates, and activity.</p>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">
+            {mode === "signin" ? "Sign in" : "Create account"}
+          </h1>
+          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
+            Sign in to see your requests, updates, and activity.
+          </p>
         </div>
-        <form onSubmit={handleSubmit} className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4">
-          <Field label="Email"><input required type="email" className={inputCls} value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@example.com" /></Field>
-          <Field label="Password"><input required type="password" minLength={6} className={inputCls} value={password} onChange={(e) => setPassword(e.target.value)} placeholder="At least 6 characters" /></Field>
+
+        <form
+          onSubmit={handleSubmit}
+          className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
+        >
+          <Field label="Email">
+            <input
+              required
+              type="email"
+              className={inputCls}
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              placeholder="you@example.com"
+            />
+          </Field>
+          <Field label="Password">
+            <input
+              required
+              type="password"
+              minLength={6}
+              className={inputCls}
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              placeholder="At least 6 characters"
+            />
+          </Field>
+
           {error && <p className="text-sm text-red-600">{error}</p>}
           {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
-          <Button disabled={loading} type="submit" variant="primary">{loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}</Button>
-          <p className="text-center text-sm text-[#0D3B3B]/55">{mode === "signin" ? <>No account? <button type="button" className="font-semibold text-[#1BAA9C]" onClick={() => { setMode("signup"); setError(""); setMessage(""); }}>Sign up</button></> : <>Already have an account? <button type="button" className="font-semibold text-[#1BAA9C]" onClick={() => { setMode("signin"); setError(""); setMessage(""); }}>Sign in</button></>}</p>
+
+          <Button disabled={loading} type="submit" variant="primary" className="w-full">
+            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+          </Button>
+
+          <p className="text-center text-sm text-[#0D3B3B]/55">
+            {mode === "signin" ? (
+              <>
+                No account?{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-[#1BAA9C]"
+                  onClick={() => {
+                    setMode("signup");
+                    setError("");
+                    setMessage("");
+                  }}
+                >
+                  Sign up
+                </button>
+              </>
+            ) : (
+              <>
+                Already have an account?{" "}
+                <button
+                  type="button"
+                  className="font-semibold text-[#1BAA9C]"
+                  onClick={() => {
+                    setMode("signin");
+                    setError("");
+                    setMessage("");
+                  }}
+                >
+                  Sign in
+                </button>
+              </>
+            )}
+          </p>
         </form>
       </section>
     </div>
   );
 }
+
 
 /* ---------------- My SEEK Dashboard ---------------- */
 
@@ -4385,7 +3647,6 @@ function MySeekDashboard({ setPage, userSession }) {
   const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
   const avatar = profile?.avatar_url || "";
   const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
-  const username = profile?.username || "";
   const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
 
   const go = (page, path = null) => {
@@ -4423,7 +3684,7 @@ function MySeekDashboard({ setPage, userSession }) {
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
                   <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {firstName} 👋</h1>
-                  <p className="mt-1 text-sm text-white/65 truncate">{username ? `@${username}` : userSession.user?.email}</p>
+                  <p className="mt-1 text-sm text-white/65 truncate">{profile?.username ? "@" + profile.username : userSession.user?.email}</p>
                 </div>
               </div>
               <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Profile</button>
@@ -4866,12 +4127,9 @@ function pageFromPath(pathname) {
   if (path === "/admin") return "admin";
   if (path === "/volunteer") return "volunteer";
   if (path === "/give") return "give";
-  if (path === "/for-you") return "for-you";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
-  if (path === "/seek-help/request") return "seek-help-form";
   if (path === "/celebrate") return "celebrate";
-  if (path === "/celebrate/request") return "celebrate-request";
   if (path === "/about") return "about";
   if (path === "/organisations") return "organisations";
   if (path === "/impact") return "impact";
@@ -4896,14 +4154,11 @@ function pathFromPage(page) {
   if (id.startsWith("member:")) return "/member/" + id.split(":")[1];
   const map = {
     home: "/",
-    "for-you": "/for-you",
     give: "/give",
     offers: "/offers",
     admin: "/admin",
     "seek-help": "/seek-help",
-    "seek-help-form": "/seek-help/request",
     celebrate: "/celebrate",
-    "celebrate-request": "/celebrate/request",
     volunteer: "/volunteer",
     about: "/about",
     organisations: "/organisations",
@@ -5207,7 +4462,6 @@ useEffect(() => {
 
   const pages = {
     home: <HomePage setPage={setPage} userSession={userSession} />,
-    "for-you": <ForYouPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
@@ -5215,10 +4469,8 @@ useEffect(() => {
     counselling: <OffersPage setPage={setPage} />,
     more: <CelebratePage setPage={setPage} />,
     admin: <AdminPage />,
-    "seek-help": <SeekHelpPage setPage={setPage} />,
-    "seek-help-form": <SeekHelpRequestPage />,
+    "seek-help": <SeekHelpPage />,
     celebrate: <CelebratePage setPage={setPage} />,
-    "celebrate-request": <CelebrateRequestPage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
     organisations: <OrganisationsPage setPage={setPage} />,
@@ -5252,7 +4504,7 @@ useEffect(() => {
   const memberId = isMemberPage ? page.split(":")[1] : null;
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help-form", "celebrate-request", "my-requests", "my-seek"];
+  const gatedPages = ["seek-help", "celebrate", "my-requests", "my-seek"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
@@ -5262,8 +4514,7 @@ useEffect(() => {
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      {page !== "home" && <LiveTicker />}
-
+      <LiveTicker />
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
