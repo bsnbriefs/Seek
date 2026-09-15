@@ -40,6 +40,8 @@ import {
   userSignIn,
   sendMagicLink,
   listMyRequests,
+  listMyOffers,
+  listMyOfferInterestsSummary,
   deleteRejectedRequest,
   postRequestPublicUpdate,
   uploadAppreciationMedia,
@@ -326,6 +328,15 @@ function daysPosted(iso) {
   return "Posted " + days + " days ago";
 }
 
+function VerifiedBadge({ className = "" }) {
+  return (
+    <span className={"inline-flex items-center gap-1 rounded-full bg-[#1BAA9C]/12 text-[#0D3B3B] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + className} title="Verified SEEK account">
+      <BadgeCheck size={12} />
+      Verified
+    </span>
+  );
+}
+
 function formatSeekStatus(status) {
   const map = {
     pending_review: "Under review",
@@ -469,7 +480,7 @@ function RequestCard({ req, onHelp, onView }) {
           )}
           <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
         </div>
-        <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title}</h3>
+        <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title} <VerifiedBadge /></h3>
       </div>
       <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
         <MapPin size={14} /> {req.location}
@@ -757,7 +768,9 @@ function FeatureStrip({ page, setPage }) {
       <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
-            const active = page === item.id || (item.filter && page === "offers" && typeof window !== "undefined" && sessionStorage.getItem("seek_offer_filter") === item.filter);
+            let offerFilter = "";
+            try { offerFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
+            const active = page === item.id || (item.filter && page === "offers" && offerFilter === item.filter);
             return (
               <button
                 key={item.id}
@@ -4348,6 +4361,10 @@ useEffect(() => {
     home: <HomePage setPage={setPage} userSession={userSession} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
+    jobs: <OffersPage setPage={setPage} />,
+    mentorship: <OffersPage setPage={setPage} />,
+    counselling: <OffersPage setPage={setPage} />,
+    more: <CelebratePage setPage={setPage} />,
     admin: <AdminPage />,
     "seek-help": <SeekHelpPage />,
     celebrate: <CelebratePage setPage={setPage} />,
@@ -4396,17 +4413,17 @@ useEffect(() => {
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
       <div key={page} className="animate-[seekFade_0.45s_ease-out]">
+      <ErrorBoundary>
       {needsUserGate ? (
         <AccountPage setPage={setPage} userSession={userSession} setUserSession={setUserSession} />
       ) : isRequestPage ? (
-        <ErrorBoundary>
         <RequestPage requestId={requestId} setPage={setPage} />
-        </ErrorBoundary>
       ) : isImpactStory ? (
         <ImpactStoryPage impactId={impactId} setPage={setPage} />
       ) : (
         pages[page] || pages.home
       )}
+      </ErrorBoundary>
       </div>
 
       {paymentReturn.status !== "idle" && (
