@@ -1079,40 +1079,19 @@ function Navbar({ page, setPage, userSession }) {
 function Footer({ setPage }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   return (
-    <footer style={{ background: C.deepTeal }} className="text-white/80 font-body">
-      <div className="mx-auto max-w-6xl px-5 sm:px-8 py-14 grid gap-10 sm:grid-cols-2 lg:grid-cols-4">
-        <div>
-          <Logo className="h-7" />
-          <p className="mt-4 text-sm text-white/60 max-w-xs">Ask for what you need. Offer what you can.</p>
-          <p className="mt-3 text-xs uppercase tracking-wide text-white/40">A project of BSN Foundation</p>
+    <footer style={{ background: C.deepTeal }} className="text-white/75 font-body">
+      <div className="mx-auto max-w-3xl px-5 py-8 text-center">
+        <Logo className="h-6 mx-auto" />
+        <p className="mt-3 text-sm text-white/55">A project of BSN Foundation</p>
+        <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
+          <button type="button" onClick={() => go("about")} className="hover:text-white">About</button>
+          <button type="button" onClick={() => go("guidelines")} className="hover:text-white">Guidelines</button>
+          <button type="button" onClick={() => go("privacy")} className="hover:text-white">Privacy</button>
+          <button type="button" onClick={() => go("terms")} className="hover:text-white">Terms</button>
+          <button type="button" onClick={() => go("contact")} className="hover:text-white">Contact</button>
         </div>
-        <div>
-          <p className="font-display font-semibold text-white mb-3 text-sm">Seek</p>
-          <ul className="space-y-2 text-sm">
-            <li><button onClick={() => go("seek-help")} className="hover:text-white">Seek Help</button></li>
-            <li><button onClick={() => go("give")} className="hover:text-white">Help Someone</button></li>
-            <li><button onClick={() => go("offers")} className="hover:text-white">Giveaways</button></li>
-            <li><button onClick={() => go("give")} className="hover:text-white">Give</button></li>
-            <li><button onClick={() => go("volunteer")} className="hover:text-white">Volunteer</button></li>
-          </ul>
-        </div>
-        <div>
-          <p className="font-display font-semibold text-white mb-3 text-sm">Organisation</p>
-          <ul className="space-y-2 text-sm">
-            <li><button onClick={() => go("about")} className="hover:text-white">About</button></li>
-            <li><button onClick={() => go("contact")} className="hover:text-white">Contact</button></li>
-            <li><button onClick={() => go("guidelines")} className="hover:text-white">Community guidelines</button></li>
-            <li><button onClick={() => go("privacy")} className="hover:text-white">Privacy</button></li>
-            <li><button onClick={() => go("terms")} className="hover:text-white">Terms</button></li>
-          </ul>
-        </div>
-        <div>
-          <p className="font-display font-semibold text-white mb-3 text-sm">Stay connected</p>
-          <SocialLinks light />
-        </div>
-      </div>
-      <div className="border-t border-white/10 py-5 text-center text-xs text-white/40">
-        © {new Date().getFullYear()} Seek — a project of BSN Foundation. All rights reserved.
+        <div className="mt-4 flex justify-center"><SocialLinks light /></div>
+        <p className="mt-5 text-[11px] text-white/35">© {new Date().getFullYear()} SEEK</p>
       </div>
     </footer>
   );
@@ -1154,6 +1133,7 @@ function HomePage({ setPage, userSession }) {
   const [liveStats, setLiveStats] = useState(null);
   const [ticker, setTicker] = useState([]);
   const [stories, setStories] = useState([]);
+  const [liveVideos, setLiveVideos] = useState([]);
   useEffect(() => {
     const tick = () => getSeekLiveStats().then(setLiveStats).catch(() => {});
     tick();
@@ -1166,7 +1146,7 @@ function HomePage({ setPage, userSession }) {
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, storyRows, crisisRows] = await Promise.all([
+        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, storyRows, liveRows, crisisRows] = await Promise.all([
           listPublishedRequests(4),
           listMatchedOfferRequestIds(),
           listPublishedImpact().catch(() => []),
@@ -1174,6 +1154,7 @@ function HomePage({ setPage, userSession }) {
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
           listAppreciationStories().catch(() => []),
+          listLiveSupportCases(6).catch(() => []),
           fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
             .then((r) => r.json())
             .then((json) => (Array.isArray(json?.data) ? json.data : []))
@@ -1185,6 +1166,7 @@ function HomePage({ setPage, userSession }) {
           setRequests(mapped);
           setImpactPreview((impactRows || []).slice(0, 3));
           setStories((storyRows || []).slice(0, 3));
+          setLiveVideos((Array.isArray(liveRows) ? liveRows : []).filter((item) => Array.isArray(item.media) && item.media.length).slice(0, 4));
           setSponsors(sponsorRows || []);
           if (stats) setLiveStats(stats);
           const crisis = (Array.isArray(crisisRows) ? crisisRows : []).map((item) => {
@@ -1219,193 +1201,77 @@ function HomePage({ setPage, userSession }) {
     <>
 
       {/* HERO */}
-      <section className="relative overflow-visible" style={{ background: `linear-gradient(180deg, ${C.bg}, #ffffff)` }}>
-        <div className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 pb-20 sm:pt-24 sm:pb-28 text-center">
-          <SectionLabel>Seek · A project of BSN Foundation</SectionLabel>
-          <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-6xl leading-[1.05] max-w-3xl mx-auto">
-            Everyone deserves a little help.
-          </h1>
-          <p className="mt-5 font-body text-lg text-[#0D3B3B]/70 max-w-xl mx-auto">
-            Three doors. Help with a need. Give money or things. Or ask for company — not money.
-          </p>
-          <div className="mt-10 grid sm:grid-cols-3 gap-3 text-left max-w-4xl mx-auto">
-            <button type="button" onClick={() => go("seek-help")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">1 · Need</p>
-              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Seek Help</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/60">School, food, rent, an emergency. Seek reviews it before it is public.</p>
-            </button>
-            <button type="button" onClick={() => go("give")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">2 · Give</p>
-              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Give or give away</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/60">Money to a person or BSN. Goods, jobs and time live under Giveaways.</p>
-            </button>
-            <button type="button" onClick={() => go("celebrate")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">3 · Company</p>
-              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Celebrate & Connect</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/60">A birthday, a new city, a study partner. Not a request for cash.</p>
-            </button>
-          </div>
-          <button onClick={() => go("volunteer")} className="mt-6 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
-            Give time instead — volunteer
-          </button>
+      <section className="px-5 pt-12 pb-8 text-center">
+        <SectionLabel>SEEK</SectionLabel>
+        <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto">
+          See the need. Feel the story. Show up.
+        </h1>
+        <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
+          <Button variant="primary" onClick={() => go("for-you")}>Watch SEEK</Button>
+          <Button variant="secondary" onClick={() => go("seek-help")}>I need help</Button>
+          <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
         </div>
       </section>
 
-
-      {userSession?.access_token && (
-        <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10">
-          <div className="flex items-end justify-between gap-3 mb-4">
-            <div>
-              <p className="font-body text-[11px] tracking-[0.18em] uppercase text-[#1BAA9C]">Your requests</p>
-              <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">Pick up where you left off.</h2>
-            </div>
-            <button type="button" onClick={() => go("my-requests")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
-          </div>
-          {mine.length === 0 ? (
-            <p className="font-body text-sm text-[#0D3B3B]/60">No requests on this account yet. Use I need help to submit one.</p>
-          ) : (
-            <div className="space-y-3">
-              {mine.map((req) => (
-                <div key={req.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 flex items-start justify-between gap-3">
-                  <div>
-                    <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{req.category} · {formatSeekStatus(req.status)}</p>
-                    <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
-                  </div>
-                  <button type="button" onClick={() => go("my-requests")} className="text-sm font-semibold text-[#1BAA9C] shrink-0">Open</button>
-                </div>
-              ))}
-            </div>
-          )}
+      {userSession?.access_token && mine.length > 0 && (
+        <section className="mx-auto max-w-lg px-5 pb-6">
+          <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
+          {mine.slice(0, 2).map((req) => (
+            <button key={req.id} type="button" onClick={() => go("my-requests")} className="mb-2 w-full rounded-2xl bg-white border border-[#0D3B3B]/8 p-3 text-left">
+              <p className="text-xs text-[#1BAA9C]">{formatSeekStatus(req.status)}</p>
+              <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
+            </button>
+          ))}
         </section>
       )}
 
-      {/* SEEK FEATURES */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
-        <div className="flex items-end justify-between gap-4 mb-6">
+      <section className="px-5 pb-10">
+        <div className="mx-auto max-w-[440px] mb-4 flex items-end justify-between">
           <div>
-            <SectionLabel>SEEK Features</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">More ways to show up</h2>
+            <SectionLabel>SEEK Videos</SectionLabel>
+            <h2 className="font-display font-bold text-xl text-[#0D3B3B]">People showing what they need.</h2>
           </div>
-          <button type="button" onClick={() => go("offers")} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore all <ArrowRight size={15} /></button>
+          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("for-you")}>All</button>
         </div>
-        <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
+        <div className="space-y-8">
+          {liveVideos.length ? liveVideos.map((request) => (
+            <LiveSupportCard key={request.id} request={request} setPage={setPage} />
+          )) : (
+            <p className="mx-auto max-w-[440px] text-sm text-[#0D3B3B]/55 text-center">When a reviewed request has public video or photos, it appears here.</p>
+          )}
+        </div>
+      </section>
+
+      <section className="px-5 pb-10">
+        <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
           {[
-            { id: "offers", icon: Package, title: "Giveaways", text: "Goods, skills and open offers." },
-            { id: "jobs", icon: Briefcase, title: "Jobs", text: "Roles posted as giveaways.", filter: "job"},
-            { id: "mentorship", icon: Users, title: "Mentorship", text: "Guidance, same giveaway list.", filter: "mentorship" },
-            { id: "impact", icon: BadgeCheck, title: "Impact", text: "What help made possible." },
-          ].map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => {
-                if (item.filter) { try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {} setPage("offers"); }
-                else setPage(item.id);
-                window.scrollTo(0, 0);
-              }}
-              className="group text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 hover:-translate-y-0.5 hover:shadow-md transition"
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#1BAA9C]/10 text-[#0D3B3B] mb-3">
-                <item.icon size={19} />
-              </span>
-              <h3 className="font-display font-bold text-base sm:text-lg text-[#0D3B3B]">{item.title}</h3>
-              <p className="mt-1 text-xs sm:text-sm text-[#0D3B3B]/55 leading-relaxed">{item.text}</p>
+            ["seek-help", "Seek Help"],
+            ["give", "Give"],
+            ["offers", "Giveaways"],
+            ["celebrate", "Connect"],
+          ].map(([id, label]) => (
+            <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
+              {label}
             </button>
           ))}
         </div>
       </section>
 
-      {/* HOW SEEK WORKS */}
-      <section className="bg-[#F4F1EA] py-16 sm:py-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="max-w-2xl mb-10">
-            <SectionLabel>How SEEK works</SectionLabel>
-            <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">Simple steps. Real people. Real help.</h2>
-            <p className="mt-3 font-body text-[#0D3B3B]/60">SEEK helps people ask for support, find ways to give it, and show what happened afterwards.</p>
-          </div>
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-4">
-            {[
-              ["01", "Tell us what you need", "Submit a request for help, an opportunity or support."],
-              ["02", "SEEK reviews it", "We review and verify information where necessary."],
-              ["03", "People respond", "Supporters, partners, volunteers and BSN Foundation can respond."],
-              ["04", "Help reaches you", "Support is delivered and the outcome can be shared through updates, photos or videos."],
-            ].map(([num, title, text]) => (
-              <div key={num} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
-                <span className="text-xs font-bold tracking-[0.18em] text-[#1BAA9C]">{num}</span>
-                <h3 className="mt-3 font-display font-bold text-lg text-[#0D3B3B]">{title}</h3>
-                <p className="mt-2 text-sm text-[#0D3B3B]/60 leading-relaxed">{text}</p>
-              </div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* PEOPLE WHO NEED HELP */}
-      <section className="bg-white py-20">
-        <div className="mx-auto max-w-6xl px-5 sm:px-8">
-          <div className="flex items-end justify-between mb-10 flex-wrap gap-4">
-            <div>
-              <SectionLabel>Open requests</SectionLabel>
-              <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B] max-w-lg">Someone out there needs what you can give.</h2>
+      {stories.length > 0 && (
+        <section className="px-5 pb-12">
+          <div className="mx-auto max-w-[440px]">
+            <SectionLabel>Outcomes</SectionLabel>
+            <div className="mt-3 space-y-3">
+              {stories.slice(0, 3).map((story) => (
+                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
+                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
+                  <p className="p-3 font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p>
+                </button>
+              ))}
             </div>
-            <button onClick={() => go("give")} className="inline-flex items-center gap-1 font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C]">
-              View all requests <ArrowRight size={16} />
-            </button>
           </div>
-          {requestsLoading ? (
-            <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
-          ) : requestsError ? (
-            <p className="font-body text-sm text-red-600">{requestsError}</p>
-          ) : requests.length === 0 ? (
-            <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-              {requests.map((r) => <RequestCard key={r.id} req={r} onHelp={(req) => {
-                if (CONNECT_CATS.includes(req.category)) {
-                  setPage(`request:${req.id}`);
-                  window.history.pushState({}, "", `/request/${req.id}`);
-                  window.scrollTo(0, 0);
-                  return;
-                }
-                sessionStorage.setItem("seek_help_request_id", req.id);
-                window.history.pushState({}, "", "/give");
-                go("give");
-              }} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
-            </div>
-          )}
-        </div>
-      </section>
-
-      {/* IMPACT */}
-      <section className="py-20" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #123f3f)` }}>
-        <div className="mx-auto max-w-6xl px-5 sm:px-8 text-center">
-          <SectionLabel>BSN Foundation impact</SectionLabel>
-          <h2 className="font-display font-bold text-3xl sm:text-4xl text-white mb-4">What community help has already looked like.</h2>
-          <p className="font-body text-sm text-white/70 mb-12">5 years of community support, starting in Nigeria and built to travel</p>
-          <div className="grid grid-cols-2 lg:grid-cols-4 gap-8">
-            {(liveStats
-              ? [
-                  { value: String(liveStats.openRequests), label: "Open requests on Seek" },
-                  { value: String(liveStats.fulfilled), label: "Needs marked fulfilled" },
-                  { value: liveStats.raised > 0 ? `₦${Math.round(liveStats.raised).toLocaleString()}` : "—", label: "Donations through Seek" },
-                  { value: String(liveStats.donationCount), label: "Successful gifts recorded" },
-                ]
-              : IMPACT_STATS
-            ).map((s) => (
-              <div key={s.label}>
-                <p className="font-display font-extrabold text-3xl sm:text-4xl text-white"><CountUp value={s.value} /></p>
-                <p className="font-body text-sm text-white/55 mt-1">{s.label}</p>
-              </div>
-            ))}
-          </div>
-          <p className="mt-10 text-xs text-white/35 font-body">
-            Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities over 5 years — including Enugu, Abuja and Lagos, and not limited to those cities.
-          </p>
-          <button type="button" onClick={() => go("impact")} className="mt-8 font-display font-semibold text-white underline underline-offset-4">
-            See Community Impact
-          </button>
-        </div>
-      </section>
+        </section>
+      )}
 
     </>
   );
@@ -1455,6 +1321,7 @@ function HelpSomeoneFeed({ setPage, limit = 6, compact = false }) {
 
 function SeekStoriesSection({ setPage, limit = 3 }) {
   const [stories, setStories] = useState([]);
+  const [liveVideos, setLiveVideos] = useState([]);
   useEffect(() => { listAppreciationStories().then((rows) => setStories((rows || []).slice(0, limit))).catch(() => setStories([])); }, [limit]);
   if (!stories.length) return null;
   return (
@@ -1814,10 +1681,10 @@ function GiveOfferForm() {
 
 
 function LiveSupportCard({ request, setPage }) {
+  const [mediaIndex, setMediaIndex] = useState(0);
   const [muted, setMuted] = useState(true);
-  const media = (Array.isArray(request.media) ? request.media : [])
-    .filter((item) => item?.media_kind === "video" && item?.public_url);
-  const current = media[0] || null;
+  const media = Array.isArray(request.media) ? request.media : [];
+  const current = media[mediaIndex] || null;
   const amountNeeded = Number(request.amountNeeded) || 0;
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
@@ -1839,82 +1706,52 @@ function LiveSupportCard({ request, setPage }) {
   };
 
   return (
-    <article className="w-full max-w-[390px] mx-auto overflow-hidden rounded-[1.6rem] bg-white border border-[#0D3B3B]/10 shadow-[0_12px_35px_rgba(13,59,59,0.10)]">
-      <div className="relative aspect-[4/5] overflow-hidden bg-[#101415]">
-        {current ? (
-          <video
-            key={current.public_url}
-            src={current.public_url}
-            autoPlay
-            muted={muted}
-            loop
-            playsInline
-            preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
-            aria-label={request.title || "SEEK support video"}
-          />
+    <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)] snap-start">
+      <div className="relative bg-[#101415] aspect-[4/5] overflow-hidden">
+        {current?.media_kind === "video" ? (
+          <video key={current.public_url} src={current.public_url} autoPlay muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={request.title || "SEEK support video"} />
+        ) : current?.public_url ? (
+          <img key={current.public_url} src={current.public_url} alt={request.title || "SEEK support case"} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
           <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
-            <div><HandHeart size={36} className="mx-auto mb-3 text-[#8DE3C5]" /><p className="font-display text-lg font-bold">Support is needed</p></div>
+            <div><HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" /><p className="font-display text-xl font-bold">Support is needed</p><p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p></div>
           </div>
         )}
 
-        <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 to-transparent text-white">
+        <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white">
           <div className="flex items-center gap-3">
-            {member.avatar_url || request.avatarUrl || request.avatar_url ? (
-              <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover border-2 border-white/80" />
-            ) : (
-              <div className="h-10 w-10 rounded-full bg-white/20 border-2 border-white/60" />
-            )}
+            {member.avatar_url || request.avatarUrl || request.avatar_url ? <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
             <div className="min-w-0 flex-1">
-              <p className="font-display font-bold leading-tight truncate">{displayName}</p>
+              <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
             </div>
-            <span className="rounded-full bg-black/40 px-2.5 py-1 text-[9px] font-bold uppercase tracking-[0.12em] backdrop-blur">SEEK</span>
+            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">Live Support</span>
           </div>
         </div>
 
-        {current?.media_kind === "video" && (
-          <button
-            type="button"
-            aria-label={muted ? "Turn sound on" : "Mute video"}
-            onClick={() => setMuted((v) => !v)}
-            className="absolute right-3 bottom-3 h-10 w-10 rounded-full bg-black/55 text-white backdrop-blur"
-          >
-            {muted ? "🔇" : "🔊"}
-          </button>
+        <div className="absolute right-3 bottom-24 flex flex-col gap-2">
+          {current?.media_kind === "video" && <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={() => setMuted((v) => !v)} className="h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>}
+          {media.length > 1 && <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
+        </div>
+
+        {media.length > 1 && (
+          <>
+            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
+            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-10 w-10 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
+          </>
         )}
 
-        <div className="absolute inset-x-0 bottom-0 p-4 bg-gradient-to-t from-black/90 via-black/45 to-transparent text-white">
-          <p className="text-[9px] font-bold uppercase tracking-[0.15em] text-[#8DE3C5]">
-            {request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}
-          </p>
-          <h2 className="mt-1 font-display text-xl sm:text-2xl font-extrabold leading-tight line-clamp-2">
-            {request.title || "A SEEK community member needs support"}
-          </h2>
-          {request.description && (
-            <p className="mt-1.5 text-xs sm:text-sm leading-5 text-white/80 line-clamp-2">{request.description}</p>
-          )}
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
+          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
+          {request.description && <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p>}
         </div>
       </div>
 
-      <div className="p-4 sm:p-5">
-        {amountNeeded > 0 && (
-          <div>
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</span>
-              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
-            </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#0D3B3B]/10">
-              <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        )}
+      <div className="bg-white p-5 sm:p-6">
+        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <CommunityInteractions targetType="request" targetId={request.id} compact />
-        <div className="mt-3 flex gap-2">
-          <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-xs font-bold text-white">Support</button>
-          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-xs font-bold text-[#0D3B3B]">View case</button>
-        </div>
+        <div className="mt-4 flex gap-2"><button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button><button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View Case</button></div>
       </div>
     </article>
   );
@@ -1927,130 +1764,34 @@ function ForYouPage({ setPage }) {
 
   useEffect(() => {
     let cancelled = false;
-    (async () => {
-      try {
-        const liveRows = await listLiveSupportCases(18);
+    listLiveSupportCases(16)
+      .then((rows) => {
         if (cancelled) return;
-        const videoCases = (Array.isArray(liveRows) ? liveRows : [])
-          .map((item) => ({
-            ...item,
-            media: (Array.isArray(item.media) ? item.media : [])
-              .filter((media) => media?.media_kind === "video" && media?.public_url),
-          }))
-          .filter((item) => item.media.length > 0);
-        setLiveCases(videoCases);
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load SEEK videos.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    })();
+        setLiveCases((Array.isArray(rows) ? rows : []).filter((item) => Array.isArray(item.media) && item.media.length));
+      })
+      .catch((err) => { if (!cancelled) setError(err?.message || "Could not load SEEK videos."); })
+      .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
 
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-
-  const doors = [
-    {
-      id: "seek-help",
-      title: "I need help",
-      text: "Ask the community for practical or financial support.",
-      action: "Ask for help",
-    },
-    {
-      id: "give",
-      title: "I want to help",
-      text: "Support an open request or give directly through SEEK.",
-      action: "Help someone",
-    },
-    {
-      id: "offers",
-      title: "I have something to give",
-      text: "Share a giveaway, job, skill, mentorship or counselling offer.",
-      action: "Give something",
-    },
-    {
-      id: "celebrate",
-      title: "I want to connect",
-      text: "Connect with the community through Celebrate & Connect — not dating.",
-      action: "Connect & celebrate",
-    },
-  ];
-
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 sm:pt-14 pb-9">
-        <div className="max-w-2xl">
-          <SectionLabel>For You</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl sm:text-5xl text-[#0D3B3B] leading-tight">
-            Start with people.
-          </h1>
-          <p className="mt-3 font-body text-base sm:text-lg leading-relaxed text-[#0D3B3B]/65 max-w-xl">
-            See a little of what is happening on SEEK, then choose how you want to show up.
-          </p>
+      <section className="px-5 pt-10 pb-16">
+        <div className="mx-auto max-w-[440px] text-center mb-6">
+          <SectionLabel>SEEK Videos</SectionLabel>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">For You</h1>
+          <p className="mt-2 text-sm text-[#0D3B3B]/55">Reviewed stories. Watch, then decide how to help.</p>
         </div>
-
-        <div className="mt-7 grid sm:grid-cols-2 gap-3 max-w-3xl">
-          {doors.map((door) => (
-            <button
-              key={door.id}
-              type="button"
-              onClick={() => go(door.id)}
-              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
-            >
-              <div className="flex items-start justify-between gap-4">
-                <div>
-                  <h2 className="font-display font-bold text-lg sm:text-xl text-[#0D3B3B]">{door.title}</h2>
-                  <p className="mt-1.5 font-body text-sm leading-relaxed text-[#0D3B3B]/58">{door.text}</p>
-                </div>
-                <ArrowRight size={17} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
-              </div>
-              <span className="mt-3 inline-flex text-xs sm:text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
-            </button>
+        {loading && <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/50">Loading videos…</p>}
+        {error && <p className="mx-auto max-w-[440px] text-center text-sm text-red-700">{error}</p>}
+        {!loading && !error && liveCases.length === 0 && (
+          <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved request evidence will appear here.</p>
+        )}
+        <div className="space-y-8">
+          {liveCases.map((request) => (
+            <LiveSupportCard key={request.id} request={request} setPage={setPage} />
           ))}
         </div>
-      </section>
-
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
-        <div className="flex items-end justify-between gap-4 mb-5">
-          <div>
-            <SectionLabel>SEEK Videos</SectionLabel>
-            <h2 className="font-display font-extrabold text-2xl sm:text-3xl text-[#0D3B3B]">
-              Real people. Real stories.
-            </h2>
-            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/58 max-w-xl">
-              Short video updates shared by SEEK members and approved for the community.
-            </p>
-          </div>
-        </div>
-
-        {loading && (
-          <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">
-            Loading SEEK videos…
-          </div>
-        )}
-
-        {error && (
-          <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>
-        )}
-
-        {!loading && !error && liveCases.length === 0 && (
-          <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-7 sm:p-9 text-center">
-            <HandHeart size={32} className="mx-auto text-[#1BAA9C] mb-3" />
-            <h3 className="font-display font-bold text-lg text-[#0D3B3B]">No videos yet.</h3>
-            <p className="mt-2 text-sm text-[#0D3B3B]/55 max-w-md mx-auto">
-              Approved video updates will appear here as members share their stories.
-            </p>
-          </div>
-        )}
-
-        {!loading && !error && liveCases.length > 0 && (
-          <div className="grid sm:grid-cols-2 lg:grid-cols-3 gap-5 items-start">
-            {liveCases.map((item) => (
-              <LiveSupportCard key={item.id} request={item} setPage={setPage} />
-            ))}
-          </div>
-        )}
       </section>
     </div>
   );
