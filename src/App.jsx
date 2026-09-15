@@ -1727,6 +1727,350 @@ function OfferCard({ offer, setPage }) {
 }
 
 
+function GivePage({ setPage }) {
+  const [sponsors, setSponsors] = useState([]);
+  useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
+  const [outreach, setOutreach] = useState(null);
+  const [storyCampaign, setStoryCampaign] = useState(() => {
+    const id = new URLSearchParams(window.location.search).get("outreach");
+    return OUTREACH_CAMPAIGNS.find((c) => c.id === id) || null;
+  });
+  const [categoryFilter, setCategoryFilter] = useState("all");
+  const [searchFilter, setSearchFilter] = useState("");
+  const [locationFilter, setLocationFilter] = useState("all");
+  const [offer, setOffer] = useState("");
+  const [offerFiles, setOfferFiles] = useState([]);
+  const [offerRequestId, setOfferRequestId] = useState("");
+  const [offerContactEmail, setOfferContactEmail] = useState("");
+  const [offerCategory, setOfferCategory] = useState("");
+  const [offerCity, setOfferCity] = useState("");
+const [offerContactPhone, setOfferContactPhone] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [offerError, setOfferError] = useState("");
+  const [offerLoading, setOfferLoading] = useState(false);
+  const [donating, setDonating] = useState(false);
+  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false, coverFee: true });
+  const [paymentError, setPaymentError] = useState("");
+  const [paymentLoading, setPaymentLoading] = useState(false);
+
+  const [requests, setRequests] = useState([]);
+  const [requestsLoading, setRequestsLoading] = useState(true);
+  const [requestsError, setRequestsError] = useState("");
+  const [selectedRequest, setSelectedRequest] = useState(null);
+  const [generalDonation, setGeneralDonation] = useState(false);
+  const [myGifts, setMyGifts] = useState([]);
+  const [giftsLoading, setGiftsLoading] = useState(false);
+
+  useEffect(() => {
+    let cancelled = false;
+    const session = getUserSession();
+    if (!session?.access_token) { setMyGifts([]); return () => { cancelled = true; }; }
+    setGiftsLoading(true);
+    listMyGifts().then((rows) => {
+      if (!cancelled) setMyGifts(Array.isArray(rows) ? rows : []);
+    }).catch(() => {
+      if (!cancelled) setMyGifts([]);
+    }).finally(() => {
+      if (!cancelled) setGiftsLoading(false);
+    });
+    return () => { cancelled = true; };
+  }, []);
+
+  useEffect(() => {
+    let cancelled = false;
+    let donorTick;
+    (async () => {
+      try {
+        const [rows, matchedIds] = await Promise.all([
+  listPublishedRequests(),
+  listMatchedOfferRequestIds(),
+]);
+const matchedSet = new Set(matchedIds);
+if (!cancelled) {
+  setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).map((r) => ({ ...r, helped: matchedSet.has(r.id) })));
+}
+      } catch (err) {
+        if (!cancelled) setRequestsError(err.message);
+      } finally {
+        if (!cancelled) setRequestsLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const [campaign, setCampaign] = useState(null);
+  useEffect(() => {
+    try {
+      const raw = sessionStorage.getItem("seek_campaign");
+      if (!raw) return;
+      const c = JSON.parse(raw);
+      sessionStorage.removeItem("seek_campaign");
+      setCampaign(c);
+      setPayment((prev) => ({ ...prev, amount: String(c.amount || prev.amount || "") }));
+      setDonating(true);
+    } catch (_e) {}
+  }, []);
+
+  function selectRequest(req) {
+    if (CONNECT_CATS.includes(req?.category)) {
+      setPage(`request:${req.id}`);
+      window.history.pushState({}, "", `/request/${req.id}`);
+      return;
+    }
+    setSelectedRequest(req);
+    setDonating(true);
+    setOfferRequestId(req?.id || "");
+    document.getElementById("donate-form")?.scrollIntoView({ behavior: "smooth", block: "start" });
+  }
+
+  useEffect(() => {
+    const wanted = sessionStorage.getItem("seek_help_request_id");
+    if (!wanted || !requests.length) return;
+    const match = requests.find((r) => r.id === wanted);
+    if (match) {
+      sessionStorage.removeItem("seek_help_request_id");
+      selectRequest(match);
+    }
+  }, [requests]);
+
+  async function startDonation(e) {
+    e.preventDefault(); setPaymentError(""); setPaymentLoading(true);
+    try {
+      const result = await initializeDonation({
+        amount: Number(payment.amount),
+        email: payment.email,
+        requestId: selectedRequest?.id || null,
+        anonymous: payment.anonymous,
+        donorName: campaign ? ((payment.name || "Supporter") + " · " + campaign.title) : (payment.name || ""),
+        coverFee: payment.coverFee !== false,
+        callbackUrl: window.location.origin,
+      });
+      window.location.href = result.authorization_url;
+    }
+    catch (err) { setPaymentError(err.message); } finally { setPaymentLoading(false); }
+  }
+  async function sendOffer() {
+    setOfferError(""); setOfferLoading(true);
+    try { await submitOffer({ description: offer, category: offerCategory || null, requestId: (offerRequestId && offerRequestId !== 'outreach') ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles }); setSubmitted(true); }
+    catch (err) { setOfferError(err.message); }
+    finally { setOfferLoading(false); }
+  }
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
+        <div className="max-w-3xl">
+          <SectionLabel>Give</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give where it matters to you.</h1>
+          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Support a person whose request has been published, or support BSN Foundation work. If what you have to give is goods, a job, mentorship or counselling, head to Giveaways instead.</p>
+        </div>
+
+        <div className="mt-8 grid md:grid-cols-2 gap-4">
+          <button type="button" onClick={() => document.getElementById("help-someone")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 sm:p-7 text-left hover:-translate-y-0.5 hover:shadow-md transition">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><HeartHandshake size={21}/></span>
+            <h2 className="mt-5 font-display font-bold text-2xl text-[#0D3B3B]">Help someone directly</h2>
+            <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">Choose a published request and make a financial contribution through the existing secure Paystack flow.</p>
+            <span className="mt-4 inline-flex text-sm font-bold text-[#1BAA9C]">See open requests →</span>
+          </button>
+          <button type="button" onClick={() => document.getElementById("bsn-work")?.scrollIntoView({ behavior: "smooth", block: "start" })} className="group rounded-3xl bg-[#0D3B3B] p-6 sm:p-7 text-left text-white hover:-translate-y-0.5 hover:shadow-md transition">
+            <span className="inline-flex h-11 w-11 items-center justify-center rounded-2xl bg-white/10 text-[#8DE3C5]"><HeartHandshake size={21}/></span>
+            <h2 className="mt-5 font-display font-bold text-2xl">Support BSN Foundation work</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/65">Support an existing BSN outreach and help fund work beyond an individual SEEK request.</p>
+            <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
+          </button>
+        </div>
+
+        {getUserSession()?.access_token && (
+          <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
+            <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your confirmed gifts stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
+              <div className="sm:text-right"><p className="text-xs text-[#0D3B3B]/45">Successful gifts</p><p className="font-display font-extrabold text-2xl text-[#0D3B3B]">{giftsLoading ? "—" : myGifts.length}</p></div>
+            </div>
+            {myGifts.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{myGifts.slice(0,3).map((g) => <span key={g.id} className="rounded-full bg-white border border-[#0D3B3B]/8 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B]/70">₦{Number(g.amount || 0).toLocaleString()}</span>)}</div>}
+          </div>
+        )}
+      </section>
+      {selectedRequest && (
+        <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
+          <p className="font-display font-semibold text-[#0D3B3B]">Helping: {selectedRequest.title}</p>
+          <button type="button" className="text-xs text-[#1BAA9C]" onClick={() => setSelectedRequest(null)}>Choose a different request</button>
+        </div>
+      )}
+
+      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
+        <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
+          <div className="max-w-2xl">
+            <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#8DE3C5]">Support a need</p>
+            <h2 className="font-display font-extrabold text-3xl mt-2">Give directly to the Seek community.</h2>
+            <p className="font-body mt-3 text-white/70">
+              {selectedRequest
+                ? <>Donating toward <span className="font-semibold text-white">{selectedRequest.title}</span> ({selectedRequest.location}).</>
+                : "Choose a request below to support it directly, or give a general donation to the wider Seek community."}
+            </p>
+            {!donating ? (
+              <Button variant="primary" className="mt-6 !bg-[#63C167] !text-[#0D3B3B]" onClick={() => { setSelectedRequest(null); setDonating(true); }}>
+                Give a general donation <ArrowRight size={16} />
+              </Button>
+            ) : (
+              <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
+                <div className="sm:col-span-3 flex flex-wrap gap-2">
+                  {[1000, 2000, 5000, 10000].map((n) => (
+                    <button key={n} type="button" className={"rounded-full px-3 py-1.5 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#63C167] text-[#0D3B3B]" : "bg-white/15 text-white")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
+                      ₦{n.toLocaleString()}
+                    </button>
+                  ))}
+                </div>
+                <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
+                {!payment.anonymous && (
+                  <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show publicly" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
+                )}
+                <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
+                <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
+                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Cover Seek’s 5% so the request keeps the full amount</label>
+                {payment.amount && (
+                  <p className="sm:col-span-3 text-sm text-white/70">
+                    You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}
+                    {payment.coverFee !== false ? " (includes ₦" + Math.round(Number(payment.amount) * 0.05).toLocaleString() + " for Seek)" : ""}
+                  </p>
+                )}
+                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
+                {selectedRequest && (
+                  <button type="button" onClick={() => { setSelectedRequest(null); }} className="sm:col-span-3 text-left text-sm text-white/70 underline underline-offset-2 hover:text-white">
+                    Give a general donation instead
+                  </button>
+                )}
+                {paymentError && <p className="sm:col-span-3 text-sm text-red-200">{paymentError}</p>}
+              </form>
+            )}
+          </div>
+        </div>
+      </section>}
+
+      <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
+        <div className="mb-4">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Help someone directly</p>
+          <h2 className="mt-1 font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
+          <p className="mt-1 text-sm text-[#0D3B3B]/55">Choose a published request to support. You can donate without creating an account.</p>
+        </div>
+        {!selectedRequest && !generalDonation && (
+          <button
+            type="button"
+            className="mb-4 text-sm font-semibold text-[#1BAA9C]"
+            onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
+          >
+            Or give a general donation
+          </button>
+        )}
+        <input
+          value={searchFilter}
+          onChange={(e) => setSearchFilter(e.target.value)}
+          placeholder="Search requests"
+          className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-sm"
+        />
+        <div className="mb-3 flex flex-wrap gap-2">
+          {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
+            <button
+              key={cat}
+              type="button"
+              onClick={() => setCategoryFilter(cat)}
+              className={`rounded-full px-3 py-1.5 text-sm ${categoryFilter === cat ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
+            >
+              {cat === "all" ? "All categories" : cat}
+            </button>
+          ))}
+        </div>
+        <div className="mb-6 flex flex-wrap gap-2">
+          {["all", ...Array.from(new Set(requests.map((r) => r.location).filter(Boolean)))].map((loc) => (
+            <button
+              key={loc}
+              type="button"
+              onClick={() => setLocationFilter(loc)}
+              className={`rounded-full px-3 py-1.5 text-sm ${locationFilter === loc ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
+            >
+              {loc === "all" ? "All locations" : loc}
+            </button>
+          ))}
+        </div>
+        {requestsLoading ? (
+          <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
+        ) : requestsError ? (
+          <p className="font-body text-sm text-red-600">{requestsError}</p>
+        ) : requests.length === 0 ? (
+          <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
+        ) : (
+          (() => {
+            const visible = requests.filter((r) => {
+              const q = searchFilter.trim().toLowerCase();
+              const matchesCat = (categoryFilter === "all" || r.category === categoryFilter) && !CONNECT_CATS.includes(r.category);
+              const matchesLoc = locationFilter === "all" || r.location === locationFilter;
+              const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
+              return matchesCat && matchesLoc && matchesQ;
+            });
+            return (
+              <>
+                <div className="mb-4 flex items-center justify-between gap-3">
+                  <p className="font-body text-sm text-[#0D3B3B]/55">
+                    Showing {visible.length} of {requests.length}
+                  </p>
+                  {(categoryFilter !== "all" || locationFilter !== "all" || searchFilter.trim()) && (
+                    <button
+                      type="button"
+                      className="text-sm font-semibold text-[#1BAA9C]"
+                      onClick={() => {
+                        setCategoryFilter("all");
+                        setLocationFilter("all");
+                        setSearchFilter("");
+                      }}
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+                {visible.length === 0 ? (
+                  <p className="font-body text-sm text-[#0D3B3B]/50">No requests match those filters.</p>
+                ) : (
+                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+                    {visible.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+                  </div>
+                )}
+              </>
+            );
+          })()
+        )}
+      </section>
+
+      <section id="bsn-work" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
+        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
+        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
+        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
+        {storyCampaign ? (
+          <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
+        ) : (
+          <div className="grid sm:grid-cols-2 gap-4">
+            {OUTREACH_CAMPAIGNS.map((c) => (
+              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="text-left rounded-3xl overflow-hidden bg-white border border-[#0D3B3B]/8 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition">
+                {c.photos?.[0] && <img src={c.photos[0]} alt="" className="h-36 w-full object-cover" />}
+                <div className="p-4">
+                  <span className="block font-display font-bold text-lg text-[#0D3B3B]">{c.title}</span>
+                  <span className="block text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</span>
+                  {c.budget ? <p className="mt-2 text-xs font-semibold text-[#0D3B3B]/55">Annual budget ₦{Number(c.budget).toLocaleString()} </p> : null}
+                  <span className="mt-3 inline-flex text-sm font-semibold text-[#1BAA9C]">See this work →</span>
+                </div>
+              </button>
+            ))}
+          </div>
+        )}
+        {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
+      </section>
+    </div>
+  );
+}
+
+
+/* ---------------- Seek Help Page ---------------- */
+
+
+
 function GiveOfferForm() {
   const [offer, setOffer] = useState("");
   const [offerFiles, setOfferFiles] = useState([]);
