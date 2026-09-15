@@ -83,6 +83,7 @@ import {
   listMyNotifications,
 } from "./lib/notificationApi";
 import { listCommunityInteractions, addCommunityReaction, addCommunityComment } from "./lib/communityApi";
+import { getSeekViewCount, recordSeekView } from "./lib/viewApi";
 
 import {
   adminLogin,
@@ -96,7 +97,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -476,7 +477,7 @@ const COMMUNITY_REACTIONS = [
 ];
 
 function CommunityInteractions({ targetType, targetId, compact = false }) {
-  const [data, setData] = useState({ comments: [], reactions: {} });
+  const [data, setData] = useState({ comments: [], reactions: {}, userReaction: null });
   const [open, setOpen] = useState(false);
   const [comment, setComment] = useState("");
   const [saving, setSaving] = useState(false);
@@ -486,7 +487,7 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
   const load = async () => {
     if (!targetType || !targetId) return;
     const next = await listCommunityInteractions(targetType, targetId);
-    setData(next || { comments: [], reactions: {} });
+    setData(next || { comments: [], reactions: {}, userReaction: null });
   };
 
   useEffect(() => { load(); }, [targetType, targetId]);
@@ -534,7 +535,7 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
                 onClick={() => react(reaction.key)}
                 aria-label={`${reaction.label}${count ? `, ${count}` : ""}`}
                 title={reaction.label}
-                className="flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm text-[#0D3B3B]/65 transition hover:bg-[#F2F7F5] hover:text-[#0D3B3B] active:scale-95"
+                className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm transition active:scale-95 ${data.userReaction === reaction.key ? "bg-[#E8F6F2] text-[#168F84] ring-1 ring-[#168F84]/20" : "text-[#0D3B3B]/65 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
               >
                 <span aria-hidden="true" className="text-[17px] leading-none">{reaction.emoji}</span>
                 {count > 0 && <span className="text-xs font-semibold tabular-nums">{count}</span>}
@@ -1520,6 +1521,7 @@ function OfferCard({ offer, setPage }) {
   const [open, setOpen] = useState(false);
   const [ownerRows, setOwnerRows] = useState([]);
   const [interestCount, setInterestCount] = useState(Number(offer.interest_count || 0));
+  const [viewCount, setViewCount] = useState(Number(offer.view_count || 0));
   const [closed, setClosed] = useState(String(offer.status || "").toLowerCase() === "closed");
   const session = getUserSession();
   const isOwner = Boolean(session?.user?.id && offer.created_by && session.user.id === offer.created_by);
@@ -1528,6 +1530,11 @@ function OfferCard({ offer, setPage }) {
     if (!isOwner) return;
     listMyOfferInterests(offer.id).then(setOwnerRows).catch(() => setOwnerRows([]));
   }, [isOwner, offer.id]);
+  useEffect(() => {
+    let cancelled = false;
+    recordSeekView("offer", offer.id).then((count) => { if (!cancelled) setViewCount(Number(count || 0)); });
+    return () => { cancelled = true; };
+  }, [offer.id]);
   const [media, setMedia] = useState(offer.media || []);
   const [apply, setApply] = useState(false);
   const [applying, setApplying] = useState(false);
@@ -1569,7 +1576,10 @@ function OfferCard({ offer, setPage }) {
             </p>
           )}
           <p className="mt-1 font-body text-[#0D3B3B] leading-relaxed">{offer.description}</p>
-          <p className="mt-2 text-xs text-[#0D3B3B]/45">{daysPosted(offer.created_at)}</p>
+          <div className="mt-2 flex items-center gap-3 text-xs text-[#0D3B3B]/45">
+            <span>{daysPosted(offer.created_at)}</span>
+            <span className="inline-flex items-center gap-1"><Eye size={13} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
+          </div>
           {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#0D3B3B]">Posted by Admin</p>}
         </div>
       </div>
@@ -3111,6 +3121,7 @@ function RequestPage({ requestId, setPage }) {
     const [donors, setDonors] = useState([]);
     const [showAllDonors, setShowAllDonors] = useState(false);
     const [hostRsvps, setHostRsvps] = useState([]);
+  const [viewCount, setViewCount] = useState(0);
   useEffect(() => {
     if (request?.title) document.title = request.title + " · Seek";
     return () => { document.title = "Seek"; };
@@ -3145,6 +3156,7 @@ function RequestPage({ requestId, setPage }) {
     setRequest(null);
   } else {
     setRequest(matched);
+    recordSeekView("request", matched.id).then((count) => { if (!cancelled) setViewCount(Number(count || 0)); });
 
     listMatchedOfferRequestIds()
       .then((ids) => { if (!cancelled) setHelped((ids || []).includes(matched.id)); })
@@ -3279,9 +3291,10 @@ function RequestPage({ requestId, setPage }) {
             WhatsApp
           </a>
         </div>
-        <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-6">
-          <MapPin size={16} /> {request.location}
-        </p>
+        <div className="flex flex-wrap items-center gap-3 text-sm text-[#0D3B3B]/60 font-body mb-6">
+          <span className="inline-flex items-center gap-1.5"><MapPin size={16} /> {request.location}</span>
+          <span className="inline-flex items-center gap-1.5"><Eye size={15} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
+        </div>
 
         <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-8 shadow-sm">
           <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
