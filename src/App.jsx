@@ -1185,25 +1185,6 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
-      {/* TWO-SIDED ENTRY */}
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-16 -mt-6 sm:-mt-10 pb-20 relative z-0">
-        <div className="grid md:grid-cols-[1fr_auto_1fr] items-center gap-6">
-          <div className="rounded-3xl p-8 sm:p-10 text-white shadow-xl" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #135050)` }}>
-            <Search size={26} className="mb-4 text-[#63C167]" />
-            <h3 className="font-display font-bold text-2xl mb-2">I need help</h3>
-            <p className="font-body text-white/70 mb-6">Share the details that will help people understand how they can help.</p>
-            <Button variant="light" onClick={() => go("seek-help")}>Ask for help <ArrowRight size={16} /></Button>
-          </div>
-          <Connector />
-          <div className="rounded-3xl p-8 sm:p-10 bg-white border border-[#0D3B3B]/8 shadow-xl">
-            <HandHeart size={26} className="mb-4 text-[#1BAA9C]" />
-            <h3 className="font-display font-bold text-2xl mb-2 text-[#0D3B3B]">I want to help</h3>
-            <p className="font-body text-[#0D3B3B]/60 mb-6">Find people and families who need something you can provide.</p>
-            <Button variant="primary" onClick={() => go("give")}>Find someone to help <ArrowRight size={16} /></Button>
-          </div>
-        </div>
-      </section>
-
       {/* SEEK STORIES */}
       {stories.length > 0 && (
         <section className="bg-[#F4F1EA] py-16 sm:py-20">
@@ -1293,30 +1274,11 @@ function HomePage({ setPage, userSession }) {
           <p className="mt-10 text-xs text-white/35 font-body">
             Live Seek platform figures. BSN Foundation work before Seek: 3,000+ lives, ₦50M+ public donations, 18+ communities over 5 years — including Enugu, Abuja and Lagos, and not limited to those cities.
           </p>
-          <div className="mt-12 text-left">
-            <p className="text-xs font-semibold uppercase tracking-[0.18em] text-white/50 mb-3">Partners</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
-              {PARTNERS.map((p) => (
-                <a key={p.name} href={p.href} className="rounded-2xl bg-white/10 min-h-[72px] px-4 py-4 text-sm text-white flex items-center justify-center text-center">{p.name}</a>
-              ))}
-            </div>
-          </div>
           <button type="button" onClick={() => go("impact")} className="mt-8 font-display font-semibold text-white underline underline-offset-4">
             See Community Impact
           </button>
         </div>
       </section>
-
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 py-16">
-        <div className="max-w-2xl mb-6">
-          <SectionLabel>Help someone today</SectionLabel>
-          <h2 className="font-display font-bold text-3xl sm:text-4xl text-[#0D3B3B]">People are asking SEEK for help.</h2>
-          <p className="mt-3 text-[#0D3B3B]/60">Choose a need you can support with money, goods, skills, time, a job or a simple connection.</p>
-        </div>
-        <HelpSomeoneFeed setPage={setPage} limit={6} />
-      </section>
-
-      <SeekStoriesSection setPage={setPage} limit={3} />
 
     </>
   );
