@@ -32,7 +32,6 @@ import {
   verifyDonation,
   listPublishedRequests,
     getRequestEvidence,
-  listLiveSupportCases,
   listMatchedOfferRequestIds,
   mapRequestRow,
   getUserSession,
@@ -1137,28 +1136,6 @@ function Connector() {
 
 /* ---------------- Homepage ---------------- */
 
-function HomeLiveStrip({ setPage }) {
-  const [cases, setCases] = useState([]);
-  useEffect(() => {
-    listLiveSupportCases(2).then((rows) => setCases(Array.isArray(rows) ? rows.slice(0, 2) : [])).catch(() => {});
-  }, []);
-  if (!cases.length) return null;
-  return (
-    <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-12">
-      <div className="flex items-end justify-between mb-4">
-        <div>
-          <SectionLabel>Live Support</SectionLabel>
-          <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People seeking support now.</h2>
-        </div>
-        <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => { setPage("for-you"); window.scrollTo(0,0); }}>See all</button>
-      </div>
-      <div className="grid md:grid-cols-2 gap-4">
-        {cases.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
-      </div>
-    </section>
-  );
-}
-
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
   const [mine, setMine] = useState([]);
@@ -1272,7 +1249,6 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
-      <HomeLiveStrip setPage={setPage} />
 
       {userSession?.access_token && (
         <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10">
@@ -1727,7 +1703,542 @@ function OfferCard({ offer, setPage }) {
 }
 
 
-function SeekGivePage({ setPage }) {
+function GiveOfferForm() {
+  const [offer, setOffer] = useState("");
+  const [offerFiles, setOfferFiles] = useState([]);
+  const [offerTarget, setOfferTarget] = useState("general");
+  const [offerRequestId, setOfferRequestId] = useState("");
+  const [offerContactEmail, setOfferContactEmail] = useState("");
+  const [offerCategory, setOfferCategory] = useState("");
+  const [offerCity, setOfferCity] = useState("");
+  const [offerContactPhone, setOfferContactPhone] = useState("");
+  const [submitted, setSubmitted] = useState(false);
+  const [offerError, setOfferError] = useState("");
+  const [offerLoading, setOfferLoading] = useState(false);
+  const [requests, setRequests] = useState([]);
+  useEffect(() => {
+    listPublishedRequests().then((rows) => setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).filter((r) => !CONNECT_CATS.includes(r.category)))).catch(() => {});
+  }, []);
+
+  const targetOptions = [
+    { id: "general", title: "General offer", desc: "Anyone who needs this", icon: HandHeart },
+    { id: "request", title: "Support a SEEK request", desc: "Choose an existing public request", icon: Search },
+    { id: "outreach", title: "BSN Foundation outreach", desc: "Support a Foundation outreach", icon: BadgeCheck },
+  ];
+  const offerTypes = [
+    ["money", "Financial support", Wallet],
+    ["food", "Food", Utensils],
+    ["items", "Goods & supplies", Package],
+    ["job", "Job opportunity", Briefcase],
+    ["mentorship", "Mentorship", Users],
+    ["counselling", "Counselling", HeartHandshake],
+    ["education", "Education / training", GraduationCap],
+    ["skills", "Professional skills / services", Handshake],
+    ["transport", "Transportation", Bus],
+    ["shelter", "Accommodation", HomeIcon],
+    ["other", "Other support", MoreHorizontal],
+  ];
+
+  if (submitted) {
+    return (
+      <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
+        <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">We have your giveaway.</h2>
+        <p className="font-body text-[#0D3B3B]/65">SEEK will review it. If approved, it can appear on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
+      </div>
+    );
+  }
+
+  return (
+    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white">
+      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
+      <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">Start by choosing who or what your offer is for.</p>
+
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Who would you like to support?</p>
+      <div className="grid sm:grid-cols-3 gap-3 mb-6">
+        {targetOptions.map((item) => {
+          const Icon = item.icon;
+          const active = offerTarget === item.id;
+          return (
+            <button
+              key={item.id}
+              type="button"
+              onClick={() => { setOfferTarget(item.id); if (item.id !== "request") setOfferRequestId(""); }}
+              className={`text-left rounded-2xl border p-4 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 ring-2 ring-[#1BAA9C]/15" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
+            >
+              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B] mb-3"><Icon size={18} /></span>
+              <span className="block font-display font-bold text-sm text-[#0D3B3B]">{item.title}</span>
+              <span className="block mt-1 text-xs leading-relaxed text-[#0D3B3B]/55">{item.desc}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      {offerTarget === "request" && (
+        <div className="mb-6">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Choose the request</p>
+          {requests.length === 0 ? (
+            <p className="rounded-2xl bg-[#F2F5F3] p-4 text-sm text-[#0D3B3B]/60">There are no eligible published requests to choose from right now.</p>
+          ) : (
+            <div className="grid sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
+              {requests.map((r) => {
+                const active = offerRequestId === r.id;
+                return (
+                  <button
+                    key={r.id}
+                    type="button"
+                    onClick={() => setOfferRequestId(r.id)}
+                    className={`rounded-xl border p-3 text-left transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
+                  >
+                    <span className="block text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{r.category}</span>
+                    <span className="block mt-1 text-sm font-semibold text-[#0D3B3B] line-clamp-2">{r.title}</span>
+                    {r.location && <span className="block mt-1 text-xs text-[#0D3B3B]/45">{r.location}</span>}
+                  </button>
+                );
+              })}
+            </div>
+          )}
+        </div>
+      )}
+
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What would you like to offer?</p>
+      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
+        {offerTypes.map(([id, label, Icon]) => {
+          const active = offerCategory === id;
+          return (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setOfferCategory(id)}
+              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
+            >
+              <Icon size={16} className="shrink-0" />
+              <span className="text-xs sm:text-sm font-semibold leading-tight">{label}</span>
+            </button>
+          );
+        })}
+      </div>
+
+      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
+      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
+      <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
+      <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
+      <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-4" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
+      <p className="text-xs text-[#0D3B3B]/45 mb-4">Add a photo or short video if it helps people understand your offer.</p>
+      <Button variant="primary" disabled={!offer.trim() || !offerCategory || (offerTarget === "request" && !offerRequestId) || offerLoading} onClick={async () => {
+        setOfferError(""); setOfferLoading(true);
+        try {
+          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
+          setSubmitted(true);
+        } catch (err) { setOfferError(err.message); }
+        finally { setOfferLoading(false); }
+      }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
+      {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
+    </div>
+  );
+}
+
+
+function LiveSupportCard({ request, setPage }) {
+  const [mediaIndex, setMediaIndex] = useState(0);
+  const media = Array.isArray(request.media) ? request.media : [];
+  const current = media[mediaIndex] || null;
+  const amountNeeded = Number(request.amountNeeded) || 0;
+  const amountRaised = Number(request.amountRaised) || 0;
+  const progress = amountNeeded > 0
+    ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100))
+    : 0;
+
+  const goToCase = () => {
+    setPage(`request:${request.id}`);
+    window.history.pushState({}, "", `/request/${request.id}`);
+    window.scrollTo(0, 0);
+  };
+
+  return (
+    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)] snap-start">
+      <div className="relative bg-[#101415] aspect-[4/5] sm:aspect-[4/4.7] overflow-hidden">
+        {current?.media_kind === "video" ? (
+          <video
+            key={current.public_url}
+            src={current.public_url}
+            autoPlay
+            muted
+            loop
+            playsInline
+            controls
+            preload="metadata"
+            className="absolute inset-0 h-full w-full object-cover"
+            aria-label={request.title || "SEEK support case video"}
+          />
+        ) : current?.public_url ? (
+          <img
+            key={current.public_url}
+            src={current.public_url}
+            alt={request.title || "SEEK support case"}
+            loading="lazy"
+            decoding="async"
+            className="absolute inset-0 h-full w-full object-cover"
+          />
+        ) : (
+          <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
+            <div>
+              <HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" />
+              <p className="font-display text-xl font-bold">Support is needed</p>
+              <p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p>
+            </div>
+          </div>
+        )}
+
+        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-4 bg-gradient-to-b from-black/55 to-transparent">
+          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0D3B3B]">Live Support</span>
+          {media.length > 1 && <span className="rounded-full bg-black/45 px-3 py-1 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
+        </div>
+
+        {media.length > 1 && (
+          <>
+            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
+            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
+          </>
+        )}
+
+        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/80 via-black/35 to-transparent text-white">
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
+          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
+          {request.description && <p className="mt-2 text-sm leading-5 text-white/80 line-clamp-3">{request.description}</p>}
+        </div>
+      </div>
+
+      <div className="p-5 sm:p-6">
+        {amountNeeded > 0 ? (
+          <div>
+            <div className="flex items-end justify-between gap-3 text-sm">
+              <div>
+                <p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p>
+                <p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p>
+              </div>
+              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
+            </div>
+            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C] transition-all" style={{ width: `${progress}%` }} /></div>
+          </div>
+        ) : <p className="text-sm text-[#0D3B3B]/55">Open the case to see the kind of support needed.</p>}
+
+        <div className="mt-5 flex gap-2">
+          <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white hover:bg-[#123f3f]">Support this case</button>
+          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B] hover:border-[#1BAA9C]">View Case</button>
+        </div>
+      </div>
+    </article>
+  );
+}
+
+function ForYouPage({ setPage }) {
+  const [requests, setRequests] = useState([]);
+  const [offers, setOffers] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [tab, setTab] = useState("all");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const [requestRows, offerRows] = await Promise.all([
+          listPublishedRequests(8),
+          listPublicOffers(),
+        ]);
+        if (cancelled) return;
+        setRequests((requestRows || []).map(mapRequestRow).slice(0, 8));
+        setOffers(Array.isArray(offerRows) ? offerRows.slice(0, 12) : []);
+      } catch (err) {
+        if (!cancelled) setError(err?.message || "Could not load what is happening on SEEK.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const visibleRequests = tab === "give" ? [] : requests;
+  const visibleOffers = tab === "help" ? [] : offers;
+  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+
+  const doors = [
+    {
+      id: "seek-help",
+      title: "I need help",
+      text: "Ask the community for practical or financial support.",
+      action: "Ask for help",
+    },
+    {
+      id: "give",
+      title: "I want to help",
+      text: "Support an open request or give directly through SEEK.",
+      action: "Help someone",
+    },
+    {
+      id: "offers",
+      title: "I have something to give",
+      text: "Share a giveaway, job, skill, mentorship or counselling offer.",
+      action: "Give something",
+    },
+    {
+      id: "celebrate",
+      title: "I want to connect",
+      text: "Meet the community through Celebrate & Connect — not dating.",
+      action: "Connect & celebrate",
+    },
+  ];
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
+        <div className="max-w-3xl">
+          <SectionLabel>For You</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
+            Welcome to SEEK.
+          </h1>
+          <p className="mt-4 font-body text-lg sm:text-xl leading-relaxed text-[#0D3B3B]/68 max-w-2xl">
+            SEEK is about people helping people. You can ask for help, support someone,
+            share something useful, or connect with the community.
+          </p>
+          <p className="mt-3 font-body text-sm sm:text-base text-[#0D3B3B]/52 max-w-2xl">
+            There is no single way to show up. Start with what you need or what you have to give.
+          </p>
+        </div>
+
+        <div className="mt-8 grid sm:grid-cols-2 gap-3 sm:gap-4 max-w-4xl">
+          {doors.map((door) => (
+            <button
+              key={door.id}
+              type="button"
+              onClick={() => go(door.id)}
+              className="group rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 sm:p-6 text-left transition hover:-translate-y-0.5 hover:border-[#1BAA9C]/45 hover:shadow-sm"
+            >
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <h2 className="font-display font-bold text-xl text-[#0D3B3B]">{door.title}</h2>
+                  <p className="mt-2 font-body text-sm leading-relaxed text-[#0D3B3B]/60">{door.text}</p>
+                </div>
+                <ArrowRight size={18} className="mt-1 shrink-0 text-[#1BAA9C] transition-transform group-hover:translate-x-1" />
+              </div>
+              <span className="mt-4 inline-flex text-sm font-semibold text-[#1BAA9C]">{door.action}</span>
+            </button>
+          ))}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+        <div className="flex items-end justify-between gap-4 mb-5">
+          <div>
+            <SectionLabel>What's happening on SEEK</SectionLabel>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See where you can show up today.</h2>
+          </div>
+        </div>
+
+        <div className="flex gap-2 overflow-x-auto scrollbar-none pb-1 mb-7">
+          {[
+            ["all", "Everything"],
+            ["help", "People who need help"],
+            ["give", "People offering help"],
+          ].map(([id, label]) => (
+            <button
+              key={id}
+              type="button"
+              onClick={() => setTab(id)}
+              className={`shrink-0 rounded-full px-4 py-2.5 text-sm font-semibold border transition ${tab === id ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}
+            >
+              {label}
+            </button>
+          ))}
+        </div>
+
+        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">Loading what is happening on SEEK…</div>}
+        {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
+
+        {!loading && !error && (
+          <div className="grid lg:grid-cols-2 gap-8">
+            {tab !== "give" && (
+              <div>
+                <div className="flex items-end justify-between gap-3 mb-4">
+                  <div>
+                    <SectionLabel>Seek Help</SectionLabel>
+                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People asking for help</h3>
+                  </div>
+                  <button type="button" onClick={() => go("seek-help")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
+                </div>
+                <div className="space-y-3">
+                  {visibleRequests.slice(0, 4).map((req) => (
+                    <RequestCard key={req.id} req={req} onHelp={() => go(`request:${req.id}`)} onView={() => go(`request:${req.id}`)} />
+                  ))}
+                  {visibleRequests.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open requests are showing right now.</div>}
+                </div>
+              </div>
+            )}
+
+            {tab !== "help" && (
+              <div>
+                <div className="flex items-end justify-between gap-3 mb-4">
+                  <div>
+                    <SectionLabel>Giveaways</SectionLabel>
+                    <h3 className="font-display font-bold text-2xl text-[#0D3B3B]">People offering something</h3>
+                  </div>
+                  <button type="button" onClick={() => go("offers")} className="text-sm font-semibold text-[#1BAA9C]">See all</button>
+                </div>
+                <div className="space-y-3">
+                  {visibleOffers.slice(0, 4).map((offer) => (
+                    <OfferCard key={offer.id} offer={offer} setPage={setPage} />
+                  ))}
+                  {visibleOffers.length === 0 && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/55">No open giveaways are showing right now.</div>}
+                </div>
+              </div>
+            )}
+          </div>
+        )}
+
+        <div className="mt-10 grid sm:grid-cols-3 gap-3">
+          {[
+            ["jobs", "Jobs", "Find opportunities shared through SEEK."],
+            ["mentorship", "Mentorship", "Offer or find guidance and experience."],
+            ["counselling", "Counselling", "Find people offering counselling support."],
+          ].map(([id, label, text]) => (
+            <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:border-[#1BAA9C]/45 transition">
+              <h3 className="font-display font-bold text-lg text-[#0D3B3B]">{label}</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">{text}</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore <ArrowRight size={14} /></span>
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function OffersPage({ setPage }) {
+  const [offers, setOffers] = useState([]);
+  const [offerFilter, setOfferFilter] = useState(() => {
+    try { return sessionStorage.getItem("seek_offer_filter") || "all"; } catch (_e) { return "all"; }
+  });
+  const [loading, setLoading] = useState(true);
+  const [error, setError] = useState("");
+  const [q, setQ] = useState("");
+
+  useEffect(() => {
+    let cancelled = false;
+    (async () => {
+      try {
+        const rows = await listPublicOffers();
+        if (!cancelled) setOffers(Array.isArray(rows) ? rows : []);
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load giveaways.");
+      } finally {
+        if (!cancelled) setLoading(false);
+      }
+    })();
+    return () => { cancelled = true; };
+  }, []);
+
+  const typeOf = (offer) => {
+    const value = String(offer?.category || "").trim().toLowerCase();
+    if (value.includes("job")) return "job";
+    if (value.includes("mentor")) return "mentorship";
+    if (value.includes("counsel")) return "counselling";
+    return "goods";
+  };
+
+  const filteredOffers = offers.filter((offer) => {
+    const type = typeOf(offer);
+    const matchesType = offerFilter === "all" || type === offerFilter;
+    const haystack = [offer.description, offer.category, offer.city].filter(Boolean).join(" ").toLowerCase();
+    return matchesType && (!q.trim() || haystack.includes(q.trim().toLowerCase()));
+  });
+
+  const tabs = [
+    ["all", "All"],
+    ["goods", "Goods"],
+    ["job", "Jobs"],
+    ["mentorship", "Mentorship"],
+    ["counselling", "Counselling"],
+  ];
+
+  const selectFilter = (value) => {
+    setOfferFilter(value);
+    try { sessionStorage.setItem("seek_offer_filter", value === "all" ? "" : value); } catch (_e) {}
+  };
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-14 pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+          <div className="max-w-2xl">
+            <SectionLabel>Giveaways</SectionLabel>
+            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Have something useful to offer?</h1>
+            <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">
+              Share goods, opportunities, skills or your time. Someone in the SEEK community may need exactly what you can give.
+            </p>
+          </div>
+          <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
+        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
+              {tabs.map(([value, label]) => {
+                const active = offerFilter === value;
+                return (
+                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[#1BAA9C] text-white" : "bg-[#F2F5F3] text-[#0D3B3B]/70 hover:bg-[#E7EFEC]")}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[#0D3B3B]/10 bg-[#F8FAF9] px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]" />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
+            <p className="mt-1 text-sm text-[#0D3B3B]/50">Published giveaways from the SEEK community.</p>
+          </div>
+          {!loading && <span className="text-sm font-semibold text-[#0D3B3B]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/50">Loading giveaways…</div>}
+          {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-600">{error}</div>}
+          {!loading && !error && filteredOffers.length === 0 && (
+            <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
+              <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">There are no published giveaways matching this filter right now. You can be the first to offer something useful.</p>
+              <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Post a giveaway</button>
+            </div>
+          )}
+          {!loading && !error && filteredOffers.map((offer) => (
+            <OfferCard key={offer.id} offer={offer} setPage={setPage} />
+          ))}
+        </div>
+
+        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-6 sm:p-8 text-white">
+          <div className="max-w-2xl">
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8DE0D5]">Give in your own way</p>
+            <h2 className="mt-2 font-display font-extrabold text-2xl">Goods, jobs, mentorship or counselling</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/65">These are all part of Giveaways. Choose the type that best describes what you can offer, and SEEK will review it before it goes public.</p>
+          </div>
+          <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Offer something</button>
+        </div>
+
+        <div id="make-offer" className="pt-12 text-left">
+          <GiveOfferForm />
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function GivePage({ setPage }) {
   const [sponsors, setSponsors] = useState([]);
   useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
   const [outreach, setOutreach] = useState(null);
@@ -2066,295 +2577,6 @@ if (!cancelled) {
   );
 }
 
-
-/* ---------------- Seek Help Page ---------------- */
-
-
-
-function GiveOfferForm() {
-  const [offer, setOffer] = useState("");
-  const [offerFiles, setOfferFiles] = useState([]);
-  const [offerTarget, setOfferTarget] = useState("general");
-  const [offerRequestId, setOfferRequestId] = useState("");
-  const [offerContactEmail, setOfferContactEmail] = useState("");
-  const [offerCategory, setOfferCategory] = useState("");
-  const [offerCity, setOfferCity] = useState("");
-  const [offerContactPhone, setOfferContactPhone] = useState("");
-  const [submitted, setSubmitted] = useState(false);
-  const [offerError, setOfferError] = useState("");
-  const [offerLoading, setOfferLoading] = useState(false);
-  const [requests, setRequests] = useState([]);
-  useEffect(() => {
-    listPublishedRequests().then((rows) => setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).filter((r) => !CONNECT_CATS.includes(r.category)))).catch(() => {});
-  }, []);
-
-  const targetOptions = [
-    { id: "general", title: "General offer", desc: "Anyone who needs this", icon: HandHeart },
-    { id: "request", title: "Support a SEEK request", desc: "Choose an existing public request", icon: Search },
-    { id: "outreach", title: "BSN Foundation outreach", desc: "Support a Foundation outreach", icon: BadgeCheck },
-  ];
-  const offerTypes = [
-    ["money", "Financial support", Wallet],
-    ["food", "Food", Utensils],
-    ["items", "Goods & supplies", Package],
-    ["job", "Job opportunity", Briefcase],
-    ["mentorship", "Mentorship", Users],
-    ["counselling", "Counselling", HeartHandshake],
-    ["education", "Education / training", GraduationCap],
-    ["skills", "Professional skills / services", Handshake],
-    ["transport", "Transportation", Bus],
-    ["shelter", "Accommodation", HomeIcon],
-    ["other", "Other support", MoreHorizontal],
-  ];
-
-  if (submitted) {
-    return (
-      <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
-        <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">We have your giveaway.</h2>
-        <p className="font-body text-[#0D3B3B]/65">SEEK will review it. If approved, it can appear on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
-      </div>
-    );
-  }
-
-  return (
-    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white">
-      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
-      <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">Start by choosing who or what your offer is for.</p>
-
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Who would you like to support?</p>
-      <div className="grid sm:grid-cols-3 gap-3 mb-6">
-        {targetOptions.map((item) => {
-          const Icon = item.icon;
-          const active = offerTarget === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => { setOfferTarget(item.id); if (item.id !== "request") setOfferRequestId(""); }}
-              className={`text-left rounded-2xl border p-4 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 ring-2 ring-[#1BAA9C]/15" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B] mb-3"><Icon size={18} /></span>
-              <span className="block font-display font-bold text-sm text-[#0D3B3B]">{item.title}</span>
-              <span className="block mt-1 text-xs leading-relaxed text-[#0D3B3B]/55">{item.desc}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {offerTarget === "request" && (
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Choose the request</p>
-          {requests.length === 0 ? (
-            <p className="rounded-2xl bg-[#F2F5F3] p-4 text-sm text-[#0D3B3B]/60">There are no eligible published requests to choose from right now.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-              {requests.map((r) => {
-                const active = offerRequestId === r.id;
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setOfferRequestId(r.id)}
-                    className={`rounded-xl border p-3 text-left transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
-                  >
-                    <span className="block text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{r.category}</span>
-                    <span className="block mt-1 text-sm font-semibold text-[#0D3B3B] line-clamp-2">{r.title}</span>
-                    {r.location && <span className="block mt-1 text-xs text-[#0D3B3B]/45">{r.location}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
-
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What would you like to offer?</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-        {offerTypes.map(([id, label, Icon]) => {
-          const active = offerCategory === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setOfferCategory(id)}
-              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
-            >
-              <Icon size={16} className="shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold leading-tight">{label}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
-      <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-4" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
-      <p className="text-xs text-[#0D3B3B]/45 mb-4">Add a photo or short video if it helps people understand your offer.</p>
-      <Button variant="primary" disabled={!offer.trim() || !offerCategory || (offerTarget === "request" && !offerRequestId) || offerLoading} onClick={async () => {
-        setOfferError(""); setOfferLoading(true);
-        try {
-          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
-          setSubmitted(true);
-        } catch (err) { setOfferError(err.message); }
-        finally { setOfferLoading(false); }
-      }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
-      {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
-    </div>
-  );
-}
-
-
-function LiveSupportCard({ request, setPage }) {
-  const [mediaIndex, setMediaIndex] = useState(0);
-  const media = Array.isArray(request.media) ? request.media : [];
-  const current = media[mediaIndex] || null;
-  const amountNeeded = Number(request.amountNeeded) || 0;
-  const amountRaised = Number(request.amountRaised) || 0;
-  const progress = amountNeeded > 0
-    ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100))
-    : 0;
-
-  const goToCase = () => {
-    setPage(`request:${request.id}`);
-    window.history.pushState({}, "", `/request/${request.id}`);
-    window.scrollTo(0, 0);
-  };
-
-  return (
-    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)] snap-start">
-      <div className="relative bg-[#101415] aspect-[4/5] sm:aspect-[4/4.7] overflow-hidden">
-        {current?.media_kind === "video" ? (
-          <video
-            key={current.public_url}
-            src={current.public_url}
-            autoPlay
-            muted
-            loop
-            playsInline
-            controls
-            preload="metadata"
-            className="absolute inset-0 h-full w-full object-cover"
-            aria-label={request.title || "SEEK support case video"}
-          />
-        ) : current?.public_url ? (
-          <img
-            key={current.public_url}
-            src={current.public_url}
-            alt={request.title || "SEEK support case"}
-            loading="lazy"
-            decoding="async"
-            className="absolute inset-0 h-full w-full object-cover"
-          />
-        ) : (
-          <div className="absolute inset-0 flex items-center justify-center bg-[#0D3B3B] px-8 text-center text-white">
-            <div>
-              <HandHeart size={42} className="mx-auto mb-3 text-[#8DE3C5]" />
-              <p className="font-display text-xl font-bold">Support is needed</p>
-              <p className="mt-2 text-sm text-white/65">Open this case to see the full request.</p>
-            </div>
-          </div>
-        )}
-
-        <div className="absolute inset-x-0 top-0 flex items-center justify-between gap-3 p-4 bg-gradient-to-b from-black/55 to-transparent">
-          <span className="rounded-full bg-white/90 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.16em] text-[#0D3B3B]">Live Support</span>
-          {media.length > 1 && <span className="rounded-full bg-black/45 px-3 py-1 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
-        </div>
-
-        {media.length > 1 && (
-          <>
-            <button type="button" aria-label="Previous media" onClick={() => setMediaIndex((i) => (i - 1 + media.length) % media.length)} className="absolute left-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">‹</button>
-            <button type="button" aria-label="Next media" onClick={() => setMediaIndex((i) => (i + 1) % media.length)} className="absolute right-3 top-1/2 -translate-y-1/2 h-9 w-9 rounded-full bg-black/45 text-white backdrop-blur text-xl">›</button>
-          </>
-        )}
-
-        <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/80 via-black/35 to-transparent text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
-          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
-          {request.description && <p className="mt-2 text-sm leading-5 text-white/80 line-clamp-3">{request.description}</p>}
-        </div>
-      </div>
-
-      <div className="p-5 sm:p-6">
-        {amountNeeded > 0 ? (
-          <div>
-            <div className="flex items-end justify-between gap-3 text-sm">
-              <div>
-                <p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p>
-                <p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()} needed</p>
-              </div>
-              <span className="font-bold text-[#1BAA9C]">{progress}%</span>
-            </div>
-            <div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C] transition-all" style={{ width: `${progress}%` }} /></div>
-          </div>
-        ) : <p className="text-sm text-[#0D3B3B]/55">Open the case to see the kind of support needed.</p>}
-
-        <div className="mt-5 flex gap-2">
-          <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white hover:bg-[#123f3f]">Support this case</button>
-          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B] hover:border-[#1BAA9C]">View Case</button>
-        </div>
-      </div>
-    </article>
-  );
-}
-
-function ForYouPage({ setPage }) {
-  const [cases, setCases] = useState([]);
-  const [loading, setLoading] = useState(true);
-  const [error, setError] = useState("");
-
-  useEffect(() => {
-    let cancelled = false;
-    const load = async () => {
-      try {
-        setLoading(true);
-        setError("");
-        const rows = await listLiveSupportCases(16);
-        if (!cancelled) setCases(Array.isArray(rows) ? rows : []);
-      } catch (err) {
-        if (!cancelled) setError(err?.message || "Could not load Live Support right now.");
-      } finally {
-        if (!cancelled) setLoading(false);
-      }
-    };
-    load();
-    const refresh = window.setInterval(load, 60000);
-    return () => { cancelled = true; window.clearInterval(refresh); };
-  }, []);
-
-  return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-2xl px-4 sm:px-6 pt-8 sm:pt-12 pb-16">
-        <div className="mb-7 text-center">
-          <SectionLabel>For You</SectionLabel>
-          <h1 className="mt-1 font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Live Support</h1>
-          <p className="mt-2 text-sm sm:text-base leading-relaxed text-[#0D3B3B]/58">Real SEEK cases that have been reviewed and opened for community support.</p>
-        </div>
-
-        {loading ? (
-          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/10 p-8 text-center text-sm text-[#0D3B3B]/55">Loading Live Support…</div>
-        ) : error ? (
-          <div className="rounded-[2rem] bg-white border border-red-200 p-8 text-center text-sm text-red-700">{error}</div>
-        ) : cases.length === 0 ? (
-          <div className="rounded-[2rem] bg-white border border-[#0D3B3B]/10 p-8 text-center">
-            <HandHeart size={36} className="mx-auto text-[#1BAA9C]" />
-            <h2 className="mt-3 font-display font-bold text-xl text-[#0D3B3B]">No Live Support cases yet</h2>
-            <p className="mt-2 text-sm text-[#0D3B3B]/55">When approved cases are published, they will appear here.</p>
-            <button type="button" onClick={() => setPage("seek-help")} className="mt-5 rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">Ask for help</button>
-          </div>
-        ) : (
-          <div className="space-y-6 snap-y snap-mandatory">
-            {cases.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
-          </div>
-        )}
-
-        <div className="mt-8 rounded-2xl border border-[#0D3B3B]/10 bg-white/75 p-4 text-center text-xs leading-5 text-[#0D3B3B]/50">SEEK reviews public requests before they appear here. Fulfilled cases leave Live Support and can continue into outcome and appreciation stories.</div>
-      </section>
-    </div>
-  );
-}
 
 /* ---------------- Seek Help Page ---------------- */
 
@@ -3986,19 +4208,8 @@ function AccountUsernameForm({ onSaved } = {}) {
       setSaving(true); setHint("");
       try {
         const saved = await updateMyUsername({ username, full_name: name, bio });
-        const refreshed = saved || await getMyProfile();
-        if (refreshed) {
-          const nextUsername = refreshed.username || username;
-          const nextName = refreshed.full_name || name;
-          const nextBio = refreshed.bio ?? bio;
-          setUsername(nextUsername);
-          setName(nextName);
-          setBio(nextBio);
-          if (typeof onSaved === "function") {
-            onSaved({ ...refreshed, username: nextUsername, full_name: nextName, bio: nextBio });
-          }
-        }
         setHint("Profile saved.");
+        if (typeof onSaved === "function") onSaved(saved);
       } catch (err) {
         setHint(err.message || "Could not save.");
       } finally { setSaving(false); }
@@ -4999,7 +5210,7 @@ function InstallSeekPrompt() {
   );
 }
 
-function AppContent() {
+export default function App() {
   useEffect(() => {
     document.documentElement.classList.remove("seek-dark");
     try { localStorage.removeItem("seek_theme"); } catch (_e) {}
@@ -5093,7 +5304,7 @@ useEffect(() => {
   const pages = {
     home: <HomePage setPage={setPage} userSession={userSession} />,
     "for-you": <ForYouPage setPage={setPage} />,
-    give: <SeekGivePage setPage={setPage} />,
+    give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
     mentorship: <OffersPage setPage={setPage} />,
@@ -5227,13 +5438,3 @@ useEffect(() => {
     </div>
   );
 }
-
-function App() {
-  return (
-    <ErrorBoundary>
-      <AppContent />
-    </ErrorBoundary>
-  );
-}
-
-export default App;
