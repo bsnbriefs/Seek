@@ -41,6 +41,8 @@ import {
   sendMagicLink,
   listMyRequests,
   listMyOffers,
+  listMyGifts,
+  refreshUserSession,
   listMyOfferInterestsSummary,
   deleteRejectedRequest,
   postRequestPublicUpdate,
@@ -1727,9 +1729,9 @@ function OffersPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
         <SectionLabel>Offers</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Giveaways</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{offerFilter === "job" ? "Jobs" : offerFilter === "mentorship" ? "Mentorship" : offerFilter === "counselling" ? "Counselling" : "Giveaways"}</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          Food, time, goods, skills people are ready to give. Seek keeps details private until there is a fit.
+          {offerFilter === "job" ? "Open roles people have posted on Seek. Indicate interest to apply." : offerFilter === "mentorship" ? "People offering guidance. Indicate interest to be introduced." : offerFilter === "counselling" ? "People offering counselling support. Indicate interest to be introduced." : "Food, time, goods, skills people are ready to give. Seek keeps details private until there is a fit."}
         </p>
       </section>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
@@ -3557,6 +3559,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const [notifications, setNotifications] = useState([]);
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
+  const [gifts, setGifts] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -3565,12 +3568,13 @@ function MySeekDashboard({ setPage, userSession }) {
 
     (async () => {
       try {
-        const [requestRows, offerRows, profileRow, liveStats, notificationRows] = await Promise.all([
+        const [requestRows, offerRows, profileRow, liveStats, notificationRows, giftRows] = await Promise.all([
           listMyRequests().catch(() => []),
           listMyOffers().catch(() => []),
           getMyProfile().catch(() => null),
           getSeekLiveStats().catch(() => null),
           listMyNotifications(50).catch(() => []),
+          listMyGifts().catch(() => []),
         ]);
 
         if (cancelled) return;
@@ -3582,6 +3586,7 @@ function MySeekDashboard({ setPage, userSession }) {
         setProfile(profileRow || null);
         setStats(liveStats || null);
         setNotifications(Array.isArray(notificationRows) ? notificationRows : []);
+        setGifts(Array.isArray(giftRows) ? giftRows : []);
 
         const offerIds = mappedOffers.map((offer) => offer.id).filter(Boolean);
         if (offerIds.length) {
@@ -3656,6 +3661,7 @@ function MySeekDashboard({ setPage, userSession }) {
               <span><strong className="text-white">{offers.length}</strong> giveaways</span>
               <span><strong className="text-white">{interests.length}</strong> interests</span>
               <span><strong className="text-white">{unreadNotifications}</strong> unread</span>
+              <span><strong className="text-white">{gifts.length}</strong> gifts sent</span>
             </div>
           </div>
         </div>
@@ -3697,6 +3703,21 @@ function MySeekDashboard({ setPage, userSession }) {
             {offers.length === 0 ? <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">You haven't created a giveaway yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Offer goods, services, opportunities or other support to someone in the SEEK community.</p><button type="button" onClick={() => go("offers", "/offers")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Give support</button></div> : (
               <div className="space-y-2">
                 {offers.slice(0, 3).map((offer) => <div key={offer.id} className="rounded-2xl border border-[#0D3B3B]/8 p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold text-[#0D3B3B] line-clamp-1">{offer.description || offer.category || "SEEK giveaway"}</p><span className="text-xs font-semibold text-[#1BAA9C]">{offer.status || "Open"}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{offer.category || "Support"}{offer.city ? ` · ${offer.city}` : ""}</p></div>)}
+              </div>
+            )}
+          </div>
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your gifts</p>
+            <h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Help you have given</h2>
+            <p className="mt-1 text-xs text-[#0D3B3B]/45">Amounts stay on your account only.</p>
+            {gifts.length === 0 ? <p className="mt-3 text-sm text-[#0D3B3B]/55">No confirmed gifts on this email yet.</p> : (
+              <div className="mt-3 space-y-2">
+                {gifts.slice(0, 8).map((g) => (
+                  <div key={g.id} className="rounded-2xl border border-[#0D3B3B]/8 p-3 flex justify-between gap-3 text-sm">
+                    <span>{g.donor_name || "Gift"}</span>
+                    <span className="font-semibold">₦{Number(g.amount || 0).toLocaleString()}</span>
+                  </div>
+                ))}
               </div>
             )}
           </div>
@@ -4331,6 +4352,11 @@ export default function App() {
   };
 
   const [userSession, setUserSession] = useState(() => getUserSession());
+  useEffect(() => {
+    refreshUserSession()
+      .then((s) => { if (s?.access_token) setUserSession(s); })
+      .catch(() => {});
+  }, []);
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
   useEffect(() => {
