@@ -1727,7 +1727,7 @@ function OfferCard({ offer, setPage }) {
 }
 
 
-function GivePage({ setPage }) {
+function SeekGivePage({ setPage }) {
   const [sponsors, setSponsors] = useState([]);
   useEffect(() => { listPublicSponsors().then(setSponsors).catch(() => {}); }, []);
   const [outreach, setOutreach] = useState(null);
@@ -5093,7 +5093,7 @@ useEffect(() => {
   const pages = {
     home: <HomePage setPage={setPage} userSession={userSession} />,
     "for-you": <ForYouPage setPage={setPage} />,
-    give: <GivePage setPage={setPage} />,
+    give: <SeekGivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
     mentorship: <OffersPage setPage={setPage} />,
