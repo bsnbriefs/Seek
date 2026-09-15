@@ -95,7 +95,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -2539,6 +2539,80 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
 
 
 function CelebratePage({ setPage }) {
+  const [list, setList] = useState([]);
+  useEffect(() => {
+    let cancelled = false;
+    listPublishedRequests(48)
+      .then((rows) => {
+        const items = (rows || []).map(mapRequestRow).filter((r) => CONNECT_CATS.includes(r.category));
+        if (!cancelled) setList(items);
+      })
+      .catch(() => {});
+    return () => { cancelled = true; };
+  }, []);
+
+  const go = (id) => { setPage && setPage(id); window.scrollTo(0, 0); };
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-14 sm:pt-20 pb-10 text-center">
+        <SectionLabel>Connect & Celebrate</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Good things are worth celebrating.</h1>
+        <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[#0D3B3B]/65">
+          SEEK brings people together around birthdays, graduations, milestones and moments that matter. Connect with the community and celebrate someone — this is about human connection, not dating or fundraising.
+        </p>
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-12">
+        <div className="grid gap-4 sm:grid-cols-3">
+          <button type="button" onClick={() => go("celebrate-request")} className="rounded-3xl bg-[#0D3B3B] p-6 text-left text-white hover:shadow-lg transition">
+            <HeartHandshake size={22} className="text-[#63C167]" />
+            <h2 className="mt-4 font-display font-bold text-xl">I want to connect</h2>
+            <p className="mt-2 text-sm leading-6 text-white/65">Share a genuine invitation for company around a meaningful moment.</p>
+          </button>
+          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
+            <Users size={22} className="text-[#1BAA9C]" />
+            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">I want to join</h2>
+            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">See published invitations and find a safe community moment to join.</p>
+          </button>
+          <button type="button" onClick={() => go("impact")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
+            <Sparkles size={22} className="text-[#1BAA9C]" />
+            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">Celebrate what happened</h2>
+            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Explore real community stories and outcomes shared through SEEK.</p>
+          </button>
+        </div>
+      </section>
+
+      <section id="celebrate-invitations" className="bg-white py-14">
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
+            <div>
+              <SectionLabel>Community moments</SectionLabel>
+              <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">Open invitations</h2>
+            </div>
+            <button type="button" onClick={() => go("celebrate-request")} className="text-sm font-bold text-[#1BAA9C]">Create an invitation →</button>
+          </div>
+          <div className="grid gap-4 md:grid-cols-2">
+            {list.slice(0, 6).map((req) => (
+              <RequestCard key={req.id} req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} />
+            ))}
+          </div>
+          {!list.length && <div className="rounded-3xl border border-[#0D3B3B]/8 bg-[#F7FAF8] p-8 text-center"><p className="font-display font-bold text-[#0D3B3B]">No published invitations yet.</p><p className="mt-2 text-sm text-[#0D3B3B]/55">Be the first to share a genuine community moment.</p></div>}
+        </div>
+      </section>
+
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 py-14 text-center">
+        <div className="rounded-3xl bg-[#0D3B3B] p-8 sm:p-10 text-white">
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#63C167]">A simple boundary</p>
+          <h2 className="mt-3 font-display font-bold text-2xl">Connect with care.</h2>
+          <p className="mt-3 text-sm leading-6 text-white/65">SEEK is not a dating app. Do not share your home address. Meet in public places and use your judgment when connecting with someone new.</p>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function CelebrateRequestPage({ setPage }) {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
@@ -4431,6 +4505,7 @@ function pageFromPath(pathname) {
   if (path === "/seek-help") return "seek-help";
   if (path === "/seek-help/request") return "seek-help-form";
   if (path === "/celebrate") return "celebrate";
+  if (path === "/celebrate/request") return "celebrate-request";
   if (path === "/about") return "about";
   if (path === "/organisations") return "organisations";
   if (path === "/impact") return "impact";
@@ -4462,6 +4537,7 @@ function pathFromPage(page) {
     "seek-help": "/seek-help",
     "seek-help-form": "/seek-help/request",
     celebrate: "/celebrate",
+    "celebrate-request": "/celebrate/request",
     volunteer: "/volunteer",
     about: "/about",
     organisations: "/organisations",
@@ -4776,6 +4852,7 @@ useEffect(() => {
     "seek-help": <SeekHelpPage setPage={setPage} />,
     "seek-help-form": <SeekHelpRequestPage />,
     celebrate: <CelebratePage setPage={setPage} />,
+    "celebrate-request": <CelebrateRequestPage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
     organisations: <OrganisationsPage setPage={setPage} />,
@@ -4809,7 +4886,7 @@ useEffect(() => {
   const memberId = isMemberPage ? page.split(":")[1] : null;
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
-  const gatedPages = ["seek-help-form", "celebrate", "my-requests", "my-seek"];
+  const gatedPages = ["seek-help-form", "celebrate-request", "my-requests", "my-seek"];
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
