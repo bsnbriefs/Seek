@@ -1071,14 +1071,27 @@ function HomePage({ setPage, userSession }) {
             Everyone deserves a little help.
           </h1>
           <p className="mt-5 font-body text-lg text-[#0D3B3B]/70 max-w-xl mx-auto">
-            Ask for what you need. Offer what you can.
+            Three doors. Help with a need. Give money or things. Or ask for company — not money.
           </p>
-          <div className="mt-9 flex flex-col sm:flex-row items-center justify-center gap-3">
-            <Button variant="primary" onClick={() => go("seek-help")}>I need help <ArrowRight size={16} /></Button>
-            <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
+          <div className="mt-10 grid sm:grid-cols-3 gap-3 text-left max-w-4xl mx-auto">
+            <button type="button" onClick={() => go("seek-help")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">1 · Need</p>
+              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Seek Help</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/60">School, food, rent, an emergency. Seek reviews it before it is public.</p>
+            </button>
+            <button type="button" onClick={() => go("give")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">2 · Give</p>
+              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Give or give away</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/60">Money to a person or BSN. Goods, jobs and time live under Giveaways.</p>
+            </button>
+            <button type="button" onClick={() => go("celebrate")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 hover:shadow-md text-left">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">3 · Company</p>
+              <h2 className="mt-2 font-display font-bold text-xl text-[#0D3B3B]">Celebrate & Connect</h2>
+              <p className="mt-1 text-sm text-[#0D3B3B]/60">A birthday, a new city, a study partner. Not a request for cash.</p>
+            </button>
           </div>
-          <button onClick={() => go("volunteer")} className="mt-5 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
-            Become a volunteer
+          <button onClick={() => go("volunteer")} className="mt-6 font-body text-sm text-[#0D3B3B]/55 hover:text-[#1BAA9C] underline underline-offset-4">
+            Give time instead — volunteer
           </button>
         </div>
       </section>
@@ -1116,20 +1129,16 @@ function HomePage({ setPage, userSession }) {
         <div className="flex items-end justify-between gap-4 mb-6">
           <div>
             <SectionLabel>SEEK Features</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">What would you like to do?</h2>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">More ways to show up</h2>
           </div>
           <button type="button" onClick={() => go("offers")} className="hidden sm:inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Explore all <ArrowRight size={15} /></button>
         </div>
         <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3 sm:gap-4">
           {[
-            { id: "seek-help", icon: Search, title: "Seek Help", text: "Tell us what you need." },
-            { id: "give", icon: HandHeart, title: "Give Support", text: "Support a person or community." },
-            { id: "offers", icon: Package, title: "Giveaways", text: "Offer money, goods or services." },
-            { id: "jobs", icon: Briefcase, title: "Jobs", text: "Offer or find an opportunity." , filter: "job"},
-            { id: "mentorship", icon: Users, title: "Mentorship", text: "Offer or request guidance.", filter: "mentorship" },
-            { id: "counselling", icon: HeartHandshake, title: "Counselling", text: "Offer or request support.", filter: "counselling" },
-            { id: "celebrate", icon: Users, title: "Connect & Celebrate", text: "Connect with people and celebrate meaningful moments." },
-            { id: "impact", icon: BadgeCheck, title: "Impact", text: "See what help made possible." },
+            { id: "offers", icon: Package, title: "Giveaways", text: "Goods, skills and open offers." },
+            { id: "jobs", icon: Briefcase, title: "Jobs", text: "Roles posted as giveaways.", filter: "job"},
+            { id: "mentorship", icon: Users, title: "Mentorship", text: "Guidance, same giveaway list.", filter: "mentorship" },
+            { id: "impact", icon: BadgeCheck, title: "Impact", text: "What help made possible." },
           ].map((item) => (
             <button
               key={item.id}
