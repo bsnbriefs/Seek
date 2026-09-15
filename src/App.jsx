@@ -82,6 +82,7 @@ import {
 import {
   listMyNotifications,
 } from "./lib/notificationApi";
+import { listCommunityInteractions, addCommunityReaction, addCommunityComment } from "./lib/communityApi";
 
 import {
   adminLogin,
@@ -463,6 +464,90 @@ function CategoryCard({ cat, onClick }) {
       </span>
       <span className="font-display font-semibold text-[#0D3B3B]">{cat.label}</span>
     </button>
+  );
+}
+
+
+const COMMUNITY_REACTIONS = [
+  { key: "support", emoji: "❤️", label: "Support" },
+  { key: "encourage", emoji: "🙏", label: "Encourage" },
+  { key: "celebrate", emoji: "🎉", label: "Celebrate" },
+  { key: "help", emoji: "🤝", label: "I can help" },
+];
+
+function CommunityInteractions({ targetType, targetId, compact = false }) {
+  const [data, setData] = useState({ comments: [], reactions: {} });
+  const [open, setOpen] = useState(false);
+  const [comment, setComment] = useState("");
+  const [saving, setSaving] = useState(false);
+  const [error, setError] = useState("");
+  const [notice, setNotice] = useState("");
+
+  const load = async () => {
+    if (!targetType || !targetId) return;
+    const next = await listCommunityInteractions(targetType, targetId);
+    setData(next || { comments: [], reactions: {} });
+  };
+
+  useEffect(() => { load(); }, [targetType, targetId]);
+
+  const react = async (reactionType) => {
+    setError(""); setNotice("");
+    try {
+      await addCommunityReaction({ targetType, targetId, reactionType });
+      await load();
+    } catch (err) {
+      setError(err?.message || "Please sign in to react.");
+    }
+  };
+
+  const submitComment = async (e) => {
+    e.preventDefault();
+    setError(""); setNotice(""); setSaving(true);
+    try {
+      await addCommunityComment({ targetType, targetId, body: comment });
+      setComment("");
+      setOpen(true);
+      setNotice("Your comment is now part of the community conversation.");
+      await load();
+    } catch (err) {
+      setError(err?.message || "Could not post your comment.");
+    } finally { setSaving(false); }
+  };
+
+  return (
+    <div className={`${compact ? "mt-4" : "mt-7"} rounded-2xl border border-[#0D3B3B]/8 bg-[#F8FAF8] p-4 sm:p-5`}>
+      <div className="flex flex-wrap items-center gap-2">
+        {COMMUNITY_REACTIONS.map((reaction) => (
+          <button key={reaction.key} type="button" onClick={() => react(reaction.key)} className="rounded-full bg-white border border-[#0D3B3B]/10 px-3 py-2 text-sm font-semibold text-[#0D3B3B] hover:border-[#1BAA9C] transition">
+            <span className="mr-1.5" aria-hidden="true">{reaction.emoji}</span>{reaction.label} <span className="ml-1 text-[#0D3B3B]/45">{data.reactions?.[reaction.key] || 0}</span>
+          </button>
+        ))}
+        <button type="button" onClick={() => setOpen((v) => !v)} className="rounded-full px-3 py-2 text-sm font-semibold text-[#1BAA9C] hover:bg-white">
+          {open ? "Hide comments" : `Comments${data.comments?.length ? ` (${data.comments.length})` : ""}`}
+        </button>
+      </div>
+      {(error || notice) && <p className={`mt-3 text-xs ${error ? "text-red-600" : "text-[#1BAA9C]"}`}>{error || notice}</p>}
+      {open && (
+        <div className="mt-4 space-y-4">
+          <form onSubmit={submitComment} className="flex flex-col sm:flex-row gap-2">
+            <textarea value={comment} onChange={(e) => setComment(e.target.value)} maxLength={500} rows={2} placeholder="Leave a kind, useful comment…" className="flex-1 rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2.5 text-sm text-[#0D3B3B] focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]" />
+            <button disabled={saving || !comment.trim()} type="submit" className="self-end sm:self-stretch rounded-xl bg-[#0D3B3B] px-4 py-2.5 text-sm font-bold text-white disabled:opacity-40">{saving ? "Posting…" : "Comment"}</button>
+          </form>
+          <p className="text-[11px] text-[#0D3B3B]/45">Keep it kind and useful. Do not post private contact details, payment credentials or sensitive information.</p>
+          {data.comments?.length ? data.comments.map((item) => (
+            <div key={item.id} className="rounded-xl bg-white border border-[#0D3B3B]/8 p-3">
+              <div className="flex items-center gap-2">
+                {item.avatar_url ? <img src={item.avatar_url} alt="" className="h-7 w-7 rounded-full object-cover" /> : <div className="h-7 w-7 rounded-full bg-[#0D3B3B]/10" />}
+                <span className="text-sm font-semibold text-[#0D3B3B]">{item.display_name || "SEEK member"}</span>
+                <span className="text-[11px] text-[#0D3B3B]/35">{daysPosted(item.created_at)}</span>
+              </div>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/75 whitespace-pre-wrap">{item.body}</p>
+            </div>
+          )) : <p className="text-sm text-[#0D3B3B]/50">No comments yet. Be the first to encourage this person.</p>}
+        </div>
+      )}
+    </div>
   );
 }
 
@@ -1475,6 +1560,8 @@ function OfferCard({ offer, setPage }) {
           Share
         </button>
       </div>
+      {!isOwner && <ReportContentForm targetType="offer" targetId={offer.id} label="Report this giveaway" />
+      <CommunityInteractions targetType="offer" targetId={offer.id} compact />}
 
       {isOwner && ownerRows.length > 0 && (
         <div className="mt-4 rounded-xl bg-[#F4F1EA] p-3 space-y-2">
@@ -3281,6 +3368,7 @@ function RequestPage({ requestId, setPage }) {
             <RequesterUpdateForm requestId={request.id} existing={request.publicUpdate} existingMedia={request.appreciationUrl} onSaved={(text) => setRequest((prev) => prev ? { ...prev, publicUpdate: text } : prev)} />
           )}
           <ReportRequestForm requestId={request.id} />
+          <CommunityInteractions targetType="request" targetId={request.id} />
 
           <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
             {request.status === "fulfilled" ? (
@@ -3424,6 +3512,91 @@ function ReportRequestForm({ requestId }) {
           >
             {loading ? "Sending…" : "Submit report"}
           </button>
+        </form>
+      )}
+    </div>
+  );
+}
+
+
+function ReportContentForm({ targetType, targetId, label = "Report this content" }) {
+  const [open, setOpen] = useState(false);
+  const [reason, setReason] = useState("inappropriate");
+  const [details, setDetails] = useState("");
+  const [email, setEmail] = useState("");
+  const [sent, setSent] = useState(false);
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  if (sent) {
+    return <p className="mt-3 text-xs font-semibold text-[#1BAA9C]">Thanks. SEEK will review this report.</p>;
+  }
+
+  return (
+    <div className="mt-3">
+      {!open ? (
+        <button
+          type="button"
+          onClick={() => setOpen(true)}
+          className="text-xs font-semibold text-[#0D3B3B]/45 hover:text-[#0D3B3B]"
+        >
+          Report
+        </button>
+      ) : (
+        <form
+          className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F7FAF8] p-4 space-y-3"
+          onSubmit={async (e) => {
+            e.preventDefault();
+            setLoading(true);
+            setError("");
+            try {
+              await submitSafetyReport({ targetType, targetId, reason, details, email });
+              setSent(true);
+            } catch (err) {
+              setError(err?.message || "Could not submit the report.");
+            } finally {
+              setLoading(false);
+            }
+          }}
+        >
+          <div>
+            <p className="font-display font-semibold text-sm text-[#0D3B3B]">{label}</p>
+            <p className="mt-1 text-xs leading-5 text-[#0D3B3B]/55">Report scams, harmful content, exposed private information or other safety concerns. Please do not include passwords, PINs or OTPs.</p>
+          </div>
+          <select
+            value={reason}
+            onChange={(e) => setReason(e.target.value)}
+            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+          >
+            <option value="inappropriate">Inappropriate or harmful content</option>
+            <option value="spam">Spam or scam</option>
+            <option value="privacy">Private information exposed</option>
+            <option value="harassment">Harassment or unsafe behaviour</option>
+            <option value="other">Something else</option>
+          </select>
+          <textarea
+            value={details}
+            onChange={(e) => setDetails(e.target.value)}
+            placeholder="What should SEEK know? (optional)"
+            rows={3}
+            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+          />
+          <input
+            type="email"
+            value={email}
+            onChange={(e) => setEmail(e.target.value)}
+            placeholder="Your email (optional)"
+            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+          />
+          {error && <p className="text-sm text-red-600">{error}</p>}
+          <div className="flex items-center gap-2">
+            <button type="submit" disabled={loading} className="rounded-full bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white">
+              {loading ? "Sending…" : "Submit report"}
+            </button>
+            <button type="button" disabled={loading} onClick={() => { setOpen(false); setError(""); }} className="rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B]">
+              Cancel
+            </button>
+          </div>
         </form>
       )}
     </div>
@@ -3657,6 +3830,7 @@ function ImpactStoryPage({ impactId, setPage }) {
             <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
         ))}
+        <CommunityInteractions targetType="impact" targetId={post.id} />
         <div className="flex flex-wrap gap-3">
           <Button variant="primary" onClick={() => { if (String(impactId).startsWith("thanks-")) { setPage("give"); window.scrollTo(0, 0); } else { setDonateOpen(true); } }}>{String(impactId).startsWith("thanks-") ? "Support the SEEK community" : "Support this work"}</Button>
           <Button variant="secondary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>All stories</Button>
