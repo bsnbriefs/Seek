@@ -161,6 +161,37 @@ export async function submitRequest(payload) {
   return request;
 }
 
+export async function uploadRequestEvidence(requestId, file) {
+  const session = (await refreshUserSession()) || getUserSession();
+  if (!session?.access_token) throw new Error("Please sign in to upload evidence.");
+  if (!requestId) throw new Error("A request is required for this evidence.");
+  if (!file) throw new Error("Choose a photo or video first.");
+  await assertFileNotAlreadyUploaded(file);
+
+  const form = new FormData();
+  form.append("file", file);
+  form.append("purpose", "evidence");
+  form.append("request_id", requestId);
+  form.append("original_name", file.name || "evidence");
+
+  const uploadResponse = await fetch(
+    `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
+    {
+      method: "POST",
+      headers: {
+        apikey: import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+      },
+      body: form,
+    }
+  );
+  const result = await uploadResponse.json().catch(() => ({}));
+  if (!uploadResponse.ok || !result?.success) {
+    throw new Error([result?.error, result?.details, result?.hint].filter(Boolean).join(" — ") || "Evidence upload failed.");
+  }
+  return result;
+}
+
 export async function listPublicOffers() {
   if (!supabaseConfigured) return [];
   let rows = await supabaseFetch(
@@ -350,6 +381,9 @@ async function attachAvatars(rows) {
 export function mapRequestRow(row) {
   return {
     id: row.id,
+    userId: row.user_id || row.created_by || "",
+    full_name: row.full_name || row.name || "",
+    username: row.username || "",
     avatarUrl: row.avatar_url || (row.avatar_path ? seekImageUrl(row.avatar_path) : "") || "",
     title: row.title,
     category: row.category,
@@ -1707,8 +1741,10 @@ export async function listLiveSupportCases(limit = 12) {
       } catch (_e) {
         media = [];
       }
+      const member = request.userId ? await getPublicMember(request.userId).catch(() => null) : null;
       return {
         ...request,
+        member: member || null,
         media: (Array.isArray(media) ? media : []).filter((item) => item?.public_url),
       };
     })
