@@ -1538,48 +1538,71 @@ export function validateSeekUsername(value) {
 export async function checkUsernameAvailable(value, currentUserId) {
   const checked = validateSeekUsername(value);
   if (!checked.ok) return checked;
-  const rows = await supabaseFetch(
-    "profiles?username=eq." + encodeURIComponent(checked.username) + "&select=id&limit=1"
-  ).catch(() => []);
-  const row = Array.isArray(rows) ? rows[0] : rows;
-  if (row?.id && row.id !== currentUserId) {
-    return { ok: false, username: checked.username, error: "That username is taken." };
+
+  const rows = await supabaseFetch("rpc/check_seek_username", {
+    method: "POST",
+    body: JSON.stringify({
+      p_username: checked.username,
+    }),
+  }).catch(() => null);
+
+  const available = Array.isArray(rows) ? rows[0] : rows;
+
+  if (
+    available === false ||
+    available === "false" ||
+    available?.available === false
+  ) {
+    return {
+      ok: false,
+      username: checked.username,
+      error: "That username is taken.",
+    };
   }
-  return { ok: true, username: checked.username };
+
+  return {
+    ok: true,
+    username: checked.username,
+  };
 }
 
 export async function updateMyUsername({ username, full_name, bio }) {
   const session = getUserSession();
-  if (!session?.access_token || !session.user?.id) {
+
+  if (!session?.access_token || !session?.user?.id) {
     throw new Error("Sign in to edit your profile.");
   }
-  const patch = {};
-  if (username !== undefined) {
-    const checked = await checkUsernameAvailable(username, session.user.id);
-    if (!checked.ok) throw new Error(checked.error);
-    patch.username = checked.username;
+
+  const checked = validateSeekUsername(username);
+
+  if (!checked.ok) {
+    throw new Error(checked.error);
   }
-  if (full_name !== undefined) patch.full_name = String(full_name || "").trim().slice(0, 80);
-  if (bio !== undefined) patch.bio = String(bio || "").trim().slice(0, 280);
-  if (!Object.keys(patch).length) return getMyProfile();
-  const response = await fetch(
-    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}`,
-    {
-      method: "PATCH",
-      headers: {
-        apikey: AUTH_KEY,
-        Authorization: `Bearer ${session.access_token}`,
-        "Content-Type": "application/json",
-        Prefer: "return=representation",
-      },
-      body: JSON.stringify(patch),
-    }
-  );
-  const data = await response.json().catch(() => ({}));
-  if (!response.ok) {
-    throw new Error(data?.message || data?.hint || "Could not save username.");
+
+  const cleanName = String(full_name || "").trim().slice(0, 80);
+  const cleanBio = String(bio || "").trim().slice(0, 280);
+
+  const rows = await supabaseFetch("rpc/save_my_profile", {
+    method: "POST",
+    body: JSON.stringify({
+      p_username: checked.username,
+      p_full_name: cleanName || null,
+      p_bio: cleanBio || null,
+    }),
+  });
+
+  const saved = Array.isArray(rows) ? rows[0] : rows;
+
+  if (!saved?.id) {
+    throw new Error("Your profile could not be saved.");
   }
-  return getMyProfile();
+
+  return {
+    ...saved,
+    avatar_url: saved.avatar_path
+      ? seekImageUrl(saved.avatar_path, 96)
+      : null,
+  };
 }
 
 export async function getPublicMember(userId) {
