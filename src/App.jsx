@@ -1137,6 +1137,28 @@ function Connector() {
 
 /* ---------------- Homepage ---------------- */
 
+function HomeLiveStrip({ setPage }) {
+  const [cases, setCases] = useState([]);
+  useEffect(() => {
+    listLiveSupportCases(2).then((rows) => setCases(Array.isArray(rows) ? rows.slice(0, 2) : [])).catch(() => {});
+  }, []);
+  if (!cases.length) return null;
+  return (
+    <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-12">
+      <div className="flex items-end justify-between mb-4">
+        <div>
+          <SectionLabel>Live Support</SectionLabel>
+          <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">People seeking support now.</h2>
+        </div>
+        <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => { setPage("for-you"); window.scrollTo(0,0); }}>See all</button>
+      </div>
+      <div className="grid md:grid-cols-2 gap-4">
+        {cases.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
+      </div>
+    </section>
+  );
+}
+
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
   const [mine, setMine] = useState([]);
@@ -1250,6 +1272,7 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
+      <HomeLiveStrip setPage={setPage} />
 
       {userSession?.access_token && (
         <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10">
@@ -1857,7 +1880,7 @@ function LiveSupportCard({ request, setPage }) {
   };
 
   return (
-    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)]">
+    <article className="overflow-hidden rounded-[2rem] bg-white border border-[#0D3B3B]/10 shadow-[0_14px_45px_rgba(13,59,59,0.10)] snap-start">
       <div className="relative bg-[#101415] aspect-[4/5] sm:aspect-[4/4.7] overflow-hidden">
         {current?.media_kind === "video" ? (
           <video
@@ -1867,6 +1890,7 @@ function LiveSupportCard({ request, setPage }) {
             muted
             loop
             playsInline
+            controls
             preload="metadata"
             className="absolute inset-0 h-full w-full object-cover"
             aria-label={request.title || "SEEK support case video"}
@@ -1977,7 +2001,7 @@ function ForYouPage({ setPage }) {
             <button type="button" onClick={() => setPage("seek-help")} className="mt-5 rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">Ask for help</button>
           </div>
         ) : (
-          <div className="space-y-6">
+          <div className="space-y-6 snap-y snap-mandatory">
             {cases.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
           </div>
         )}
@@ -3617,11 +3641,14 @@ function AccountUsernameForm({ onSaved } = {}) {
       e.preventDefault();
       setSaving(true); setHint("");
       try {
-        const saved = await updateMyUsername({ username, full_name: name, bio });
-        setUsername(saved?.username || username);
-        setName(saved?.full_name ?? name);
-        setBio(saved?.bio ?? bio);
-        if (typeof onSaved === "function") onSaved(saved);
+        await updateMyUsername({ username, full_name: name, bio });
+        const refreshed = await getMyProfile();
+        if (refreshed) {
+          setUsername(refreshed.username || username);
+          setName(refreshed.full_name || name);
+          setBio(refreshed.bio || bio);
+          if (typeof onSaved === "function") onSaved(refreshed);
+        }
         setHint("Profile saved.");
       } catch (err) {
         setHint(err.message || "Could not save.");
