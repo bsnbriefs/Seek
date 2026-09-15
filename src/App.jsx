@@ -1866,20 +1866,18 @@ function ForYouPage({ setPage }) {
 function OffersPage({ setPage }) {
   const [offers, setOffers] = useState([]);
   const [offerFilter, setOfferFilter] = useState(() => {
-    try { return sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) { return ""; }
+    try { return sessionStorage.getItem("seek_offer_filter") || "all"; } catch (_e) { return "all"; }
   });
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
   const [q, setQ] = useState("");
-  const [statusFilter, setStatusFilter] = useState("all");
+
   useEffect(() => {
     let cancelled = false;
-    let donorTick;
     (async () => {
       try {
         const rows = await listPublicOffers();
-        if (!cancelled) setOffers(rows);
+        if (!cancelled) setOffers(Array.isArray(rows) ? rows : []);
       } catch (err) {
         if (!cancelled) setError(err.message || "Could not load giveaways.");
       } finally {
@@ -1888,55 +1886,100 @@ function OffersPage({ setPage }) {
     })();
     return () => { cancelled = true; };
   }, []);
+
+  const typeOf = (offer) => {
+    const value = String(offer?.category || "").trim().toLowerCase();
+    if (value.includes("job")) return "job";
+    if (value.includes("mentor")) return "mentorship";
+    if (value.includes("counsel")) return "counselling";
+    return "goods";
+  };
+
+  const filteredOffers = offers.filter((offer) => {
+    const type = typeOf(offer);
+    const matchesType = offerFilter === "all" || type === offerFilter;
+    const haystack = [offer.description, offer.category, offer.city].filter(Boolean).join(" ").toLowerCase();
+    return matchesType && (!q.trim() || haystack.includes(q.trim().toLowerCase()));
+  });
+
+  const tabs = [
+    ["all", "All"],
+    ["goods", "Goods"],
+    ["job", "Jobs"],
+    ["mentorship", "Mentorship"],
+    ["counselling", "Counselling"],
+  ];
+
+  const selectFilter = (value) => {
+    setOfferFilter(value);
+    try { sessionStorage.setItem("seek_offer_filter", value === "all" ? "" : value); } catch (_e) {}
+  };
+
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
-        <SectionLabel>Offers</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{offerFilter === "job" ? "Jobs" : offerFilter === "mentorship" ? "Mentorship" : offerFilter === "counselling" ? "Counselling" : "Giveaways"}</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          {offerFilter === "job" ? "Open roles people have posted on Seek. Indicate interest to apply." : offerFilter === "mentorship" ? "People offering guidance. Indicate interest to be introduced." : offerFilter === "counselling" ? "People offering counselling support. Indicate interest to be introduced." : "Food, time, goods, skills people are ready to give. Seek keeps details private until there is a fit."}
-        </p>
-      </section>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-4">
-        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading giveaways…</p>}
-        {error && <p className="font-body text-sm text-red-600">{error}</p>}
-        {!loading && !error && offers.length === 0 && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">Nothing open here yet. Use Post a giveaway to add one.</p>
-        )}
-        {!loading && !error && offers.length > 0 && offers.filter((o) => offerFilter && String(o.category || "").toLowerCase() !== offerFilter.toLowerCase()).length === offers.length && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">No {offerFilter} posts yet. Post a giveaway and choose that type.</p>
-        )}
-        {offers.filter((o) => !offerFilter || String(o.category || "").toLowerCase() === offerFilter.toLowerCase()).map((offer) => (
-          <OfferCard offer={offer} setPage={setPage} />
-        ))}
-        <div className="pt-8">
-          <p className="font-display font-semibold text-[#0D3B3B] mb-3">What you can offer</p>
-          <div className="grid grid-cols-2 sm:grid-cols-3 gap-3 text-left">
-            {[
-              { icon: Wallet, label: "Money", id: "money" },
-              { icon: Utensils, label: "Food", id: "food" },
-              { icon: Shirt, label: "Clothing", id: "clothing" },
-              { icon: Package, label: "Items", id: "items" },
-              { icon: HeartHandshake, label: "Time / skills", id: "time" },
-              { icon: HomeIcon, label: "Shelter / space", id: "shelter" },
-            ].map((item) => {
-              const Icon = item.icon;
-              const active = offerFilter === item.id;
-              return (
-                <button key={item.label} type="button" onClick={() => setOfferFilter(active ? "" : item.id)} className={"rounded-2xl bg-white border p-4 text-left " + (active ? "border-[#1BAA9C]" : "border-[#0D3B3B]/8")}>
-                  <span className="flex h-10 w-10 items-center justify-center rounded-xl text-white mb-2" style={{ background: `linear-gradient(135deg, ${C.teal}, ${C.green})` }}>
-                    <Icon size={18} />
-                  </span>
-                  <p className="font-display font-semibold text-sm text-[#0D3B3B]">{item.label}</p>
-                </button>
-              );
-            })}
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-14 pb-8">
+        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
+          <div className="max-w-2xl">
+            <SectionLabel>Giveaways</SectionLabel>
+            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Have something useful to offer?</h1>
+            <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">
+              Share goods, opportunities, skills or your time. Someone in the SEEK community may need exactly what you can give.
+            </p>
           </div>
-        </div>
-        <div className="text-center pt-6">
           <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
         </div>
-        <div id="make-offer" className="pt-10 text-left">
+      </section>
+
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
+        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5">
+          <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
+            <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
+              {tabs.map(([value, label]) => {
+                const active = offerFilter === value;
+                return (
+                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[#1BAA9C] text-white" : "bg-[#F2F5F3] text-[#0D3B3B]/70 hover:bg-[#E7EFEC]")}>
+                    {label}
+                  </button>
+                );
+              })}
+            </div>
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[#0D3B3B]/10 bg-[#F8FAF9] px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]" />
+          </div>
+        </div>
+
+        <div className="mt-6 flex items-center justify-between gap-3">
+          <div>
+            <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
+            <p className="mt-1 text-sm text-[#0D3B3B]/50">Published giveaways from the SEEK community.</p>
+          </div>
+          {!loading && <span className="text-sm font-semibold text-[#0D3B3B]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
+        </div>
+
+        <div className="mt-4 space-y-4">
+          {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/50">Loading giveaways…</div>}
+          {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-600">{error}</div>}
+          {!loading && !error && filteredOffers.length === 0 && (
+            <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
+              <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">There are no published giveaways matching this filter right now. You can be the first to offer something useful.</p>
+              <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Post a giveaway</button>
+            </div>
+          )}
+          {!loading && !error && filteredOffers.map((offer) => (
+            <OfferCard key={offer.id} offer={offer} setPage={setPage} />
+          ))}
+        </div>
+
+        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-6 sm:p-8 text-white">
+          <div className="max-w-2xl">
+            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8DE0D5]">Give in your own way</p>
+            <h2 className="mt-2 font-display font-extrabold text-2xl">Goods, jobs, mentorship or counselling</h2>
+            <p className="mt-2 text-sm leading-relaxed text-white/65">These are all part of Giveaways. Choose the type that best describes what you can offer, and SEEK will review it before it goes public.</p>
+          </div>
+          <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Offer something</button>
+        </div>
+
+        <div id="make-offer" className="pt-12 text-left">
           <GiveOfferForm />
         </div>
       </section>
