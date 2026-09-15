@@ -1314,7 +1314,7 @@ export async function getMyProfile() {
   const session = getUserSession();
   if (!session?.access_token || !session?.user?.id) return null;
   const rows = await fetch(
-    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path&limit=1`,
+    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}&select=id,role,avatar_path,username,full_name,bio&limit=1`,
     {
       headers: {
         apikey: AUTH_KEY,
@@ -1522,16 +1522,79 @@ export async function listMyGifts() {
 }
 
 
+export function normalizeSeekUsername(value) {
+  return String(value || "").trim().toLowerCase();
+}
+
+export function validateSeekUsername(value) {
+  const username = normalizeSeekUsername(value);
+  if (!username) return { ok: false, error: "Choose a username." };
+  if (!/^[a-z0-9_]{3,24}$/.test(username)) {
+    return { ok: false, error: "Use 3–24 characters: a–z, 0–9 and underscore only." };
+  }
+  return { ok: true, username };
+}
+
+export async function checkUsernameAvailable(value, currentUserId) {
+  const checked = validateSeekUsername(value);
+  if (!checked.ok) return checked;
+  const rows = await supabaseFetch(
+    "profiles?username=eq." + encodeURIComponent(checked.username) + "&select=id&limit=1"
+  ).catch(() => []);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  if (row?.id && row.id !== currentUserId) {
+    return { ok: false, username: checked.username, error: "That username is taken." };
+  }
+  return { ok: true, username: checked.username };
+}
+
+export async function updateMyUsername({ username, full_name, bio }) {
+  const session = getUserSession();
+  if (!session?.access_token || !session.user?.id) {
+    throw new Error("Sign in to edit your profile.");
+  }
+  const patch = {};
+  if (username !== undefined) {
+    const checked = await checkUsernameAvailable(username, session.user.id);
+    if (!checked.ok) throw new Error(checked.error);
+    patch.username = checked.username;
+  }
+  if (full_name !== undefined) patch.full_name = String(full_name || "").trim().slice(0, 80);
+  if (bio !== undefined) patch.bio = String(bio || "").trim().slice(0, 280);
+  if (!Object.keys(patch).length) return getMyProfile();
+  const response = await fetch(
+    `${AUTH_URL}/rest/v1/profiles?id=eq.${session.user.id}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: AUTH_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=representation",
+      },
+      body: JSON.stringify(patch),
+    }
+  );
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.message || data?.hint || "Could not save username.");
+  }
+  return getMyProfile();
+}
+
 export async function getPublicMember(userId) {
   if (!userId) return null;
-  const row = await supabaseFetch(
-    "profiles?id=eq." + encodeURIComponent(userId) + "&select=id,full_name,avatar_url,avatar_path&limit=1"
+  const rows = await supabaseFetch(
+    "rpc/get_public_member",
+    { method: "POST", body: JSON.stringify({ p_key: String(userId) }) }
   ).catch(() => []);
-  const item = Array.isArray(row) ? row[0] : row;
-  if (!item) return { id: userId, name: "SEEK member", avatar_url: "" };
+  const item = Array.isArray(rows) ? rows[0] : rows;
+  if (!item) return { id: userId, name: "SEEK member", username: "", bio: "", avatar_url: "" };
   return {
     id: item.id || userId,
     name: item.full_name || "SEEK member",
-    avatar_url: item.avatar_url || "",
+    username: item.username || "",
+    bio: item.bio || "",
+    avatar_url: item.avatar_path ? seekImageUrl(item.avatar_path, 160) : "",
   };
 }
