@@ -4095,7 +4095,7 @@ function AccountAvatar() {
   );
 }
 
-function AccountUsernameForm() {
+function AccountUsernameForm({ onSaved } = {}) {
   const [username, setUsername] = useState("");
   const [name, setName] = useState("");
   const [bio, setBio] = useState("");
@@ -4114,8 +4114,9 @@ function AccountUsernameForm() {
       e.preventDefault();
       setSaving(true); setHint("");
       try {
-        await updateMyUsername({ username, full_name: name, bio });
-        setHint("Saved.");
+        const saved = await updateMyUsername({ username, full_name: name, bio });
+        setHint("Profile saved.");
+        if (typeof onSaved === "function") onSaved(saved);
       } catch (err) {
         setHint(err.message || "Could not save.");
       } finally { setSaving(false); }
@@ -4139,9 +4140,19 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [message, setMessage] = useState("");
+  const [profile, setProfile] = useState(null);
+
+  useEffect(() => {
+    if (!userSession?.access_token) {
+      setProfile(null);
+      return;
+    }
+    getMyProfile().then((p) => setProfile(p || null)).catch(() => {});
+  }, [userSession]);
 
   if (userSession?.access_token) {
-    const displayName = userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+    const username = profile?.username ? `@${profile.username}` : "Username not set";
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
@@ -4150,16 +4161,16 @@ function AccountPage({ setPage, userSession, setUserSession }) {
               <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
                 <SectionLabel>Profile</SectionLabel>
-                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName}</h1>
-                <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <SeekVerifiedCheck /></h1>
+                <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
               </div>
             </div>
             <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
               <strong className="text-white">Your public profile</strong><br />
-              Only your name and photo are intended to be public. Your gifts, requests, notifications and contact details stay private to your account.
+              Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
             </div>
             <div className="mt-5 rounded-2xl bg-white p-5 text-[#0D3B3B]">
-              <AccountUsernameForm />
+              <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
             </div>
           </div>
 
@@ -4377,6 +4388,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
   const avatar = profile?.avatar_url || "";
   const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+  const username = profile?.username ? `@${profile.username}` : "Username not set";
   const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
 
   const go = (page, path = null) => {
@@ -4414,7 +4426,7 @@ function MySeekDashboard({ setPage, userSession }) {
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
                   <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {firstName} 👋</h1>
-                  <p className="mt-1 text-sm text-white/65 truncate">{userSession.user?.email}</p>
+                  <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
                 </div>
               </div>
               <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Profile</button>
