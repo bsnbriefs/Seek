@@ -41,6 +41,8 @@ import {
   userSignUp,
   userSignIn,
   sendMagicLink,
+  requestPasswordReset,
+  startGoogleSignIn,
   listMyRequests,
   listMyOffers,
   listMyGifts,
@@ -1817,7 +1819,7 @@ function LiveSupportCard({ request, setPage }) {
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
           <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
-          {request.description && <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p>}
+          {request.description && String(request.description).trim() !== String(request.title || "").trim() && !String(request.description).trim().startsWith(String(request.title || "").trim()) ? <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p> : null}
         </div>
       </div>
 
@@ -4124,7 +4126,11 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     setMessage("");
     setLoading(true);
     try {
-      if (mode === "signup") {
+      if (mode === "recover") {
+        await requestPasswordReset(email);
+        setMessage("Check your email for a password reset link.");
+        setMode("signin");
+      } else if (mode === "signup") {
         const result = await userSignUp(email, password);
         if (result?.needsConfirmation) {
           setMessage("Check your email to confirm your account, then sign in.");
@@ -4157,10 +4163,10 @@ function AccountPage({ setPage, userSession, setUserSession }) {
         <div className="text-center mb-8">
           <SectionLabel>Account</SectionLabel>
           <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">
-            {mode === "signin" ? "Sign in" : "Create account"}
+            {mode === "recover" ? "Reset password" : mode === "signin" ? "Sign in" : "Create account"}
           </h1>
           <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
-            Sign in to see your requests, updates, and activity.
+            {mode === "recover" ? "We will email a reset link." : "Stay signed in on this device."}
           </p>
         </div>
 
@@ -4178,9 +4184,10 @@ function AccountPage({ setPage, userSession, setUserSession }) {
               placeholder="you@example.com"
             />
           </Field>
+          {mode !== "recover" && (
           <Field label="Password">
             <input
-              required
+              required={mode !== "recover"}
               type="password"
               minLength={6}
               className={inputCls}
@@ -4189,13 +4196,35 @@ function AccountPage({ setPage, userSession, setUserSession }) {
               placeholder="At least 6 characters"
             />
           </Field>
+          )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
           {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
 
           <Button disabled={loading} type="submit" variant="primary" className="w-full">
-            {loading ? "Please wait…" : mode === "signin" ? "Sign in" : "Create account"}
+            {loading ? "Please wait…" : mode === "recover" ? "Send reset link" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
+          {mode !== "recover" && (
+            <button type="button" className="w-full rounded-full border border-[#0D3B3B]/15 py-3 text-sm font-semibold" onClick={() => startGoogleSignIn()}>
+              Continue with Google
+            </button>
+            <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+              try {
+                setError("");
+                await sendMagicLink(email);
+                setMessage("Check your email for a sign-in link.");
+              } catch (err) {
+                setError(err.message || "Could not send a sign-in link.");
+              }
+            }}>
+              Email me a sign-in link
+            </button>
+          )}
+          {mode === "signin" && (
+            <button type="button" className="block w-full text-center text-sm font-semibold text-[#1BAA9C]" onClick={() => { setMode("recover"); setError(""); setMessage(""); }}>
+              Forgot password?
+            </button>
+          )}
 
           <p className="text-center text-sm text-[#0D3B3B]/55">
             {mode === "signin" ? (
@@ -4900,7 +4929,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const items = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "discover", label: "Discover", icon: Search },
-    { id: "for-you", label: "For You", icon: Sparkles },
+    { id: "notifications", label: "Inbox", icon: Bell, action: () => go(userSession?.access_token ? "notifications" : "account") },
     { id: "my-seek", label: "My SEEK", icon: User, action: () => go(userSession?.access_token ? "my-seek" : "account") },
   ];
 
