@@ -1294,7 +1294,7 @@ function HomePage({ setPage, userSession }) {
       <section className="px-5 pt-12 pb-8 text-center">
         <SectionLabel>SEEK</SectionLabel>
         <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto">
-          See the need. Feel the story. Show up.
+          See the need. Hear the story. Be the help.
         </h1>
         <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button variant="primary" onClick={() => go("seek-help")}>I need help</Button>
@@ -1903,7 +1903,7 @@ function DiscoverPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 pt-12 pb-8">
         <SectionLabel>Discover SEEK</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Understand SEEK. Then take your next step.</h1>
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">See the need. Hear the story. Be the help.</h1>
         <p className="mt-3 font-body text-[#0D3B3B]/65">SEEK connects people who need help with people who can offer support, time, goods and company.</p>
         <p className="mt-4 font-display font-bold text-[#0D3B3B]">Ask for what you need. Offer what you can.</p>
       </section>
@@ -1963,7 +1963,7 @@ function ForYouPage({ setPage }) {
         <div className="mx-auto max-w-[440px] text-center mb-6">
           <SectionLabel>SEEK Videos</SectionLabel>
           <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">For You</h1>
-          <p className="mt-2 text-sm text-[#0D3B3B]/55">Reviewed stories. Watch, then decide how to help.</p>
+          <p className="mt-2 text-sm text-[#0D3B3B]/55">Hear the story. Then decide how to help.</p>
         </div>
         {loading && <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/50">Loading videos…</p>}
         {error && <p className="mx-auto max-w-[440px] text-center text-sm text-red-700">{error}</p>}
@@ -2940,8 +2940,8 @@ function OrganisationsPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 pt-16 pb-16">
         <SectionLabel>For organisations</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Your organisation can give here too.</h1>
-        <p className="mt-4 font-body text-[#0D3B3B]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. You use the same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Your organisation can be the help too.</h1>
+        <p className="mt-4 font-body text-[#0D3B3B]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. Same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
         <div className="mt-8 grid sm:grid-cols-2 gap-3 pb-16">
           {items.map((item) => (
             <button key={item.t} type="button" onClick={() => go(item.id)} className="seek-reveal rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
