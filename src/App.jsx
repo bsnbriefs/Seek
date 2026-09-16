@@ -137,7 +137,7 @@ const SEEK_LANGS = [
 ];
 const SEEK_I18N = {
   en: {
-    hero: "See the need. Hear the story. Be the help.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Ask for what you need. Offer what you can.",
     needHelp: "I need help",
     wantHelp: "I want to help",
@@ -145,7 +145,7 @@ const SEEK_I18N = {
     language: "Language",
   },
   pcm: {
-    hero: "See di need. Hear di story. Be di help.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Ask wetin you need. Offer wetin you fit give.",
     needHelp: "I need help",
     wantHelp: "I wan help",
@@ -153,7 +153,7 @@ const SEEK_I18N = {
     language: "Language",
   },
   ha: {
-    hero: "Ga bukata. Ji labarin. Ka zama taimako.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Nemi abin da kake bukata. Ba da abin da za ka iya.",
     needHelp: "Ina bukatar taimako",
     wantHelp: "Ina so in taimaka",
@@ -161,7 +161,7 @@ const SEEK_I18N = {
     language: "Harshe",
   },
   yo: {
-    hero: "Wo aini naa. Gbo itan naa. Je iranlowo.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Beere ohun ti o nilo. Fun ohun ti o le fun.",
     needHelp: "Mo nilo iranlowo",
     wantHelp: "Mo fe ran lowo",
@@ -169,7 +169,7 @@ const SEEK_I18N = {
     language: "Ede",
   },
   ig: {
-    hero: "Hu mkpa. Nu akuko. Buru enyemaka.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Rio ihe i choro. Nye ihe i nwere.",
     needHelp: "A choro m enyemaka",
     wantHelp: "A choro m inyere aka",
@@ -177,7 +177,7 @@ const SEEK_I18N = {
     language: "Asusu",
   },
   fr: {
-    hero: "Voir le besoin. Entendre l'histoire. Etre l'aide.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Demandez ce dont vous avez besoin. Offrez ce que vous pouvez.",
     needHelp: "J'ai besoin d'aide",
     wantHelp: "Je veux aider",
@@ -185,7 +185,7 @@ const SEEK_I18N = {
     language: "Langue",
   },
   es: {
-    hero: "Ver la necesidad. Oir la historia. Ser la ayuda.",
+    hero: "ASK. SEEK. FIND.",
     askOffer: "Pide lo que necesitas. Ofrece lo que puedas.",
     needHelp: "Necesito ayuda",
     wantHelp: "Quiero ayudar",
@@ -1371,9 +1371,10 @@ function HomePage({ setPage, userSession }) {
       {/* HERO */}
       <section className="px-5 pt-12 pb-8 text-center">
         <SectionLabel>SEEK</SectionLabel>
-        <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto">
-          {tSeek("hero")}
+        <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto tracking-tight">
+          ASK. SEEK. FIND.
         </h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/65 max-w-md mx-auto">{tSeek("askOffer")}</p>
         <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
           <Button variant="primary" onClick={() => go("seek-help")}>{tSeek("needHelp")}</Button>
           <Button variant="secondary" onClick={() => go("give")}>{tSeek("wantHelp")}</Button>
@@ -1981,9 +1982,8 @@ function DiscoverPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 pt-12 pb-8">
         <SectionLabel>Discover SEEK</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">See the need. Hear the story. Be the help.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65">SEEK connects people who need help with people who can offer support, time, goods and company.</p>
-        <p className="mt-4 font-display font-bold text-[#0D3B3B]">Ask for what you need. Offer what you can.</p>
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">ASK. SEEK. FIND.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/65">Ask for what you need. Offer what you can. SEEK is where those two meet.</p>
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-10 space-y-3">
         {doors.map((d) => (
