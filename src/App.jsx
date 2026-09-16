@@ -2234,7 +2234,7 @@ if (!cancelled) {
         {getUserSession()?.access_token && (
           <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
             <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
-              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your confirmed gifts stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
+              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your giving</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">What you gave neighbours stay here.</h2><p className="mt-1 text-sm text-[#0D3B3B]/55">Your giving history is private to your account.</p></div>
               <div className="sm:text-right"><p className="text-xs text-[#0D3B3B]/45">Successful gifts</p><p className="font-display font-extrabold text-2xl text-[#0D3B3B]">{giftsLoading ? "—" : myGifts.length}</p></div>
             </div>
             {myGifts.length > 0 && <div className="mt-4 flex flex-wrap gap-2">{myGifts.slice(0,3).map((g) => <span key={g.id} className="rounded-full bg-white border border-[#0D3B3B]/8 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B]/70">₦{Number(g.amount || 0).toLocaleString()}</span>)}</div>}
@@ -2603,8 +2603,8 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
         <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Tell us what you need.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/60">Share only what's needed to describe your request — you're always in control of what's shown publicly.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask a neighbour for what you need.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/60">Say what you need in plain words. SEEK reviews it before neighbours see it.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -2618,6 +2618,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
               if (!form.category) throw new Error("Choose what you need help with.");
               await submitRequest({
                 ...form,
+                email: (getUserSession()?.user?.email || form.email || "").trim(),
                 onProgress: ({ index, total, name }) => {
                   setUploadProgress(`Uploading file ${index} of ${total}: ${name}`);
                 },
@@ -2633,7 +2634,14 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
         >
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Full name (admin only)"><input required className={inputCls} value={form.name} onChange={set("name")} placeholder="Your name" /></Field>
-            <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
+            {getUserSession()?.user?.email ? (
+              <Field label="Email">
+                <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={getUserSession().user.email} />
+                <p className="mt-1 text-xs text-[#0D3B3B]/50">Uses the email on your SEEK account.</p>
+              </Field>
+            ) : (
+              <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
+            )}
           </div>
           <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
@@ -2696,9 +2704,9 @@ function CelebratePage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-14 sm:pt-20 pb-10 text-center">
         <SectionLabel>Connect & Celebrate</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Good things are worth celebrating.</h1>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Celebrate with a neighbour.</h1>
         <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[#0D3B3B]/65">
-          SEEK brings people together around birthdays, graduations, milestones and moments that matter. Connect with the community and celebrate someone — this is about human connection, not dating or fundraising.
+          Birthdays, graduations, a new city. Ask a neighbour to be there. SEEK reads every post. This is not dating, and it is not a fundraiser.
         </p>
       </section>
 
@@ -2774,19 +2782,26 @@ function CelebrateRequestPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 pt-16 pb-8 text-center">
         <SectionLabel>Celebrate & Connect</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Find company. Not a donation.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65">Ask for company at a birthday, a graduation, or in a new city. Seek reads every post before it is public.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask a neighbour to be there.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/65">Tell neighbours what you are marking and who you hope will come. SEEK reads it before it is public.</p>
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-10">
         <form className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 space-y-4" onSubmit={async (e) => {
           e.preventDefault(); setError(""); setLoading(true);
           try {
-            await submitRequest({ ...form, amount: "", description: form.need, evidenceFiles: form.evidenceFiles });
+            await submitRequest({ ...form, email: (getUserSession()?.user?.email || form.email || "").trim(), amount: "", description: form.need, evidenceFiles: form.evidenceFiles });
             setSubmitted(true);
           } catch (err) { setError(err.message); } finally { setLoading(false); }
         }}>
           <Field label="Your name"><input required className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
-          <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+          {getUserSession()?.user?.email ? (
+            <Field label="Email">
+              <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={getUserSession().user.email} />
+              <p className="mt-1 text-xs text-[#0D3B3B]/50">Uses the email on your SEEK account.</p>
+            </Field>
+          ) : (
+            <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
+          )}
           <Field label="Phone"><input required className={inputCls} value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} /></Field>
           <Field label="City"><input required className={inputCls} value={form.location} onChange={(e) => setForm({ ...form, location: e.target.value })} /></Field>
           <Field label="What kind of company">
@@ -3028,7 +3043,7 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
           try {
             if (!form.photo) throw new Error("Add a recent photo of yourself.");
             const uploaded = await uploadProfilePhoto(form.photo);
-            await submitCelebrateRsvp({ requestId: request.id, ...form, photo: uploaded.storage_path || uploaded.path || uploaded.public_url || "" });
+            await submitCelebrateRsvp({ requestId: request.id, ...form, email: session?.user?.email || form.email, photo: uploaded.storage_path || uploaded.path || uploaded.public_url || "" });
             try { localStorage.setItem("seek_rsvp_" + request.id, "1"); } catch (_e) {}
             setDone(true); setCount((n) => n + 1);
           } catch (err) { setError(err.message || "Could not send this."); }
@@ -3036,7 +3051,11 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
         }}>
           <p className="text-sm text-[#0D3B3B]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : "Tell this Seeker how you can help — a role, an introduction, or your time."}</p>
           <input required className={inputCls} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
-          <input required type="email" className={inputCls} placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          {session?.user?.email ? (
+            <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={session.user.email} />
+          ) : (
+            <input required type="email" className={inputCls} placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
+          )}
           <input required className={inputCls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
           {CONNECT_CATS.includes(request.category) && (
             <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
@@ -4411,6 +4430,18 @@ function MySeekDashboard({ setPage, userSession }) {
               <span><strong className="text-white">{offers.length}</strong> giveaways</span>
               <span><strong className="text-white">{gifts.length}</strong> gifts</span>
               <span><strong className="text-white">{unreadNotifications}</strong> new messages</span>
+            </div>
+            <div className="mt-5 grid grid-cols-2 gap-3">
+              <div className="rounded-2xl bg-white/10 p-4">
+                <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5] font-bold">Received</p>
+                <p className="mt-1 font-display font-extrabold text-xl">₦{requests.reduce((sum, r) => sum + Number(r.amountRaised || r.amount_raised || 0), 0).toLocaleString()}</p>
+                <p className="mt-1 text-[11px] text-white/60">Gifts neighbours sent you</p>
+              </div>
+              <div className="rounded-2xl bg-white/10 p-4">
+                <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5] font-bold">Given</p>
+                <p className="mt-1 font-display font-extrabold text-xl">₦{gifts.reduce((sum, g) => sum + Number(g.amount || 0), 0).toLocaleString()}</p>
+                <p className="mt-1 text-[11px] text-white/60">What you gave neighbours</p>
+              </div>
             </div>
           </div>
         </div>
