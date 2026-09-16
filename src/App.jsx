@@ -1752,11 +1752,13 @@ function GiveOfferForm() {
 
 
 
-function SeekAutoVideo({ src, muted, title }) {
+function SeekAutoVideo({ src, title }) {
   const ref = useRef(null);
+  const [muted, setMuted] = useState(true);
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
+    node.muted = true;
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
@@ -1764,15 +1766,30 @@ function SeekAutoVideo({ src, muted, title }) {
         } else {
           node.pause();
           node.muted = true;
+          setMuted(true);
         }
       });
     }, { threshold: [0, 0.55, 1] });
     io.observe(node);
     return () => io.disconnect();
   }, [src]);
-  useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
+  const toggleSound = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const v = ref.current;
+    if (!v) return;
+    const next = !v.muted;
+    v.muted = next;
+    v.volume = 1;
+    setMuted(next);
+    const play = v.play();
+    if (play && play.catch) play.catch(() => {});
+  };
   return (
-    <video ref={ref} src={src} muted={muted} loop playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} />
+    <>
+      <video ref={ref} src={src} muted loop playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} />
+      <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={toggleSound} className="absolute right-3 bottom-24 z-20 h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>
+    </>
   );
 }
 
@@ -1802,7 +1819,7 @@ function LiveSupportCard({ request, setPage }) {
     <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)] snap-start">
       <div className="relative bg-[#101415] aspect-[4/5] overflow-hidden">
         {current?.media_kind === "video" ? (
-          <SeekAutoVideo src={current.public_url} muted={muted} title={request.title || "SEEK support video"} />
+          <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
         ) : current?.public_url ? (
           <img key={current.public_url} src={current.public_url} alt={request.title || "SEEK support case"} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
@@ -1823,7 +1840,6 @@ function LiveSupportCard({ request, setPage }) {
         </div>
 
         <div className="absolute right-3 bottom-24 flex flex-col gap-2">
-          {current?.media_kind === "video" && <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={() => setMuted((v) => !v)} className="h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>}
           {media.length > 1 && <span className="rounded-full bg-black/55 px-3 py-1.5 text-xs font-semibold text-white backdrop-blur">{mediaIndex + 1}/{media.length}</span>}
         </div>
 
