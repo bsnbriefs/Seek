@@ -1286,14 +1286,6 @@ function Connector() {
 
 /* ---------------- Homepage ---------------- */
 
-function SeekRail({ children }) {
-  return (
-    <div className="flex gap-3 overflow-x-auto snap-x snap-mandatory pb-1 -mx-5 px-5" style={{ WebkitOverflowScrolling: "touch" }}>
-      {children}
-    </div>
-  );
-}
-
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
   const [mine, setMine] = useState([]);
@@ -1402,20 +1394,17 @@ function HomePage({ setPage, userSession }) {
       )}
 
       <section className="px-5 pb-10">
-        <div className="mx-auto max-w-[440px]">
-          <SeekRail>
-            {[
-              ["seek-help", "Seek Help"],
-              ["give", "Give"],
-              ["offers", "Giveaways"],
-              ["celebrate", "Connect"],
-              ["for-you", "Stories"],
-            ].map(([id, label]) => (
-              <button key={id} type="button" onClick={() => go(id)} className="snap-start shrink-0 rounded-full border border-[#0D3B3B]/12 bg-white px-5 py-3 text-sm font-semibold text-[#0D3B3B]">
-                {label}
-              </button>
-            ))}
-          </SeekRail>
+        <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
+          {[
+            ["seek-help", "Seek Help"],
+            ["give", "Give"],
+            ["offers", "Giveaways"],
+            ["celebrate", "Connect"],
+          ].map(([id, label]) => (
+            <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
+              {label}
+            </button>
+          ))}
         </div>
       </section>
 
@@ -1423,15 +1412,13 @@ function HomePage({ setPage, userSession }) {
         <section className="px-5 pb-12">
           <div className="mx-auto max-w-[440px]">
             <SectionLabel>Outcomes</SectionLabel>
-            <div className="mt-3">
-              <SeekRail>
-              {stories.slice(0, 6).map((story) => (
-                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="snap-center shrink-0 w-[78%] text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
+            <div className="mt-3 space-y-3">
+              {stories.slice(0, 3).map((story) => (
+                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
                   {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
                   <p className="p-3 font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p>
                 </button>
               ))}
-              </SeekRail>
             </div>
           </div>
         </section>
