@@ -1418,19 +1418,23 @@ export async function listRequestDonors(requestId) {
   if (!supabaseConfigured || !requestId) return [];
   let rows = [];
   try {
-    rows = await supabaseFetch("rpc/list_request_donors", {
-      method: "POST",
-      body: JSON.stringify({ p_request_id: requestId }),
-    });
+    rows = await supabaseFetch(
+      "public_gifts?select=amount,anonymous,created_at,donor_name,status&request_id=eq." +
+        encodeURIComponent(requestId) +
+        "&status=in.(successful,success,confirmed)&order=created_at.desc&limit=40"
+    );
   } catch (_e) {
     rows = [];
   }
   if (!Array.isArray(rows) || !rows.length) {
-    rows = await supabaseFetch(
-      "donations?select=amount,anonymous,created_at,donor_name,status&request_id=eq." +
-        encodeURIComponent(requestId) +
-        "&status=eq.successful&order=created_at.desc&limit=40"
-    );
+    try {
+      rows = await supabaseFetch("rpc/list_request_donors", {
+        method: "POST",
+        body: JSON.stringify({ p_request_id: requestId }),
+      });
+    } catch (_e) {
+      rows = [];
+    }
   }
   return (Array.isArray(rows) ? rows : []).map((row) => ({
     amount: Number(row.amount) || 0,
