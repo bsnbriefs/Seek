@@ -1821,9 +1821,9 @@ export async function getPublicMember(userId) {
   if (!item) return { id: userId, name: "", username: "", bio: "", avatar_url: "" };
   return {
     id: item.id || userId,
-    name: item.full_name || "SEEK member",
+    name: item.full_name || item.username || "",
     username: item.username || "",
     bio: item.bio || "",
-    avatar_url: item.avatar_path ? seekImageUrl(item.avatar_path, 160) : "",
+    avatar_url: item.avatar_url || (item.avatar_path ? seekImageUrl(item.avatar_path, 160) : ""),
   };
 }
