@@ -3380,22 +3380,24 @@ function RequestPage({ requestId, setPage }) {
               <>
                 {caseDonateOpen && <CaseDonateSheet request={request} onClose={() => setCaseDonateOpen(false)} />}
                 {CONNECT_CATS.includes(request.category) ? (
-                <CelebrateRsvp request={request} setPage={setPage} />
+                  <CelebrateRsvp request={request} setPage={setPage} />
+                ) : isFinancialNeed(request) ? (
+                  <Button
+                    variant="primary"
+                    className="w-full sm:w-auto"
+                    onClick={() => setCaseDonateOpen(true)}
+                  >
+                    Support this case <HandHeart size={16} />
+                  </Button>
                 ) : (
-                {isFinancialNeed(request) ? (
-                <Button
-                  variant="primary"
-                  className="w-full sm:w-auto"
-                  onClick={() => setCaseDonateOpen(true)}
-                >
-                  Support this case <HandHeart size={16} />
-                </Button>
-                ) : (
-                <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
-                )}
+                  <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
                 )}
                 <p className="font-body text-xs text-[#0D3B3B]/45">
-                  {CONNECT_CATS.includes(request.category) ? "Your contact goes to the host after Seek records it. Meet in public." : "Opens Paystack for this case."}
+                  {CONNECT_CATS.includes(request.category)
+                    ? "Your contact goes to the host after Seek records it. Meet in public."
+                    : isFinancialNeed(request)
+                      ? "Opens Paystack for this case."
+                      : "Use View more to see how you can help."}
                 </p>
               </>
             )}
