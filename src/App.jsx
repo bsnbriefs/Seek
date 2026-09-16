@@ -4205,20 +4205,22 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             {loading ? "Please wait…" : mode === "recover" ? "Send reset link" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
           {mode !== "recover" && (
-            <button type="button" className="w-full rounded-full border border-[#0D3B3B]/15 py-3 text-sm font-semibold" onClick={() => startGoogleSignIn()}>
-              Continue with Google
-            </button>
-            <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
-              try {
-                setError("");
-                await sendMagicLink(email);
-                setMessage("Check your email for a sign-in link.");
-              } catch (err) {
-                setError(err.message || "Could not send a sign-in link.");
-              }
-            }}>
-              Email me a sign-in link
-            </button>
+            <>
+              <button type="button" className="w-full rounded-full border border-[#0D3B3B]/15 py-3 text-sm font-semibold" onClick={() => startGoogleSignIn()}>
+                Continue with Google
+              </button>
+              <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+                try {
+                  setError("");
+                  await sendMagicLink(email);
+                  setMessage("Check your email for a sign-in link.");
+                } catch (err) {
+                  setError(err.message || "Could not send a sign-in link.");
+                }
+              }}>
+                Email me a sign-in link
+              </button>
+            </>
           )}
           {mode === "signin" && (
             <button type="button" className="block w-full text-center text-sm font-semibold text-[#1BAA9C]" onClick={() => { setMode("recover"); setError(""); setMessage(""); }}>
