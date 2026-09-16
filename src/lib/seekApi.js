@@ -1396,9 +1396,9 @@ export async function getMyProfile() {
   const cached = readProfileCache();
   if (!mapped && cached) mapped = cached;
   else if (mapped && cached) {
-    mapped.username = mapped.username || cached.username;
-    mapped.full_name = mapped.full_name || cached.full_name;
-    mapped.bio = mapped.bio || cached.bio;
+    mapped.username = cached.username || mapped.username;
+    mapped.full_name = cached.full_name || mapped.full_name;
+    mapped.bio = cached.bio || mapped.bio;
   }
   if (mapped?.avatar_url) cacheAvatarUrl(mapped.avatar_url);
   if (mapped) writeProfileCache(mapped);
@@ -1725,6 +1725,13 @@ export async function updateMyUsername({
   }
 
   const profileFromRpc = Array.isArray(saved) ? saved[0] : saved;
+  writeProfileCache({
+    id: session.user.id,
+    username: checked.username,
+    full_name: cleanName,
+    bio: cleanBio,
+    avatar_url: profileFromRpc?.avatar_path ? seekImageUrl(profileFromRpc.avatar_path, 96) : null,
+  });
   const refreshed = await getMyProfile();
   if (refreshed?.username || refreshed?.full_name || refreshed?.bio || refreshed?.id) {
     const next = {
