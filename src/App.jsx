@@ -4892,8 +4892,11 @@ function LiveTicker() {
           listRecentGifts(8).catch(() => []),
         ]);
         const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
-          const purpose = String(g.donor_name || "").split("·").slice(1).join("·").replace(/\[.*?\]/g, "").trim() || "Seek";
-          return "NEW GIFT · ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose + " · " + daysPosted(g.created_at);
+          const raw = String(g.donor_name || "");
+          const parts = raw.split("·").map((s) => s.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
+          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "A neighbour" : parts[0];
+          const purpose = parts.slice(1).join(" · ") || "a SEEK request";
+          return who + " sent ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose + " · " + daysPosted(g.created_at);
         });
         const bits = [
           stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
