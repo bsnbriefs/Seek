@@ -1006,7 +1006,6 @@ export default function AdminPage() {
                       </p>
                     )}
                   </div>
-                  </div>
                   </details>
                 );
               })}
