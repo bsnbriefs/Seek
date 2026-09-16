@@ -267,8 +267,10 @@ const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment
 function isFinancialNeed(req) {
   if (!req) return false;
   if (CONNECT_CATS.includes(req.category)) return false;
+  const cat = String(req.category || "").toLowerCase();
+  if (/job|employ|mentor|counsel|compan|friend|celebrat/.test(cat)) return false;
   const kind = String(req.type || req.need_type || "").toLowerCase();
-  if (["item", "goods", "time", "company", "connect"].includes(kind)) return false;
+  if (["item", "goods", "time", "company", "connect", "job"].includes(kind)) return false;
   return Number(req.amountNeeded || req.amount_needed || 0) > 0;
 }
 
@@ -779,7 +781,7 @@ function OutreachCheckout({ campaign, onClose }) {
   const [loading, setLoading] = useState(false);
   if (!campaign) return null;
   return (
-    <div className="fixed inset-0 z-[80] bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[160] bg-black/50 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
@@ -909,7 +911,7 @@ function CaseDonateSheet({ request, onClose }) {
   const [loading, setLoading] = useState(false);
   if (!request) return null;
   return (
-    <div className="fixed inset-0 z-[80] bg-black/50 flex items-end sm:items-center justify-center p-4" onClick={onClose}>
+    <div className="fixed inset-0 z-[160] bg-black/50 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
@@ -932,7 +934,7 @@ function CaseDonateSheet({ request, onClose }) {
             setLoading(false);
           }
         }}
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl"
+        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl mb-4"
       >
         <p className="text-[10px] uppercase tracking-widest text-[#1BAA9C] font-bold">Support this case</p>
         <h3 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">{request.title || "This SEEK request"}</h3>
@@ -980,8 +982,8 @@ function FeatureStrip({ page, setPage }) {
   };
   return (
     <div className="sticky top-16 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
-      <div className="mx-auto max-w-6xl px-3 overflow-x-auto overflow-y-visible scrollbar-none">
-        <div className="flex gap-1 min-w-max py-2 items-center relative">
+      <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
+        <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
             let offerFilter = "";
             try { offerFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
@@ -1007,7 +1009,7 @@ function FeatureStrip({ page, setPage }) {
               More
             </button>
             {moreOpen && (
-              <div className="absolute right-0 top-full mt-1 w-48 rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-xl z-20">
+              <div className="fixed right-3 top-32 w-56 max-h-[70vh] overflow-y-auto rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-2xl z-[160]">
                 {[
                   ["jobs", "Jobs", "job"],
                   ["mentorship", "Mentorship", "mentorship"],
@@ -1105,8 +1107,8 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <button type="button" onClick={() => go(userSession?.access_token ? "my-seek" : "account")} aria-label="My SEEK" className="p-1">
-          {avatar ? <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" /> : <User size={20} />}
+        <button type="button" onClick={() => go(userSession?.access_token ? "notifications" : "account")} aria-label="Notifications" className="p-2">
+          <Bell size={20} />
         </button>
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1747,6 +1749,7 @@ function SeekAutoVideo({ src, muted, title }) {
           node.play().catch(() => {});
         } else {
           node.pause();
+          node.muted = true;
         }
       });
     }, { threshold: [0, 0.55, 1] });
@@ -1852,7 +1855,7 @@ function DiscoverPage({ setPage }) {
       <section className="mx-auto max-w-3xl px-5 pt-12 pb-8">
         <SectionLabel>Discover</SectionLabel>
         <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening around SEEK.</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/55">Topics, outcomes and community activity — not another video feed.</p>
+        <p className="mt-2 text-sm text-[#0D3B3B]/55">Browse open needs, topics and community activity.</p>
         <div className="mt-5 flex flex-wrap gap-2">
           {topics.map(([filter, label]) => (
             <button key={filter} type="button" onClick={() => { try { sessionStorage.setItem("seek_offer_filter", filter === "jobs" ? "job" : ""); } catch (_e) {} go(filter === "jobs" ? "offers" : "give"); }} className="rounded-full border border-[#0D3B3B]/12 bg-white px-3 py-1.5 text-sm">{label}</button>
@@ -1879,11 +1882,24 @@ function DiscoverPage({ setPage }) {
         </section>
       )}
       <section className="mx-auto max-w-3xl px-5 pb-14">
-        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Community</h2>
-        <div className="flex gap-2">
-          <button type="button" onClick={() => go("volunteer")} className="rounded-full border px-4 py-2 text-sm">Volunteer</button>
-          <button type="button" onClick={() => go("organisations")} className="rounded-full border px-4 py-2 text-sm">Organisations</button>
-          <button type="button" onClick={() => go("offers")} className="rounded-full border px-4 py-2 text-sm">Giveaways</button>
+        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Ways to give</h2>
+        <div className="grid grid-cols-2 gap-3">
+          <button type="button" onClick={() => go("give")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
+            <p className="font-display font-bold text-[#0D3B3B]">Give money</p>
+            <p className="mt-1 text-xs text-[#0D3B3B]/55">A published request or a BSN outreach.</p>
+          </button>
+          <button type="button" onClick={() => go("offers")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
+            <p className="font-display font-bold text-[#0D3B3B]">Giveaways</p>
+            <p className="mt-1 text-xs text-[#0D3B3B]/55">Goods, time, jobs and skills.</p>
+          </button>
+          <button type="button" onClick={() => go("volunteer")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
+            <p className="font-display font-bold text-[#0D3B3B]">Volunteer</p>
+            <p className="mt-1 text-xs text-[#0D3B3B]/55">Offer your time to BSN work.</p>
+          </button>
+          <button type="button" onClick={() => go("impact")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
+            <p className="font-display font-bold text-[#0D3B3B]">Impact</p>
+            <p className="mt-1 text-xs text-[#0D3B3B]/55">See where gifts already went.</p>
+          </button>
         </div>
       </section>
     </div>
@@ -4369,7 +4385,8 @@ function MySeekDashboard({ setPage, userSession }) {
                 </div>
                 <div className="min-w-0">
                   <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
-                  <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}, {firstName} 👋</h1>
+                  <p className="mt-1 text-xs text-white/70">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}</p>
+                  <h1 className="font-display font-extrabold text-2xl sm:text-3xl truncate">{firstName}</h1>
                   <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
                 </div>
               </div>
