@@ -788,6 +788,7 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
+                  </div>
                 </details>
               );
             })}
@@ -1004,6 +1005,7 @@ export default function AdminPage() {
                         Connection confirmed
                       </p>
                     )}
+                  </div>
                   </div>
                   </details>
                 );
