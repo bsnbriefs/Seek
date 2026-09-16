@@ -17,19 +17,10 @@ async function sendReceipt(opts: {
   amount: number;
   purpose: string;
   reference: string;
-  coverNote: string;
 }) {
   const key = Deno.env.get("RESEND_API_KEY") || "";
   if (!key || !opts.to) return;
   const naira = "₦" + Math.round(Number(opts.amount) || 0).toLocaleString();
-  const html = `
-    <p>Thank you for giving through SEEK.</p>
-    <p><strong>Amount:</strong> ${esc(naira)}<br/>
-    <strong>Purpose:</strong> ${esc(opts.purpose)}<br/>
-    <strong>Reference:</strong> ${esc(opts.reference)}</p>
-    <p>${esc(opts.coverNote)}</p>
-    <p>This is your SEEK receipt. Keep it for your records. SEEK is a project of BSN Foundation.</p>
-  `;
   await fetch("https://api.resend.com/emails", {
     method: "POST",
     headers: {
@@ -40,52 +31,25 @@ async function sendReceipt(opts: {
       from: "Seek <notify@seekbsn.org>",
       to: [opts.to],
       subject: "SEEK receipt — " + naira,
-      html,
+      html: `<p>Thank you for giving through SEEK.</p><p><strong>Amount:</strong> ${esc(naira)}<br/><strong>Purpose:</strong> ${esc(opts.purpose)}<br/><strong>Reference:</strong> ${esc(opts.reference)}</p><p>This is your SEEK receipt. SEEK is a project of BSN Foundation.</p>`,
     }),
   }).catch(() => {});
 }
 
-async function findDonation(supabase: ReturnType<typeof createClient>, reference: string) {
-  const select = "id,request_id,amount,status,email,donor_email,donor_name,paystack_reference";
-  const byRef = await supabase.from("donations").select(select).eq("paystack_reference", reference).maybeSingle();
-  if (byRef.data) return byRef.data;
-  return null;
-}
-
-async function markPaid(supabase: ReturnType<typeof createClient>, reference: string, payload: Record<string, unknown>) {
-  let donation = await findDonation(supabase, reference);
-  if (!donation) {
-    const meta = (payload?.metadata || {}) as Record<string, unknown>;
-    const amount = Number(meta.gift_amount || Number(payload?.amount || 0) / 100) || 0;
-    const email = String((payload as { customer?: { email?: string } })?.customer?.email || "");
-    const row: Record<string, unknown> = {
-      request_id: meta.request_id || null,
-      donor_email: email,
-      anonymous: Boolean(meta.anonymous),
-      amount,
-      currency: "NGN",
-      paystack_reference: reference,
-      status: "pending",
-      donor_name: meta.donor_name || null,
-    };
-    const inserted = await supabase.from("donations").insert(row).select("id,request_id,amount,status,email,donor_email,donor_name").maybeSingle();
-    donation = inserted.data;
-  }
-  if (!donation) throw new Error("Donation not found.");
-  if (donation.status === "successful") return { donation, justPaid: false };
-
-  const { error } = await supabase
-    .from("donations")
-    .update({
-      status: "successful",
-      paid_at: new Date().toISOString(),
-      paystack_payload: payload,
-    })
-    .eq("id", donation.id);
-  if (error) {
-    await supabase.from("donations").update({ status: "successful" }).eq("id", donation.id);
-  }
-  return { donation, justPaid: true };
+function giftFromPaystack(reference: string, payload: Record<string, unknown>) {
+  const meta = (payload?.metadata || {}) as Record<string, unknown>;
+  const amount = Number(meta.gift_amount || Number(payload?.amount || 0) / 100) || 0;
+  const email = String((payload as { customer?: { email?: string } })?.customer?.email || "");
+  return {
+    id: null,
+    request_id: meta.request_id || null,
+    amount,
+    status: "successful",
+    email,
+    donor_email: email,
+    donor_name: meta.donor_name || null,
+    paystack_reference: reference,
+  };
 }
 
 Deno.serve(async (req) => {
@@ -103,16 +67,66 @@ Deno.serve(async (req) => {
       throw new Error(result.message || "Payment is not successful yet.");
     }
 
-    const supabase = createClient(
-      Deno.env.get("SUPABASE_URL")!,
-      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || Deno.env.get("SERVICE_ROLE_KEY")!
-    );
+    const service =
+      Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") ||
+      Deno.env.get("SERVICE_ROLE_KEY") ||
+      Deno.env.get("SUPABASE_SECRET_KEYS") ||
+      "";
+    const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", service);
 
-    const meta = result.data?.metadata || {};
+    const payload = result.data || {};
+    const meta = payload.metadata || {};
+    let donation: Record<string, unknown> | null = null;
+    let justPaid = true;
+
+    const found = await supabase
+      .from("donations")
+      .select("id,request_id,amount,status,email,donor_email,donor_name")
+      .eq("paystack_reference", reference)
+      .maybeSingle();
+    if (found.data) donation = found.data;
+
+    if (!donation) {
+      const row = {
+        request_id: meta.request_id || null,
+        donor_email: payload.customer?.email || "",
+        amount: Number(meta.gift_amount || Number(payload.amount || 0) / 100) || 0,
+        currency: "NGN",
+        paystack_reference: reference,
+        status: "successful",
+      };
+      const inserted = await supabase.from("donations").insert(row).select("id,request_id,amount,status,email,donor_email,donor_name").maybeSingle();
+      if (inserted.data) donation = inserted.data;
+    }
+
+    if (donation?.id && donation.status !== "successful") {
+      await supabase.from("donations").update({ status: "successful" }).eq("id", donation.id);
+    } else if (donation?.status === "successful" && donation.id) {
+      justPaid = false;
+    }
+
+    if (!donation) donation = giftFromPaystack(reference, payload);
+
+    if (justPaid) {
+      let purpose = String(donation.donor_name || meta.donor_name || "").split("·").slice(1).join("·").trim();
+      if (!purpose && donation.request_id) {
+        const { data: reqRow } = await supabase.from("requests").select("title").eq("id", donation.request_id).maybeSingle();
+        purpose = reqRow?.title || "A published SEEK request";
+      }
+      if (!purpose) purpose = "SEEK / BSN Foundation";
+      const to = String(donation.email || donation.donor_email || payload.customer?.email || "");
+      await sendReceipt({
+        to,
+        amount: Number(donation.amount || 0),
+        purpose,
+        reference,
+      });
+    }
+
     if (String(meta.interval || "") === "monthly") {
-      const authCode = result.data?.authorization?.authorization_code;
-      const customer = result.data?.customer?.customer_code || result.data?.customer?.email;
-      const kobo = Number(result.data?.amount || 0);
+      const authCode = payload.authorization?.authorization_code;
+      const customer = payload.customer?.customer_code || payload.customer?.email;
+      const kobo = Number(payload.amount || 0);
       if (authCode && customer && kobo > 0) {
         const planRes = await fetch("https://api.paystack.co/plan", {
           method: "POST",
@@ -128,8 +142,7 @@ Deno.serve(async (req) => {
           }),
         });
         const plan = await planRes.json();
-        const planCode = plan?.data?.plan_code;
-        if (planCode) {
+        if (plan?.data?.plan_code) {
           await fetch("https://api.paystack.co/subscription", {
             method: "POST",
             headers: {
@@ -138,32 +151,12 @@ Deno.serve(async (req) => {
             },
             body: JSON.stringify({
               customer,
-              plan: planCode,
+              plan: plan.data.plan_code,
               authorization: authCode,
             }),
           });
         }
       }
-    }
-
-    const { donation, justPaid } = await markPaid(supabase, reference, result.data || {});
-
-    if (justPaid) {
-      let purpose = String(donation.donor_name || "").split("·").slice(1).join("·").trim();
-      if (!purpose && donation.request_id) {
-        const { data: reqRow } = await supabase.from("requests").select("title").eq("id", donation.request_id).maybeSingle();
-        purpose = reqRow?.title || "A published SEEK request";
-      }
-      if (!purpose) purpose = "SEEK / BSN Foundation";
-      const to = donation.email || donation.donor_email || result.data?.customer?.email || "";
-      const naira = Number(donation.amount || result.data?.amount / 100 || 0);
-      await sendReceipt({
-        to,
-        amount: naira,
-        purpose,
-        reference,
-        coverNote: "If you covered SEEK’s 5%, that is included in the amount Paystack charged.",
-      });
     }
 
     return new Response(JSON.stringify({
