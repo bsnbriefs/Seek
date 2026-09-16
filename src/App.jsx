@@ -339,7 +339,7 @@ const CATEGORIES = [
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
-const SWIPE_SEQ = ["for-you", "seek-help", "give", "offers", "celebrate"];
+const SWIPE_SEQ = ["home", "for-you", "seek-help", "give", "offers", "celebrate"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
 function isFinancialNeed(req) {
   if (!req) return false;
@@ -5470,8 +5470,10 @@ useEffect(() => {
           const tch = e.changedTouches[0];
           const dx = tch.clientX - s.x;
           const dy = tch.clientY - s.y;
-          if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
-          if (Date.now() - s.t > 700) return;
+          if (Math.abs(dy) > 36) return;
+          if (Math.abs(dx) < 120 || Math.abs(dx) < Math.abs(dy) * 2.2) return;
+          if (Date.now() - s.t > 500) return;
+          if (page === "for-you" && Math.abs(dy) > 18) return;
           const i = SWIPE_SEQ.indexOf(page);
           const next = dx < 0 ? SWIPE_SEQ[i + 1] : SWIPE_SEQ[i - 1];
           if (next) setPage(next);
