@@ -262,6 +262,14 @@ const CATEGORIES = [
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
+function isFinancialNeed(req) {
+  if (!req) return false;
+  if (CONNECT_CATS.includes(req.category)) return false;
+  const kind = String(req.type || req.need_type || "").toLowerCase();
+  if (["item", "goods", "time", "company", "connect"].includes(kind)) return false;
+  return Number(req.amountNeeded || req.amount_needed || 0) > 0;
+}
+
 
 const PARTNERS = [
   { name: "BSN Foundation", href: "https://barristerstreet.org" },
@@ -1790,7 +1798,7 @@ function LiveSupportCard({ request, setPage }) {
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
             </div>
-            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">Live Support</span>
+            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">SEEK video</span>
           </div>
         </div>
 
@@ -1814,8 +1822,11 @@ function LiveSupportCard({ request, setPage }) {
       </div>
 
       <div className="bg-white p-5 sm:p-6">
-        {amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
-        <div className="mt-4 flex gap-2"><button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button><button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View Case</button></div>
+        {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
+        <div className="mt-4 flex gap-2">
+          {isFinancialNeed(request) ? <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button> : <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">{CONNECT_CATS.includes(request.category) ? "I can be there" : "View case"}</button>}
+          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View more</button>
+        </div>
       </div>
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
     </article>
@@ -3371,6 +3382,7 @@ function RequestPage({ requestId, setPage }) {
                 {CONNECT_CATS.includes(request.category) ? (
                 <CelebrateRsvp request={request} setPage={setPage} />
                 ) : (
+                {isFinancialNeed(request) ? (
                 <Button
                   variant="primary"
                   className="w-full sm:w-auto"
@@ -3378,6 +3390,9 @@ function RequestPage({ requestId, setPage }) {
                 >
                   Support this case <HandHeart size={16} />
                 </Button>
+                ) : (
+                <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
+                )}
                 )}
                 <p className="font-body text-xs text-[#0D3B3B]/45">
                   {CONNECT_CATS.includes(request.category) ? "Your contact goes to the host after Seek records it. Meet in public." : "Opens Paystack for this case."}
@@ -4882,9 +4897,9 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
 
   const items = [
     { id: "home", label: "Home", icon: HomeIcon },
-    { id: "offers", label: "Discover", icon: Search },
-    { id: "notifications", label: "Notifications", icon: Bell, action: () => go(userSession?.access_token ? "notifications" : "account") },
-    { id: "messages", label: "Messages", icon: Mail, action: () => go(userSession?.access_token ? "my-seek" : "account") },
+    { id: "discover", label: "Discover", icon: Search },
+    { id: "for-you", label: "For You", icon: Sparkles },
+    { id: "my-seek", label: "My SEEK", icon: User, action: () => go(userSession?.access_token ? "my-seek" : "account") },
   ];
 
   const actions = [
@@ -5206,7 +5221,7 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen pb-[4.6rem] lg:pb-0" style={{ background: C.white, color: C.ink }}>
+    <div className="font-body min-h-screen pb-28 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
       <FeatureStrip page={page} setPage={setPage} />
