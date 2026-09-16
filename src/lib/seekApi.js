@@ -665,6 +665,26 @@ export async function userSignIn(email, password) {
   return session;
 }
 
+
+export async function requestPasswordReset(email) {
+  const value = String(email || "").trim().toLowerCase();
+  if (!value) throw new Error("Enter the email on your SEEK account.");
+  const response = await fetch(`${AUTH_URL}/auth/v1/recover`, {
+    method: "POST",
+    headers: { apikey: AUTH_KEY, "Content-Type": "application/json" },
+    body: JSON.stringify({ email: value }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    throw new Error(data?.msg || data?.error_description || "Could not send reset email.");
+  }
+}
+
+export function startGoogleSignIn() {
+  const redirect = encodeURIComponent(window.location.origin + "/account");
+  window.location.href = `${AUTH_URL}/auth/v1/authorize?provider=google&redirect_to=${redirect}`;
+}
+
 export async function deleteRejectedRequest(requestId) {
   const session = getUserSession();
   if (!session?.access_token) throw new Error("Please sign in first.");
@@ -1358,35 +1378,30 @@ function writeProfileCache(row) {
 
 export async function getMyProfile() {
   const session = (await refreshUserSession()) || getUserSession();
-  if (!session?.access_token || !session?.user?.id) return null;
+  if (!session?.access_token || !session?.user?.id) return readProfileCache();
 
+  let mapped = null;
   try {
     const rpc = await callSeekProfileRpc("get_my_profile", {});
     const row = Array.isArray(rpc) ? rpc[0] : rpc;
-    if (!row) return null;
-
-    const mapped = {
-      ...row,
-      avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
-    };
-    if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
-    return mapped;
+    if (row) {
+      mapped = {
+        ...row,
+        avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
+      };
+    }
   } catch (_e) {
-    return null;
+    mapped = null;
   }
-  const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-  const mapped = {
-    ...row,
-    avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
-  };
-  if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
   const cached = readProfileCache();
-  if (cached && cached.id === mapped.id) {
+  if (!mapped && cached) mapped = cached;
+  else if (mapped && cached) {
     mapped.username = mapped.username || cached.username;
     mapped.full_name = mapped.full_name || cached.full_name;
-    mapped.bio = mapped.bio ?? cached.bio;
+    mapped.bio = mapped.bio || cached.bio;
   }
-  writeProfileCache(mapped);
+  if (mapped?.avatar_url) cacheAvatarUrl(mapped.avatar_url);
+  if (mapped) writeProfileCache(mapped);
   return mapped;
 }
 
