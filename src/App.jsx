@@ -2100,7 +2100,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [offerError, setOfferError] = useState("");
   const [offerLoading, setOfferLoading] = useState(false);
   const [donating, setDonating] = useState(false);
-  const [payment, setPayment] = useState({ amount: "", email: "", name: "", anonymous: false, coverFee: true });
+  const [payment, setPayment] = useState({ amount: "2000", email: (getUserSession()?.user?.email || ""), name: "", anonymous: false, coverFee: true });
   const [paymentError, setPaymentError] = useState("");
   const [paymentLoading, setPaymentLoading] = useState(false);
 
@@ -2189,7 +2189,7 @@ if (!cancelled) {
     try {
       const result = await initializeDonation({
         amount: Number(payment.amount),
-        email: payment.email,
+        email: getUserSession()?.user?.email || payment.email,
         requestId: selectedRequest?.id || null,
         anonymous: payment.anonymous,
         donorName: campaign ? ((payment.name || "Supporter") + " · " + campaign.title) : (payment.name || ""),
@@ -2248,53 +2248,34 @@ if (!cancelled) {
         </div>
       )}
 
-      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10" id="donate-form">
-        <div className="rounded-3xl p-8 sm:p-10 text-white" style={{ background: `linear-gradient(135deg, ${C.deepTeal}, #12665F)` }}>
-          <div className="max-w-2xl">
-            <p className="font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#8DE3C5]">Support a need</p>
-            <h2 className="font-display font-extrabold text-3xl mt-2">Give directly to the Seek community.</h2>
-            <p className="font-body mt-3 text-white/70">
-              {selectedRequest
-                ? <>Donating toward <span className="font-semibold text-white">{selectedRequest.title}</span> ({selectedRequest.location}).</>
-                : "Choose a request below to support it directly, or give a general donation to the wider Seek community."}
-            </p>
-            {!donating ? (
-              <Button variant="primary" className="mt-6 !bg-[#63C167] !text-[#0D3B3B]" onClick={() => { setSelectedRequest(null); setDonating(true); }}>
-                Give a general donation <ArrowRight size={16} />
-              </Button>
-            ) : (
-              <form onSubmit={startDonation} className="mt-6 grid sm:grid-cols-3 gap-3">
-                <div className="sm:col-span-3 flex flex-wrap gap-2">
-                  {[1000, 2000, 5000, 10000].map((n) => (
-                    <button key={n} type="button" className={"rounded-full px-3 py-1.5 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#63C167] text-[#0D3B3B]" : "bg-white/15 text-white")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
-                      ₦{n.toLocaleString()}
-                    </button>
-                  ))}
-                </div>
-                <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Amount (₦)" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                {!payment.anonymous && (
-                  <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show publicly" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                )}
-                <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email" className="rounded-xl px-4 py-3 text-[#0D3B3B] outline-none" />
-                <Button disabled={paymentLoading} type="submit" variant="primary" className="!bg-[#63C167] !text-[#0D3B3B]">{paymentLoading ? "Opening payment…" : "Continue to Paystack"}</Button>
-                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Cover Seek’s 5% so the request keeps the full amount</label>
-                {payment.amount && (
-                  <p className="sm:col-span-3 text-sm text-white/70">
-                    You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}
-                    {payment.coverFee !== false ? " (includes ₦" + Math.round(Number(payment.amount) * 0.05).toLocaleString() + " for Seek)" : ""}
-                  </p>
-                )}
-                <label className="sm:col-span-3 flex items-center gap-2 text-sm text-white/70"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
-                {selectedRequest && (
-                  <button type="button" onClick={() => { setSelectedRequest(null); }} className="sm:col-span-3 text-left text-sm text-white/70 underline underline-offset-2 hover:text-white">
-                    Give a general donation instead
-                  </button>
-                )}
-                {paymentError && <p className="sm:col-span-3 text-sm text-red-200">{paymentError}</p>}
-              </form>
-            )}
+      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-md px-5 pb-28" id="donate-form">
+        <form onSubmit={startDonation} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">{selectedRequest ? "Give to this neighbour" : "Give to SEEK"}</p>
+          <h2 className="mt-1 font-display font-extrabold text-xl text-[#0D3B3B]">{selectedRequest ? selectedRequest.title : "A general gift"}</h2>
+          {selectedRequest?.location && <p className="mt-1 text-sm text-[#0D3B3B]/50">{selectedRequest.location}</p>}
+          <div className="mt-4 flex flex-wrap gap-2">
+            {[1000, 2000, 5000, 10000].map((n) => (
+              <button key={n} type="button" className={"rounded-full px-3 py-2 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
+                ₦{n.toLocaleString()}
+              </button>
+            ))}
           </div>
-        </div>
+          <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Or type an amount" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+          {!payment.anonymous && (
+            <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show (optional)" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+          )}
+          {getUserSession()?.user?.email ? (
+            <p className="mt-3 text-sm text-[#0D3B3B]/55">Receipt goes to {getUserSession().user.email}</p>
+          ) : (
+            <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email for receipt" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+          )}
+          <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/65"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
+          <label className="mt-2 flex items-center gap-2 text-sm text-[#0D3B3B]/65"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Add 5% so SEEK can keep the lights on</label>
+          {payment.amount && <p className="mt-2 text-sm text-[#0D3B3B]/55">You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}</p>}
+          {paymentError && <p className="mt-2 text-sm text-red-600">{paymentError}</p>}
+          <button disabled={paymentLoading} type="submit" className="mt-4 w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold">{paymentLoading ? "Opening Paystack…" : "Continue to Paystack"}</button>
+          {selectedRequest && <button type="button" onClick={() => { setSelectedRequest(null); setGeneralDonation(true); }} className="mt-3 w-full text-center text-sm text-[#1BAA9C]">Give a general gift instead</button>}
+        </form>
       </section>}
 
       <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pb-16">
