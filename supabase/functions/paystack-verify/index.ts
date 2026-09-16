@@ -5,14 +5,54 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+function esc(value: unknown) {
+  return String(value || "")
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;");
+}
+
+async function sendReceipt(opts: {
+  to: string;
+  amount: number;
+  purpose: string;
+  reference: string;
+  coverNote: string;
+}) {
+  const key = Deno.env.get("RESEND_API_KEY") || "";
+  if (!key || !opts.to) return;
+  const naira = "₦" + Math.round(Number(opts.amount) || 0).toLocaleString();
+  const html = `
+    <p>Thank you for giving through SEEK.</p>
+    <p><strong>Amount:</strong> ${esc(naira)}<br/>
+    <strong>Purpose:</strong> ${esc(opts.purpose)}<br/>
+    <strong>Reference:</strong> ${esc(opts.reference)}</p>
+    <p>${esc(opts.coverNote)}</p>
+    <p>This is your SEEK receipt. Keep it for your records. SEEK is a project of BSN Foundation.</p>
+  `;
+  await fetch("https://api.resend.com/emails", {
+    method: "POST",
+    headers: {
+      Authorization: "Bearer " + key,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({
+      from: "Seek <notify@seekbsn.org>",
+      to: [opts.to],
+      subject: "SEEK receipt — " + naira,
+      html,
+    }),
+  }).catch(() => {});
+}
+
 async function markPaid(supabase: ReturnType<typeof createClient>, reference: string, payload: Record<string, unknown>) {
   const { data: donation } = await supabase
     .from("donations")
-    .select("id,request_id,amount,status")
+    .select("id,request_id,amount,status,email,donor_email,donor_name")
     .eq("paystack_reference", reference)
     .maybeSingle();
   if (!donation) throw new Error("Donation not found.");
-  if (donation.status === "successful") return donation;
+  if (donation.status === "successful") return { donation, justPaid: false };
 
   const { error } = await supabase
     .from("donations")
@@ -25,7 +65,7 @@ async function markPaid(supabase: ReturnType<typeof createClient>, reference: st
   if (error) {
     await supabase.from("donations").update({ status: "successful" }).eq("id", donation.id);
   }
-  return donation;
+  return { donation, justPaid: true };
 }
 
 Deno.serve(async (req) => {
@@ -86,7 +126,26 @@ Deno.serve(async (req) => {
       }
     }
 
-    const donation = await markPaid(supabase, reference, result.data || {});
+    const { donation, justPaid } = await markPaid(supabase, reference, result.data || {});
+
+    if (justPaid) {
+      let purpose = String(donation.donor_name || "").split("·").slice(1).join("·").trim();
+      if (!purpose && donation.request_id) {
+        const { data: reqRow } = await supabase.from("requests").select("title").eq("id", donation.request_id).maybeSingle();
+        purpose = reqRow?.title || "A published SEEK request";
+      }
+      if (!purpose) purpose = "SEEK / BSN Foundation";
+      const to = donation.email || donation.donor_email || result.data?.customer?.email || "";
+      const naira = Number(donation.amount || result.data?.amount / 100 || 0);
+      await sendReceipt({
+        to,
+        amount: naira,
+        purpose,
+        reference,
+        coverNote: "If you covered SEEK’s 5%, that is included in the amount Paystack charged.",
+      });
+    }
+
     return new Response(JSON.stringify({
       ok: true,
       verified: true,
