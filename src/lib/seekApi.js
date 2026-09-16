@@ -953,8 +953,12 @@ async function countRows(path) {
 
 export async function listRecentGifts(limit = 8) {
   const rows = await supabaseFetch(
-    "donations?select=amount,donor_name,created_at,status&status=eq.successful&order=created_at.desc&limit=" + limit
-  ).catch(() => []);
+    "public_gifts?select=amount,donor_name,anonymous,created_at,status,request_id&order=created_at.desc&limit=" + limit
+  ).catch(() =>
+    supabaseFetch(
+      "donations?select=amount,donor_name,anonymous,created_at,status&status=eq.successful&order=created_at.desc&limit=" + limit
+    ).catch(() => [])
+  );
   return Array.isArray(rows) ? rows : [];
 }
 
@@ -986,7 +990,7 @@ export async function getSeekLiveStats() {
   const [openRequests, fulfilled, donationRows] = await Promise.all([
     countRows("requests?select=id&is_public=eq.true&status=in.(published,partially_funded)"),
     countRows("requests?select=id&status=eq.fulfilled"),
-    supabaseFetch("donations?select=amount,status&status=in.(successful,success,confirmed)&limit=2000").catch(() =>
+    supabaseFetch("public_gifts?select=amount,status&limit=2000").catch(() =>
       supabaseFetch("donations?select=amount,status&limit=2000").catch(() => [])
     ),
   ]);
