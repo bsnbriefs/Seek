@@ -1786,8 +1786,9 @@ function LiveSupportCard({ request, setPage }) {
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
-  const displayName = member.name || request.full_name || request.name || request.username || "A neighbour";
-  const username = member.username ? `@${member.username}` : "";
+  const rawName = member.name || request.full_name || request.name || member.username || request.username || "";
+  const displayName = /^seek member$|^seeker$|^a neighbour/i.test(String(rawName).trim()) ? (member.username || request.username || "Neighbour") : (rawName || member.username || request.username || "Neighbour");
+  const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
 
   const goToCase = () => {
     setPage(`request:${request.id}`);
@@ -1817,7 +1818,7 @@ function LiveSupportCard({ request, setPage }) {
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
             </div>
-            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">{videoKindLabel(request)}</span>
+            <span className="max-w-[42%] shrink-0 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] backdrop-blur text-center leading-tight">{videoKindLabel(request)}</span>
           </div>
         </div>
 
