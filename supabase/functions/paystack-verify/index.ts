@@ -85,6 +85,17 @@ Deno.serve(async (req) => {
       .eq("paystack_reference", reference)
       .maybeSingle();
     if (found.data) donation = found.data;
+    if (!donation && meta.request_id) {
+      const pending = await supabase
+        .from("donations")
+        .select("id,request_id,amount,status,email,donor_email,donor_name")
+        .eq("request_id", meta.request_id)
+        .eq("status", "pending")
+        .order("created_at", { ascending: false })
+        .limit(1)
+        .maybeSingle();
+      if (pending.data) donation = pending.data;
+    }
 
     if (!donation) {
       const row = {
@@ -100,7 +111,10 @@ Deno.serve(async (req) => {
     }
 
     if (donation?.id && donation.status !== "successful") {
-      await supabase.from("donations").update({ status: "successful" }).eq("id", donation.id);
+      await supabase.from("donations").update({
+        status: "successful",
+        donor_name: donation.donor_name || meta.donor_name || payload.customer?.first_name || null,
+      }).eq("id", donation.id);
     } else if (donation?.status === "successful" && donation.id) {
       justPaid = false;
     }
