@@ -1348,6 +1348,14 @@ export async function uploadProfilePhoto(file) {
   return result;
 }
 
+const SEEK_PROFILE_CACHE = "seek_my_profile_v1";
+function readProfileCache() {
+  try { return JSON.parse(localStorage.getItem(SEEK_PROFILE_CACHE) || "null"); } catch { return null; }
+}
+function writeProfileCache(row) {
+  try { if (row) localStorage.setItem(SEEK_PROFILE_CACHE, JSON.stringify(row)); } catch (_e) {}
+}
+
 export async function getMyProfile() {
   const session = (await refreshUserSession()) || getUserSession();
   if (!session?.access_token || !session?.user?.id) return null;
@@ -1372,6 +1380,13 @@ export async function getMyProfile() {
     avatar_url: row.avatar_path ? seekImageUrl(row.avatar_path, 96) : null,
   };
   if (mapped.avatar_url) cacheAvatarUrl(mapped.avatar_url);
+  const cached = readProfileCache();
+  if (cached && cached.id === mapped.id) {
+    mapped.username = mapped.username || cached.username;
+    mapped.full_name = mapped.full_name || cached.full_name;
+    mapped.bio = mapped.bio ?? cached.bio;
+  }
+  writeProfileCache(mapped);
   return mapped;
 }
 
@@ -1697,12 +1712,14 @@ export async function updateMyUsername({
   const profileFromRpc = Array.isArray(saved) ? saved[0] : saved;
   const refreshed = await getMyProfile();
   if (refreshed?.username || refreshed?.full_name || refreshed?.bio || refreshed?.id) {
-    return {
+    const next = {
       ...refreshed,
-      username: refreshed.username || checked.username,
-      full_name: refreshed.full_name || cleanName,
-      bio: refreshed.bio ?? cleanBio,
+      username: checked.username || refreshed.username,
+      full_name: cleanName || refreshed.full_name,
+      bio: cleanBio || refreshed.bio,
     };
+    writeProfileCache(next);
+    return next;
   }
   if (profileFromRpc) {
     return {
