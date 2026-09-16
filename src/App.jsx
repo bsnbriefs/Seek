@@ -125,6 +125,82 @@ const C = {
   ink: "var(--seek-ink, #0F211F)",
 };
 
+
+const SEEK_LANGS = [
+  { id: "en", label: "English" },
+  { id: "pcm", label: "Nigerian Pidgin" },
+  { id: "ha", label: "Hausa" },
+  { id: "yo", label: "Yoruba" },
+  { id: "ig", label: "Igbo" },
+  { id: "fr", label: "Francais" },
+  { id: "es", label: "Espanol" },
+];
+const SEEK_I18N = {
+  en: {
+    hero: "See the need. Hear the story. Be the help.",
+    askOffer: "Ask for what you need. Offer what you can.",
+    needHelp: "I need help",
+    wantHelp: "I want to help",
+    seeStories: "See stories",
+    language: "Language",
+  },
+  pcm: {
+    hero: "See di need. Hear di story. Be di help.",
+    askOffer: "Ask wetin you need. Offer wetin you fit give.",
+    needHelp: "I need help",
+    wantHelp: "I wan help",
+    seeStories: "See stories",
+    language: "Language",
+  },
+  ha: {
+    hero: "Ga bukata. Ji labarin. Ka zama taimako.",
+    askOffer: "Nemi abin da kake bukata. Ba da abin da za ka iya.",
+    needHelp: "Ina bukatar taimako",
+    wantHelp: "Ina so in taimaka",
+    seeStories: "Duba labarai",
+    language: "Harshe",
+  },
+  yo: {
+    hero: "Wo aini naa. Gbo itan naa. Je iranlowo.",
+    askOffer: "Beere ohun ti o nilo. Fun ohun ti o le fun.",
+    needHelp: "Mo nilo iranlowo",
+    wantHelp: "Mo fe ran lowo",
+    seeStories: "Wo awon itan",
+    language: "Ede",
+  },
+  ig: {
+    hero: "Hu mkpa. Nu akuko. Buru enyemaka.",
+    askOffer: "Rio ihe i choro. Nye ihe i nwere.",
+    needHelp: "A choro m enyemaka",
+    wantHelp: "A choro m inyere aka",
+    seeStories: "Lee akuko",
+    language: "Asusu",
+  },
+  fr: {
+    hero: "Voir le besoin. Entendre l'histoire. Etre l'aide.",
+    askOffer: "Demandez ce dont vous avez besoin. Offrez ce que vous pouvez.",
+    needHelp: "J'ai besoin d'aide",
+    wantHelp: "Je veux aider",
+    seeStories: "Voir les recits",
+    language: "Langue",
+  },
+  es: {
+    hero: "Ver la necesidad. Oir la historia. Ser la ayuda.",
+    askOffer: "Pide lo que necesitas. Ofrece lo que puedas.",
+    needHelp: "Necesito ayuda",
+    wantHelp: "Quiero ayudar",
+    seeStories: "Ver historias",
+    language: "Idioma",
+  },
+};
+function readSeekLang() {
+  try { return localStorage.getItem("seek_lang") || "en"; } catch (_e) { return "en"; }
+}
+function tSeek(key) {
+  const lang = readSeekLang();
+  return (SEEK_I18N[lang] && SEEK_I18N[lang][key]) || SEEK_I18N.en[key] || key;
+}
+
 const FONTS = (
   <style>{`
     @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
@@ -1177,6 +1253,7 @@ function Footer({ setPage }) {
         <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
           <button type="button" onClick={() => go("about")} className="hover:text-white">About</button>
           <button type="button" onClick={() => go("guidelines")} className="hover:text-white">Guidelines</button>
+          <button type="button" onClick={() => go("language")} className="hover:text-white">{tSeek("language")}</button>
           <button type="button" onClick={() => go("privacy")} className="hover:text-white">Privacy</button>
           <button type="button" onClick={() => go("terms")} className="hover:text-white">Terms</button>
           <button type="button" onClick={() => go("contact")} className="hover:text-white">Contact</button>
@@ -1294,12 +1371,12 @@ function HomePage({ setPage, userSession }) {
       <section className="px-5 pt-12 pb-8 text-center">
         <SectionLabel>SEEK</SectionLabel>
         <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto">
-          See the need. Hear the story. Be the help.
+          {tSeek("hero")}
         </h1>
         <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button variant="primary" onClick={() => go("seek-help")}>I need help</Button>
-          <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
-          <Button variant="secondary" onClick={() => go("for-you")}>See stories</Button>
+          <Button variant="primary" onClick={() => go("seek-help")}>{tSeek("needHelp")}</Button>
+          <Button variant="secondary" onClick={() => go("give")}>{tSeek("wantHelp")}</Button>
+          <Button variant="secondary" onClick={() => go("for-you")}>{tSeek("seeStories")}</Button>
         </div>
       </section>
 
@@ -3764,6 +3841,31 @@ function ContactPage() {
   );
 }
 
+function LanguagePage({ setPage }) {
+  const [lang, setLang] = useState(readSeekLang());
+  const choose = (id) => {
+    try { localStorage.setItem("seek_lang", id); } catch (_e) {}
+    setLang(id);
+    window.location.reload();
+  };
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-md px-5 pt-12 pb-28">
+        <SectionLabel>{tSeek("language")}</SectionLabel>
+        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">Choose a language</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/55">SEEK stays in English under the hood. These words cover Home and the main doors first.</p>
+        <div className="mt-6 divide-y divide-[#0D3B3B]/8 rounded-3xl bg-white border border-[#0D3B3B]/10 overflow-hidden">
+          {SEEK_LANGS.map((item) => (
+            <button key={item.id} type="button" onClick={() => choose(item.id)} className={"w-full text-left px-5 py-4 text-base " + (lang === item.id ? "bg-[#1BAA9C]/10 font-semibold text-[#0D3B3B]" : "text-[#0D3B3B]")}>
+              {item.label}
+            </button>
+          ))}
+        </div>
+      </section>
+    </div>
+  );
+}
+
 function LegalPage({ title }) {
   const copy = {
     Privacy: [
@@ -4950,6 +5052,7 @@ function pageFromPath(pathname) {
   if (path === "/seek-help/request") return "seek-help-form";
   if (path === "/celebrate") return "celebrate";
   if (path === "/celebrate/request") return "celebrate-request";
+  if (path === "/language") return "language";
   if (path === "/about") return "about";
   if (path === "/organisations") return "organisations";
   if (path === "/impact") return "impact";
@@ -4988,6 +5091,7 @@ function pathFromPage(page) {
     organisations: "/organisations",
     impact: "/impact",
     privacy: "/privacy",
+    language: "/language",
     terms: "/terms",
     guidelines: "/guidelines",
     contact: "/contact",
@@ -5304,6 +5408,7 @@ useEffect(() => {
     organisations: <OrganisationsPage setPage={setPage} />,
     impact: <ImpactPage setPage={setPage} />,
     privacy: <LegalPage title="Privacy" setPage={setPage} />,
+    language: <LanguagePage setPage={setPage} />,
     terms: <LegalPage title="Terms" setPage={setPage} />,
     guidelines: <LegalPage title="Guidelines" setPage={setPage} />,
     contact: <ContactPage />,
