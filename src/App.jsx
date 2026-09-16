@@ -949,11 +949,13 @@ function FeatureStrip({ page, setPage }) {
   try { currentOfferFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
   const moreActive = ["volunteer", "about", "impact", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
   const items = [
+    { id: "home", label: "Home" },
     { id: "for-you", label: "For You" },
+    { id: "discover", label: "Discover" },
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
-    { id: "celebrate", label: "Connect & Celebrate" },
+    { id: "celebrate", label: "Connect" },
   ];
   const go = (item) => {
     if (item.filter) {
@@ -968,8 +970,8 @@ function FeatureStrip({ page, setPage }) {
   };
   return (
     <div className="sticky top-16 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
-      <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
-        <div className="flex gap-1 min-w-max py-2 items-center">
+      <div className="mx-auto max-w-6xl px-3 overflow-x-auto overflow-y-visible scrollbar-none">
+        <div className="flex gap-1 min-w-max py-2 items-center relative">
           {items.map((item) => {
             let offerFilter = "";
             try { offerFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
@@ -1004,6 +1006,10 @@ function FeatureStrip({ page, setPage }) {
                   ["volunteer", "Volunteer"],
                   ["organisations", "For organisations"],
                   ["about", "About SEEK"],
+                  ["contact", "Contact"],
+                  ["guidelines", "Help & Safety"],
+                  ["privacy", "Privacy"],
+                  ["terms", "Terms"],
                 ].map(([id, label, filter]) => (
                   <button
                     key={id}
@@ -1084,7 +1090,6 @@ function Navbar({ page, setPage, userSession }) {
             {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
             <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
-          <NotificationBell userSession={userSession} setPage={setPage} />
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
@@ -1093,7 +1098,6 @@ function Navbar({ page, setPage, userSession }) {
         <button type="button" onClick={() => go(userSession?.access_token ? "my-seek" : "account")} aria-label="My SEEK" className="p-1">
           {avatar ? <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" /> : <User size={20} />}
         </button>
-        <NotificationBell userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -1265,9 +1269,9 @@ function HomePage({ setPage, userSession }) {
           See the need. Feel the story. Show up.
         </h1>
         <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button variant="primary" onClick={() => go("for-you")}>Watch SEEK</Button>
-          <Button variant="secondary" onClick={() => go("seek-help")}>I need help</Button>
+          <Button variant="primary" onClick={() => go("seek-help")}>I need help</Button>
           <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
+          <Button variant="secondary" onClick={() => go("for-you")}>See stories</Button>
         </div>
       </section>
 
@@ -1282,23 +1286,6 @@ function HomePage({ setPage, userSession }) {
           ))}
         </section>
       )}
-
-      <section className="px-5 pb-10">
-        <div className="mx-auto max-w-[440px] mb-4 flex items-end justify-between">
-          <div>
-            <SectionLabel>SEEK Videos</SectionLabel>
-            <h2 className="font-display font-bold text-xl text-[#0D3B3B]">People showing what they need.</h2>
-          </div>
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("for-you")}>All</button>
-        </div>
-        <div className="space-y-8">
-          {liveVideos.length ? liveVideos.map((request) => (
-            <LiveSupportCard key={request.id} request={request} setPage={setPage} />
-          )) : (
-            <p className="mx-auto max-w-[440px] text-sm text-[#0D3B3B]/55 text-center">When a reviewed request has public video or photos, it appears here.</p>
-          )}
-        </div>
-      </section>
 
       <section className="px-5 pb-10">
         <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
@@ -1832,6 +1819,61 @@ function LiveSupportCard({ request, setPage }) {
       </div>
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
     </article>
+  );
+}
+
+
+function DiscoverPage({ setPage }) {
+  const [requests, setRequests] = useState([]);
+  const [stories, setStories] = useState([]);
+  const [offers, setOffers] = useState([]);
+  useEffect(() => {
+    listPublishedRequests(8).then((rows) => setRequests((rows || []).map(mapRequestRow).slice(0, 6))).catch(() => {});
+    listAppreciationStories().then((rows) => setStories((rows || []).slice(0, 4))).catch(() => {});
+    listPublicOffers().then((rows) => setOffers((Array.isArray(rows) ? rows : []).slice(0, 4))).catch(() => {});
+  }, []);
+  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
+  const topics = [["education","Education"],["food","Food"],["medical","Medical"],["jobs","Jobs"],["housing","Housing"],["children","Children"]];
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 pt-12 pb-8">
+        <SectionLabel>Discover</SectionLabel>
+        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening around SEEK.</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/55">Topics, outcomes and community activity — not another video feed.</p>
+        <div className="mt-5 flex flex-wrap gap-2">
+          {topics.map(([filter, label]) => (
+            <button key={filter} type="button" onClick={() => { try { sessionStorage.setItem("seek_offer_filter", filter === "jobs" ? "job" : ""); } catch (_e) {} go(filter === "jobs" ? "offers" : "give"); }} className="rounded-full border border-[#0D3B3B]/12 bg-white px-3 py-1.5 text-sm">{label}</button>
+          ))}
+        </div>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 pb-8">
+        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Open needs</h2>
+        <div className="space-y-3">{requests.filter((r) => !CONNECT_CATS.includes(r.category)).slice(0,4).map((req) => (
+          <button key={req.id} type="button" onClick={() => { setPage("request:"+req.id); window.history.pushState({},"","/request/"+req.id); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+            <p className="text-xs text-[#1BAA9C]">{req.category}{req.location ? " · "+req.location : ""}</p>
+            <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
+          </button>
+        ))}</div>
+      </section>
+      {stories.length > 0 && (
+        <section className="mx-auto max-w-3xl px-5 pb-8">
+          <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Impact</h2>
+          <div className="grid sm:grid-cols-2 gap-3">{stories.map((s) => (
+            <button key={s.id} type="button" onClick={() => { setPage("impact:"+s.id); window.history.pushState({},"","/impact/"+s.id); }} className="text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-3">
+              <p className="font-semibold text-[#0D3B3B] line-clamp-2">{s.title || "A SEEK story"}</p>
+            </button>
+          ))}</div>
+        </section>
+      )}
+      <section className="mx-auto max-w-3xl px-5 pb-14">
+        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Community</h2>
+        <div className="flex gap-2">
+          <button type="button" onClick={() => go("volunteer")} className="rounded-full border px-4 py-2 text-sm">Volunteer</button>
+          <button type="button" onClick={() => go("organisations")} className="rounded-full border px-4 py-2 text-sm">Organisations</button>
+          <button type="button" onClick={() => go("offers")} className="rounded-full border px-4 py-2 text-sm">Giveaways</button>
+        </div>
+      </section>
+    </div>
   );
 }
 
@@ -3966,8 +4008,11 @@ function AccountUsernameForm({ onSaved } = {}) {
       setSaving(true); setHint("");
       try {
         const saved = await updateMyUsername({ username, full_name: name, bio });
+        setUsername(saved?.username || username);
+        setName(saved?.full_name || name);
+        setBio(saved?.bio ?? bio);
         setHint("Profile saved.");
-        if (typeof onSaved === "function") onSaved(saved);
+        if (typeof onSaved === "function") onSaved({ ...(saved || {}), username: saved?.username || username, full_name: saved?.full_name || name, bio: saved?.bio ?? bio });
       } catch (err) {
         setHint(err.message || "Could not save.");
       } finally { setSaving(false); }
@@ -4769,6 +4814,7 @@ function pageFromPath(pathname) {
   if (path === "/volunteer") return "volunteer";
   if (path === "/give") return "give";
   if (path === "/for-you") return "for-you";
+  if (path === "/discover") return "discover";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
   if (path === "/seek-help/request") return "seek-help-form";
@@ -4799,6 +4845,7 @@ function pathFromPage(page) {
   const map = {
     home: "/",
     "for-you": "/for-you",
+    discover: "/discover",
     give: "/give",
     offers: "/offers",
     admin: "/admin",
@@ -5110,6 +5157,7 @@ useEffect(() => {
   const pages = {
     home: <HomePage setPage={setPage} userSession={userSession} />,
     "for-you": <ForYouPage setPage={setPage} />,
+    discover: <DiscoverPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
