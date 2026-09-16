@@ -510,8 +510,16 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
 
   const react = async (reactionType) => {
     setError(""); setNotice("");
+    const lockKey = "seek_react_" + targetType + "_" + targetId;
+    let existing = "";
+    try { existing = localStorage.getItem(lockKey) || ""; } catch (_e) {}
+    if (existing && existing !== reactionType) {
+      setError("You already reacted to this post.");
+      return;
+    }
     try {
       await addCommunityReaction({ targetType, targetId, reactionType });
+      try { localStorage.setItem(lockKey, reactionType); } catch (_e) {}
       await load();
     } catch (err) {
       setError(err?.message || "Please sign in to react.");
@@ -609,7 +617,7 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
                     ) : (
                       <div className="h-6 w-6 rounded-full bg-[#DDEBE7]" />
                     )}
-                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "Seeker"}</span>
+                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "A neighbour"}</span>
                     <span className="text-[10px] text-[#0D3B3B]/30">{daysPosted(item.created_at)}</span>
                   </div>
                   <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[#0D3B3B]/72 whitespace-pre-wrap">{item.body}</p>
@@ -1772,7 +1780,7 @@ function LiveSupportCard({ request, setPage }) {
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
-  const displayName = member.name || request.full_name || request.name || "Seeker";
+  const displayName = member.name || request.full_name || request.name || request.username || "A neighbour";
   const username = member.username ? `@${member.username}` : "";
 
   const goToCase = () => {
@@ -2932,7 +2940,7 @@ function MemberPage({ memberId, setPage }) {
   return (
     <div className="mx-auto max-w-lg px-5 py-16 text-center">
       {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
-      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "Seeker"} <VerifiedBadge /></h1>
+      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "A neighbour"} <VerifiedBadge /></h1>
       {member?.username ? <p className="mt-1 font-semibold text-[#1BAA9C]">@{member.username}</p> : null}
       {member?.bio ? <p className="mt-3 text-sm text-[#0D3B3B]/70">{member.bio}</p> : null}
       <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name, photo and username. Email and gifts stay private.</p>
@@ -3026,16 +3034,19 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
           } catch (err) { setError(err.message || "Could not send this."); }
           finally { setLoading(false); }
         }}>
+          <p className="text-sm text-[#0D3B3B]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : "Tell this Seeker how you can help — a role, an introduction, or your time."}</p>
           <input required className={inputCls} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           <input required type="email" className={inputCls} placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           <input required className={inputCls} placeholder="Phone" value={form.phone} onChange={(e) => setForm({ ...form, phone: e.target.value })} />
-          <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
-          <textarea required rows={2} className={inputCls} placeholder="When you can be there" value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
+          {CONNECT_CATS.includes(request.category) && (
+            <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
+          )}
+          <textarea required rows={2} className={inputCls} placeholder={CONNECT_CATS.includes(request.category) ? "When you can be there" : "How you can help"} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
           <label className="block text-sm text-[#0D3B3B]/60">Recent photo of you
             <input required type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" onChange={(e) => setForm({ ...form, photo: e.target.files?.[0] || null })} />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : "Send to host"}</Button>
+          <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : CONNECT_CATS.includes(request.category) ? "Send to host" : "Send to the Seeker"}</Button>
         </form>
       )}
     </div>
@@ -4084,7 +4095,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   }, [userSession]);
 
   if (userSession?.access_token) {
-    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "Seeker";
+    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "A neighbour";
     const username = profile?.username ? `@${profile.username}` : "Username not set";
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
@@ -4349,7 +4360,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const unreadNotifications = notifications.filter((n) => !n.read_at).length;
   const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
   const avatar = profile?.avatar_url || "";
-  const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "Seeker";
+  const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "A neighbour";
   const username = profile?.username ? `@${profile.username}` : "Username not set";
   const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
 
