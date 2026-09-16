@@ -42,7 +42,7 @@ Deno.serve(async (req) => {
       }
     }
 
-    const reference = `SEEK-${crypto.randomUUID().replaceAll("-", "").slice(0, 24).toUpperCase()}`;
+    const reference = `SEEK-${Date.now().toString(36).toUpperCase()}-${crypto.randomUUID().replaceAll("-", "").slice(0, 16).toUpperCase()}`;
     const row: Record<string, unknown> = {
       request_id,
       donor_email: email,
