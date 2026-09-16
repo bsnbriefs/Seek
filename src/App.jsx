@@ -1790,7 +1790,6 @@ function SeekAutoVideo({ src, title }) {
   return (
     <>
       <video ref={ref} src={src} muted playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
-      <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={toggleSound} className="absolute right-3 bottom-28 z-20 h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>
       {ended && (
         <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
       )}
@@ -1864,9 +1863,17 @@ function LiveSupportCard({ request, setPage }) {
 
       <div className="shrink-0 bg-white px-4 pt-3 pb-4">
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
-        <div className="mt-4 flex gap-2">
-          {isFinancialNeed(request) ? <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button> : <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">{CONNECT_CATS.includes(request.category) ? "I can be there" : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "View case"}</button>}
-          <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View more</button>
+        <div className="mt-3 flex flex-col gap-2">
+          {isFinancialNeed(request) ? (
+            <button type="button" onClick={supportCase} className="w-full rounded-full bg-[#1BAA9C] px-4 py-3.5 text-sm font-bold text-white">Support this case</button>
+          ) : CONNECT_CATS.includes(request.category) ? (
+            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">I can be there</button>
+          ) : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
+            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">I can help</button>
+          ) : (
+            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">View case</button>
+          )}
+          <button type="button" onClick={goToCase} className="w-full rounded-full border border-[#0D3B3B]/15 px-4 py-2.5 text-sm font-semibold text-[#0D3B3B]">View more</button>
         </div>
       </div>
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
@@ -1900,7 +1907,7 @@ function DiscoverPage({ setPage }) {
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-10 space-y-3">
         {doors.map((d) => (
-          <button key={d.id} type="button" onClick={() => go(d.id)} className="w-full text-left rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
+          <button key={d.id} type="button" onClick={() => go(d.id)} className="seek-reveal w-full text-left rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 active:scale-[0.99] transition">
             <p className="font-display font-bold text-lg text-[#0D3B3B]">{d.title}</p>
             <p className="mt-1 text-sm leading-relaxed text-[#0D3B3B]/60">{d.body}</p>
             <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">{d.title === "Giveaways" ? "Explore Giveaways" : d.title} →</p>
@@ -2933,11 +2940,13 @@ function OrganisationsPage({ setPage }) {
         <SectionLabel>For organisations</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Your organisation can give here too.</h1>
         <p className="mt-4 font-body text-[#0D3B3B]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. You use the same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
-        <div className="mt-8 grid gap-3">
+        <div className="mt-8 grid sm:grid-cols-2 gap-3 pb-16">
           {items.map((item) => (
-            <button key={item.t} type="button" onClick={() => go(item.id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left">
-              <p className="font-display font-bold text-[#0D3B3B]">{item.t}</p>
+            <button key={item.t} type="button" onClick={() => go(item.id)} className="seek-reveal rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">{item.id === "volunteer" ? "Time" : item.id === "offers" ? "Giveaways" : "Give"}</p>
+              <p className="mt-2 font-display font-bold text-lg text-[#0D3B3B]">{item.t}</p>
               <p className="mt-1 text-sm text-[#0D3B3B]/60">{item.d}</p>
+              <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">Continue →</p>
             </button>
           ))}
         </div>
