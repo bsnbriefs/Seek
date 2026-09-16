@@ -274,6 +274,13 @@ function isFinancialNeed(req) {
   return Number(req.amountNeeded || req.amount_needed || 0) > 0;
 }
 
+function videoKindLabel(req) {
+  const cat = String(req?.category || "").toLowerCase();
+  if (CONNECT_CATS.includes(req?.category) || /celebrat|connect|compan|friend/.test(cat)) return "Invitation";
+  if (/job|employ|mentor|counsel/.test(cat)) return "Looking for work";
+  return "Neighbour story";
+}
+
 
 const PARTNERS = [
   { name: "BSN Foundation", href: "https://barristerstreet.org" },
@@ -1810,7 +1817,7 @@ function LiveSupportCard({ request, setPage }) {
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
             </div>
-            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">SEEK video</span>
+            <span className="rounded-full bg-black/45 px-3 py-1 text-[10px] font-bold uppercase tracking-[0.14em] backdrop-blur">{videoKindLabel(request)}</span>
           </div>
         </div>
 
@@ -1925,7 +1932,7 @@ function ForYouPage({ setPage }) {
         if (cancelled) return;
         setLiveCases((Array.isArray(rows) ? rows : []).filter((item) => Array.isArray(item.media) && item.media.length));
       })
-      .catch((err) => { if (!cancelled) setError(err?.message || "Could not load SEEK videos."); })
+      .catch((err) => { if (!cancelled) setError(err?.message || "Could not load neighbour stories."); })
       .finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
