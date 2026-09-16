@@ -788,7 +788,6 @@ export default function AdminPage() {
                       </button>
                     )}
                   </div>
-                  </div>
                 </details>
               );
             })}
