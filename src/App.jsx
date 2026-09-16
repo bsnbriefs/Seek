@@ -375,8 +375,8 @@ function formatSeekStatus(status) {
 function SeekVerifiedCheck({ className = "" }) {
   return (
     <span
-      title="SEEK member"
-      aria-label="SEEK member"
+      title="Seeker"
+      aria-label="Seeker"
       className={`inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-[#1D9BF0] text-white shrink-0 ${className}`}
     >
       <Check size={11} strokeWidth={3} />
@@ -609,7 +609,7 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
                     ) : (
                       <div className="h-6 w-6 rounded-full bg-[#DDEBE7]" />
                     )}
-                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "SEEK member"}</span>
+                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "Seeker"}</span>
                     <span className="text-[10px] text-[#0D3B3B]/30">{daysPosted(item.created_at)}</span>
                   </div>
                   <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[#0D3B3B]/72 whitespace-pre-wrap">{item.body}</p>
@@ -1772,7 +1772,7 @@ function LiveSupportCard({ request, setPage }) {
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
-  const displayName = member.name || request.full_name || request.name || "SEEK member";
+  const displayName = member.name || request.full_name || request.name || "Seeker";
   const username = member.username ? `@${member.username}` : "";
 
   const goToCase = () => {
@@ -1798,7 +1798,7 @@ function LiveSupportCard({ request, setPage }) {
 
         <div className="absolute inset-x-0 top-0 p-4 bg-gradient-to-b from-black/70 via-black/25 to-transparent text-white">
           <div className="flex items-center gap-3">
-            {member.avatar_url || request.avatarUrl || request.avatar_url ? <img src={member.avatar_url || request.avatarUrl || request.avatar_url} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
+            {postAvatar(member.avatar_url || request.avatarUrl || request.avatar_url, request) ? <img src={postAvatar(member.avatar_url || request.avatarUrl || request.avatar_url, request)} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
             <div className="min-w-0 flex-1">
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
@@ -1829,7 +1829,7 @@ function LiveSupportCard({ request, setPage }) {
       <div className="bg-white p-5 sm:p-6">
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-4 flex gap-2">
-          {isFinancialNeed(request) ? <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button> : <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">{CONNECT_CATS.includes(request.category) ? "I can be there" : "View case"}</button>}
+          {isFinancialNeed(request) ? <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button> : <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">{CONNECT_CATS.includes(request.category) ? "I can be there" : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "View case"}</button>}
           <button type="button" onClick={goToCase} className="rounded-full border border-[#0D3B3B]/15 px-4 py-3 text-sm font-bold text-[#0D3B3B]">View more</button>
         </div>
       </div>
@@ -2907,9 +2907,9 @@ function OrganisationsPage({ setPage }) {
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 pt-16 pb-16">
-        <SectionLabel>SEEK for organisations</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Companies, NGOs and churches can give through Seek.</h1>
-        <p className="mt-4 font-body text-[#0D3B3B]/65">This is not a second website. You use the same Give and Giveaways paths. Seek reviews what goes public.</p>
+        <SectionLabel>For organisations</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Your organisation can give here too.</h1>
+        <p className="mt-4 font-body text-[#0D3B3B]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. You use the same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
         <div className="mt-8 grid gap-3">
           {items.map((item) => (
             <button key={item.t} type="button" onClick={() => go(item.id)} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5 text-left">
@@ -2927,12 +2927,12 @@ function OrganisationsPage({ setPage }) {
 function MemberPage({ memberId, setPage }) {
   const [member, setMember] = useState(null);
   useEffect(() => {
-    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "SEEK member" }));
+    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "Seeker" }));
   }, [memberId]);
   return (
     <div className="mx-auto max-w-lg px-5 py-16 text-center">
       {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
-      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "SEEK member"} <VerifiedBadge /></h1>
+      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "Seeker"} <VerifiedBadge /></h1>
       {member?.username ? <p className="mt-1 font-semibold text-[#1BAA9C]">@{member.username}</p> : null}
       {member?.bio ? <p className="mt-3 text-sm text-[#0D3B3B]/70">{member.bio}</p> : null}
       <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name, photo and username. Email and gifts stay private.</p>
@@ -2986,7 +2986,9 @@ function AboutPage({ setPage }) {
 /* ---------------- Public Request Page ---------------- */
 
 
-function CelebrateRsvp({ request, setPage }) {
+function CelebrateRsvp({ request, setPage, helpLabel }) {
+  const actionLabel = helpLabel || (CONNECT_CATS.includes(request.category) ? "I can be there" : "I can help");
+
   const [open, setOpen] = useState(false);
   const [done, setDone] = useState(() => {
     try { return Boolean(localStorage.getItem("seek_rsvp_" + request.id)); } catch (_e) { return false; }
@@ -2999,7 +3001,7 @@ function CelebrateRsvp({ request, setPage }) {
   useEffect(() => {
     getCelebrateRsvpCount(request.id).then(setCount).catch(() => {});
   }, [request.id]);
-  if (done) return <p className="font-semibold text-[#1BAA9C]">You said you can be there. {count ? count + " people have indicated." : ""}</p>;
+  if (done) return <p className="font-semibold text-[#1BAA9C]">You have indicated. {count ? count + " people have indicated." : ""}</p>;
   return (
     <div className="w-full">
       <Button variant="primary" className="w-full sm:w-auto" onClick={() => {
@@ -3010,7 +3012,7 @@ function CelebrateRsvp({ request, setPage }) {
         }
         setOpen(!open);
       }}>
-        {count ? count + " people can be there · I can be there" : "I can be there"}
+        {count ? count + " people · " + actionLabel : actionLabel}
       </Button>
       {open && (
         <form className="mt-4 space-y-3" onSubmit={async (e) => {
@@ -3170,7 +3172,7 @@ function RequestPage({ requestId, setPage }) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
         <SectionLabel>Public request</SectionLabel>
         <p className="font-body text-sm text-[#0D3B3B]/55 mb-4">
-          Seek reviewed this request. The check mark identifies a SEEK member account; request review is shown separately below. Names, phones and emails stay private.
+          Seek reviewed this request. The check mark identifies a Seeker account; request review is shown separately below. Names, phones and emails stay private.
         </p>
         <div className="flex flex-wrap items-center gap-2 mb-4">
           <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">
@@ -3397,8 +3399,8 @@ function RequestPage({ requestId, setPage }) {
             ) : (
               <>
                 {caseDonateOpen && <CaseDonateSheet request={request} onClose={() => setCaseDonateOpen(false)} />}
-                {CONNECT_CATS.includes(request.category) ? (
-                  <CelebrateRsvp request={request} setPage={setPage} />
+                {CONNECT_CATS.includes(request.category) || /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
+                  <CelebrateRsvp request={request} setPage={setPage} helpLabel={/job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "I can be there"} />
                 ) : isFinancialNeed(request) ? (
                   <Button
                     variant="primary"
@@ -4082,7 +4084,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   }, [userSession]);
 
   if (userSession?.access_token) {
-    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+    const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "Seeker";
     const username = profile?.username ? `@${profile.username}` : "Username not set";
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
@@ -4347,7 +4349,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const unreadNotifications = notifications.filter((n) => !n.read_at).length;
   const completedOffers = offers.filter((o) => ["matched", "fulfilled", "completed"].includes(String(o.status || "").toLowerCase())).length;
   const avatar = profile?.avatar_url || "";
-  const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "SEEK member";
+  const displayName = profile?.full_name || profile?.name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "Seeker";
   const username = profile?.username ? `@${profile.username}` : "Username not set";
   const firstName = String(displayName).trim().split(/\s+/)[0] || "there";
 
