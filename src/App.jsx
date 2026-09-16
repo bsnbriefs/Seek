@@ -1076,19 +1076,23 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <NotificationBell userSession={userSession} setPage={setPage} />
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
-            className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B]"
+            className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B] inline-flex items-center gap-2"
+            aria-label="My SEEK"
           >
-            {avatar && <img loading="lazy" decoding="async" src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" />}
-            {userSession?.access_token ? "My SEEK" : "Sign in"}
+            {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
+            <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
+          <NotificationBell userSession={userSession} setPage={setPage} />
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
           <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
+        <button type="button" onClick={() => go(userSession?.access_token ? "my-seek" : "account")} aria-label="My SEEK" className="p-1">
+          {avatar ? <img src={avatar} alt="" className="h-8 w-8 rounded-full object-cover" /> : <User size={20} />}
+        </button>
         <NotificationBell userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1734,6 +1738,30 @@ function GiveOfferForm() {
 }
 
 
+
+function SeekAutoVideo({ src, muted, title }) {
+  const ref = useRef(null);
+  useEffect(() => {
+    const node = ref.current;
+    if (!node) return;
+    const io = new IntersectionObserver((entries) => {
+      entries.forEach((entry) => {
+        if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
+          node.play().catch(() => {});
+        } else {
+          node.pause();
+        }
+      });
+    }, { threshold: [0, 0.55, 1] });
+    io.observe(node);
+    return () => io.disconnect();
+  }, [src]);
+  useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
+  return (
+    <video ref={ref} src={src} muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={title} />
+  );
+}
+
 function LiveSupportCard({ request, setPage }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [muted, setMuted] = useState(true);
@@ -1759,7 +1787,7 @@ function LiveSupportCard({ request, setPage }) {
     <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)] snap-start">
       <div className="relative bg-[#101415] aspect-[4/5] overflow-hidden">
         {current?.media_kind === "video" ? (
-          <video key={current.public_url} src={current.public_url} autoPlay muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={request.title || "SEEK support video"} />
+          <SeekAutoVideo src={current.public_url} muted={muted} title={request.title || "SEEK support video"} />
         ) : current?.public_url ? (
           <img key={current.public_url} src={current.public_url} alt={request.title || "SEEK support case"} loading="lazy" decoding="async" className="absolute inset-0 h-full w-full object-cover" />
         ) : (
@@ -2950,6 +2978,7 @@ function RequestPage({ requestId, setPage }) {
     const [helped, setHelped] = useState(false);
     const [donors, setDonors] = useState([]);
     const [showAllDonors, setShowAllDonors] = useState(false);
+    const [caseDonateOpen, setCaseDonateOpen] = useState(false);
     const [hostRsvps, setHostRsvps] = useState([]);
   const [viewCount, setViewCount] = useState(0);
   useEffect(() => {
@@ -3296,24 +3325,20 @@ function RequestPage({ requestId, setPage }) {
               </>
             ) : (
               <>
+                {caseDonateOpen && <CaseDonateSheet request={request} onClose={() => setCaseDonateOpen(false)} />}
                 {CONNECT_CATS.includes(request.category) ? (
                 <CelebrateRsvp request={request} setPage={setPage} />
                 ) : (
                 <Button
                   variant="primary"
                   className="w-full sm:w-auto"
-                  onClick={() => {
-                    sessionStorage.setItem("seek_help_request_id", request.id);
-                    window.history.pushState({}, "", "/give");
-                    setPage("give");
-                    window.scrollTo(0, 0);
-                  }}
+                  onClick={() => setCaseDonateOpen(true)}
                 >
-                  I Want to Help <HandHeart size={16} />
+                  Support this case <HandHeart size={16} />
                 </Button>
                 )}
                 <p className="font-body text-xs text-[#0D3B3B]/45">
-                  {CONNECT_CATS.includes(request.category) ? "Your contact goes to the host after Seek records it. Meet in public." : "You’ll be taken to the Give page where you can make an offer or donate."}
+                  {CONNECT_CATS.includes(request.category) ? "Your contact goes to the host after Seek records it. Meet in public." : "Opens Paystack for this case."}
                 </p>
               </>
             )}
@@ -4268,14 +4293,21 @@ function MySeekDashboard({ setPage, userSession }) {
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-7 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {statCards.map(({ label, value, icon: Icon, action }) => (
-          <button key={label} type="button" onClick={action} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 sm:p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
-            <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#1BAA9C]/10 text-[#1BAA9C]"><Icon size={18} /></span>
-            <p className="mt-3 text-[10px] uppercase tracking-widest text-[#0D3B3B]/45">{label}</p>
-            <p className="mt-1 font-display font-extrabold text-2xl text-[#0D3B3B]">{loading ? "—" : value}</p>
-          </button>
-        ))}
+      <section className="mx-auto max-w-xl px-5 sm:px-8 pb-8">
+        <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 divide-y divide-[#0D3B3B]/8">
+          {[
+            ["My requests", () => go("my-requests", "/my-requests"), requests.length],
+            ["My giveaways", () => go("offers", "/offers"), offers.length],
+            ["My support", () => go("my-seek"), gifts.length],
+            ["Messages", () => go("notifications", "/notifications"), unreadNotifications],
+            ["Account & privacy", () => go("account", "/account"), ""],
+          ].map(([label, action, count]) => (
+            <button key={label} type="button" onClick={action} className="w-full flex items-center justify-between px-5 py-4 text-left">
+              <span className="font-semibold text-[#0D3B3B]">{label}</span>
+              <span className="text-sm text-[#0D3B3B]/45">{count === "" ? "→" : count}</span>
+            </button>
+          ))}
+        </div>
       </section>
 
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10 grid lg:grid-cols-3 gap-5">
