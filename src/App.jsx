@@ -1,7 +1,7 @@
-import AdminPage from "./AdminPage";
 import NotificationBell from "./NotificationBell";
-import NotificationsPage from "./NotificationsPage";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
+const AdminPage = lazy(() => import("./AdminPage"));
+const NotificationsPage = lazy(() => import("./NotificationsPage"));
 
 class ErrorBoundary extends React.Component {
   constructor(props) {
@@ -768,7 +768,7 @@ function OutreachStory({ campaign, onBack, onDonate }) {
       ) : null}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {(campaign.videos || []).map((src) => (
-          <video key={src} src={encodeURI(src)} className="w-full rounded-2xl bg-black" controls playsInline preload="metadata" />
+          <video key={src} src={encodeURI(src)} className="w-full rounded-2xl bg-black" controls playsInline preload="none" />
         ))}
         {(campaign.photos || []).map((src) => (
           <img key={src} src={encodeURI(src)} alt="" className="w-full h-48 object-cover rounded-2xl" />
@@ -1228,20 +1228,19 @@ function HomePage({ setPage, userSession }) {
     let donorTick;
     (async () => {
       try {
-        const [rows, matchedIds, impactRows, sponsorRows, stats, offerRows, storyRows, liveRows, crisisRows] = await Promise.all([
+        const [rows, matchedIds] = await Promise.all([
           listPublishedRequests(4),
-          listMatchedOfferRequestIds(),
+          listMatchedOfferRequestIds().catch(() => []),
+        ]);
+        const [impactRows, sponsorRows, stats, offerRows, storyRows, crisisRows] = await Promise.all([
           listPublishedImpact().catch(() => []),
           listPublicSponsors().catch(() => []),
           getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
           listAppreciationStories().catch(() => []),
-          listLiveSupportCases(6).catch(() => []),
-          fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=6&sort[]=date:desc")
-            .then((r) => r.json())
-            .then((json) => (Array.isArray(json?.data) ? json.data : []))
-            .catch(() => []),
+          Promise.resolve([]),
         ]);
+        const liveRows = [];
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
           const mapped = rows.map(mapRequestRow).map((r) => ({ ...r, helped: matchedSet.has(r.id) })).slice(0, 4);
@@ -1329,7 +1328,7 @@ function HomePage({ setPage, userSession }) {
             <div className="mt-3 space-y-3">
               {stories.slice(0, 3).map((story) => (
                 <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
-                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
+                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
                   <p className="p-3 font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p>
                 </button>
               ))}
@@ -1402,7 +1401,7 @@ function SeekStoriesSection({ setPage, limit = 3 }) {
       <div className="grid sm:grid-cols-3 gap-4">
         {stories.map((story) => (
           <button key={story.id} type="button" className="text-left rounded-2xl overflow-hidden bg-white border border-[#0D3B3B]/10 shadow-sm" onClick={() => { setPage("impact"); window.scrollTo(0,0); }}>
-            {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="metadata" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-28 bg-[#0D3B3B]/5" />}
+            {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-28 bg-[#0D3B3B]/5" />}
             <div className="p-4"><p className="font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p><p className="mt-2 text-sm text-[#0D3B3B]/55 line-clamp-3">{story.story}</p></div>
           </button>
         ))}
@@ -1766,7 +1765,7 @@ function SeekAutoVideo({ src, muted, title }) {
   }, [src]);
   useEffect(() => { if (ref.current) ref.current.muted = muted; }, [muted]);
   return (
-    <video ref={ref} src={src} muted={muted} loop playsInline preload="metadata" className="absolute inset-0 h-full w-full object-cover" aria-label={title} />
+    <video ref={ref} src={src} muted={muted} loop playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} />
   );
 }
 
@@ -3279,7 +3278,7 @@ function RequestPage({ requestId, setPage }) {
             controlsList="nodownload noplaybackrate"
             disablePictureInPicture
             playsInline
-            preload="metadata"
+            preload="none"
             onContextMenu={(e) => e.preventDefault()}
             className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8"
           />
@@ -3842,7 +3841,7 @@ function ImpactStoryPage({ impactId, setPage }) {
         {post.story && <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
         {(post.mediaItems || [{ public_url: post.public_url, media_kind: post.media_kind }].filter((m) => m.public_url)).map((m) => (
           m.media_kind === "video" ? (
-            <video key={m.public_url} src={m.public_url} controls playsInline preload="metadata" className="w-full max-h-96 rounded-2xl bg-black" />
+            <video key={m.public_url} src={m.public_url} controls playsInline preload="none" className="w-full max-h-96 rounded-2xl bg-black" />
           ) : (
             <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
@@ -3936,7 +3935,7 @@ function ImpactPage({ setPage }) {
             }}
           >
             {post.public_url && post.media_kind === "video" ? (
-              <video src={post.public_url} muted playsInline preload="metadata" className="h-24 w-full object-cover bg-black" />
+              <video src={post.public_url} muted playsInline preload="none" className="h-24 w-full object-cover bg-black" />
             ) : post.public_url ? (
               <img loading="lazy" decoding="async" src={post.public_url} alt="" className="h-24 w-full object-cover" />
             ) : (
@@ -3967,7 +3966,7 @@ function ImpactPage({ setPage }) {
                   }}
                 >
                   {post.public_url && post.media_kind === "video" ? (
-                    <video src={post.public_url} muted playsInline preload="metadata" className="h-24 w-full object-cover bg-black" />
+                    <video src={post.public_url} muted playsInline preload="none" className="h-24 w-full object-cover bg-black" />
                   ) : post.public_url ? (
                     <img loading="lazy" src={post.public_url} alt="" className="h-24 w-full object-cover" />
                   ) : null}
@@ -4877,7 +4876,7 @@ function LiveTicker() {
       } catch (_e) {}
     };
     load();
-    const id = setInterval(load, 20000);
+    const id = setInterval(load, 60000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
   if (!items.length) return null;
@@ -5309,6 +5308,7 @@ useEffect(() => {
 
       <div key={page} className="animate-[seekFade_0.45s_ease-out]">
       <ErrorBoundary>
+      <Suspense fallback={<div className="min-h-[30vh]" />}>
       {needsUserGate ? (
         <AccountPage setPage={setPage} userSession={userSession} setUserSession={setUserSession} />
       ) : isRequestPage ? (
@@ -5320,6 +5320,7 @@ useEffect(() => {
       ) : (
         pages[page] || pages.home
       )}
+      </Suspense>
       </ErrorBoundary>
       </div>
 
