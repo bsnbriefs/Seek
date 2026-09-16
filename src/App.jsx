@@ -3148,7 +3148,13 @@ function RequestPage({ requestId, setPage }) {
       })
       .catch(() => {});
     const loadDonors = () => listRequestDonors(matched.id)
-      .then((rows) => { if (!cancelled) setDonors(Array.isArray(rows) ? rows : []); })
+      .then((rows) => {
+        if (cancelled) return;
+        const list = Array.isArray(rows) ? rows : [];
+        setDonors(list);
+        const raised = list.reduce((sum, d) => sum + (Number(d.amount) || 0), 0);
+        setRequest((prev) => prev ? { ...prev, amountRaised: raised || prev.amountRaised } : prev);
+      })
       .catch(() => {});
     loadDonors();
     donorTick = setInterval(loadDonors, 8000);
@@ -3767,7 +3773,8 @@ function LegalPage({ title }) {
       "You may ask for your account or request data to be reviewed by contacting BSN Foundation through Seek.",
     ],
     Terms: [
-      "Seek is a community assistance platform operated as a project of BSN Foundation.",
+      "SEEK keeping the lights on. When you give through Paystack, SEEK asks to add 5% on top of the amount that goes to the request or BSN outreach. That 5% helps run SEEK (hosting, review, messages). You can untick it before you pay. SEEK does not take 5% out of the gift if you do not add it.",
+      "Seek is a community assistance project of BSN Foundation.",
       "Submitting a request, offer, donation or volunteer form does not guarantee funding or a match.",
       "Users must provide truthful information and must not use Seek to harass, defraud or exploit others.",
       "Seek may decline, unpublish or remove content that breaks these terms or our community guidelines.",
