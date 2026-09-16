@@ -1369,6 +1369,14 @@ export async function uploadProfilePhoto(file) {
 }
 
 const SEEK_PROFILE_CACHE = "seek_my_profile_v1";
+const SEEK_BIO_CACHE = "seek_my_bio_v1";
+function readBioCache() {
+  try { return localStorage.getItem(SEEK_BIO_CACHE) || ""; } catch { return ""; }
+}
+function writeBioCache(bio) {
+  try { if (bio != null) localStorage.setItem(SEEK_BIO_CACHE, String(bio)); } catch (_e) {}
+}
+
 function readProfileCache() {
   try { return JSON.parse(localStorage.getItem(SEEK_PROFILE_CACHE) || "null"); } catch { return null; }
 }
@@ -1398,7 +1406,7 @@ export async function getMyProfile() {
   else if (mapped && cached) {
     mapped.username = cached.username || mapped.username;
     mapped.full_name = cached.full_name || mapped.full_name;
-    mapped.bio = cached.bio || mapped.bio;
+    mapped.bio = readBioCache() || cached.bio || mapped.bio;
   }
   if (mapped?.avatar_url) cacheAvatarUrl(mapped.avatar_url);
   if (mapped) writeProfileCache(mapped);
@@ -1725,6 +1733,7 @@ export async function updateMyUsername({
   }
 
   const profileFromRpc = Array.isArray(saved) ? saved[0] : saved;
+  writeBioCache(cleanBio);
   writeProfileCache({
     id: session.user.id,
     username: checked.username,
@@ -1799,7 +1808,7 @@ export async function getPublicMember(userId) {
     { method: "POST", body: JSON.stringify({ p_key: String(userId) }) }
   ).catch(() => []);
   const item = Array.isArray(rows) ? rows[0] : rows;
-  if (!item) return { id: userId, name: "SEEK member", username: "", bio: "", avatar_url: "" };
+  if (!item) return { id: userId, name: "", username: "", bio: "", avatar_url: "" };
   return {
     id: item.id || userId,
     name: item.full_name || "SEEK member",
