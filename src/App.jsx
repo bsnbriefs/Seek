@@ -918,8 +918,9 @@ function ThemeToggle() {
 
 
 function CaseDonateSheet({ request, onClose }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
+  const session = getUserSession();
+  const [name, setName] = useState(session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "");
+  const [email, setEmail] = useState(session?.user?.email || "");
   const [amount, setAmount] = useState(request?.amountNeeded ? Math.min(Number(request.amountNeeded), 5000) : 2000);
   const [anonymous, setAnonymous] = useState(false);
   const [error, setError] = useState("");
@@ -934,12 +935,13 @@ function CaseDonateSheet({ request, onClose }) {
           setError("");
           setLoading(true);
           try {
+            if (!anonymous && !String(name || "").trim()) throw new Error("Add the name to show with this gift.");
             const result = await initializeDonation({
               amount: Number(amount),
-              email,
+              email: session?.user?.email || email,
               requestId: request.id,
               anonymous,
-              donorName: anonymous ? "Anonymous" : (name || "Supporter"),
+              donorName: anonymous ? "Anonymous" : String(name || "").trim(),
               coverFee: true,
               callbackUrl: window.location.origin + "/request/" + request.id,
             });
@@ -3339,7 +3341,7 @@ function RequestPage({ requestId, setPage }) {
               <ul className="space-y-2">
                 {(showAllDonors ? donors : donors.slice(0, 3)).map((d, i) => (
                   <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 && !showAllDonors ? "bg-[#1BAA9C]/10" : "")}>
-                    <span className="text-[#0D3B3B]/70 inline-flex items-center gap-1.5">{d.anonymous ? "Anonymous" : (d.name || d.donor_name || "A supporter")} {!d.anonymous && <SeekVerifiedCheck className="h-4 w-4" />}</span>
+                    <span className="text-[#0D3B3B]/70 inline-flex items-center gap-1.5">{d.anonymous ? "Anonymous" : String(d.name || d.donor_name || "").split("·")[0].trim() || "Neighbour"} {!d.anonymous && <SeekVerifiedCheck className="h-4 w-4" />}</span>
                     <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
