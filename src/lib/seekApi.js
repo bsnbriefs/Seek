@@ -1478,6 +1478,16 @@ export async function submitCelebrateRsvp(payload) {
     }),
   });
   try {
+    await supabaseFetch("rpc/notify_request_host", {
+      method: "POST",
+      body: JSON.stringify({
+        p_request_id: payload.requestId,
+        p_title: "Someone can help",
+        p_body: (payload.name || "Someone") + " responded to your SEEK post",
+      }),
+    });
+  } catch (_e) {}
+  try {
     await fetch(`${import.meta.env.VITE_SUPABASE_URL}/functions/v1/notify-celebrate-rsvp`, {
       method: "POST",
       headers: {
