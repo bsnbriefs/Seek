@@ -1871,67 +1871,56 @@ function LiveSupportCard({ request, setPage }) {
 
 
 function DiscoverPage({ setPage }) {
-  const [requests, setRequests] = useState([]);
-  const [stories, setStories] = useState([]);
-  const [offers, setOffers] = useState([]);
-  useEffect(() => {
-    listPublishedRequests(8).then((rows) => setRequests((rows || []).map(mapRequestRow).slice(0, 6))).catch(() => {});
-    listAppreciationStories().then((rows) => setStories((rows || []).slice(0, 4))).catch(() => {});
-    listPublicOffers().then((rows) => setOffers((Array.isArray(rows) ? rows : []).slice(0, 4))).catch(() => {});
-  }, []);
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-  const topics = [["education","Education"],["food","Food"],["medical","Medical"],["jobs","Jobs"],["housing","Housing"],["children","Children"]];
+  const doors = [
+    { id: "seek-help", title: "Seek Help", body: "Need help? Create a SEEK request and tell neighbours what you need — money, food, a job, or something else genuine." },
+    { id: "give", title: "Give", body: "Give money to a published request or a BSN outreach. You can give without an account." },
+    { id: "offers", title: "Giveaways", body: "Give goods, a job, mentorship or counselling. SEEK reads the post before it is public." },
+    { id: "celebrate", title: "Connect & Celebrate", body: "Ask a neighbour to be there for a birthday, a graduation or a new city. This is not a fundraiser." },
+  ];
+  const steps = [
+    ["Create an account", "So you can ask, offer, and keep your activity in one place.", "account"],
+    ["Choose what you need", "Seek Help, Give, Giveaways, or Connect.", "seek-help"],
+    ["Tell your story", "Share the details SEEK needs to review the post.", "seek-help"],
+    ["Neighbours respond", "They give, offer a gift, or say they can be there.", "give"],
+    ["Track what happens", "Requests, gifts and messages live in My SEEK.", "my-seek"],
+  ];
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 pt-12 pb-8">
-        <SectionLabel>Discover</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening around SEEK.</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/55">Browse open needs, topics and community activity.</p>
-        <div className="mt-5 flex flex-wrap gap-2">
-          {topics.map(([filter, label]) => (
-            <button key={filter} type="button" onClick={() => { try { sessionStorage.setItem("seek_offer_filter", filter === "jobs" ? "job" : ""); } catch (_e) {} go(filter === "jobs" ? "offers" : "give"); }} className="rounded-full border border-[#0D3B3B]/12 bg-white px-3 py-1.5 text-sm">{label}</button>
+      <section className="mx-auto max-w-2xl px-5 pt-12 pb-8">
+        <SectionLabel>Discover SEEK</SectionLabel>
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">Understand SEEK. Then take your next step.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/65">SEEK connects people who need help with people who can offer support, time, goods and company.</p>
+        <p className="mt-4 font-display font-bold text-[#0D3B3B]">Ask for what you need. Offer what you can.</p>
+      </section>
+      <section className="mx-auto max-w-2xl px-5 pb-10 space-y-3">
+        {doors.map((d) => (
+          <button key={d.id} type="button" onClick={() => go(d.id)} className="w-full text-left rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
+            <p className="font-display font-bold text-lg text-[#0D3B3B]">{d.title}</p>
+            <p className="mt-1 text-sm leading-relaxed text-[#0D3B3B]/60">{d.body}</p>
+            <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">{d.title === "Giveaways" ? "Explore Giveaways" : d.title} →</p>
+          </button>
+        ))}
+      </section>
+      <section className="mx-auto max-w-2xl px-5 pb-10">
+        <h2 className="font-display font-extrabold text-2xl text-[#0D3B3B]">How SEEK works</h2>
+        <ol className="mt-4 space-y-3">
+          {steps.map(([title, body, id], i) => (
+            <li key={title}>
+              <button type="button" onClick={() => go(id)} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                <p className="text-[10px] font-bold uppercase tracking-widest text-[#1BAA9C]">Step {i + 1}</p>
+                <p className="mt-1 font-display font-bold text-[#0D3B3B]">{title}</p>
+                <p className="mt-1 text-sm text-[#0D3B3B]/60">{body}</p>
+              </button>
+            </li>
           ))}
-        </div>
+        </ol>
       </section>
-      <section className="mx-auto max-w-3xl px-5 pb-8">
-        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Open needs</h2>
-        <div className="space-y-3">{requests.filter((r) => !CONNECT_CATS.includes(r.category)).slice(0,4).map((req) => (
-          <button key={req.id} type="button" onClick={() => { setPage("request:"+req.id); window.history.pushState({},"","/request/"+req.id); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
-            <p className="text-xs text-[#1BAA9C]">{req.category}{req.location ? " · "+req.location : ""}</p>
-            <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
-          </button>
-        ))}</div>
-      </section>
-      {stories.length > 0 && (
-        <section className="mx-auto max-w-3xl px-5 pb-8">
-          <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Impact</h2>
-          <div className="grid sm:grid-cols-2 gap-3">{stories.map((s) => (
-            <button key={s.id} type="button" onClick={() => { setPage("impact:"+s.id); window.history.pushState({},"","/impact/"+s.id); }} className="text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-3">
-              <p className="font-semibold text-[#0D3B3B] line-clamp-2">{s.title || "A SEEK story"}</p>
-            </button>
-          ))}</div>
-        </section>
-      )}
-      <section className="mx-auto max-w-3xl px-5 pb-14">
-        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-3">Ways to give</h2>
-        <div className="grid grid-cols-2 gap-3">
-          <button type="button" onClick={() => go("give")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
-            <p className="font-display font-bold text-[#0D3B3B]">Give money</p>
-            <p className="mt-1 text-xs text-[#0D3B3B]/55">A published request or a BSN outreach.</p>
-          </button>
-          <button type="button" onClick={() => go("offers")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
-            <p className="font-display font-bold text-[#0D3B3B]">Giveaways</p>
-            <p className="mt-1 text-xs text-[#0D3B3B]/55">Goods, time, jobs and skills.</p>
-          </button>
-          <button type="button" onClick={() => go("volunteer")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
-            <p className="font-display font-bold text-[#0D3B3B]">Volunteer</p>
-            <p className="mt-1 text-xs text-[#0D3B3B]/55">Offer your time to BSN work.</p>
-          </button>
-          <button type="button" onClick={() => go("impact")} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
-            <p className="font-display font-bold text-[#0D3B3B]">Impact</p>
-            <p className="mt-1 text-xs text-[#0D3B3B]/55">See where gifts already went.</p>
-          </button>
-        </div>
+      <section className="mx-auto max-w-2xl px-5 pb-28">
+        <h2 className="font-display font-extrabold text-2xl text-[#0D3B3B]">How SEEK keeps this careful</h2>
+        <p className="mt-3 text-sm leading-relaxed text-[#0D3B3B]/65">SEEK reads posts before they are public. Evidence can sit with a request. You can report a post. Accounts use email sign-in. Names and phones stay off the public card unless you choose to share them when someone offers help.</p>
+        <p className="mt-3 text-sm text-[#0D3B3B]/55">SEEK does not claim that every person is independently verified. The check mark means they have a SEEK account.</p>
+        <button type="button" onClick={() => go("about")} className="mt-5 text-sm font-semibold text-[#1BAA9C]">Trust &amp; safety →</button>
       </section>
     </div>
   );
