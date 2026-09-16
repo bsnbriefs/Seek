@@ -1755,10 +1755,12 @@ function GiveOfferForm() {
 function SeekAutoVideo({ src, title }) {
   const ref = useRef(null);
   const [muted, setMuted] = useState(true);
+  const [ended, setEnded] = useState(false);
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
     node.muted = true;
+    setEnded(false);
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
@@ -1787,8 +1789,11 @@ function SeekAutoVideo({ src, title }) {
   };
   return (
     <>
-      <video ref={ref} src={src} muted loop playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} />
-      <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={toggleSound} className="absolute right-3 bottom-24 z-20 h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>
+      <video ref={ref} src={src} muted playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <button type="button" aria-label={muted ? "Turn sound on" : "Mute video"} onClick={toggleSound} className="absolute right-3 bottom-28 z-20 h-11 w-11 rounded-full bg-black/55 text-white backdrop-blur text-lg">{muted ? "🔇" : "🔊"}</button>
+      {ended && (
+        <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
+      )}
     </>
   );
 }
@@ -1816,8 +1821,8 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-[1.75rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)] snap-start">
-      <div className="relative bg-[#101415] aspect-[4/5] overflow-hidden">
+    <article className="mx-auto flex h-[calc(100dvh-12.5rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+      <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
         ) : current?.public_url ? (
@@ -1857,7 +1862,7 @@ function LiveSupportCard({ request, setPage }) {
         </div>
       </div>
 
-      <div className="bg-white p-5 sm:p-6">
+      <div className="shrink-0 bg-white px-4 pt-3 pb-4">
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-4 flex gap-2">
           {isFinancialNeed(request) ? <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">Support this case</button> : <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-4 py-3 text-sm font-bold text-white">{CONNECT_CATS.includes(request.category) ? "I can be there" : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "View case"}</button>}
@@ -1956,9 +1961,11 @@ function ForYouPage({ setPage }) {
         {!loading && !error && liveCases.length === 0 && (
           <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved request evidence will appear here.</p>
         )}
-        <div className="space-y-8">
+        <div className="mx-auto max-w-[440px] h-[calc(100dvh-12.5rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-4">
           {liveCases.map((request) => (
-            <LiveSupportCard key={request.id} request={request} setPage={setPage} />
+            <div key={request.id} className="mb-3 snap-start">
+              <LiveSupportCard request={request} setPage={setPage} />
+            </div>
           ))}
         </div>
       </section>
