@@ -339,6 +339,7 @@ const CATEGORIES = [
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
+const SWIPE_SEQ = ["for-you", "seek-help", "give", "offers", "celebrate"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
 function isFinancialNeed(req) {
   if (!req) return false;
@@ -5452,7 +5453,30 @@ useEffect(() => {
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
 
-      <div key={page} className="animate-[seekFade_0.45s_ease-out]">
+      <div
+        key={page}
+        className="animate-[seekFade_0.45s_ease-out]"
+        onTouchStart={(e) => {
+          if (window.innerWidth >= 1024) return;
+          if (!SWIPE_SEQ.includes(page)) return;
+          const tch = e.changedTouches[0];
+          window.__seekSwipe = { x: tch.clientX, y: tch.clientY, t: Date.now() };
+        }}
+        onTouchEnd={(e) => {
+          const s = window.__seekSwipe;
+          window.__seekSwipe = null;
+          if (!s || window.innerWidth >= 1024) return;
+          if (!SWIPE_SEQ.includes(page)) return;
+          const tch = e.changedTouches[0];
+          const dx = tch.clientX - s.x;
+          const dy = tch.clientY - s.y;
+          if (Math.abs(dx) < 80 || Math.abs(dx) < Math.abs(dy) * 1.6) return;
+          if (Date.now() - s.t > 700) return;
+          const i = SWIPE_SEQ.indexOf(page);
+          const next = dx < 0 ? SWIPE_SEQ[i + 1] : SWIPE_SEQ[i - 1];
+          if (next) setPage(next);
+        }}
+      >
       <ErrorBoundary>
       <Suspense fallback={<div className="min-h-[30vh]" />}>
       {needsUserGate ? (
