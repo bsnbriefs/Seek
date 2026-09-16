@@ -45,12 +45,32 @@ async function sendReceipt(opts: {
   }).catch(() => {});
 }
 
+async function findDonation(supabase: ReturnType<typeof createClient>, reference: string) {
+  const select = "id,request_id,amount,status,email,donor_email,donor_name,paystack_reference";
+  const byRef = await supabase.from("donations").select(select).eq("paystack_reference", reference).maybeSingle();
+  if (byRef.data) return byRef.data;
+  return null;
+}
+
 async function markPaid(supabase: ReturnType<typeof createClient>, reference: string, payload: Record<string, unknown>) {
-  const { data: donation } = await supabase
-    .from("donations")
-    .select("id,request_id,amount,status,email,donor_email,donor_name")
-    .eq("paystack_reference", reference)
-    .maybeSingle();
+  let donation = await findDonation(supabase, reference);
+  if (!donation) {
+    const meta = (payload?.metadata || {}) as Record<string, unknown>;
+    const amount = Number(meta.gift_amount || Number(payload?.amount || 0) / 100) || 0;
+    const email = String((payload as { customer?: { email?: string } })?.customer?.email || "");
+    const row: Record<string, unknown> = {
+      request_id: meta.request_id || null,
+      donor_email: email,
+      anonymous: Boolean(meta.anonymous),
+      amount,
+      currency: "NGN",
+      paystack_reference: reference,
+      status: "pending",
+      donor_name: meta.donor_name || null,
+    };
+    const inserted = await supabase.from("donations").insert(row).select("id,request_id,amount,status,email,donor_email,donor_name").maybeSingle();
+    donation = inserted.data;
+  }
   if (!donation) throw new Error("Donation not found.");
   if (donation.status === "successful") return { donation, justPaid: false };
 
