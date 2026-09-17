@@ -233,6 +233,9 @@ export async function getOfferMedia(offerId) {
 }
 
 export async function uploadOfferMedia(offerId, file, accessToken) {
+  const session = getUserSession();
+  const token = accessToken || session?.access_token;
+  if (!token) throw new Error("Sign in to upload giveaway proof.");
   const form = new FormData();
   form.append("file", file);
   form.append("purpose", "offer");
@@ -242,10 +245,7 @@ export async function uploadOfferMedia(offerId, file, accessToken) {
     apikey:
       import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
       import.meta.env.VITE_SUPABASE_ANON_KEY,
-    Authorization: `Bearer ${
-      import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
-      import.meta.env.VITE_SUPABASE_ANON_KEY
-    }`,
+    Authorization: `Bearer ${token}`,
   };
   const response = await fetch(
     `${import.meta.env.VITE_SUPABASE_URL}/functions/v1/secure-media-upload`,
@@ -1317,19 +1317,26 @@ export async function closeMyOffer(offerId) {
   if (!session?.access_token || !offerId) throw new Error("Sign in first.");
   const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
   const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const headers = {
+    apikey: key,
+    Authorization: "Bearer " + session.access_token,
+    "Content-Type": "application/json",
+    Prefer: "return=minimal",
+  };
+  const rpc = await fetch(url + "/rest/v1/rpc/close_seek_offer", {
+    method: "POST",
+    headers,
+    body: JSON.stringify({ p_offer_id: offerId }),
+  });
+  if (rpc.ok) return;
   const response = await fetch(url + "/rest/v1/offers?id=eq." + encodeURIComponent(offerId), {
     method: "PATCH",
-    headers: {
-      apikey: key,
-      Authorization: "Bearer " + session.access_token,
-      "Content-Type": "application/json",
-      Prefer: "return=minimal",
-    },
+    headers,
     body: JSON.stringify({ status: "closed" }),
   });
   if (!response.ok) {
     const data = await response.json().catch(() => ({}));
-    throw new Error(data?.message || "Could not close this giveaway.");
+    throw new Error(data?.message || "Could not end this giveaway.");
   }
 }
 
