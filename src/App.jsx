@@ -208,9 +208,8 @@ function tSeek(key) {
 
 const FONTS = (
   <style>{`
-    @import url('https://fonts.googleapis.com/css2?family=Plus+Jakarta+Sans:wght@500;600;700;800&family=Inter:wght@400;500;600&display=swap');
-    .font-display { font-family: 'Plus Jakarta Sans', ui-sans-serif, system-ui, sans-serif; letter-spacing: -0.03em; }
-    .font-body { font-family: 'Inter', ui-sans-serif, system-ui, sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
+    .font-display { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: -0.03em; }
+    .font-body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
     @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
     .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
     html { scroll-behavior: smooth; }
@@ -1317,14 +1316,14 @@ function HomePage({ setPage, userSession }) {
           listPublishedRequests(4),
           listMatchedOfferRequestIds().catch(() => []),
         ]);
-        const [impactRows, sponsorRows, stats, offerRows, storyRows, crisisRows] = await Promise.all([
+        const [impactRows, sponsorRows, offerRows, storyRows] = await Promise.all([
           listPublishedImpact().catch(() => []),
           listPublicSponsors().catch(() => []),
-          getSeekLiveStats().catch(() => null),
           listPublicOffers().catch(() => []),
           listAppreciationStories().catch(() => []),
-          Promise.resolve([]),
         ]);
+        const crisisRows = [];
+        const stats = null;
         const liveRows = [];
         const matchedSet = new Set(matchedIds);
         if (!cancelled) {
@@ -1352,15 +1351,7 @@ function HomePage({ setPage, userSession }) {
         if (!cancelled) setRequestsLoading(false);
       }
     })();
-    const poll = setInterval(async () => {
-      try {
-        const rows = await listPublishedRequests(4);
-        if (!cancelled) {
-          setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).slice(0, 4));
-        }
-      } catch (_e) {}
-    }, 15000);
-    return () => { cancelled = true; clearInterval(poll); };
+    return () => { cancelled = true; };
   }, []);
 
   return (
@@ -2359,7 +2350,7 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
     (async () => {
       try {
         const [rows, matchedIds] = await Promise.all([
-  listPublishedRequests(),
+  listPublishedRequests(12),
   listMatchedOfferRequestIds(),
 ]);
 const matchedSet = new Set(matchedIds);
@@ -5176,14 +5167,14 @@ function LiveTicker() {
     let cancelled = false;
     const load = async () => {
       try {
-        const [reqRows, offerRows, disasters, nigeria, stats, gifts] = await Promise.all([
+        const [reqRows, offerRows, stats, gifts] = await Promise.all([
           listPublishedRequests(6).catch(() => []),
           listPublicOffers().catch(() => []),
-          fetch("https://api.reliefweb.int/v1/disasters?appname=seekbsn&profile=list&limit=8&sort[]=date:desc").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.name).filter(Boolean)).catch(() => []),
-          fetch("https://api.reliefweb.int/v1/reports?appname=seekbsn&profile=list&limit=8&sort[]=date:desc&filter[field]=primary_country&filter[value]=Nigeria").then((r) => r.json()).then((j) => (j.data || []).map((d) => d.fields?.title).filter(Boolean)).catch(() => []),
           getSeekLiveStats().catch(() => null),
           listRecentGifts(8).catch(() => []),
         ]);
+        const disasters = [];
+        const nigeria = [];
         const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
           const raw = String(g.donor_name || "");
           const parts = raw.split("·").map((s) => s.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
