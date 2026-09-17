@@ -1948,3 +1948,46 @@ export async function seekAiAssist({ purpose = "classify", title = "", descripti
   }
   return data;
 }
+
+export async function getMyWallet() {
+  const session = (await refreshUserSession()) || getUserSession();
+  if (!session?.access_token || !session?.user?.id) return { balance: 0 };
+  const rows = await supabaseFetch(
+    "profiles?id=eq." + encodeURIComponent(session.user.id) + "&select=wallet_balance&limit=1"
+  ).catch(() => []);
+  const row = Array.isArray(rows) ? rows[0] : rows;
+  return { balance: Number(row?.wallet_balance || 0) };
+}
+
+export async function spendFromWallet(requestId, amount) {
+  const session = (await refreshUserSession()) || getUserSession();
+  if (!session?.access_token) throw new Error("Sign in to give from your wallet.");
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const response = await fetch(url + "/rest/v1/rpc/spend_seek_wallet", {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ p_request_id: requestId, p_amount: Number(amount) }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) throw new Error(data.message || data.error || "Could not give from wallet.");
+  return data;
+}
+
+export async function loadSeekWallet(amount) {
+  const session = (await refreshUserSession()) || getUserSession();
+  if (!session?.access_token) throw new Error("Sign in to load your wallet.");
+  return initializeDonation({
+    amount: Number(amount),
+    email: session.user?.email,
+    requestId: null,
+    campaignId: "wallet",
+    donorName: "Wallet load",
+    coverFee: true,
+    callbackUrl: window.location.origin + "/give",
+  });
+}
