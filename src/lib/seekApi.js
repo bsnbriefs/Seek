@@ -394,6 +394,8 @@ export function mapRequestRow(row) {
     urgency: row.urgency,
     verification: row.verification_status,
     status: row.status,
+    created_at: row.created_at || row.createdAt || row.published_at || "",
+    createdAt: row.created_at || row.createdAt || row.published_at || "",
     type:
       (row.assistance_type || "")
         .toLowerCase()
