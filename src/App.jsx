@@ -1667,7 +1667,7 @@ function OfferCard({ offer, setPage }) {
 }
 
 
-function GiveOfferForm() {
+function GiveOfferForm({ setPage }) {
   const [offer, setOffer] = useState("");
   const [offerFiles, setOfferFiles] = useState([]);
   const [offerTarget, setOfferTarget] = useState("general");
@@ -1682,6 +1682,21 @@ function GiveOfferForm() {
   const [requests, setRequests] = useState([]);
   useEffect(() => {
     listPublishedRequests().then((rows) => setRequests((rows || []).map((row) => row.title ? row : mapRequestRow(row)).filter((r) => !CONNECT_CATS.includes(r.category)))).catch(() => {});
+    try {
+      const raw = sessionStorage.getItem("seek_offer_draft");
+      if (raw) {
+        const draft = JSON.parse(raw);
+        if (draft.offer) setOffer(draft.offer);
+        if (draft.offerCategory) setOfferCategory(draft.offerCategory);
+        if (draft.offerTarget) setOfferTarget(draft.offerTarget);
+        if (draft.offerRequestId) setOfferRequestId(draft.offerRequestId);
+        if (draft.offerCity) setOfferCity(draft.offerCity);
+        if (draft.offerContactEmail) setOfferContactEmail(draft.offerContactEmail);
+        if (draft.offerContactPhone) setOfferContactPhone(draft.offerContactPhone);
+      }
+    } catch (_e) {}
+    const session = getUserSession();
+    if (session?.user?.email) setOfferContactEmail((prev) => prev || session.user.email);
   }, []);
 
   const targetOptions = [
@@ -1806,8 +1821,20 @@ function GiveOfferForm() {
       <Button variant="primary" disabled={!offer.trim() || !offerCategory || (offerTarget === "request" && !offerRequestId) || offerLoading} onClick={async () => {
         setOfferError(""); setOfferLoading(true);
         try {
-          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
+          if (!getUserSession()?.access_token) {
+            try {
+              sessionStorage.setItem("seek_return", "offers");
+              sessionStorage.setItem("seek_offer_draft", JSON.stringify({
+                offer, offerCategory, offerTarget, offerRequestId, offerCity, offerContactEmail, offerContactPhone,
+              }));
+            } catch (_e) {}
+            if (setPage) setPage("account");
+            else window.location.href = "/account";
+            return;
+          }
+          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || getUserSession()?.user?.email || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
           setSubmitted(true);
+          try { sessionStorage.removeItem("seek_offer_draft"); } catch (_e) {}
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
       }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
@@ -2174,7 +2201,7 @@ function OffersPage({ setPage }) {
         </div>
 
         <div id="make-offer" className="pt-12 text-left">
-          <GiveOfferForm />
+          <GiveOfferForm setPage={setPage} />
         </div>
       </section>
     </div>
@@ -4263,6 +4290,15 @@ function AccountPage({ setPage, userSession, setUserSession }) {
       return;
     }
     getMyProfile().then((p) => setProfile(p || null)).catch(() => {});
+    const back = sessionStorage.getItem("seek_return");
+    if (!back) return;
+    sessionStorage.removeItem("seek_return");
+    if (String(back).startsWith("request:")) {
+      window.history.pushState({}, "", "/request/" + back.split(":")[1]);
+    } else if (back === "offers") {
+      window.history.pushState({}, "", "/offers");
+    }
+    setPage(back);
   }, [userSession]);
 
   if (userSession?.access_token) {
@@ -4370,6 +4406,11 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </p>
         </div>
 
+        <button type="button" className="w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold mb-3" onClick={() => startGoogleSignIn()}>
+          Continue with Google
+        </button>
+        <p className="text-center text-xs text-[#0D3B3B]/45 mb-6">Stays signed in on this phone.</p>
+        <p className="text-center text-xs text-[#0D3B3B]/40 mb-3">Or use email</p>
         <form
           onSubmit={handleSubmit}
           className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
@@ -4406,9 +4447,10 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </Button>
           {mode !== "recover" && (
             <>
-              <button type="button" className="w-full rounded-full border border-[#0D3B3B]/15 py-3 text-sm font-semibold" onClick={() => startGoogleSignIn()}>
+              <button type="button" className="w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold" onClick={() => startGoogleSignIn()}>
                 Continue with Google
               </button>
+              <p className="text-center text-xs text-[#0D3B3B]/45">Stays signed in on this phone.</p>
               <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
                 try {
                   setError("");
