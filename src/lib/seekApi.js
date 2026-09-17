@@ -1828,7 +1828,45 @@ export async function listLiveSupportCases(limit = 12) {
     })
   );
 
-  return cases;
+  const extra = [];
+  try {
+    const impact = await listPublishedImpact();
+    (Array.isArray(impact) ? impact : []).forEach((row) => {
+      const media = (row.mediaItems || []).filter((m) => m?.public_url);
+      if (!media.length && row.public_url) media.push({ public_url: row.public_url, media_kind: row.media_kind || "image" });
+      if (!media.length) return;
+      extra.push({
+        id: row.id,
+        feedKind: "impact",
+        title: row.title || "SEEK impact",
+        description: row.story || "",
+        category: "Impact",
+        location: row.location || "",
+        created_at: row.published_at || row.created_at,
+        amountNeeded: 0,
+        media,
+      });
+    });
+  } catch (_e) {}
+  try {
+    const thanks = await listAppreciationStories();
+    (Array.isArray(thanks) ? thanks : []).forEach((row) => {
+      if (!row.public_url) return;
+      extra.push({
+        id: row.id,
+        feedKind: "appreciation",
+        title: row.title || "Thank you",
+        description: row.story || row.public_update || "",
+        category: "Appreciation",
+        location: row.location || "",
+        created_at: row.created_at || row.public_update_at,
+        amountNeeded: 0,
+        media: [{ public_url: row.public_url, media_kind: row.media_kind || "video" }],
+      });
+    });
+  } catch (_e) {}
+
+  return [...extra, ...cases];
 }
       
 export async function getPublicMember(userId) {
