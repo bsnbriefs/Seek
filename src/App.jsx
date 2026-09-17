@@ -1057,6 +1057,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
+    { id: "shop", label: "Shop" },
     { id: "celebrate", label: "Connect" },
   ];
   const go = (item) => {
@@ -1101,7 +1102,6 @@ function FeatureStrip({ page, setPage }) {
             {moreOpen && (
               <div className="fixed right-3 top-32 w-56 max-h-[70vh] overflow-y-auto rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-2xl z-[160]">
                 {[
-                  ["shop", "Shop"],
                   ["organisations", "For organisations"],
                   ["impact", "Impact"],
                   ["volunteer", "Volunteer"],
@@ -5158,9 +5158,9 @@ function MyRequestsPage({ setPage, userSession }) {
 /* ---------------- App ---------------- */
 
 const SEEK_SHOP = [
-  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "One size. Cotton.", sizes: ["One size"] },
-  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Soft cotton.", sizes: ["S", "M", "L", "XL"] },
-  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Warm layer.", sizes: ["S", "M", "L", "XL"] },
+  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "Deep teal. Official mark + BSN.", sizes: ["One size"], image: "/shop/cap.jpg" },
+  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Black cotton. ASK. SEEK. FIND.", sizes: ["S", "M", "L", "XL"], image: "/shop/tee.jpg" },
+  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Black. Mark on chest, line on back.", sizes: ["S", "M", "L", "XL"], image: "/shop/hoodie.jpg" },
 ];
 
 function ShopPage({ setPage }) {
@@ -5191,11 +5191,21 @@ function ShopPage({ setPage }) {
               key={row.id}
               type="button"
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
-              className="rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 text-left"
+              className="rounded-3xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
             >
-              <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">{row.note}</p>
-              <p className="mt-3 text-sm font-bold text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+              <div className="bg-[#101415] aspect-[16/10] flex items-center justify-center p-6">
+                <img
+                  src={row.image}
+                  alt={row.title}
+                  className="max-h-40 w-auto object-contain"
+                  onError={(e) => { e.currentTarget.src = SEEK_FACE; }}
+                />
+              </div>
+              <div className="p-5">
+                <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
+                <p className="mt-1 text-sm text-[#0D3B3B]/55">{row.note}</p>
+                <p className="mt-3 text-sm font-bold text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+              </div>
             </button>
           ))}
         </div>
