@@ -633,30 +633,11 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
 
   return (
     <div className={`${compact ? "mt-4" : "mt-6"}`}>
-      <div className="flex items-center gap-2 border-t border-[#0D3B3B]/8 pt-3">
-        <div className="flex min-w-0 flex-1 items-center gap-1 overflow-x-auto scrollbar-hide">
-          {COMMUNITY_REACTIONS.map((reaction) => {
-            const count = Number(data.reactions?.[reaction.key] || 0);
-            return (
-              <button
-                key={reaction.key}
-                type="button"
-                onClick={() => react(reaction.key)}
-                aria-label={`${reaction.label}${count ? `, ${count}` : ""}`}
-                title={reaction.label}
-                className={`flex shrink-0 items-center gap-1 rounded-full px-2.5 py-1.5 text-sm transition active:scale-95 ${data.userReaction === reaction.key ? "bg-[#E8F6F2] text-[#168F84] ring-1 ring-[#168F84]/20" : "text-[#0D3B3B]/65 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
-              >
-                <span aria-hidden="true" className="text-[17px] leading-none">{reaction.emoji}</span>
-                {count > 0 && <span className="text-xs font-semibold tabular-nums">{count}</span>}
-              </button>
-            );
-          })}
-        </div>
-
+      <div className="flex items-center justify-between gap-2 border-t border-[#0D3B3B]/8 pt-3">
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setError(""); setNotice(""); }}
-          className={`shrink-0 rounded-full px-3 py-1.5 text-xs font-semibold transition ${open ? "bg-[#E8F6F2] text-[#168F84]" : "text-[#0D3B3B]/55 hover:bg-[#F2F7F5] hover:text-[#0D3B3B]"}`}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${open ? "bg-[#E8F6F2] text-[#168F84]" : "text-[#0D3B3B]/55"}`}
         >
           {commentsCount > 0 ? `Comments ${commentsCount}` : "Comment"}
         </button>
@@ -1601,7 +1582,7 @@ function OfferCard({ offer, setPage }) {
           {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#0D3B3B]">Posted by Admin</p>}
         </div>
       </div>
-      <div className="mt-4 flex items-center gap-4 text-sm font-semibold">
+      <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
         <button type="button" className="text-[#1BAA9C]" onClick={async () => {
           if (!open && media.length === 0) {
             try {
