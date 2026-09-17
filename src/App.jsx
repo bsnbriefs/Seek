@@ -5193,11 +5193,11 @@ function ShopPage({ setPage }) {
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
               className="rounded-3xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
             >
-              <div className="bg-[#101415] aspect-[16/10] flex items-center justify-center p-6">
+              <div className="bg-[#101415] px-3 pt-3">
                 <img
                   src={row.image}
                   alt={row.title}
-                  className="max-h-40 w-auto object-contain"
+                  className="w-full h-auto max-h-[22rem] object-contain object-center rounded-2xl"
                   onError={(e) => { e.currentTarget.src = SEEK_FACE; }}
                 />
               </div>
