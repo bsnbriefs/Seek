@@ -217,8 +217,9 @@ const FONTS = (
 
     html, body { background-color: var(--seek-bg, #F2F5F3); }
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark h1, html.seek-dark h2, html.seek-dark h3 { color: #EDE8E0 !important; }
-    html.seek-dark .text-\[\#0D3B3B\] { color: #EDE8E0 !important; }
+    html.seek-dark h1, html.seek-dark h2 { color: #B8EDE3 !important; }
+    html.seek-dark h3 { color: #D7EEE8 !important; }
+    html.seek-dark .text-\[\#0D3B3B\] { color: #B8EDE3 !important; }
     html.seek-dark .text-\[\#0D3B3B\]\/20,
     html.seek-dark .text-\[\#0D3B3B\]\/25,
     html.seek-dark .text-\[\#0D3B3B\]\/30,
@@ -253,8 +254,9 @@ const FONTS = (
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: rgb(13 59 59 / 0.62) !important; }
 
 
-    html.seek-dark body { background-color: #0E1616; color: #E8F2EF; }
-    html.seek-dark header { background: #0E1616 !important; border-color: rgba(255,255,255,0.08) !important; }
+    html.seek-dark body { background-color: #121414; color: #C9D6D2; }
+    html.seek-dark header { background: #000000 !important; border-color: #000000 !important; }
+    html.seek-dark header + div, html.seek-dark .sticky.top-24 { background: #121414 !important; border-color: rgba(255,255,255,0.06) !important; }
     html.seek-dark header .text-\[\#0D3B3B\],
     html.seek-dark header button { color: #F4F1EA !important; }
     html.seek-dark .bg-white { background-color: #152220 !important; color: #E8F2EF; }
@@ -917,7 +919,9 @@ function SectionLabel({ children }) {
 
 function getSeekTheme() {
   try {
-    return localStorage.getItem("seek_theme") === "dark" ? "dark" : "light";
+    const saved = localStorage.getItem("seek_theme");
+    if (saved === "light") return "light";
+    return "dark";
   } catch (_e) {
     return "light";
   }
@@ -928,15 +932,16 @@ function applySeekTheme(theme) {
   const root = document.documentElement;
   root.classList.toggle("seek-dark", next === "dark");
   if (next === "dark") {
-    root.style.setProperty("--seek-bg", "#0E1616");
-    root.style.setProperty("--seek-card", "#152220");
-    root.style.setProperty("--seek-ink", "#E8F2EF");
-    root.style.setProperty("--seek-wash", "rgba(26,29,36,0.88)");
+    root.style.setProperty("--seek-bg", "#121414");
+    root.style.setProperty("--seek-card", "#1A2220");
+    root.style.setProperty("--seek-ink", "#C9D6D2");
+    root.style.setProperty("--seek-head", "#B8EDE3");
+    root.style.setProperty("--seek-wash", "rgba(18,20,20,0.92)");
     root.style.setProperty("--seek-photo", "none");
-    root.style.backgroundColor = "#1A1D24";
+    root.style.backgroundColor = "#121414";
     if (document.body) {
-      document.body.style.backgroundColor = "#1A1D24";
-      document.body.style.color = "#F4F1EA";
+      document.body.style.backgroundColor = "#121414";
+      document.body.style.color = "#C9D6D2";
     }
   } else {
     root.style.setProperty("--seek-bg", "#F2F5F3");
@@ -984,15 +989,11 @@ function ThemeToggle() {
   return (
     <button
       type="button"
-      aria-label={dark ? "Use light background" : "Use dark background"}
+      aria-label={dark ? "Use light theme" : "Use dark theme"}
       onClick={() => setTheme(dark ? "light" : "dark")}
-      className="relative h-8 w-14 shrink-0 rounded-full border border-[#0D3B3B]/15 bg-[#F4F1EA]"
+      className="p-2 text-current"
     >
-      <span
-        className={`absolute top-0.5 flex h-7 w-7 items-center justify-center rounded-full bg-[#0D3B3B] text-white shadow transition-transform duration-300 ${dark ? "translate-x-6" : "translate-x-0.5"}`}
-      >
-        {dark ? <Sun size={13} /> : <Moon size={13} />}
-      </span>
+      {dark ? <Sun size={20} className="seek-theme-icon" /> : <Moon size={20} className="seek-theme-icon" />}
     </button>
   );
 }
@@ -1031,7 +1032,7 @@ function FeatureStrip({ page, setPage }) {
   };
   return (
     <div className="sticky top-24 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
-      <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
+      <div className="mx-auto max-w-6xl px-5 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
             let offerFilter = "";
