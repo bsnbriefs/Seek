@@ -707,31 +707,79 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
   );
 }
 
-async function startGivePaystack(req) {
-  if (!req?.id) return;
-  if (CONNECT_CATS.includes(req.category)) {
-    return;
-  }
+function SeekDonateModal({ request, onClose }) {
   const session = getUserSession();
-  const email = session?.user?.email || window.prompt("Email for your receipt");
-  if (!email) return;
-  const needed = Number(req.amountNeeded || req.amount_needed || 0);
-  const raised = Number(req.amountRaised || req.amount_raised || 0);
-  const left = needed > raised ? needed - raised : 0;
-  const amount = left >= 1000 ? Math.min(5000, left) : 2000;
-  const result = await initializeDonation({
-    amount,
-    email,
-    requestId: req.id,
-    anonymous: false,
-    donorName: session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "",
-    coverFee: true,
-    callbackUrl: window.location.origin + "/request/" + req.id,
-  });
-  if (result?.authorization_url) window.location.href = result.authorization_url;
+  const [name, setName] = useState(session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "");
+  const [email, setEmail] = useState(session?.user?.email || "");
+  const [amount, setAmount] = useState("10000");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+  if (!request) return null;
+  const chips = [5000, 10000, 25000, 50000];
+  return (
+    <div className="fixed inset-0 z-[180] bg-black/60 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
+      <form
+        onClick={(e) => e.stopPropagation()}
+        onSubmit={async (e) => {
+          e.preventDefault();
+          setError("");
+          setLoading(true);
+          try {
+            if (!String(name || "").trim()) throw new Error("Add your name so the neighbour knows who helped.");
+            if (!String(email || "").trim()) throw new Error("Add an email for your receipt.");
+            const gift = Number(amount);
+            if (!Number.isFinite(gift) || gift < 100) throw new Error("Enter an amount of at least ₦100.");
+            const result = await initializeDonation({
+              amount: gift,
+              email: String(email).trim(),
+              requestId: request.id,
+              anonymous: false,
+              donorName: String(name).trim(),
+              coverFee: true,
+              callbackUrl: window.location.origin + "/request/" + request.id,
+            });
+            if (!result?.authorization_url) throw new Error("Paystack did not open.");
+            window.location.href = result.authorization_url;
+          } catch (err) {
+            setError(err.message || "Payment could not start.");
+            setLoading(false);
+          }
+        }}
+        className="w-full max-w-md rounded-[1.75rem] bg-[#101415] text-white p-6 shadow-2xl border border-white/10"
+      >
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">Secure donation</p>
+            <h3 className="mt-1 font-display font-bold text-xl">Give through SEEK</h3>
+          </div>
+          <button type="button" onClick={onClose} className="h-9 w-9 rounded-full bg-white/10 text-lg">×</button>
+        </div>
+        <p className="mt-4 rounded-2xl bg-[#1BAA9C]/15 border border-[#1BAA9C]/30 p-3 text-sm leading-relaxed text-[#8DE3C5]">
+          You are supporting: <span className="font-semibold text-white">{request.title || "this neighbour"}</span>.
+          {request.location ? " · " + request.location : ""}
+        </p>
+        <label className="mt-5 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Your name</label>
+        <input required className="mt-1 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ada" />
+        <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Email address</label>
+        <input required type="email" className="mt-1 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
+        <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Amount to give (₦)</label>
+        <div className="mt-2 flex flex-wrap gap-2">
+          {chips.map((n) => (
+            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-3 py-2 text-sm font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>₦{n.toLocaleString()}</button>
+          ))}
+        </div>
+        <input required inputMode="numeric" className="mt-3 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Or type an amount" />
+        {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
+        <button type="submit" disabled={loading} className="mt-5 w-full rounded-full bg-[#1BAA9C] text-[#0D3B3B] py-3.5 text-sm font-extrabold tracking-wide">
+          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment"}
+        </button>
+      </form>
+    </div>
+  );
 }
 
 function RequestCard({ req, onHelp, onView }) {
+  const [donateOpen, setDonateOpen] = useState(false);
   const needed = Number(req.amountNeeded || req.amount_needed || 0);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req) || SEEK_FACE;
@@ -755,11 +803,12 @@ function RequestCard({ req, onHelp, onView }) {
       )}
       <div className="mt-4 flex items-center gap-2">
         {onView && <button type="button" onClick={() => onView(req)} className="flex-1 rounded-full border border-[#0D3B3B]/15 py-2.5 text-sm font-semibold text-[#0D3B3B]">View story</button>}
-        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : startGivePaystack(req)} className="flex-1 rounded-full bg-[#1BAA9C] py-2.5 text-sm font-bold text-white">
+        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : setDonateOpen(true)} className="flex-1 rounded-full bg-[#1BAA9C] py-2.5 text-sm font-bold text-white">
           {CONNECT_CATS.includes(req.category) ? "I can be there" : "Give now"}
         </button>
       </div>
       <CommunityInteractions targetType="request" targetId={req.id} compact />
+      {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
     </div>
   );
 }
