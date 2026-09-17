@@ -1909,16 +1909,17 @@ export function suggestNeedStructure({ need = "", description = "", amount = "" 
 }
 
 export function explainSeekNeed(raw) {
-  const text = String(raw || "").trim();
+  const text = String(raw || "").replace(/\s+/g, " ").trim();
   if (!text) return null;
   const lower = text.toLowerCase();
-  let title = "Help with a need";
+  let title = text.length > 72 ? text.slice(0, 69).replace(/\s+\S*$/, "") : text;
   if (lower.includes("school")) title = "Help with school fees";
   else if (lower.includes("rent")) title = "Help with rent";
   else if (lower.includes("hospital") || lower.includes("medical")) title = "Help with medical costs";
   else if (lower.includes("food")) title = "Help with food";
   else if (lower.includes("job")) title = "Help finding work";
-  const description = text.endsWith(".") ? text : text + ".";
+  const sentence = /[.!?]$/.test(text) ? text : text + ".";
+  const description = "I am asking the SEEK community for help. " + sentence + " I will only use support for this need.";
   return { title, description };
 }
 
