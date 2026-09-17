@@ -26,6 +26,7 @@ import {
   submitRequest,
   suggestNeedStructure,
   explainSeekNeed,
+  seekAiAssist,
   submitCelebrateRsvp,
   getCelebrateRsvpCount,
   submitOffer,
@@ -2743,20 +2744,24 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             </p>
           )}
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder={CONNECT_CATS.includes(form.category) ? "e.g. Company at my graduation on Saturday" : "e.g. School fees for this term"} /></Field>
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => {
-            const hint = suggestNeedStructure({ need: form.need, description: form.description, amount: form.amount });
-            setForm((prev) => ({ ...prev, category: hint.category || prev.category }));
-            setError(hint.missing.length ? ("You can still submit. Consider adding: " + hint.missing.join(", ") + ".") : "");
+          <div className="flex flex-wrap gap-3">
+          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+            const hint = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
+            const local = suggestNeedStructure({ need: form.need, description: form.description, amount: form.amount });
+            setForm((prev) => ({ ...prev, category: hint.category || local.category || prev.category }));
+            setError((hint.missing || local.missing || []).length ? ("You can still submit. Consider adding: " + (hint.missing || local.missing).join(", ") + ".") : "Category updated. You can still edit it.");
           }}>Suggest a category from what I wrote</button>
-          <button type="button" className="ml-4 text-sm font-semibold text-[#1BAA9C]" onClick={() => {
-            const draft = explainSeekNeed(form.need || form.description);
-            if (!draft) return;
+          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+            const draft = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
+            const local = explainSeekNeed(form.need || form.description);
             setForm((prev) => ({
               ...prev,
-              need: draft.title,
-              description: draft.description,
+              need: draft.title || local?.title || prev.need,
+              description: draft.description || local?.description || prev.description,
             }));
+            setError("Draft updated. Edit it before you submit.");
           }}>Help me explain this</button>
+          </div>
           <Field label="Amount needed (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
           </Field>

@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import {
   adminLogin,
   getAdminSession,
+  refreshAdminSession,
   adminLogout,
   getAdminRequests,
   getAdminOffers,
@@ -161,6 +162,10 @@ export default function AdminPage() {
     try {
       setError("");
       setAiLoading(req.id);
+      const fresh = await refreshAdminSession();
+      if (fresh) setSession(fresh);
+      const token = fresh?.access_token || session?.access_token;
+      if (!token) throw new Error("Sign in to admin again.");
       const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
       const key = (
         import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
@@ -171,7 +176,7 @@ export default function AdminPage() {
         method: "POST",
         headers: {
           apikey: key,
-          Authorization: `Bearer ${session?.access_token || key}`,
+          Authorization: `Bearer ${token}`,
           "Content-Type": "application/json",
         },
         body: JSON.stringify({
