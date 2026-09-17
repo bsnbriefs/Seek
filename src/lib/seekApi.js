@@ -1885,3 +1885,25 @@ export async function getPublicMember(userId) {
     avatar_url: item.avatar_url || (item.avatar_path ? seekImageUrl(item.avatar_path, 160) : ""),
   };
 }
+
+export function suggestNeedStructure({ need = "", description = "", amount = "" } = {}) {
+  const text = [need, description].join(" ").toLowerCase();
+  let category = "Financial Assistance";
+  if (/food|hungry|rice|meal/.test(text)) category = "Food";
+  else if (/rent|house|shelter|homeless/.test(text)) category = "Housing";
+  else if (/school|fee|exam|tuition|uniform/.test(text)) category = "Education";
+  else if (/hospital|medicine|surgery|clinic|doctor/.test(text)) category = "Medical";
+  else if (/job|work|cv|employ/.test(text)) category = "Employment & Business";
+  else if (/cloth|wear|shoe/.test(text)) category = "Clothing";
+  else if (/baby|pregnan|diaper/.test(text)) category = "Baby & Family";
+  else if (/bus|transport|fare/.test(text)) category = "Transportation";
+  else if (/urgent|emergency/.test(text)) category = "Emergency";
+  const missing = [];
+  if (!amount && !/₦|naira|\d{3,}/.test(text)) missing.push("how much you need");
+  if (!/lagos|abuja|enugu|ibadan|ph|city|state/.test(text)) missing.push("where you are");
+  return {
+    category,
+    summary: String(need || description || "").slice(0, 160),
+    missing,
+  };
+}
