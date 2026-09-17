@@ -421,21 +421,28 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 const SEEK_FACE = "/seek-logo.png";
 
-async function shareSeekStory({ title, path }) {
+async function shareSeekStory({ title, path, mediaUrl }) {
   const url = `${window.location.origin}${path.startsWith("/") ? path : "/" + path}`;
-  const text = `${title || "A story on SEEK"}\n${url}\nASK. SEEK. FIND.`;
+  const caption = title || "A story on SEEK";
+  if (mediaUrl && typeof navigator.canShare === "function") {
+    try {
+      const res = await fetch(mediaUrl);
+      const blob = await res.blob();
+      const ext = String(blob.type || "").includes("video") ? "mp4" : String(blob.type || "").includes("png") ? "png" : "jpg";
+      const file = new File([blob], `seek-story.${ext}`, { type: blob.type || "video/mp4" });
+      if (navigator.canShare({ files: [file] })) {
+        await navigator.share({ files: [file], title: caption, text: caption });
+        return "media";
+      }
+    } catch (_e) {}
+  }
   try {
     if (navigator.share) {
-      await navigator.share({ title: title || "SEEK", text, url });
+      await navigator.share({ title: caption, text: "ASK. SEEK. FIND.", url });
       return "shared";
     }
   } catch (_e) {}
-  try {
-    if (navigator.clipboard?.writeText) {
-      await navigator.clipboard.writeText(url);
-    }
-  } catch (_e) {}
-  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  window.open(`https://wa.me/?text=${encodeURIComponent(url)}`, "_blank", "noopener,noreferrer");
   return "whatsapp";
 }
 
@@ -2000,8 +2007,7 @@ function LiveSupportCard({ request, setPage }) {
 
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
           <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
-          <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
-          {request.description && String(request.description).trim() !== String(request.title || "").trim() && !String(request.description).trim().startsWith(String(request.title || "").trim()) ? <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p> : null}
+          <h2 className="mt-1 font-display text-xl font-extrabold leading-tight line-clamp-2">{request.title || "Support needed"}</h2>
         </div>
       </div>
 
@@ -2009,27 +2015,23 @@ function LiveSupportCard({ request, setPage }) {
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-2 flex items-center gap-2">
           {isFinancialNeed(request) ? (
-            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Support this case</button>
-          ) : request.feedKind === "impact" ? (
-            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">See impact</button>
-          ) : request.feedKind === "appreciation" ? (
-            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View story</button>
-          ) : CONNECT_CATS.includes(request.category) ? (
-            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">I can be there</button>
-          ) : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
-            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">I can help</button>
+            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Give</button>
           ) : (
-            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View case</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View</button>
           )}
-          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">View more</button>
+          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">More</button>
           <button
             type="button"
-            className="rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]"
+            className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]"
             onClick={async () => {
               const path = request.feedKind === "impact" || request.feedKind === "appreciation"
                 ? `/impact/${request.id}`
                 : `/request/${request.id}`;
-              await shareSeekStory({ title: request.title || "A neighbour on SEEK", path });
+              await shareSeekStory({
+                title: request.title || "A neighbour on SEEK",
+                path,
+                mediaUrl: current?.public_url || "",
+              });
             }}
           >
             Share
