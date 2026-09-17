@@ -24,6 +24,7 @@ class ErrorBoundary extends React.Component {
 }
 import {
   submitRequest,
+  suggestNeedStructure,
   submitCelebrateRsvp,
   getCelebrateRsvpCount,
   submitOffer,
@@ -2734,6 +2735,11 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             </p>
           )}
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder={CONNECT_CATS.includes(form.category) ? "e.g. Company at my graduation on Saturday" : "e.g. School fees for this term"} /></Field>
+          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => {
+            const hint = suggestNeedStructure({ need: form.need, description: form.description, amount: form.amount });
+            setForm((prev) => ({ ...prev, category: hint.category || prev.category }));
+            setError(hint.missing.length ? ("You can still submit. Consider adding: " + hint.missing.join(", ") + ".") : "");
+          }}>Suggest a category from what I wrote</button>
           <Field label="Amount needed (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
           </Field>
