@@ -707,14 +707,17 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
   );
 }
 
-function SeekDonateModal({ request, onClose }) {
+function SeekDonateModal({ request, campaign, onClose }) {
   const session = getUserSession();
   const [name, setName] = useState(session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "");
   const [email, setEmail] = useState(session?.user?.email || "");
-  const [amount, setAmount] = useState("10000");
+  const [amount, setAmount] = useState(String(campaign?.amount || 10000));
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
-  if (!request) return null;
+  const title = request?.title || campaign?.title || "SEEK";
+  const place = request?.location || campaign?.location || "";
+  const kind = request ? "neighbour" : "outreach";
+  if (!request && !campaign) return null;
   const chips = [5000, 10000, 25000, 50000];
   return (
     <div className="fixed inset-0 z-[180] bg-black/40 flex items-center justify-center p-5" onClick={onClose}>
@@ -732,11 +735,16 @@ function SeekDonateModal({ request, onClose }) {
             const result = await initializeDonation({
               amount: gift,
               email: String(email).trim(),
-              requestId: request.id,
+              requestId: request?.id || null,
+              campaignId: campaign?.id || null,
               anonymous: false,
-              donorName: String(name).trim(),
+              donorName: request
+                ? String(name).trim()
+                : String(name).trim() + " · " + title + (campaign?.id ? " [" + campaign.id + "]" : ""),
               coverFee: true,
-              callbackUrl: window.location.origin + "/request/" + request.id,
+              callbackUrl: request
+                ? window.location.origin + "/request/" + request.id
+                : `${window.location.origin}/give${campaign?.id ? "?outreach=" + encodeURIComponent(campaign.id) : ""}`,
             });
             if (!result?.authorization_url) throw new Error("Paystack did not open.");
             window.location.href = result.authorization_url;
@@ -752,7 +760,7 @@ function SeekDonateModal({ request, onClose }) {
           <button type="button" onClick={onClose} className="h-8 w-8 rounded-full bg-white/10">×</button>
         </div>
         <p className="mt-3 text-sm text-white/80">
-          Supporting <span className="font-semibold text-white">{request.title || "this neighbour"}</span>
+          Supporting <span className="font-semibold text-white">{title}</span>{place ? " · " + place : ""}{kind === "outreach" ? " · BSN outreach" : ""}
         </p>
         <input required className="mt-3 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
         <input required type="email" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for receipt" />
@@ -891,63 +899,9 @@ function OutreachStory({ campaign, onBack, onDonate }) {
 }
 
 function OutreachCheckout({ campaign, onClose }) {
-  const [name, setName] = useState("");
-  const [email, setEmail] = useState("");
-  const [amount, setAmount] = useState(campaign?.amount || 10000);
-  const [monthly, setMonthly] = useState(false);
-  const [anonymous, setAnonymous] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  if (!campaign) return null;
-  return (
-    <div className="fixed inset-0 z-[160] bg-black/50 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setError("");
-          setLoading(true);
-          try {
-            const result = await initializeDonation({
-              amount: Number(amount),
-              email,
-              requestId: null,
-              anonymous,
-              donorName: (anonymous ? "Anonymous" : (name || "Supporter")) + " · " + campaign.title + " [" + campaign.id + "]",
-              coverFee: true,
-              interval: monthly ? "monthly" : "once",
-              campaignId: campaign.id,
-              callbackUrl: `${window.location.origin}/give?outreach=${encodeURIComponent(campaign.id)}`,
-            });
-            window.location.href = result.authorization_url;
-          } catch (err) {
-            setError(err.message || "Payment could not start.");
-            setLoading(false);
-          }
-        }}
-        className="w-full max-w-md rounded-3xl bg-[#F7F1EA] p-6 shadow-2xl"
-      >
-        <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Give to {campaign.title}</h3>
-        <input required className="mt-4 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-        <input required type="email" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-        <input required inputMode="numeric" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-3.5 font-body" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount in naira" />
-        <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
-          <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
-          Give this amount every month
-        </label>
-        <label className="mt-2 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
-          <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
-          Give anonymously
-        </label>
-        {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
-        <button disabled={loading} className="mt-4 w-full rounded-xl bg-[#0D3B3B] text-white font-display font-semibold py-3">
-          {loading ? "Opening Paystack…" : "Give ₦" + Number(amount || 0).toLocaleString()}
-        </button>
-        <button type="button" onClick={onClose} className="mt-3 w-full text-sm text-[#0D3B3B]/60">Cancel</button>
-      </form>
-    </div>
-  );
+  return <SeekDonateModal campaign={campaign} onClose={onClose} />;
 }
+
 
 function SectionLabel({ children }) {
   return (
@@ -1045,59 +999,9 @@ function ThemeToggle() {
 
 
 function CaseDonateSheet({ request, onClose }) {
-  const session = getUserSession();
-  const [name, setName] = useState(session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "");
-  const [email, setEmail] = useState(session?.user?.email || "");
-  const [amount, setAmount] = useState(request?.amountNeeded ? Math.min(Number(request.amountNeeded), 5000) : 2000);
-  const [anonymous, setAnonymous] = useState(false);
-  const [error, setError] = useState("");
-  const [loading, setLoading] = useState(false);
-  if (!request) return null;
-  return (
-    <div className="fixed inset-0 z-[160] bg-black/50 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
-      <form
-        onClick={(e) => e.stopPropagation()}
-        onSubmit={async (e) => {
-          e.preventDefault();
-          setError("");
-          setLoading(true);
-          try {
-            if (!anonymous && !String(name || "").trim()) throw new Error("Add the name to show with this gift.");
-            const result = await initializeDonation({
-              amount: Number(amount),
-              email: session?.user?.email || email,
-              requestId: request.id,
-              anonymous,
-              donorName: anonymous ? "Anonymous" : String(name || "").trim(),
-              coverFee: true,
-              callbackUrl: window.location.origin + "/request/" + request.id,
-            });
-            window.location.href = result.authorization_url;
-          } catch (err) {
-            setError(err.message || "Payment could not start.");
-            setLoading(false);
-          }
-        }}
-        className="w-full max-w-md rounded-3xl bg-white p-6 shadow-2xl mb-4"
-      >
-        <p className="text-[10px] uppercase tracking-widest text-[#1BAA9C] font-bold">Support this case</p>
-        <h3 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">{request.title || "This SEEK request"}</h3>
-        <input required className="mt-4 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
-        <input required type="email" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email" />
-        <input required inputMode="numeric" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 p-3.5" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount in naira" />
-        <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/70">
-          <input type="checkbox" checked={anonymous} onChange={(e) => setAnonymous(e.target.checked)} />
-          Give anonymously
-        </label>
-        {error && <p className="text-sm text-red-700 mt-2">{error}</p>}
-        <div className="mt-5 flex gap-2">
-          <button type="button" onClick={onClose} className="flex-1 rounded-full border py-3 text-sm font-bold">Cancel</button>
-          <button type="submit" disabled={loading} className="flex-1 rounded-full bg-[#0D3B3B] text-white py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Continue to Paystack"}</button>
-        </div>
-      </form>
-    </div>
-  );
+  return <SeekDonateModal request={request} onClose={onClose} />;
 }
+
 
 function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
@@ -2416,7 +2320,9 @@ if (!cancelled) {
         </div>
       )}
 
-      {(selectedRequest || generalDonation) && <section className="mx-auto max-w-md px-5 pb-28" id="donate-form">
+      {selectedRequest && <SeekDonateModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />}
+      {generalDonation && !selectedRequest && <SeekDonateModal campaign={{ title: "SEEK community" }} onClose={() => setGeneralDonation(false)} />}
+      {false && (selectedRequest || generalDonation) && <section className="mx-auto max-w-md px-5 pb-28" id="donate-form">
         <form onSubmit={startDonation} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm">
           <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">{selectedRequest ? "Give to this neighbour" : "Give to SEEK"}</p>
           <h2 className="mt-1 font-display font-extrabold text-xl text-[#0D3B3B]">{selectedRequest ? selectedRequest.title : "A general gift"}</h2>
