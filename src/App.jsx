@@ -233,7 +233,8 @@ const FONTS = (
     html.seek-dark .text-\[\#0D3B3B\]\/70,
     html.seek-dark .text-\[\#0D3B3B\]\/75,
     html.seek-dark .text-\[\#0D3B3B\]\/80,
-    html.seek-dark .text-\[\#0D3B3B\]\/90 { color: rgba(237,232,224,0.78) !important; }
+    html.seek-dark .text-\[\#0D3B3B\]\/90 { color: #B7CEC8 !important; }
+    html.seek-dark p, html.seek-dark .font-body { color: #C5D4D0 !important; }
     html.seek-dark .bg-white, html.seek-dark .bg-white * { color: unset; }
     html.seek-dark .bg-white { color: #E8F2EF !important; }
     html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #E8F2EF !important; }
@@ -251,7 +252,7 @@ const FONTS = (
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/70,
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/75,
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/80,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: rgb(13 59 59 / 0.62) !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: #C5D4D0 !important; }
 
 
     html.seek-dark body { background-color: #121414; color: #C9D6D2; }
@@ -267,7 +268,7 @@ const FONTS = (
     html.seek-dark .bg-white label,
     html.seek-dark .bg-white span,
     html.seek-dark .bg-white button,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #1A1D24 !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #E8F2EF !important; }
     html.seek-dark .bg-white input,
     html.seek-dark .bg-white textarea,
     html.seek-dark .bg-white select {
