@@ -258,6 +258,8 @@ const FONTS = (
     html.seek-dark body { background-color: #121414; color: #C9D6D2; }
     html.seek-dark header { background: #000000 !important; border-color: #000000 !important; }
     html.seek-dark header + div, html.seek-dark .sticky.top-24 { background: #121414 !important; border-color: rgba(255,255,255,0.06) !important; }
+    html.seek-dark .seek-tabs button { color: #D7E6E2 !important; }
+    html.seek-dark .seek-tabs button.border-\[\#1BAA9C\] { color: #8DE3C5 !important; }
     html.seek-dark header .text-\[\#0D3B3B\],
     html.seek-dark header button { color: #F4F1EA !important; }
     html.seek-dark .bg-white { background-color: #152220 !important; color: #E8F2EF; }
@@ -1032,7 +1034,7 @@ function FeatureStrip({ page, setPage }) {
     window.scrollTo(0, 0);
   };
   return (
-    <div className="sticky top-24 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
+    <div className="seek-tabs sticky top-24 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-5 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
@@ -1733,7 +1735,7 @@ function GiveOfferForm({ setPage }) {
   }
 
   return (
-    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white">
+    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white pb-28">
       <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
       <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">Start by choosing who or what your offer is for.</p>
 
@@ -1793,7 +1795,7 @@ function GiveOfferForm({ setPage }) {
               key={id}
               type="button"
               onClick={() => setOfferCategory(id)}
-              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
+              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 min-h-[3.25rem] transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
             >
               <Icon size={16} className="shrink-0" />
               <span className="text-xs sm:text-sm font-semibold leading-tight">{label}</span>
@@ -1802,7 +1804,9 @@ function GiveOfferForm({ setPage }) {
         })}
       </div>
 
-      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">City</p>
+      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-4 font-body text-[#0D3B3B]" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Describe the giveaway</p>
       <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-2" />
       <button type="button" className="mb-3 text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
         if (!String(offer || "").trim()) {
