@@ -46,6 +46,7 @@ import {
   listMyRequests,
   listMyOffers,
   listMyGifts,
+  listReceivedForMe,
   refreshUserSession,
   getPublicMember,
   updateMyUsername,
@@ -972,6 +973,29 @@ function applySeekTheme(theme) {
   return next;
 }
 
+function NavInboxButton({ userSession, setPage }) {
+  const [unread, setUnread] = useState(0);
+  useEffect(() => {
+    if (!userSession?.access_token) { setUnread(0); return; }
+    let stop = false;
+    const load = () => listMyNotifications(30).then((rows) => {
+      if (stop) return;
+      setUnread((Array.isArray(rows) ? rows : []).filter((n) => !n.read_at).length);
+    }).catch(() => {});
+    load();
+    const id = setInterval(load, 12000);
+    return () => { stop = true; clearInterval(id); };
+  }, [userSession?.access_token, userSession?.user?.id]);
+  return (
+    <button type="button" onClick={() => { setPage(userSession?.access_token ? "notifications" : "account"); window.history.pushState({}, "", userSession?.access_token ? "/notifications" : "/account"); }} aria-label="Inbox" className="relative p-2">
+      <Bell size={20} />
+      {unread > 0 && (
+        <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-5 px-1 rounded-full bg-[#1BAA9C] text-[10px] font-bold text-white flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
+      )}
+    </button>
+  );
+}
+
 function ThemeToggle() {
   const [theme, setTheme] = useState(() => getSeekTheme());
   useEffect(() => { applySeekTheme(theme); }, [theme]);
@@ -1188,6 +1212,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
             className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B] inline-flex items-center gap-2"
@@ -1201,9 +1226,7 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <button type="button" onClick={() => go(userSession?.access_token ? "notifications" : "account")} aria-label="Notifications" className="p-2">
-          <Bell size={20} />
-        </button>
+        <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
@@ -4447,6 +4470,7 @@ function MySeekDashboard({ setPage, userSession }) {
   const [profile, setProfile] = useState(null);
   const [stats, setStats] = useState(null);
   const [gifts, setGifts] = useState([]);
+  const [received, setReceived] = useState([]);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -4455,13 +4479,14 @@ function MySeekDashboard({ setPage, userSession }) {
 
     (async () => {
       try {
-        const [requestRows, offerRows, profileRow, liveStats, notificationRows, giftRows] = await Promise.all([
+        const [requestRows, offerRows, profileRow, liveStats, notificationRows, giftRows, receivedRows] = await Promise.all([
           listMyRequests().catch(() => []),
           listMyOffers().catch(() => []),
           getMyProfile().catch(() => null),
           getSeekLiveStats().catch(() => null),
           listMyNotifications(50).catch(() => []),
           listMyGifts().catch(() => []),
+          listReceivedForMe().catch(() => []),
         ]);
 
         if (cancelled) return;
@@ -4474,6 +4499,7 @@ function MySeekDashboard({ setPage, userSession }) {
         setStats(liveStats || null);
         setNotifications(Array.isArray(notificationRows) ? notificationRows : []);
         setGifts(Array.isArray(giftRows) ? giftRows : []);
+        setReceived(Array.isArray(receivedRows) ? receivedRows : []);
 
         const offerIds = mappedOffers.map((offer) => offer.id).filter(Boolean);
         if (offerIds.length) {
@@ -4487,7 +4513,11 @@ function MySeekDashboard({ setPage, userSession }) {
       }
     })();
 
-    return () => { cancelled = true; };
+    const tick = setInterval(() => {
+      listMyNotifications(50).then((rows) => { if (!cancelled) setNotifications(Array.isArray(rows) ? rows : []); }).catch(() => {});
+      listReceivedForMe().then((rows) => { if (!cancelled) setReceived(Array.isArray(rows) ? rows : []); }).catch(() => {});
+    }, 12000);
+    return () => { cancelled = true; clearInterval(tick); };
   }, [userSession]);
 
   if (!userSession?.access_token) {
@@ -4555,7 +4585,7 @@ function MySeekDashboard({ setPage, userSession }) {
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/10 p-4">
                 <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5] font-bold">Received</p>
-                <p className="mt-1 font-display font-extrabold text-xl">₦{requests.reduce((sum, r) => sum + Number(r.amountRaised || r.amount_raised || 0), 0).toLocaleString()}</p>
+                <p className="mt-1 font-display font-extrabold text-xl">₦{(received.length ? received : requests).reduce((sum, r) => sum + Number(r.amount || r.amountRaised || r.amount_raised || 0), 0).toLocaleString()}</p>
                 <p className="mt-1 text-[11px] text-white/60">Gifts neighbours sent you</p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4">
