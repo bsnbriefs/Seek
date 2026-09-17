@@ -2022,7 +2022,7 @@ function ForYouPage({ setPage }) {
     listLiveSupportCases(16)
       .then((rows) => {
         if (cancelled) return;
-        setLiveCases((Array.isArray(rows) ? rows : []).filter((item) => Array.isArray(item.media) && item.media.length));
+        setLiveCases((Array.isArray(rows) ? rows : []).filter((item) => item && Array.isArray(item.media) && item.media.length));
       })
       .catch((err) => { if (!cancelled) setError(err?.message || "Could not load neighbour stories."); })
       .finally(() => { if (!cancelled) setLoading(false); });
