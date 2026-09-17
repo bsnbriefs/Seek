@@ -1908,7 +1908,7 @@ function LiveSupportCard({ request, setPage }) {
             {postAvatar(member.avatar_url || request.avatarUrl || request.avatar_url, request) ? <img src={postAvatar(member.avatar_url || request.avatarUrl || request.avatar_url, request)} alt="" className="h-11 w-11 rounded-full object-cover border-2 border-white/80" /> : <div className="h-11 w-11 rounded-full bg-white/20 border-2 border-white/60" />}
             <div className="min-w-0 flex-1">
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
-              <p className="text-xs text-white/70 truncate">{username || daysPosted(request.created_at || request.createdAt)}</p>
+              <p className="text-xs text-white/70 truncate">{daysPosted(request.created_at || request.createdAt || request.published_at)}</p>
             </div>
             <span className="max-w-[42%] shrink-0 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] backdrop-blur text-center leading-tight">{videoKindLabel(request)}</span>
           </div>
@@ -1926,7 +1926,7 @@ function LiveSupportCard({ request, setPage }) {
         )}
 
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""} · {daysPosted(request.created_at || request.createdAt || request.published_at)}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
           <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
           {request.description && String(request.description).trim() !== String(request.title || "").trim() && !String(request.description).trim().startsWith(String(request.title || "").trim()) ? <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p> : null}
         </div>
