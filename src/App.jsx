@@ -717,7 +717,7 @@ function SeekDonateModal({ request, onClose }) {
   if (!request) return null;
   const chips = [5000, 10000, 25000, 50000];
   return (
-    <div className="fixed inset-0 z-[180] bg-black/60 flex items-end sm:items-center justify-center p-4 pb-28" onClick={onClose}>
+    <div className="fixed inset-0 z-[180] bg-black/40 flex items-center justify-center p-5" onClick={onClose}>
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
@@ -745,33 +745,26 @@ function SeekDonateModal({ request, onClose }) {
             setLoading(false);
           }
         }}
-        className="w-full max-w-md rounded-[1.75rem] bg-[#101415] text-white p-6 shadow-2xl border border-white/10"
+        className="w-full max-w-[22rem] rounded-2xl bg-[#101415] text-white p-4 shadow-2xl border border-white/10"
       >
-        <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">Secure donation</p>
-            <h3 className="mt-1 font-display font-bold text-xl">Give through SEEK</h3>
-          </div>
-          <button type="button" onClick={onClose} className="h-9 w-9 rounded-full bg-white/10 text-lg">×</button>
+        <div className="flex items-center justify-between gap-2">
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8DE3C5]">Secure donation</p>
+          <button type="button" onClick={onClose} className="h-8 w-8 rounded-full bg-white/10">×</button>
         </div>
-        <p className="mt-4 rounded-2xl bg-[#1BAA9C]/15 border border-[#1BAA9C]/30 p-3 text-sm leading-relaxed text-[#8DE3C5]">
-          You are supporting: <span className="font-semibold text-white">{request.title || "this neighbour"}</span>.
-          {request.location ? " · " + request.location : ""}
+        <p className="mt-3 text-sm text-white/80">
+          Supporting <span className="font-semibold text-white">{request.title || "this neighbour"}</span>
         </p>
-        <label className="mt-5 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Your name</label>
-        <input required className="mt-1 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={name} onChange={(e) => setName(e.target.value)} placeholder="e.g. Ada" />
-        <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Email address</label>
-        <input required type="email" className="mt-1 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="you@email.com" />
-        <label className="mt-3 block text-[11px] font-semibold uppercase tracking-widest text-white/50">Amount to give (₦)</label>
-        <div className="mt-2 flex flex-wrap gap-2">
+        <input required className="mt-3 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={name} onChange={(e) => setName(e.target.value)} placeholder="Your name" />
+        <input required type="email" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for receipt" />
+        <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((n) => (
-            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-3 py-2 text-sm font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>₦{n.toLocaleString()}</button>
+            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>₦{n.toLocaleString()}</button>
           ))}
         </div>
-        <input required inputMode="numeric" className="mt-3 w-full rounded-xl bg-white/5 border border-white/15 p-3.5 text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Or type an amount" />
-        {error && <p className="mt-3 text-sm text-red-300">{error}</p>}
-        <button type="submit" disabled={loading} className="mt-5 w-full rounded-full bg-[#1BAA9C] text-[#0D3B3B] py-3.5 text-sm font-extrabold tracking-wide">
-          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString() + " payment"}
+        <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
+        {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
+        <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-[#0D3B3B] py-3 text-sm font-extrabold">
+          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString()}
         </button>
       </form>
     </div>
