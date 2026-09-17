@@ -701,62 +701,31 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
 
 function RequestCard({ req, onHelp, onView }) {
   return (
-    <div className="flex flex-col rounded-2xl bg-white p-6 shadow-sm border border-[#0D3B3B]/5 hover:shadow-md hover:-translate-y-1 transition-all duration-300">
-      <div className="flex flex-wrap items-center gap-2 mb-3">
-        <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
-        {isBsnPost(req) && <span className="text-[10px] font-semibold uppercase tracking-wide rounded-full bg-[#0D3B3B] text-white px-2 py-0.5">Posted by Admin</span>}
-        <UrgencyBadge level={req.urgency} />
-      </div>
-      <div className="flex items-start gap-3 mb-2">
+    <div className="flex flex-col rounded-2xl bg-white p-5 border border-[#0D3B3B]/10">
+      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Need"}{isBsnPost(req) ? " · Admin" : ""}</p>
+      <div className="mt-3 flex items-start gap-3">
         <div className="relative shrink-0">
           {postAvatar(req.avatarUrl, req) ? (
-            <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white" fetchpriority="high" />
+            <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white" />
           ) : (
             <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10" />
           )}
-          <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
         </div>
-        <h3 className="font-display font-bold text-lg text-[#0D3B3B] mb-1.5">{req.title} <VerifiedBadge /></h3>
+        <h3 className="font-display font-bold text-lg text-[#0D3B3B] leading-snug">{req.title}</h3>
       </div>
-      <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 font-body mb-3">
-        <MapPin size={14} /> {req.location}
-      </p>
-      {req.created_at || req.createdAt ? <p className="text-xs text-[#0D3B3B]/45 mb-3">{daysPosted(req.created_at || req.createdAt)}</p> : null}
+      <p className="mt-3 text-sm text-[#0D3B3B]/55">{[req.location, daysPosted(req.created_at || req.createdAt)].filter(Boolean).join(" · ")}</p>
       {CONNECT_CATS.includes(req.category) ? (
-        <p className="mb-4 text-sm font-semibold font-body text-[#0D3B3B]">Looking for company, not donations.</p>
+        <p className="mt-3 text-sm text-[#0D3B3B]/70">Looking for company, not money.</p>
       ) : req.amountNeeded ? (
-        <div className="mb-4"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
-      ) : (
-        <p className="mb-4 text-sm font-semibold font-body text-[#0D3B3B]">
-          {req.type === "item" ? "In-kind assistance requested" : "Ongoing support requested"}
-        </p>
-      )}
-      <div className="mt-auto flex items-center justify-between">
-        {req.helped && (
-  <p className="text-xs font-semibold text-[#1BAA9C] mb-2 w-full">
-    Help has been offered for this request
-  </p>
-)}
-        <VerificationBadge status={req.status} />
-        <div className="flex items-center gap-3">
-          {onView && (
-            <button
-              type="button"
-              onClick={() => onView(req)}
-              className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#1BAA9C] hover:text-[#0D3B3B] transition-colors"
-            >
-              View
-            </button>
-          )}
-          <button
-            type="button"
-            onClick={onHelp ? () => onHelp(req) : undefined}
-            className="inline-flex items-center gap-1 text-sm font-display font-semibold text-[#0D3B3B] hover:text-[#1BAA9C] transition-colors"
-          >
-            {CONNECT_CATS.includes(req.category) ? "I can be there" : "Help"} <ChevronRight size={15} />
-          </button>
-        </div>
+        <div className="mt-3"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
+      ) : null}
+      <div className="mt-4 flex items-center gap-5 text-sm font-semibold">
+        {onView && <button type="button" onClick={() => onView(req)} className="text-[#1BAA9C]">View</button>}
+        <button type="button" onClick={onHelp ? () => onHelp(req) : undefined} className="text-[#0D3B3B]">
+          {CONNECT_CATS.includes(req.category) ? "I can be there" : "Help"}
+        </button>
       </div>
+      <CommunityInteractions targetType="request" targetId={req.id} compact />
     </div>
   );
 }
