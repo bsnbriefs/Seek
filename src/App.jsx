@@ -420,6 +420,34 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 
 const SEEK_FACE = "/seek-logo.png";
+
+async function shareSeekStory({ title, path }) {
+  const url = `${window.location.origin}${path.startsWith("/") ? path : "/" + path}`;
+  const text = `${title || "A story on SEEK"}\n${url}\nASK. SEEK. FIND.`;
+  try {
+    if (navigator.share) {
+      await navigator.share({ title: title || "SEEK", text, url });
+      return "shared";
+    }
+  } catch (_e) {}
+  try {
+    if (navigator.clipboard?.writeText) {
+      await navigator.clipboard.writeText(url);
+    }
+  } catch (_e) {}
+  window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+  return "whatsapp";
+}
+
+function SeekVideoWatermark() {
+  return (
+    <img
+      src={SEEK_FACE}
+      alt=""
+      className="pointer-events-none absolute bottom-3 right-3 z-20 h-9 w-9 rounded-full object-contain opacity-80 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]"
+    />
+  );
+}
 function isBsnPost(row = {}) {
   const blob = [row.title, row.description, row.name, row.contactEmail, row.requester_name, row.display_name, row.category].join(" ").toLowerCase();
   return blob.includes("bsn") || blob.includes("barrister street");
@@ -893,7 +921,10 @@ function OutreachStory({ campaign, onBack, onDonate }) {
       ) : null}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
         {(campaign.videos || []).map((src) => (
-          <video key={src} src={encodeURI(src)} className="w-full rounded-2xl bg-black" controls playsInline preload="none" />
+          <div className="relative overflow-hidden rounded-2xl bg-black">
+            <video key={src} src={encodeURI(src)} className="w-full bg-black" controls playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+            <SeekVideoWatermark />
+          </div>
         ))}
         {(campaign.photos || []).map((src) => (
           <img key={src} src={encodeURI(src)} alt="" className="w-full h-48 object-cover rounded-2xl" />
@@ -1661,7 +1692,10 @@ function OfferCard({ offer, setPage }) {
         <div className="mt-3 space-y-3">
           {media.map((m) => (
             m.media_kind === "video" ? (
-              <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+              <div className="relative overflow-hidden rounded-xl bg-black">
+                <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+                <SeekVideoWatermark />
+              </div>
             ) : (
               <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[#0D3B3B]/5" />
             )
@@ -1890,7 +1924,8 @@ function SeekAutoVideo({ src, title }) {
   };
   return (
     <>
-      <video ref={ref} src={src} muted playsInline preload="none" className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <SeekVideoWatermark />
       {ended && (
         <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
       )}
@@ -1987,6 +2022,18 @@ function LiveSupportCard({ request, setPage }) {
             <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View case</button>
           )}
           <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">View more</button>
+          <button
+            type="button"
+            className="rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]"
+            onClick={async () => {
+              const path = request.feedKind === "impact" || request.feedKind === "appreciation"
+                ? `/impact/${request.id}`
+                : `/request/${request.id}`;
+              await shareSeekStory({ title: request.title || "A neighbour on SEEK", path });
+            }}
+          >
+            Share
+          </button>
         </div>
       </div>
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
@@ -2922,7 +2969,7 @@ function CelebratePage({ setPage }) {
         </div>
       </section>
 
-      <section id="celebrate-invitations" className="bg-white py-14">
+      <section id="celebrate-invitations" className="py-14 pb-32">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
             <div>
@@ -2936,7 +2983,7 @@ function CelebratePage({ setPage }) {
               <RequestCard key={req.id} req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} />
             ))}
           </div>
-          {!list.length && <div className="rounded-3xl border border-[#0D3B3B]/8 bg-[#F7FAF8] p-8 text-center"><p className="font-display font-bold text-[#0D3B3B]">No published invitations yet.</p><p className="mt-2 text-sm text-[#0D3B3B]/55">Be the first to share a genuine community moment.</p></div>}
+          {!list.length && <div className="rounded-3xl border border-white/10 bg-[#152220] p-8 text-center"><p className="font-display font-bold text-white">No published invitations yet.</p><p className="mt-2 text-sm text-white/65">Be the first to share a genuine community moment.</p></div>}
         </div>
       </section>
 
@@ -3470,7 +3517,10 @@ function RequestPage({ requestId, setPage }) {
               )}
               {(request.appreciationItems || [{ public_url: request.appreciationUrl, media_kind: request.appreciationKind }].filter((item) => item.public_url)).map((item) => (
                 item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
-                  <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 rounded-xl bg-black" />
+                  <div className="relative overflow-hidden rounded-xl bg-black">
+                    <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+                    <SeekVideoWatermark />
+                  </div>
                 ) : (
                   <img loading="lazy" decoding="async" key={item.public_url} src={item.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain" />
                 )
@@ -3492,6 +3542,7 @@ function RequestPage({ requestId, setPage }) {
             className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8 object-contain select-none"
           />
         ) : file.mime_type?.startsWith("video/") ? (
+          <div className="relative overflow-hidden rounded-xl border border-[#0D3B3B]/8 bg-black">
           <video
             src={file.public_url}
             controls
@@ -3500,8 +3551,10 @@ function RequestPage({ requestId, setPage }) {
             playsInline
             preload="none"
             onContextMenu={(e) => e.preventDefault()}
-            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8"
+            className="w-full max-h-96"
           />
+          <SeekVideoWatermark />
+          </div>
         ) : file.mime_type === "application/pdf" ? (
           <iframe
             src={`${file.public_url}#toolbar=0&navpanes=0`}
@@ -4064,30 +4117,35 @@ function ImpactStoryPage({ impactId, setPage }) {
         <SectionLabel>Community Impact</SectionLabel>
         <div className="flex items-start justify-between gap-3">
           <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{post.title}</h1>
-          <button
-            type="button"
-            className="rounded-full border px-3 py-1.5 text-sm font-semibold"
-            onClick={async () => {
-              const url = post.request_id
-                ? `${window.location.origin}/request/${post.request_id}`
-                : `${window.location.origin}/impact/${post.id}`;
-              try {
-                if (navigator.share) await navigator.share({ title: post.title, url });
-                else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(url);
-                  window.alert("Link copied");
-                }
-              } catch (_e) {}
-            }}
-          >
-            Share
-          </button>
+          <div className="flex shrink-0 gap-2">
+            <button
+              type="button"
+              className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+              onClick={async () => {
+                const path = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
+                await shareSeekStory({ title: post.title, path });
+              }}
+            >
+              Share
+            </button>
+            <a
+              className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+              href={`https://wa.me/?text=${encodeURIComponent((post.title || "SEEK story") + " " + (typeof window !== "undefined" ? window.location.origin : "https://seekbsn.org") + (post.request_id ? "/request/" + post.request_id : "/impact/" + post.id))}`}
+              target="_blank"
+              rel="noreferrer"
+            >
+              WhatsApp
+            </a>
+          </div>
         </div>
         <p className="font-body text-sm text-[#0D3B3B]/55">{[post.location, post.happened_on].filter(Boolean).join(" · ")}</p>
         {post.story && <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
         {(post.mediaItems || [{ public_url: post.public_url, media_kind: post.media_kind }].filter((m) => m.public_url)).map((m) => (
           m.media_kind === "video" ? (
-            <video key={m.public_url} src={m.public_url} controls playsInline preload="none" className="w-full max-h-96 rounded-2xl bg-black" />
+            <div className="relative overflow-hidden rounded-2xl bg-black">
+              <video key={m.public_url} src={m.public_url} controls playsInline preload="none" className="w-full max-h-96 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+              <SeekVideoWatermark />
+            </div>
           ) : (
             <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-96 rounded-2xl object-contain border" />
           )
@@ -5269,22 +5327,22 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
       {composerOpen && (
         <div className="fixed inset-0 z-[140] lg:hidden" role="dialog" aria-modal="true" aria-label="SEEK quick actions">
           <button type="button" aria-label="Close quick actions" className="absolute inset-0 bg-[#0D3B3B]/35 backdrop-blur-[2px]" onClick={() => setComposerOpen(false)} />
-          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-white p-4 shadow-2xl border border-[#0D3B3B]/10">
+          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-[#101415] p-4 shadow-2xl border border-white/10 text-white">
             <div className="flex items-center justify-between px-2 pb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#1BAA9C]">SEEK</p>
-                <h2 className="font-display font-extrabold text-xl text-[#0D3B3B]">What would you like to do?</h2>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">SEEK</p>
+                <h2 className="font-display font-extrabold text-xl text-white">What would you like to do?</h2>
               </div>
-              <button type="button" onClick={() => setComposerOpen(false)} className="h-9 w-9 rounded-full bg-[#F2F5F3] text-[#0D3B3B] text-xl" aria-label="Close">×</button>
+              <button type="button" onClick={() => setComposerOpen(false)} className="h-9 w-9 rounded-full bg-white/15 text-white text-xl leading-none" aria-label="Close">×</button>
             </div>
             <div className="grid grid-cols-2 gap-2">
               {actions.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button key={item.id} type="button" onClick={() => openAction(item)} className="rounded-2xl border border-[#0D3B3B]/10 p-3 text-left hover:bg-[#F2F5F3] active:scale-[0.98] transition">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B]"><Icon size={18} /></span>
-                    <span className="mt-2 block text-sm font-bold text-[#0D3B3B]">{item.label}</span>
-                    <span className="mt-0.5 block text-[11px] leading-4 text-[#0D3B3B]/50">{item.note}</span>
+                  <button key={item.id} type="button" onClick={() => openAction(item)} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 active:scale-[0.98] transition">
+                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white"><Icon size={18} /></span>
+                    <span className="mt-2 block text-sm font-bold text-white">{item.label}</span>
+                    <span className="mt-0.5 block text-[11px] leading-4 text-white/60">{item.note}</span>
                   </button>
                 );
               })}
