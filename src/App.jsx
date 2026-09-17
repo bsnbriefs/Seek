@@ -25,6 +25,7 @@ class ErrorBoundary extends React.Component {
 import {
   submitRequest,
   suggestNeedStructure,
+  explainSeekNeed,
   submitCelebrateRsvp,
   getCelebrateRsvpCount,
   submitOffer,
@@ -1356,6 +1357,13 @@ function HomePage({ setPage, userSession }) {
         </p>
         <div className="mt-6">
           <Button variant="primary" onClick={() => go("for-you")}>Explore SEEK</Button>
+        <p className="mt-4 text-sm text-[#0D3B3B]/55">Not sure where to start?</p>
+        <div className="mt-2 flex flex-wrap justify-center gap-2">
+          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("seek-help")}>I need help</button>
+          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("give")}>I want to support someone</button>
+          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("offers")}>I want to offer something</button>
+          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("celebrate")}>I want to create or join something</button>
+        </div>
         </div>
       </section>
 
@@ -2740,6 +2748,15 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             setForm((prev) => ({ ...prev, category: hint.category || prev.category }));
             setError(hint.missing.length ? ("You can still submit. Consider adding: " + hint.missing.join(", ") + ".") : "");
           }}>Suggest a category from what I wrote</button>
+          <button type="button" className="ml-4 text-sm font-semibold text-[#1BAA9C]" onClick={() => {
+            const draft = explainSeekNeed(form.need || form.description);
+            if (!draft) return;
+            setForm((prev) => ({
+              ...prev,
+              need: draft.title,
+              description: draft.description,
+            }));
+          }}>Help me explain this</button>
           <Field label="Amount needed (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
           </Field>
