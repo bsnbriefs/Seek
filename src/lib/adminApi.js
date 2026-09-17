@@ -119,6 +119,7 @@ export async function refreshAdminSession() {
   const next = {
     ...session,
     access_token: data.access_token,
+    accessToken: data.access_token,
     refresh_token: data.refresh_token || session.refresh_token,
     user: data.user || session.user,
   };
