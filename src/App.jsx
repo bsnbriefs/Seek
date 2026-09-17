@@ -5158,9 +5158,9 @@ function MyRequestsPage({ setPage, userSession }) {
 /* ---------------- App ---------------- */
 
 const SEEK_SHOP = [
-  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "Deep teal. Official mark + BSN.", sizes: ["One size"], image: "/shop/cap.jpg" },
-  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Black cotton. ASK. SEEK. FIND.", sizes: ["S", "M", "L", "XL"], image: "/shop/tee.jpg" },
-  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Black. Mark on chest, line on back.", sizes: ["S", "M", "L", "XL"], image: "/shop/hoodie.jpg" },
+  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "Deep teal. Official mark + BSN.", sizes: ["One size"], image: "/shop/Cap.png" },
+  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Black cotton. ASK. SEEK. FIND.", sizes: ["S", "M", "L", "XL"], image: "/shop/Tee.png" },
+  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Black. Mark on chest, line on back.", sizes: ["S", "M", "L", "XL"], image: "/shop/Hoodie.png" },
 ];
 
 function ShopPage({ setPage }) {
