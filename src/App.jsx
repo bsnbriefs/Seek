@@ -353,6 +353,8 @@ function isFinancialNeed(req) {
 }
 
 function videoKindLabel(req) {
+  if (req?.feedKind === "impact") return "Impact";
+  if (req?.feedKind === "appreciation") return "Appreciation";
   const cat = String(req?.category || "").toLowerCase();
   if (CONNECT_CATS.includes(req?.category) || /celebrat|connect|compan|friend/.test(cat)) return "Invitation";
   if (/job|employ|mentor|counsel/.test(cat)) return "Looking for work";
@@ -1866,8 +1868,16 @@ function LiveSupportCard({ request, setPage }) {
   const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
 
   const goToCase = () => {
-    setPage(`request:${request.id}`);
-    window.history.pushState({}, "", `/request/${request.id}`);
+    if (request.feedKind === "impact") {
+      window.history.pushState({}, "", `/impact/${request.id}`);
+      setPage(`impact:${request.id}`);
+    } else if (request.feedKind === "appreciation") {
+      window.history.pushState({}, "", `/impact/${request.id}`);
+      setPage(`impact:${request.id}`);
+    } else {
+      setPage(`request:${request.id}`);
+      window.history.pushState({}, "", `/request/${request.id}`);
+    }
     window.scrollTo(0, 0);
   };
 
@@ -1920,6 +1930,10 @@ function LiveSupportCard({ request, setPage }) {
         <div className="mt-3 flex flex-col gap-2">
           {isFinancialNeed(request) ? (
             <button type="button" onClick={supportCase} className="w-full rounded-full bg-[#1BAA9C] px-4 py-3.5 text-sm font-bold text-white">Support this case</button>
+          ) : request.feedKind === "impact" ? (
+            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">See impact</button>
+          ) : request.feedKind === "appreciation" ? (
+            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">View story</button>
           ) : CONNECT_CATS.includes(request.category) ? (
             <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">I can be there</button>
           ) : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
