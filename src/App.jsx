@@ -1049,7 +1049,7 @@ function FeatureStrip({ page, setPage }) {
   const [moreOpen, setMoreOpen] = useState(false);
   let currentOfferFilter = "";
   try { currentOfferFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
-  const moreActive = ["volunteer", "about", "impact", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
+  const moreActive = ["volunteer", "about", "impact", "shop", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
   const items = [
     { id: "home", label: "Home" },
     { id: "for-you", label: "For You" },
@@ -1101,17 +1101,13 @@ function FeatureStrip({ page, setPage }) {
             {moreOpen && (
               <div className="fixed right-3 top-32 w-56 max-h-[70vh] overflow-y-auto rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-2xl z-[160]">
                 {[
+                  ["shop", "Shop"],
+                  ["organisations", "For organisations"],
+                  ["impact", "Impact"],
+                  ["volunteer", "Volunteer"],
                   ["jobs", "Jobs", "job"],
                   ["mentorship", "Mentorship", "mentorship"],
                   ["counselling", "Counselling", "counselling"],
-                  ["impact", "Impact"],
-                  ["volunteer", "Volunteer"],
-                  ["organisations", "For organisations"],
-                  ["about", "About SEEK"],
-                  ["contact", "Contact"],
-                  ["guidelines", "Help & Safety"],
-                  ["privacy", "Privacy"],
-                  ["terms", "Terms"],
                 ].map(([id, label, filter]) => (
                   <button
                     key={id}
@@ -5161,6 +5157,102 @@ function MyRequestsPage({ setPage, userSession }) {
 
 /* ---------------- App ---------------- */
 
+const SEEK_SHOP = [
+  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "One size. Cotton.", sizes: ["One size"] },
+  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Soft cotton.", sizes: ["S", "M", "L", "XL"] },
+  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Warm layer.", sizes: ["S", "M", "L", "XL"] },
+];
+
+function ShopPage({ setPage }) {
+  const session = getUserSession();
+  const [item, setItem] = useState(null);
+  const [size, setSize] = useState("");
+  const [name, setName] = useState(session?.user?.user_metadata?.full_name || "");
+  const [email, setEmail] = useState(session?.user?.email || "");
+  const [phone, setPhone] = useState("");
+  const [address, setAddress] = useState("");
+  const [city, setCity] = useState("");
+  const [error, setError] = useState("");
+  const [loading, setLoading] = useState(false);
+
+  return (
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 pt-12 pb-28">
+        <SectionLabel>Shop</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Wear SEEK. Support outreach.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/70 max-w-xl">
+          Official SEEK items. You pay through Paystack. We post to the address you give. Part of each sale supports BSN outreach — Food Drive, Pad a Girl Child, Hospital Visitation, and Back to School.
+        </p>
+        <p className="mt-2 text-sm text-[#0D3B3B]/50">This is not a gift exchange between neighbours. SEEK fulfils the order.</p>
+
+        <div className="mt-8 grid gap-3">
+          {SEEK_SHOP.map((row) => (
+            <button
+              key={row.id}
+              type="button"
+              onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
+              className="rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 text-left"
+            >
+              <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
+              <p className="mt-1 text-sm text-[#0D3B3B]/55">{row.note}</p>
+              <p className="mt-3 text-sm font-bold text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+            </button>
+          ))}
+        </div>
+        <button type="button" className="mt-8 text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("give")}>Give to a request instead</button>
+      </section>
+
+      {item && (
+        <div className="fixed inset-0 z-[180] bg-black/40 flex items-end sm:items-center justify-center p-4" onClick={() => !loading && setItem(null)}>
+          <form
+            className="w-full max-w-sm rounded-2xl bg-[#101415] text-white p-4"
+            onClick={(e) => e.stopPropagation()}
+            onSubmit={async (e) => {
+              e.preventDefault();
+              setError("");
+              setLoading(true);
+              try {
+                if (!name.trim() || !email.trim() || !phone.trim() || !address.trim() || !city.trim()) {
+                  throw new Error("Name, email, phone, city and address are needed to post the item.");
+                }
+                const result = await initializeDonation({
+                  amount: item.price,
+                  email: email.trim(),
+                  campaignId: null,
+                  donorName: `${name.trim()} · ${item.title} [${item.id}] · ${size} · ${city.trim()} · ${address.trim()} · ${phone.trim()}`,
+                  coverFee: true,
+                  callbackUrl: `${window.location.origin}/shop`,
+                });
+                if (!result?.authorization_url) throw new Error("Paystack did not open.");
+                window.location.href = result.authorization_url;
+              } catch (err) {
+                setError(err.message || "Could not start payment.");
+                setLoading(false);
+              }
+            }}
+          >
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8DE3C5]">Order</p>
+            <h2 className="font-display font-bold text-lg mt-1">{item.title} · ₦{item.price.toLocaleString()}</h2>
+            <div className="mt-3 flex flex-wrap gap-2">
+              {item.sizes.map((s) => (
+                <button key={s} type="button" onClick={() => setSize(s)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${size === s ? "bg-[#1BAA9C] text-white" : "bg-white/10"}`}>{s}</button>
+              ))}
+            </div>
+            <input className="mt-3 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+            <textarea className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" rows={2} placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
+            {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
+            <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[#1BAA9C] py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Pay ₦" + item.price.toLocaleString()}</button>
+            <button type="button" className="mt-2 w-full text-sm text-white/60" onClick={() => !loading && setItem(null)}>Close</button>
+          </form>
+        </div>
+      )}
+    </div>
+  );
+}
+
 function LiveTicker() {
   const [items, setItems] = useState([]);
   useEffect(() => {
@@ -5232,6 +5324,7 @@ function pageFromPath(pathname) {
   if (path === "/celebrate/request") return "celebrate-request";
   if (path === "/language") return "language";
   if (path === "/about") return "about";
+  if (path === "/shop") return "shop";
   if (path === "/organisations") return "organisations";
   if (path === "/impact") return "impact";
   if (path.startsWith("/impact/")) return "impact:" + path.split("/")[2];
@@ -5266,6 +5359,7 @@ function pathFromPage(page) {
     "celebrate-request": "/celebrate/request",
     volunteer: "/volunteer",
     about: "/about",
+    shop: "/shop",
     organisations: "/organisations",
     impact: "/impact",
     privacy: "/privacy",
@@ -5583,6 +5677,7 @@ useEffect(() => {
     "celebrate-request": <CelebrateRequestPage setPage={setPage} />,
     volunteer: <VolunteerPage />,
     about: <AboutPage setPage={setPage} />,
+    shop: <ShopPage setPage={setPage} />,
     organisations: <OrganisationsPage setPage={setPage} />,
     impact: <ImpactPage setPage={setPage} />,
     privacy: <LegalPage title="Privacy" setPage={setPage} />,
