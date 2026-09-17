@@ -426,20 +426,20 @@ function postAvatar(url, row = {}) {
 function daysPosted(iso) {
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
-  if (Number.isNaN(ms) || ms < 0) return "Posted just now";
+  if (Number.isNaN(ms) || ms < 0) return "Just now";
   const secs = Math.floor(ms / 1000);
-  if (secs < 1) return "Posted just now";
-  if (secs === 1) return "Posted 1 second ago";
-  if (secs < 60) return "Posted " + secs + " seconds ago";
+  if (secs < 1) return "Just now";
+  if (secs === 1) return "1 second ago";
+  if (secs < 60) return secs + " seconds ago";
   const mins = Math.floor(secs / 60);
-  if (mins === 1) return "Posted 1 minute ago";
-  if (mins < 60) return "Posted " + mins + " minutes ago";
+  if (mins === 1) return "1 minute ago";
+  if (mins < 60) return mins + " minutes ago";
   const hours = Math.floor(mins / 60);
-  if (hours === 1) return "Posted 1 hour ago";
-  if (hours < 24) return "Posted " + hours + " hours ago";
+  if (hours === 1) return "1 hour ago";
+  if (hours < 24) return hours + " hours ago";
   const days = Math.floor(hours / 24);
-  if (days === 1) return "Posted 1 day ago";
-  return "Posted " + days + " days ago";
+  if (days === 1) return "1 day ago";
+  return days + " days ago";
 }
 
 function VerifiedBadge({ className = "" }) {
