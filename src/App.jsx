@@ -1988,55 +1988,94 @@ function LiveSupportCard({ request, setPage }) {
 
 
 function DiscoverPage({ setPage }) {
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-  const doors = [
-    { id: "seek-help", title: "Seek Help", body: "Need help? Create a SEEK request and tell neighbours what you need — money, food, a job, or something else genuine." },
-    { id: "give", title: "Give", body: "Give money to a published request or a BSN outreach. You can give without an account." },
-    { id: "offers", title: "Giveaways", body: "Give goods, a job, mentorship or counselling. SEEK reads the post before it is public." },
-    { id: "celebrate", title: "Connect & Celebrate", body: "Ask a neighbour to be there for a birthday, a graduation or a new city. This is not a fundraiser." },
-  ];
-  const steps = [
-    ["Create an account", "So you can ask, offer, and keep your activity in one place.", "account"],
-    ["Choose what you need", "Seek Help, Give, Giveaways, or Connect.", "seek-help"],
-    ["Tell your story", "Share the details SEEK needs to review the post.", "seek-help"],
-    ["Neighbours respond", "They give, offer a gift, or say they can be there.", "give"],
-    ["Track what happens", "Requests, gifts and messages live in My SEEK.", "my-seek"],
-  ];
+  const [tab, setTab] = useState("latest");
+  const [items, setItems] = useState([]);
+  const [loading, setLoading] = useState(true);
+  const go = (page, path) => {
+    if (path) window.history.pushState({}, "", path);
+    setPage(page);
+    window.scrollTo(0, 0);
+  };
+  useEffect(() => {
+    let cancelled = false;
+    Promise.all([
+      listPublishedRequests(24).catch(() => []),
+      listPublicOffers().catch(() => []),
+      listPublishedImpact().catch(() => []),
+      listAppreciationStories().catch(() => []),
+    ]).then(([requests, offers, impact, thanks]) => {
+      if (cancelled) return;
+      const stamp = (row) => new Date(row.created_at || row.createdAt || row.published_at || row.happened_on || 0).getTime() || 0;
+      const feed = [
+        ...(Array.isArray(requests) ? requests : []).map((row) => {
+          const r = row.title ? row : mapRequestRow(row);
+          const connect = CONNECT_CATS.includes(r.category);
+          return {
+            key: "req-" + r.id,
+            kind: connect ? "Celebrate" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
+            title: r.title || "Open request",
+            body: r.location || r.category || "",
+            at: stamp(r),
+            page: "request:" + r.id,
+            path: "/request/" + r.id,
+          };
+        }),
+        ...(Array.isArray(offers) ? offers : []).map((o) => ({
+          key: "off-" + o.id,
+          kind: /job/i.test(String(o.category || "")) ? "Job" : /mentor/i.test(String(o.category || "")) ? "Mentorship" : /counsel/i.test(String(o.category || "")) ? "Counselling" : "Giveaway",
+          title: String(o.description || "Open giveaway").slice(0, 90),
+          body: [o.category, o.city].filter(Boolean).join(" · "),
+          at: stamp(o),
+          page: "offers",
+          path: "/offers",
+        })),
+        ...(Array.isArray(impact) ? impact : []).map((row) => ({
+          key: "imp-" + row.id,
+          kind: "Impact",
+          title: row.title || "Community impact",
+          body: row.location || "",
+          at: stamp(row),
+          page: "impact:" + row.id,
+          path: "/impact/" + row.id,
+        })),
+        ...(Array.isArray(thanks) ? thanks : []).map((row) => ({
+          key: "thx-" + (row.id || row.request_id),
+          kind: "Appreciation",
+          title: row.title || "Thank you",
+          body: row.location || "",
+          at: stamp(row),
+          page: row.request_id ? "request:" + row.request_id : "impact",
+          path: row.request_id ? "/request/" + row.request_id : "/impact",
+        })),
+      ].sort((a, b) => b.at - a.at);
+      setItems(feed);
+    }).finally(() => { if (!cancelled) setLoading(false); });
+    return () => { cancelled = true; };
+  }, []);
+  const latest = items.slice(0, 40);
+  const trending = items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20);
+  const shown = tab === "trending" ? trending : latest;
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-2xl px-5 pt-12 pb-8">
-        <SectionLabel>Discover SEEK</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">ASK. SEEK. FIND.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65">Ask for what you need. Offer what you can. SEEK is where those two meet.</p>
+      <section className="mx-auto max-w-2xl px-5 pt-10 pb-4">
+        <SectionLabel>Discover</SectionLabel>
+        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening on SEEK</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/55">Latest public requests, giveaways, impact and thank-yous.</p>
+        <div className="mt-4 flex gap-2">
+          <button type="button" onClick={() => setTab("latest")} className={"rounded-full px-4 py-2 text-sm font-semibold " + (tab === "latest" ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15")}>Latest</button>
+          <button type="button" onClick={() => setTab("trending")} className={"rounded-full px-4 py-2 text-sm font-semibold " + (tab === "trending" ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15")}>Trending</button>
+        </div>
       </section>
-      <section className="mx-auto max-w-2xl px-5 pb-10 space-y-3">
-        {doors.map((d) => (
-          <button key={d.id} type="button" onClick={() => go(d.id)} className="seek-reveal w-full text-left rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 active:scale-[0.99] transition">
-            <p className="font-display font-bold text-lg text-[#0D3B3B]">{d.title}</p>
-            <p className="mt-1 text-sm leading-relaxed text-[#0D3B3B]/60">{d.body}</p>
-            <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">{d.title === "Giveaways" ? "Explore Giveaways" : d.title} →</p>
+      <section className="mx-auto max-w-2xl px-5 pb-28 space-y-3">
+        {loading && <p className="text-sm text-[#0D3B3B]/50">Loading SEEK activity…</p>}
+        {!loading && !shown.length && <p className="text-sm text-[#0D3B3B]/55">Nothing public to show yet.</p>}
+        {shown.map((item) => (
+          <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[#1BAA9C]">{item.kind}{item.at ? " · " + daysPosted(new Date(item.at).toISOString()) : ""}</p>
+            <p className="mt-1 font-display font-bold text-[#0D3B3B]">{item.title}</p>
+            {item.body ? <p className="mt-1 text-sm text-[#0D3B3B]/55">{item.body}</p> : null}
           </button>
         ))}
-      </section>
-      <section className="mx-auto max-w-2xl px-5 pb-10">
-        <h2 className="font-display font-extrabold text-2xl text-[#0D3B3B]">How SEEK works</h2>
-        <ol className="mt-4 space-y-3">
-          {steps.map(([title, body, id], i) => (
-            <li key={title}>
-              <button type="button" onClick={() => go(id)} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
-                <p className="text-[10px] font-bold uppercase tracking-widest text-[#1BAA9C]">Step {i + 1}</p>
-                <p className="mt-1 font-display font-bold text-[#0D3B3B]">{title}</p>
-                <p className="mt-1 text-sm text-[#0D3B3B]/60">{body}</p>
-              </button>
-            </li>
-          ))}
-        </ol>
-      </section>
-      <section className="mx-auto max-w-2xl px-5 pb-28">
-        <h2 className="font-display font-extrabold text-2xl text-[#0D3B3B]">How SEEK keeps this careful</h2>
-        <p className="mt-3 text-sm leading-relaxed text-[#0D3B3B]/65">SEEK reads posts before they are public. Evidence can sit with a request. You can report a post. Accounts use email sign-in. Names and phones stay off the public card unless you choose to share them when someone offers help.</p>
-        <p className="mt-3 text-sm text-[#0D3B3B]/55">SEEK does not claim that every person is independently verified. The check mark means they have a SEEK account.</p>
-        <button type="button" onClick={() => go("about")} className="mt-5 text-sm font-semibold text-[#1BAA9C]">Trust &amp; safety →</button>
       </section>
     </div>
   );
@@ -4447,10 +4486,6 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </Button>
           {mode !== "recover" && (
             <>
-              <button type="button" className="w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold" onClick={() => startGoogleSignIn()}>
-                Continue with Google
-              </button>
-              <p className="text-center text-xs text-[#0D3B3B]/45">Stays signed in on this phone.</p>
               <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
                 try {
                   setError("");
