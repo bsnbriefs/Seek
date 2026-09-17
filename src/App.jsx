@@ -30,6 +30,7 @@ import {
   submitCelebrateRsvp,
   getCelebrateRsvpCount,
   submitOffer,
+  uploadOfferMedia,
   submitVolunteer,
   initializeDonation,
   verifyDonation,
@@ -1555,12 +1556,28 @@ function OfferCard({ offer, setPage }) {
           }
           setApply(!apply);
         }}>
-          {closed ? "This giveaway is closed" : interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
+          {closed ? "Giveaway ended" : applied ? "You already indicated interest" : interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
         </button>
         {isOwner && !closed && (
-          <button type="button" className="text-xs text-[#0D3B3B]/60" onClick={async () => {
-            try { await closeMyOffer(offer.id); setClosed(true); } catch (err) { window.alert(err.message); }
-          }}>Close giveaway</button>
+          <label className="rounded-full border border-[#0D3B3B]/20 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B] cursor-pointer">
+            End with proof
+            <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={async (e) => {
+              const file = e.target.files?.[0];
+              e.target.value = "";
+              if (!file) return;
+              if (!window.confirm("Upload this proof and end the giveaway? New interest and emails will stop.")) return;
+              try {
+                await uploadOfferMedia(offer.id, file);
+                await closeMyOffer(offer.id);
+                setClosed(true);
+                setApply(false);
+                const files = await getOfferMedia(offer.id).catch(() => []);
+                if (files?.length) setMedia(files);
+              } catch (err) {
+                window.alert(err.message || "Could not end this giveaway.");
+              }
+            }} />
+          </label>
         )}
         {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
         <button
@@ -1599,7 +1616,7 @@ function OfferCard({ offer, setPage }) {
           ))}
         </div>
       )}
-      {apply && !applied && (
+      {apply && !applied && !closed && (
         <form
           className="mt-3 space-y-2"
           onSubmit={async (e) => {
