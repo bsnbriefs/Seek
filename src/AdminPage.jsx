@@ -59,6 +59,8 @@ export default function AdminPage() {
   const [offerFilter, setOfferFilter] = useState("all");
   const [search, setSearch] = useState("");
   const [adminTab, setAdminTab] = useState("post");
+  const [aiNotes, setAiNotes] = useState({});
+  const [aiLoading, setAiLoading] = useState("");
   const [impactPosts, setImpactPosts] = useState([]);
   const [openOfferMedia, setOpenOfferMedia] = useState({});
   const [impactEditingId, setImpactEditingId] = useState(null);
@@ -152,6 +154,44 @@ export default function AdminPage() {
       await loadRequests();
     } catch (err) {
       setError(err.message);
+    }
+  }
+
+  async function summarizeRequest(req) {
+    try {
+      setError("");
+      setAiLoading(req.id);
+      const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+      const key = (
+        import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
+        import.meta.env.VITE_SUPABASE_ANON_KEY ||
+        ""
+      ).trim();
+      const response = await fetch(`${url}/functions/v1/seek-ai-assist`, {
+        method: "POST",
+        headers: {
+          apikey: key,
+          Authorization: `Bearer ${session?.access_token || key}`,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({
+          purpose: "admin-triage",
+          title: req.title || "",
+          description: req.description || req.need || "",
+        }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (!response.ok) {
+        throw new Error(data.error || "AI assist failed.");
+      }
+      const summary = [data.summary, data.category, (data.flags || []).join(", "), (data.missing || []).join(", ")]
+        .filter(Boolean)
+        .join(" · ");
+      setAiNotes((prev) => ({ ...prev, [req.id]: summary || "No summary." }));
+    } catch (err) {
+      setError(err.message);
+    } finally {
+      setAiLoading("");
     }
   }
 
@@ -647,6 +687,18 @@ export default function AdminPage() {
                       if (navigator.clipboard) navigator.clipboard.writeText(url);
                       setShareLink(url);
                     }}>Live · copy link</button>
+                  )}
+
+                  <button
+                    type="button"
+                    className="mt-3 text-sm font-semibold text-[#1BAA9C]"
+                    onClick={() => summarizeRequest(req)}
+                    disabled={aiLoading === req.id}
+                  >
+                    {aiLoading === req.id ? "Summarizing…" : "Summarize"}
+                  </button>
+                  {aiNotes[req.id] && (
+                    <p className="mt-2 text-sm text-[#0D3B3B]/70">{aiNotes[req.id]}</p>
                   )}
 
                   <div className="mt-5 grid grid-cols-2 gap-2">
