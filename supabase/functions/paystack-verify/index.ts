@@ -29,7 +29,7 @@ Deno.serve(async (req) => {
 
     const found = await supabase
       .from("donations")
-      .select("id,request_id,amount,status,donor_name,donor_email")
+      .select("id,request_id,amount,status,donor_name,donor_email,campaign_id")
       .eq("paystack_reference", reference)
       .maybeSingle();
 
@@ -50,6 +50,20 @@ Deno.serve(async (req) => {
       throw new Error("Gift could not be marked successful.");
     }
 
+    if (String(found.data.campaign_id || "") === "wallet" && found.data.donor_email) {
+      const { data: profile } = await supabase
+        .from("profiles")
+        .select("id,wallet_balance")
+        .eq("email", found.data.donor_email)
+        .maybeSingle();
+      if (profile?.id) {
+        await supabase
+          .from("profiles")
+          .update({ wallet_balance: Number(profile.wallet_balance || 0) + Number(found.data.amount || 0) })
+          .eq("id", profile.id);
+      }
+    }
+
     return new Response(JSON.stringify({
       ok: true,
       verified: true,
@@ -58,92 +72,6 @@ Deno.serve(async (req) => {
       amount: closed.data.amount,
       donation: closed.data,
     }), { headers: { ...cors, "Content-Type": "application/json" } });
-  } catch (error) {
-    return new Response(
-      JSON.stringify({ error: error instanceof Error ? error.message : "Unexpected error" }),
-      { status: 400, headers: { ...cors, "Content-Type": "application/json" } }
-    );
-  }
-});        paystack_reference: reference,
-        status: "successful",
-      };
-      const inserted = await supabase.from("donations").insert(row).select("id,request_id,amount,status,email,donor_email,donor_name").maybeSingle();
-      if (inserted.data) donation = inserted.data;
-    }
-
-    if (donation?.id && donation.status !== "successful") {
-      await supabase.from("donations").update({
-        status: "successful",
-        donor_name: donation.donor_name || meta.donor_name || payload.customer?.first_name || null,
-      }).eq("id", donation.id);
-    } else if (donation?.status === "successful" && donation.id) {
-      justPaid = false;
-    }
-
-    if (!donation) donation = giftFromPaystack(reference, payload);
-
-    if (justPaid) {
-      let purpose = String(donation.donor_name || meta.donor_name || "").split("·").slice(1).join("·").trim();
-      if (!purpose && donation.request_id) {
-        const { data: reqRow } = await supabase.from("requests").select("title").eq("id", donation.request_id).maybeSingle();
-        purpose = reqRow?.title || "A published SEEK request";
-      }
-      if (!purpose) purpose = "SEEK / BSN Foundation";
-      const to = String(donation.email || donation.donor_email || payload.customer?.email || "");
-      await sendReceipt({
-        to,
-        amount: Number(donation.amount || 0),
-        purpose,
-        reference,
-      });
-    }
-
-    if (String(meta.interval || "") === "monthly") {
-      const authCode = payload.authorization?.authorization_code;
-      const customer = payload.customer?.customer_code || payload.customer?.email;
-      const kobo = Number(payload.amount || 0);
-      if (authCode && customer && kobo > 0) {
-        const planRes = await fetch("https://api.paystack.co/plan", {
-          method: "POST",
-          headers: {
-            Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
-            "Content-Type": "application/json",
-          },
-          body: JSON.stringify({
-            name: "Seek monthly " + Math.round(kobo / 100),
-            interval: "monthly",
-            amount: kobo,
-            currency: "NGN",
-          }),
-        });
-        const plan = await planRes.json();
-        if (plan?.data?.plan_code) {
-          await fetch("https://api.paystack.co/subscription", {
-            method: "POST",
-            headers: {
-              Authorization: `Bearer ${Deno.env.get("PAYSTACK_SECRET_KEY")}`,
-              "Content-Type": "application/json",
-            },
-            body: JSON.stringify({
-              customer,
-              plan: plan.data.plan_code,
-              authorization: authCode,
-            }),
-          });
-        }
-      }
-    }
-
-    return new Response(JSON.stringify({
-      ok: true,
-      verified: true,
-      request_id: donation.request_id,
-      requestId: donation.request_id,
-      amount: donation.amount,
-      donation,
-    }), {
-      headers: { ...cors, "Content-Type": "application/json" },
-    });
   } catch (error) {
     return new Response(
       JSON.stringify({ error: error instanceof Error ? error.message : "Unexpected error" }),
