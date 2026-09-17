@@ -1866,7 +1866,7 @@ export async function listLiveSupportCases(limit = 12) {
     });
   } catch (_e) {}
 
-  const stamp = (row) => new Date(row.created_at || row.createdAt || row.published_at || 0).getTime();
+  const stamp = (row) => Math.max(new Date(row.created_at || 0).getTime() || 0, new Date(row.createdAt || 0).getTime() || 0, new Date(row.published_at || 0).getTime() || 0);
   return [...extra, ...cases].sort((a, b) => stamp(b) - stamp(a));
 }
       
