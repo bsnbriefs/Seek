@@ -1030,7 +1030,7 @@ function FeatureStrip({ page, setPage }) {
     window.scrollTo(0, 0);
   };
   return (
-    <div className="sticky top-16 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
+    <div className="sticky top-24 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-3 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
@@ -5138,9 +5138,10 @@ function LiveTicker() {
     const id = setInterval(load, 60000);
     return () => { cancelled = true; clearInterval(id); };
   }, []);
-  if (!items.length) return null;
+  if (!items.length) return <div className="h-0" />;
   return (
-    <div className="sticky top-16 z-[105] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
+    <>
+    <div className="fixed top-16 inset-x-0 z-[120] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-1">
         <span className="seek-live-blink shrink-0 text-[9px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-1.5 py-0.5 rounded">Live</span>
         <div className="overflow-hidden flex-1">
@@ -5152,6 +5153,8 @@ function LiveTicker() {
         </div>
       </div>
     </div>
+    <div className="h-8" aria-hidden="true" />
+    </>
   );
 }
 
