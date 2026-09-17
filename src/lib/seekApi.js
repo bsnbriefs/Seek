@@ -1921,3 +1921,26 @@ export function explainSeekNeed(raw) {
   const description = text.endsWith(".") ? text : text + ".";
   return { title, description };
 }
+
+export async function seekAiAssist({ purpose = "classify", title = "", description = "", need = "" } = {}) {
+  const session = (await refreshUserSession()) || getUserSession();
+  if (!session?.access_token) {
+    return suggestNeedStructure({ need: need || title, description, amount: "" });
+  }
+  const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
+  const key = (import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY || import.meta.env.VITE_SUPABASE_ANON_KEY || "").trim();
+  const response = await fetch(url + "/functions/v1/seek-ai-assist", {
+    method: "POST",
+    headers: {
+      apikey: key,
+      Authorization: "Bearer " + session.access_token,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ purpose, title: title || need, description: description || need }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok) {
+    return suggestNeedStructure({ need: need || title, description, amount: "" });
+  }
+  return data;
+}

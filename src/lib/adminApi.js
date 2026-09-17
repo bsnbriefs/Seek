@@ -103,6 +103,31 @@ export function getAdminSession() {
   }
 }
 
+export async function refreshAdminSession() {
+  const session = getAdminSession();
+  if (!session?.refresh_token) return session;
+  const response = await fetch(`${SUPABASE_URL}/auth/v1/token?grant_type=refresh_token`, {
+    method: "POST",
+    headers: {
+      apikey: SUPABASE_KEY,
+      "Content-Type": "application/json",
+    },
+    body: JSON.stringify({ refresh_token: session.refresh_token }),
+  });
+  const data = await response.json().catch(() => ({}));
+  if (!response.ok || !data?.access_token) return session;
+  const next = {
+    ...session,
+    access_token: data.access_token,
+    refresh_token: data.refresh_token || session.refresh_token,
+    user: data.user || session.user,
+  };
+  try {
+    localStorage.setItem("seek_admin_session", JSON.stringify(next));
+  } catch (_e) {}
+  return next;
+}
+
 export function adminLogout() {
   localStorage.removeItem('seek_admin_session');
 }
@@ -1008,13 +1033,31 @@ export async function getAdminCelebrateRsvps() {
   });
   const data = await response.json().catch(() => []);
   if (!response.ok) throw new Error(data?.message || "Could not load Celebrate RSVPs.");
-  const base = SUPABASE_URL.replace(/\/$/, "");
-  return (Array.isArray(data) ? data : []).map((row) => ({
-    ...row,
-    photo_url: row.photo_path
-      ? (String(row.photo_path).startsWith("http") ? row.photo_path : base + "/storage/v1/object/public/" + String(row.photo_path).replace(/^\//, ""))
-      : "",
-  }));
+  const rows = Array.isArray(data) ? data : [];
+  const out = [];
+  for (const row of rows) {
+    let photo_url = "";
+    const path = String(row.photo_path || "").replace(/^\/+/, "").replace(/^seek-evidence\//, "");
+    if (row.photo_path && /^https?:\/\//i.test(row.photo_path)) photo_url = row.photo_path;
+    else if (path) {
+      const signRes = await fetch(`${SUPABASE_URL}/storage/v1/object/sign/seek-evidence/${path}`, {
+        method: "POST",
+        headers: {
+          apikey: SUPABASE_KEY,
+          Authorization: "Bearer " + session.access_token,
+          "Content-Type": "application/json",
+        },
+        body: JSON.stringify({ expiresIn: 600 }),
+      });
+      const signData = await signRes.json().catch(() => ({}));
+      const signedPath = signData?.signedURL || signData?.signedUrl || "";
+      photo_url = signedPath
+        ? (signedPath.startsWith("http") ? signedPath : `${SUPABASE_URL}/storage/v1${signedPath}`)
+        : "";
+    }
+    out.push({ ...row, photo_url });
+  }
+  return out;
 }
 
 export async function updateAdminCelebrateRsvp(id, status) {
