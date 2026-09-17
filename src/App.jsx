@@ -5158,9 +5158,15 @@ function MyRequestsPage({ setPage, userSession }) {
 /* ---------------- App ---------------- */
 
 const SEEK_SHOP = [
-  { id: "merch-cap", title: "SEEK cap", price: 5000, note: "Deep teal. Official mark + BSN.", sizes: ["One size"], image: "/shop/Cap.png" },
-  { id: "merch-tee", title: "SEEK tee", price: 8000, note: "Black cotton. ASK. SEEK. FIND.", sizes: ["S", "M", "L", "XL"], image: "/shop/Tee.png" },
-  { id: "merch-hoodie", title: "SEEK hoodie", price: 15000, note: "Black. Mark on chest, line on back.", sizes: ["S", "M", "L", "XL"], image: "/shop/Hoodie.png" },
+  { id: "merch-cap", title: "SEEK Cap", price: 15000, note: "Deep teal. Official mark.", sizes: ["One size"], image: "/shop/seek-cap.png", fallback: "/shop/Cap.png" },
+  { id: "merch-tee", title: "SEEK T-Shirt", price: 18000, note: "Black cotton. ASK. SEEK. FIND.", sizes: ["S", "M", "L", "XL"], image: "/shop/seek-tee.png", fallback: "/shop/Tee.png" },
+  { id: "merch-hoodie", title: "SEEK Hoodie", price: 35000, note: "Black. Mark on chest, line on back.", sizes: ["S", "M", "L", "XL"], image: "/shop/seek-hoodie.png", fallback: "/shop/Hoodie.png" },
+  { id: "merch-tote", title: "SEEK Tote Bag", price: 12000, note: "Everyday bag. Official mark.", sizes: ["One size"], image: "/shop/seek-tote-bag.png" },
+  { id: "merch-bottle", title: "SEEK Water Bottle", price: 18000, note: "Reusable bottle.", sizes: ["One size"], image: "/shop/seek-water-bottle.png" },
+  { id: "merch-backpack", title: "SEEK Backpack", price: 40000, note: "Daily pack. Official mark.", sizes: ["One size"], image: "/shop/seek-backpack.png" },
+  { id: "merch-notebook", title: "SEEK Notebook", price: 10000, note: "For notes on the field.", sizes: ["One size"], image: "/shop/seek-notebook.png" },
+  { id: "merch-vest", title: "SEEK Volunteer Vest", price: 25000, note: "For outreach days.", sizes: ["S", "M", "L", "XL"], image: "/shop/seek-volunteer-vest.png" },
+  { id: "merch-umbrella", title: "SEEK Umbrella", price: 20000, note: "Official mark.", sizes: ["One size"], image: "/shop/seek-umbrella.png" },
 ];
 
 function ShopPage({ setPage }) {
@@ -5183,7 +5189,7 @@ function ShopPage({ setPage }) {
         <p className="mt-3 font-body text-[#0D3B3B]/70 max-w-xl">
           Official SEEK items. You pay through Paystack. We post to the address you give. Part of each sale supports BSN outreach — Food Drive, Pad a Girl Child, Hospital Visitation, and Back to School.
         </p>
-        <p className="mt-2 text-sm text-[#0D3B3B]/50">This is not a gift exchange between neighbours. SEEK fulfils the order.</p>
+        <p className="mt-2 text-sm text-[#0D3B3B]/50">This is not a gift exchange between neighbours. SEEK fulfils the order. Collection from ₦10,000.</p>
 
         <div className="mt-8 grid gap-3">
           {SEEK_SHOP.map((row) => (
@@ -5198,13 +5204,22 @@ function ShopPage({ setPage }) {
                   src={row.image}
                   alt={row.title}
                   className="w-full h-auto max-h-[22rem] object-contain object-center rounded-2xl"
-                  onError={(e) => { e.currentTarget.src = SEEK_FACE; }}
+                  onError={(e) => {
+                    if (row.fallback && e.currentTarget.src.indexOf(row.fallback) === -1) {
+                      e.currentTarget.src = row.fallback;
+                    } else {
+                      e.currentTarget.src = SEEK_FACE;
+                    }
+                  }}
                 />
               </div>
               <div className="p-5">
-                <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
+                <div className="flex items-start justify-between gap-3">
+                  <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
+                  <p className="shrink-0 font-display font-extrabold text-xl text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+                </div>
                 <p className="mt-1 text-sm text-[#0D3B3B]/55">{row.note}</p>
-                <p className="mt-3 text-sm font-bold text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+                <p className="mt-3 text-sm font-bold text-[#0D3B3B]">Order</p>
               </div>
             </button>
           ))}
