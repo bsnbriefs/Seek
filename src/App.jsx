@@ -427,8 +427,11 @@ function daysPosted(iso) {
   if (!iso) return "";
   const ms = Date.now() - new Date(iso).getTime();
   if (Number.isNaN(ms) || ms < 0) return "Posted just now";
-  const mins = Math.floor(ms / 60000);
-  if (mins < 1) return "Posted just now";
+  const secs = Math.floor(ms / 1000);
+  if (secs < 1) return "Posted just now";
+  if (secs === 1) return "Posted 1 second ago";
+  if (secs < 60) return "Posted " + secs + " seconds ago";
+  const mins = Math.floor(secs / 60);
   if (mins === 1) return "Posted 1 minute ago";
   if (mins < 60) return "Posted " + mins + " minutes ago";
   const hours = Math.floor(mins / 60);
@@ -1923,7 +1926,7 @@ function LiveSupportCard({ request, setPage }) {
         )}
 
         <div className="absolute inset-x-0 bottom-0 p-5 sm:p-6 bg-gradient-to-t from-black/90 via-black/55 to-transparent text-white">
-          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""}</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.16em] text-[#8DE3C5]">{request.category || "Support needed"}{request.location ? ` · ${request.location}` : ""} · {daysPosted(request.created_at || request.createdAt || request.published_at)}</p>
           <h2 className="mt-1 font-display text-2xl sm:text-3xl font-extrabold leading-tight line-clamp-3">{request.title || "A SEEK community member needs support"}</h2>
           {request.description && String(request.description).trim() !== String(request.title || "").trim() && !String(request.description).trim().startsWith(String(request.title || "").trim()) ? <p className="mt-2 text-sm leading-5 text-white/82 line-clamp-3">{request.description}</p> : null}
         </div>
@@ -1931,21 +1934,21 @@ function LiveSupportCard({ request, setPage }) {
 
       <div className="shrink-0 bg-white px-4 pt-3 pb-4">
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
-        <div className="mt-3 flex flex-col gap-2">
+        <div className="mt-2 flex items-center gap-2">
           {isFinancialNeed(request) ? (
-            <button type="button" onClick={supportCase} className="w-full rounded-full bg-[#1BAA9C] px-4 py-3.5 text-sm font-bold text-white">Support this case</button>
+            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Support this case</button>
           ) : request.feedKind === "impact" ? (
-            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">See impact</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">See impact</button>
           ) : request.feedKind === "appreciation" ? (
-            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">View story</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View story</button>
           ) : CONNECT_CATS.includes(request.category) ? (
-            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">I can be there</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">I can be there</button>
           ) : /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
-            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">I can help</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">I can help</button>
           ) : (
-            <button type="button" onClick={goToCase} className="w-full rounded-full bg-[#0D3B3B] px-4 py-3.5 text-sm font-bold text-white">View case</button>
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View case</button>
           )}
-          <button type="button" onClick={goToCase} className="w-full rounded-full border border-[#0D3B3B]/15 px-4 py-2.5 text-sm font-semibold text-[#0D3B3B]">View more</button>
+          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">View more</button>
         </div>
       </div>
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
