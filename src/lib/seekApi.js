@@ -952,13 +952,14 @@ async function countRows(path) {
 }
 
 export async function listRecentGifts(limit = 8) {
-  const rows = await supabaseFetch(
+  let rows = await supabaseFetch(
     "public_gifts?select=amount,donor_name,anonymous,created_at,status,request_id&order=created_at.desc&limit=" + limit
-  ).catch(() =>
-    supabaseFetch(
+  ).catch(() => []);
+  if (!Array.isArray(rows) || !rows.length) {
+    rows = await supabaseFetch(
       "donations?select=amount,donor_name,anonymous,created_at,status&status=eq.successful&order=created_at.desc&limit=" + limit
-    ).catch(() => [])
-  );
+    ).catch(() => []);
+  }
   return Array.isArray(rows) ? rows : [];
 }
 
