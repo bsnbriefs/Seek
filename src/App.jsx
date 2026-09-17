@@ -1344,16 +1344,17 @@ function HomePage({ setPage, userSession }) {
     <>
 
       {/* HERO */}
-      <section className="px-5 pt-12 pb-8 text-center">
-        <SectionLabel>SEEK</SectionLabel>
-        <h1 className="font-display font-extrabold text-[#0D3B3B] text-4xl sm:text-5xl leading-[1.08] max-w-md mx-auto tracking-tight">
+      <section className="px-5 pt-10 pb-8 text-center">
+        <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-14 w-auto object-contain" />
+        <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
           ASK. SEEK. FIND.
         </h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65 max-w-md mx-auto">{tSeek("askOffer")}</p>
-        <div className="mt-7 flex flex-col sm:flex-row items-center justify-center gap-3">
-          <Button variant="primary" onClick={() => go("seek-help")}>{tSeek("needHelp")}</Button>
-          <Button variant="secondary" onClick={() => go("give")}>{tSeek("wantHelp")}</Button>
-          <Button variant="secondary" onClick={() => go("for-you")}>{tSeek("seeStories")}</Button>
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1BAA9C]">What SEEK is all about</p>
+        <p className="mt-3 font-body text-sm leading-relaxed text-[#0D3B3B]/70 max-w-md mx-auto">
+          SEEK is a community assistance platform built to connect people who need help with people who can offer it. Ask for what you need. Offer what you can — whether it is financial support, goods, opportunities, mentorship, counselling, or simply showing up for someone.
+        </p>
+        <div className="mt-6">
+          <Button variant="primary" onClick={() => go("for-you")}>Explore SEEK</Button>
         </div>
       </section>
 
