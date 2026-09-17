@@ -1604,6 +1604,17 @@ export async function listMyOfferInterestsSummary(offerIds) {
 }
 
 
+export async function listReceivedForMe() {
+  const rows = await listMyRequests().catch(() => []);
+  const ids = (Array.isArray(rows) ? rows : []).map((r) => r.id).filter(Boolean);
+  if (!ids.length) return [];
+  const chunk = ids.slice(0, 40).join(",");
+  const gifts = await supabaseFetch(
+    "public_gifts?select=amount,donor_name,anonymous,created_at,request_id,status&request_id=in.(" + chunk + ")&order=created_at.desc&limit=80"
+  ).catch(() => []);
+  return Array.isArray(gifts) ? gifts : [];
+}
+
 export async function listMyGifts() {
   const session = getUserSession();
   if (!session?.access_token) return [];
