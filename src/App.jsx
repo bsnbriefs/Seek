@@ -50,6 +50,9 @@ import {
   listMyOffers,
   listMyGifts,
   listReceivedForMe,
+  getMyWallet,
+  spendFromWallet,
+  loadSeekWallet,
   refreshUserSession,
   getPublicMember,
   updateMyUsername,
@@ -2213,6 +2216,11 @@ const [offerContactPhone, setOfferContactPhone] = useState("");
   const [generalDonation, setGeneralDonation] = useState(false);
   const [myGifts, setMyGifts] = useState([]);
   const [giftsLoading, setGiftsLoading] = useState(false);
+  const [wallet, setWallet] = useState(0);
+
+  useEffect(() => {
+    getMyWallet().then((w) => setWallet(Number(w?.balance || 0))).catch(() => setWallet(0));
+  }, []);
 
   useEffect(() => {
     let cancelled = false;
@@ -2376,6 +2384,33 @@ if (!cancelled) {
           {payment.amount && <p className="mt-2 text-sm text-[#0D3B3B]/55">You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}</p>}
           {paymentError && <p className="mt-2 text-sm text-red-600">{paymentError}</p>}
           <button disabled={paymentLoading} type="submit" className="mt-4 w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold">{paymentLoading ? "Opening Paystack…" : "Continue to Paystack"}</button>
+          {getUserSession()?.access_token && (
+            <div className="mt-4 rounded-2xl bg-[#F2F5F3] p-3">
+              <p className="text-sm font-semibold text-[#0D3B3B]">Wallet · ₦{Number(wallet || 0).toLocaleString()}</p>
+              <div className="mt-2 flex gap-2">
+                <button type="button" className="flex-1 rounded-full border border-[#0D3B3B]/15 py-2 text-xs font-semibold" onClick={async () => {
+                  try {
+                    const result = await loadSeekWallet(Number(payment.amount) || 2000);
+                    if (result?.authorization_url) window.location.href = result.authorization_url;
+                  } catch (err) {
+                    setPaymentError(err.message);
+                  }
+                }}>Load wallet</button>
+                {selectedRequest && (
+                  <button type="button" className="flex-1 rounded-full bg-[#1BAA9C] text-white py-2 text-xs font-bold" onClick={async () => {
+                    try {
+                      await spendFromWallet(selectedRequest.id, Number(payment.amount));
+                      const next = await getMyWallet();
+                      setWallet(Number(next?.balance || 0));
+                      setPaymentError("Gift sent from your wallet.");
+                    } catch (err) {
+                      setPaymentError(err.message);
+                    }
+                  }}>Give from wallet</button>
+                )}
+              </div>
+            </div>
+          )}
           {selectedRequest && <button type="button" onClick={() => { setSelectedRequest(null); setGeneralDonation(true); }} className="mt-3 w-full text-center text-sm text-[#1BAA9C]">Give a general gift instead</button>}
         </form>
       </section>}
