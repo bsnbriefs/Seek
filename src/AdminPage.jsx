@@ -401,6 +401,29 @@ export default function AdminPage() {
           </p>
         )}
 
+        <div className="mb-6 flex flex-wrap gap-2">
+          {[
+            { id: "post", label: "Post" },
+            { id: "requests", label: "Requests" },
+            { id: "offers", label: "Offers" },
+            { id: "volunteers", label: "Volunteers" },
+            { id: "money", label: "Money" },
+            { id: "trust", label: "Trust" },
+            { id: "impact", label: "Impact" },
+          ].map((tab) => (
+            <button
+              key={tab.id}
+              type="button"
+              onClick={() => setAdminTab(tab.id)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold ${
+                adminTab === tab.id ? "bg-[#0D3B3B] text-white" : "bg-white border"
+              }`}
+            >
+              {tab.label}
+            </button>
+          ))}
+        </div>
+
         {adminTab === "post" && (
         <div className="mb-8 grid gap-4 lg:grid-cols-3">
           <form className="rounded-2xl border bg-white p-4 space-y-2" onSubmit={async (e) => {
@@ -476,28 +499,6 @@ export default function AdminPage() {
         )}
 
 
-        <div className="mb-6 flex flex-wrap gap-2">
-          {[
-            { id: "post", label: "Post" },
-            { id: "requests", label: "Requests" },
-            { id: "offers", label: "Offers" },
-            { id: "volunteers", label: "Volunteers" },
-            { id: "money", label: "Money" },
-            { id: "trust", label: "Trust" },
-            { id: "impact", label: "Impact" },
-          ].map((tab) => (
-            <button
-              key={tab.id}
-              type="button"
-              onClick={() => setAdminTab(tab.id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${
-                adminTab === tab.id ? "bg-[#0D3B3B] text-white" : "bg-white border"
-              }`}
-            >
-              {tab.label}
-            </button>
-          ))}
-        </div>
         {adminTab === "requests" && (
         <div>
         {/* REQUESTS */}

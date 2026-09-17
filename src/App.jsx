@@ -1358,13 +1358,6 @@ function HomePage({ setPage, userSession }) {
         </p>
         <div className="mt-6">
           <Button variant="primary" onClick={() => go("for-you")}>Explore SEEK</Button>
-        <p className="mt-4 text-sm text-[#0D3B3B]/55">Not sure where to start?</p>
-        <div className="mt-2 flex flex-wrap justify-center gap-2">
-          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("seek-help")}>I need help</button>
-          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("give")}>I want to support someone</button>
-          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("offers")}>I want to offer something</button>
-          <button type="button" className="rounded-full border border-[#0D3B3B]/15 bg-white px-3 py-1.5 text-xs font-semibold" onClick={() => go("celebrate")}>I want to create or join something</button>
-        </div>
         </div>
       </section>
 
@@ -2744,6 +2737,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             </p>
           )}
           <Field label="What do you need?"><input required className={inputCls} value={form.need} onChange={set("need")} placeholder={CONNECT_CATS.includes(form.category) ? "e.g. Company at my graduation on Saturday" : "e.g. School fees for this term"} /></Field>
+          <Field label="Describe it in your own words">
+            <textarea className={inputCls} rows={4} value={form.description} onChange={set("description")} placeholder="What happened, who it is for, and what would help." />
+          </Field>
           <div className="flex flex-wrap gap-3">
           <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
             const hint = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
@@ -2752,14 +2748,18 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             setError((hint.missing || local.missing || []).length ? ("You can still submit. Consider adding: " + (hint.missing || local.missing).join(", ") + ".") : "Category updated. You can still edit it.");
           }}>Suggest a category from what I wrote</button>
           <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+            if (!(form.need || form.description).trim()) {
+              setError("Write what you need first, then tap Help me explain this.");
+              return;
+            }
             const draft = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
-            const local = explainSeekNeed(form.need || form.description);
+            const local = explainSeekNeed([form.need, form.description].filter(Boolean).join(". "));
             setForm((prev) => ({
               ...prev,
               need: draft.title || local?.title || prev.need,
               description: draft.description || local?.description || prev.description,
             }));
-            setError("Draft updated. Edit it before you submit.");
+            setError("Draft updated. Edit the description before you submit.");
           }}>Help me explain this</button>
           </div>
           <Field label="Amount needed (₦)">
