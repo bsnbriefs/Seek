@@ -163,9 +163,15 @@ export default function AdminPage() {
       setError("");
       setAiLoading(req.id);
       const fresh = await refreshAdminSession();
-      if (fresh) setSession(fresh);
-      const token = fresh?.access_token || session?.access_token;
+      const token = fresh?.access_token || fresh?.accessToken || session?.access_token || session?.accessToken;
       if (!token) throw new Error("Sign in to admin again.");
+      if (fresh) {
+        setSession({
+          ...fresh,
+          accessToken: token,
+          access_token: token,
+        });
+      }
       const url = (import.meta.env.VITE_SUPABASE_URL || "").trim();
       const key = (
         import.meta.env.VITE_SUPABASE_PUBLISHABLE_KEY ||
@@ -233,7 +239,7 @@ export default function AdminPage() {
   }
 
   useEffect(() => {
-    if (session?.accessToken) {
+    if (session?.accessToken || session?.access_token) {
       loadRequests();
     }
   }, [session]);
@@ -292,7 +298,7 @@ export default function AdminPage() {
     rejected: offers.filter((o) => o.status === "rejected").length,
   };
 
-  if (!session?.accessToken) {
+  if (!(session?.accessToken || session?.access_token)) {
     return (
       <main className="min-h-screen bg-[#F2F5F3] px-5 py-16">
         <div className="mx-auto max-w-md rounded-3xl bg-white p-8 shadow-sm">
