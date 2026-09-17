@@ -1767,7 +1767,21 @@ function GiveOfferForm() {
       </div>
 
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
+      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-2" />
+      <button type="button" className="mb-3 text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+        if (!String(offer || "").trim()) {
+          setOfferError("Write a short offer first, then tap Help me explain this.");
+          return;
+        }
+        try {
+          const draft = await seekAiAssist({ purpose: "classify", title: offerCategory || "giveaway", description: offer });
+          const local = explainSeekNeed(offer);
+          setOffer((draft.description || local?.description || offer).replace(/^I am asking the SEEK community for help\. /i, "I can offer this to a neighbour. "));
+          setOfferError("Draft updated. Edit it before you submit.");
+        } catch (err) {
+          setOfferError(err.message || "Could not draft the offer.");
+        }
+      }}>Help me explain this</button>
       <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
       <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-4" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
@@ -2701,11 +2715,18 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <div>
-            <p className="text-sm font-semibold text-[#0D3B3B] mb-2">What do you need help with?</p>
-            <div className="flex flex-wrap gap-2">
-              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
-                <button type="button" key={c.id} onClick={() => setForm({ ...form, category: c.label })} className={`rounded-full px-3 py-1.5 text-sm ${form.category === c.label ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15"}`}>{c.label}</button>
-              ))}
+            <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What do you need help with?</p>
+            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
+              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => {
+                const Icon = c.icon;
+                const active = form.category === c.label;
+                return (
+                  <button type="button" key={c.id} onClick={() => setForm({ ...form, category: c.label })} className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}>
+                    {Icon ? <Icon size={16} className="shrink-0" /> : null}
+                    <span className="text-xs sm:text-sm font-semibold leading-tight">{c.label}</span>
+                  </button>
+                );
+              })}
             </div>
           </div>
           {CONNECT_CATS.includes(form.category) && (
