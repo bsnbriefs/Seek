@@ -5,53 +5,6 @@ const cors = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-function esc(value: unknown) {
-  return String(value || "")
-    .replace(/&/g, "&amp;")
-    .replace(/</g, "&lt;")
-    .replace(/>/g, "&gt;");
-}
-
-async function sendReceipt(opts: {
-  to: string;
-  amount: number;
-  purpose: string;
-  reference: string;
-}) {
-  const key = Deno.env.get("RESEND_API_KEY") || "";
-  if (!key || !opts.to) return;
-  const naira = "₦" + Math.round(Number(opts.amount) || 0).toLocaleString();
-  await fetch("https://api.resend.com/emails", {
-    method: "POST",
-    headers: {
-      Authorization: "Bearer " + key,
-      "Content-Type": "application/json",
-    },
-    body: JSON.stringify({
-      from: "Seek <notify@seekbsn.org>",
-      to: [opts.to],
-      subject: "SEEK receipt — " + naira,
-      html: `<p>Thank you for giving through SEEK.</p><p><strong>Amount:</strong> ${esc(naira)}<br/><strong>Purpose:</strong> ${esc(opts.purpose)}<br/><strong>Reference:</strong> ${esc(opts.reference)}</p><p>This is your SEEK receipt. SEEK is a project of BSN Foundation.</p>`,
-    }),
-  }).catch(() => {});
-}
-
-function giftFromPaystack(reference: string, payload: Record<string, unknown>) {
-  const meta = (payload?.metadata || {}) as Record<string, unknown>;
-  const amount = Number(meta.gift_amount || Number(payload?.amount || 0) / 100) || 0;
-  const email = String((payload as { customer?: { email?: string } })?.customer?.email || "");
-  return {
-    id: null,
-    request_id: meta.request_id || null,
-    amount,
-    status: "successful",
-    email,
-    donor_email: email,
-    donor_name: meta.donor_name || null,
-    paystack_reference: reference,
-  };
-}
-
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") return new Response("ok", { headers: cors });
   try {
@@ -74,36 +27,44 @@ Deno.serve(async (req) => {
       "";
     const supabase = createClient(Deno.env.get("SUPABASE_URL") || "", service);
 
-    const payload = result.data || {};
-    const meta = payload.metadata || {};
-    let donation: Record<string, unknown> | null = null;
-    let justPaid = true;
-
     const found = await supabase
       .from("donations")
-      .select("id,request_id,amount,status,email,donor_email,donor_name")
+      .select("id,request_id,amount,status,donor_name,donor_email")
       .eq("paystack_reference", reference)
       .maybeSingle();
-    if (found.data) donation = found.data;
-    if (!donation && meta.request_id) {
-      const pending = await supabase
-        .from("donations")
-        .select("id,request_id,amount,status,email,donor_email,donor_name")
-        .eq("request_id", meta.request_id)
-        .eq("status", "pending")
-        .order("created_at", { ascending: false })
-        .limit(1)
-        .maybeSingle();
-      if (pending.data) donation = pending.data;
+
+    if (!found.data) throw new Error("Donation not found.");
+
+    if (String(found.data.status) !== "successful") {
+      const { error } = await supabase.from("donations").update({ status: "successful" }).eq("id", found.data.id);
+      if (error) throw new Error(error.message);
     }
 
-    if (!donation) {
-      const row = {
-        request_id: meta.request_id || null,
-        donor_email: payload.customer?.email || "",
-        amount: Number(meta.gift_amount || Number(payload.amount || 0) / 100) || 0,
-        currency: "NGN",
-        paystack_reference: reference,
+    const closed = await supabase
+      .from("donations")
+      .select("id,request_id,amount,status,donor_name")
+      .eq("id", found.data.id)
+      .single();
+
+    if (String(closed.data?.status) !== "successful") {
+      throw new Error("Gift could not be marked successful.");
+    }
+
+    return new Response(JSON.stringify({
+      ok: true,
+      verified: true,
+      request_id: closed.data.request_id,
+      requestId: closed.data.request_id,
+      amount: closed.data.amount,
+      donation: closed.data,
+    }), { headers: { ...cors, "Content-Type": "application/json" } });
+  } catch (error) {
+    return new Response(
+      JSON.stringify({ error: error instanceof Error ? error.message : "Unexpected error" }),
+      { status: 400, headers: { ...cors, "Content-Type": "application/json" } }
+    );
+  }
+});        paystack_reference: reference,
         status: "successful",
       };
       const inserted = await supabase.from("donations").insert(row).select("id,request_id,amount,status,email,donor_email,donor_name").maybeSingle();
