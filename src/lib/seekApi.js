@@ -1907,3 +1907,17 @@ export function suggestNeedStructure({ need = "", description = "", amount = "" 
     missing,
   };
 }
+
+export function explainSeekNeed(raw) {
+  const text = String(raw || "").trim();
+  if (!text) return null;
+  const lower = text.toLowerCase();
+  let title = "Help with a need";
+  if (lower.includes("school")) title = "Help with school fees";
+  else if (lower.includes("rent")) title = "Help with rent";
+  else if (lower.includes("hospital") || lower.includes("medical")) title = "Help with medical costs";
+  else if (lower.includes("food")) title = "Help with food";
+  else if (lower.includes("job")) title = "Help finding work";
+  const description = text.endsWith(".") ? text : text + ".";
+  return { title, description };
+}
