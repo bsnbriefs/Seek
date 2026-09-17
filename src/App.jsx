@@ -234,9 +234,9 @@ const FONTS = (
     html.seek-dark .text-\[\#0D3B3B\]\/80,
     html.seek-dark .text-\[\#0D3B3B\]\/90 { color: rgba(237,232,224,0.78) !important; }
     html.seek-dark .bg-white, html.seek-dark .bg-white * { color: unset; }
-    html.seek-dark .bg-white { color: #0F211F !important; }
-    html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #0D3B3B !important; }
-    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #0D3B3B !important; }
+    html.seek-dark .bg-white { color: #E8F2EF !important; }
+    html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #E8F2EF !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #E8F2EF !important; }
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/20,
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/25,
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/30,
@@ -253,11 +253,11 @@ const FONTS = (
     html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: rgb(13 59 59 / 0.62) !important; }
 
 
-    html.seek-dark body { background-color: #1A1D24; color: #F4F1EA; }
-    html.seek-dark header { background: rgba(26,29,36,0.92) !important; border-color: rgba(255,255,255,0.08) !important; }
+    html.seek-dark body { background-color: #0E1616; color: #E8F2EF; }
+    html.seek-dark header { background: #0E1616 !important; border-color: rgba(255,255,255,0.08) !important; }
     html.seek-dark header .text-\[\#0D3B3B\],
     html.seek-dark header button { color: #F4F1EA !important; }
-    html.seek-dark .bg-white { background-color: #F7F6F2 !important; color: #1A1D24; }
+    html.seek-dark .bg-white { background-color: #152220 !important; color: #E8F2EF; }
     html.seek-dark .bg-white h1,
     html.seek-dark .bg-white h2,
     html.seek-dark .bg-white h3,
@@ -928,9 +928,9 @@ function applySeekTheme(theme) {
   const root = document.documentElement;
   root.classList.toggle("seek-dark", next === "dark");
   if (next === "dark") {
-    root.style.setProperty("--seek-bg", "#1A1D24");
-    root.style.setProperty("--seek-card", "#F7F6F2");
-    root.style.setProperty("--seek-ink", "#F4F1EA");
+    root.style.setProperty("--seek-bg", "#0E1616");
+    root.style.setProperty("--seek-card", "#152220");
+    root.style.setProperty("--seek-ink", "#E8F2EF");
     root.style.setProperty("--seek-wash", "rgba(26,29,36,0.88)");
     root.style.setProperty("--seek-photo", "none");
     root.style.backgroundColor = "#1A1D24";
@@ -1143,6 +1143,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <ThemeToggle />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
@@ -1157,6 +1158,7 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
+        <ThemeToggle />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
