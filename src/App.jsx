@@ -708,29 +708,31 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
 }
 
 function RequestCard({ req, onHelp, onView }) {
+  const needed = Number(req.amountNeeded || req.amount_needed || 0);
+  const raised = Number(req.amountRaised || req.amount_raised || 0);
+  const face = postAvatar(req.avatarUrl || req.avatar_url, req) || SEEK_FACE;
   return (
     <div className="flex flex-col rounded-2xl bg-white p-5 border border-[#0D3B3B]/10">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Need"}{isBsnPost(req) ? " · Admin" : ""}</p>
       <div className="mt-3 flex items-start gap-3">
-        <div className="relative shrink-0">
-          {postAvatar(req.avatarUrl, req) ? (
-            <img loading="lazy" decoding="async" src={postAvatar(req.avatarUrl, req)} alt="" className="h-11 w-11 rounded-full object-cover bg-white" />
-          ) : (
-            <div className="h-11 w-11 rounded-full bg-[#0D3B3B]/10" />
-          )}
+        <img loading="lazy" decoding="async" src={face} alt="" className="h-12 w-12 rounded-full object-cover bg-white" />
+        <div className="min-w-0">
+          <h3 className="font-display font-bold text-lg text-[#0D3B3B] leading-snug">{req.title}</h3>
+          <p className="mt-1 text-sm text-[#0D3B3B]/55">{[req.location, daysPosted(req.created_at || req.createdAt)].filter(Boolean).join(" · ")}</p>
         </div>
-        <h3 className="font-display font-bold text-lg text-[#0D3B3B] leading-snug">{req.title}</h3>
       </div>
-      <p className="mt-3 text-sm text-[#0D3B3B]/55">{[req.location, daysPosted(req.created_at || req.createdAt)].filter(Boolean).join(" · ")}</p>
+      {req.description ? <p className="mt-3 text-sm text-[#0D3B3B]/70 line-clamp-2">{req.description}</p> : null}
       {CONNECT_CATS.includes(req.category) ? (
         <p className="mt-3 text-sm text-[#0D3B3B]/70">Looking for company, not money.</p>
-      ) : req.amountNeeded ? (
-        <div className="mt-3"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div>
-      ) : null}
-      <div className="mt-4 flex items-center gap-5 text-sm font-semibold">
-        {onView && <button type="button" onClick={() => onView(req)} className="text-[#1BAA9C]">View</button>}
-        <button type="button" onClick={onHelp ? () => onHelp(req) : undefined} className="text-[#0D3B3B]">
-          {CONNECT_CATS.includes(req.category) ? "I can be there" : "Help"}
+      ) : needed > 0 ? (
+        <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>
+      ) : (
+        <p className="mt-3 text-sm font-semibold text-[#0D3B3B]">Any amount helps.</p>
+      )}
+      <div className="mt-4 flex items-center gap-2">
+        {onView && <button type="button" onClick={() => onView(req)} className="flex-1 rounded-full border border-[#0D3B3B]/15 py-2.5 text-sm font-semibold text-[#0D3B3B]">View story</button>}
+        <button type="button" onClick={onHelp ? () => onHelp(req) : undefined} className="flex-1 rounded-full bg-[#1BAA9C] py-2.5 text-sm font-bold text-white">
+          {CONNECT_CATS.includes(req.category) ? "I can be there" : "Give now"}
         </button>
       </div>
       <CommunityInteractions targetType="request" targetId={req.id} compact />
@@ -2312,8 +2314,8 @@ if (!cancelled) {
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
         <div className="max-w-3xl">
           <SectionLabel>Give</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give where it matters to you.</h1>
-          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Support a person whose request has been published, or support BSN Foundation work. If what you have to give is goods, a job, mentorship or counselling, head to Giveaways instead.</p>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Someone is waiting on a neighbour.</h1>
+          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">Pick a published request and give through Paystack. You do not need an account. Or fund a BSN outreach if you want your gift to reach more than one person.</p>
         </div>
 
         <div className="mt-8 grid md:grid-cols-2 gap-4">
