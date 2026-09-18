@@ -2012,7 +2012,7 @@ function LiveSupportCard({ request, setPage }) {
 
 
 function DiscoverPage({ setPage }) {
-  const [tab, setTab] = useState("shop");
+  const [tab, setTab] = useState("latest");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const go = (page, path) => {
@@ -2076,25 +2076,24 @@ function DiscoverPage({ setPage }) {
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
-  const shown = tab === "impact"
-    ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
-    : tab === "job"
-      ? items.filter((item) => String(item.kind).toLowerCase().includes("job"))
-      : tab === "mentorship"
-        ? items.filter((item) => String(item.kind).toLowerCase().includes("mentor"))
-        : tab === "counselling"
-          ? items.filter((item) => String(item.kind).toLowerCase().includes("counsel"))
-          : items;
+  const shown = tab === "trending"
+    ? items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20)
+    : tab === "impact"
+      ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
+      : items.slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
         <div className="mx-auto max-w-2xl px-5 pt-4">
           <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]">Discover</p>
-          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">Another layer of SEEK life</h1>
+          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What is happening on SEEK</h1>
+          <p className="mt-1 text-sm text-[#0D3B3B]/55">Latest public requests, giveaways, impact and thank-yous.</p>
         </div>
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
             {[
+              ["latest", "Latest"],
+              ["trending", "Trending"],
               ["shop", "Shop"],
               ["organisations", "Organisations"],
               ["volunteer", "Volunteer"],
