@@ -1074,8 +1074,9 @@ function FeatureStrip({ page, setPage }) {
     { id: "seek-help", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
-    { id: "shop", label: "Shop" },
     { id: "celebrate", label: "Connect" },
+    { id: "organisations", label: "Organizations" },
+    { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
     if (item.filter) {
@@ -2087,9 +2088,9 @@ function DiscoverPage({ setPage }) {
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
         <div className="mx-auto max-w-2xl px-5 pt-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]">Discover</p>
-          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">See what just went live.</h1>
-          <p className="mt-1 text-sm text-[#0D3B3B]/70">A neighbour asked. Someone offered. Help landed. This is that board.</p>
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
+          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
+          <p className="mt-1 text-sm text-[#0D3B3B]/70">Current requests, giveaways, impact and thank-yous on SEEK.</p>
         </div>
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
@@ -4906,7 +4907,10 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
           setSaving(true);
           setError("");
           if (text.trim().length < 3) throw new Error("Write a short note about how it went.");
-          if ((files?.length || 0) + (existingMedia ? 1 : 0) < 3) throw new Error("Add at least 3 photos or short videos.");
+          const all = files || [];
+          const videos = all.filter((f) => String(f.type || "").startsWith("video")).length + (String(existingMedia || "").match(/\.(mp4|webm|mov)(\?|$)/i) ? 1 : 0);
+          const photos = all.filter((f) => String(f.type || "").startsWith("image")).length + (existingMedia && !String(existingMedia).match(/\.(mp4|webm|mov)(\?|$)/i) ? 1 : 0);
+          if (videos < 1 && photos < 3) throw new Error("Share at least 1 video or 3 photos.");
           await postRequestPublicUpdate(requestId, text);
           for (const f of files || []) await uploadAppreciationMedia(requestId, f);
           setSaved(true);
@@ -4930,7 +4934,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         placeholder="What happened, and how did people show up?"
         className="w-full rounded-xl border px-3 py-2 text-sm"
       />
-      <p className="text-xs text-[#0D3B3B]/50">Add at least 3 photos or short videos of how it went. These help Seek tell the outcome.</p>
+      <p className="text-xs text-[#0D3B3B]/50">Share at least 1 video or 3 photos. SEEK reviews this before it is public.</p>
       <input
         type="file"
         multiple
@@ -4951,7 +4955,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         disabled={saving}
         className="rounded-xl bg-[#0D3B3B] text-white px-3 py-2 text-sm font-semibold"
       >
-        {saving ? "Saving…" : saved ? "Update message" : "Publish update"}
+        {saving ? "Saving…" : saved ? "Update message" : "Submit for review"}
       </button>
     </form>
   );

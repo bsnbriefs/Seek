@@ -33,6 +33,8 @@ import {
   postAdminGiveaway,
   getAdminCelebrateRsvps,
   updateAdminCelebrateRsvp,
+  getAdminAppreciation,
+  updateAdminAppreciationStatus,
 } from "./lib/adminApi";
 
 export default function AdminPage() {
@@ -74,6 +76,7 @@ export default function AdminPage() {
   });
   const [impactSaving, setImpactSaving] = useState(false);
   const [safetyReports, setSafetyReports] = useState([]);
+  const [appreciationRows, setAppreciationRows] = useState([]);
   const [auditLogs, setAuditLogs] = useState([]);
   const [supportChats, setSupportChats] = useState([]);
   const [activeChat, setActiveChat] = useState(null);
@@ -85,7 +88,7 @@ export default function AdminPage() {
       setLoading(true);
       setError("");
 
-      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData, rsvpData] = await Promise.all([
+      const [requestData, offerData, volunteerData, privateData, donationData, impactData, reportData, auditData, chatData, interestData, rsvpData, thanksData] = await Promise.all([
         getAdminRequests(),
         getAdminOffers(),
         getAdminVolunteers().catch(() => []),
@@ -97,6 +100,7 @@ export default function AdminPage() {
         getAdminSupportConversations().catch(() => []),
         getAdminOfferInterests().catch(() => []),
         getAdminCelebrateRsvps().catch(() => []),
+        getAdminAppreciation().catch(() => []),
       ]);
 
       setRequests(requestData);
@@ -110,6 +114,7 @@ export default function AdminPage() {
       setSupportChats(chatData);
       setOfferInterests(interestData);
       setCelebrateRsvps(rsvpData || []);
+      setAppreciationRows(thanksData || []);
     } catch (err) {
       setError(err.message);
     } finally {
@@ -409,6 +414,7 @@ export default function AdminPage() {
             { id: "volunteers", label: "Volunteers" },
             { id: "money", label: "Money" },
             { id: "trust", label: "Trust" },
+            { id: "thanks", label: "Thanks" },
             { id: "impact", label: "Impact" },
           ].map((tab) => (
             <button
@@ -1322,7 +1328,27 @@ export default function AdminPage() {
 
         </div>
         )}
+        {adminTab === "thanks" && (
+          <div className="mt-8">
+            <h2 className="text-2xl font-semibold mb-2">Requester thank-yous</h2>
+            <p className="text-sm text-slate-500 mb-4">Approve before anything is public.</p>
+            {!appreciationRows.length && <p className="text-slate-500">No thank-yous yet.</p>}
+            <div className="space-y-3">
+              {appreciationRows.map((row) => (
+                <div key={row.id} className="rounded-xl border bg-white p-4">
+                  <p className="text-xs uppercase tracking-wide text-slate-500">{row.status || "pending"}</p>
+                  <p className="text-sm mt-1">{row.file_name || row.media_kind || "Media"}</p>
+                  <div className="mt-3 flex gap-2">
+                    <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-3 py-1.5 text-sm" onClick={async () => { await updateAdminAppreciationStatus(row.id, "approved"); loadRequests(); }}>Approve</button>
+                    <button type="button" className="rounded-full border px-3 py-1.5 text-sm" onClick={async () => { await updateAdminAppreciationStatus(row.id, "rejected"); loadRequests(); }}>Reject</button>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </div>
+        )}
         {adminTab === "impact" && (
+
         <div>
         {/* COMMUNITY IMPACT */}
         <div className="mt-10">
