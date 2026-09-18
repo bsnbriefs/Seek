@@ -400,6 +400,23 @@ function Logo({ light = false, className = "h-8" }) {
   );
 }
 
+function ShopSupportStrip({ setPage, tone = "page" }) {
+  const preview = ["/shop/seek-cap.png", "/shop/seek-tee.png", "/shop/seek-hoodie.png"];
+  return (
+    <div className={"rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 " + (tone === "modal" ? "mt-4 text-left" : "mt-6")}>
+      <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Support SEEK in another way</p>
+      <p className="mt-1 font-display font-bold text-[#0D3B3B]">Shop official SEEK merchandise and wear the mission.</p>
+      <p className="mt-1 text-sm text-[#0D3B3B]/55">This does not replace a gift to a request. Orders go through the SEEK store.</p>
+      <div className="mt-3 flex gap-2 overflow-x-auto">
+        {preview.map((src) => (
+          <img key={src} src={src} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover bg-[#F2F5F3]" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+        ))}
+      </div>
+      <button type="button" className="mt-3 text-sm font-bold text-[#1BAA9C]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Visit SEEK Store</button>
+    </div>
+  );
+}
+
 function Button({ children, variant = "primary", className = "", ...props }) {
   const base = "font-display font-semibold inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
   const variants = {
@@ -1392,6 +1409,9 @@ function HomePage({ setPage, userSession }) {
               {label}
             </button>
           ))}
+        </div>
+        <div className="mx-auto max-w-[440px]">
+          <ShopSupportStrip setPage={setPage} />
         </div>
       </section>
 
@@ -2443,6 +2463,7 @@ if (!cancelled) {
             <span className="mt-4 inline-flex text-sm font-bold text-[#8DE3C5]">See BSN work →</span>
           </button>
         </div>
+        <ShopSupportStrip setPage={setPage} />
 
         {getUserSession()?.access_token && (
           <div className="mt-5 rounded-3xl bg-[#F2F5F3] border border-[#0D3B3B]/8 p-5 sm:p-6">
@@ -3684,6 +3705,12 @@ function RequestPage({ requestId, setPage }) {
                 ) : (
                   <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
                 )}
+                {isFinancialNeed(request) ? (
+                  <p className="text-sm text-[#0D3B3B]/55">
+                    Can't donate right now? You can still support the SEEK community.{" "}
+                    <button type="button" className="font-bold text-[#1BAA9C]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Shop SEEK merch</button>
+                  </p>
+                ) : null}
                 <p className="font-body text-xs text-[#0D3B3B]/45">
                   {CONNECT_CATS.includes(request.category)
                     ? "Your contact goes to the host after Seek records it. Meet in public."
@@ -5807,6 +5834,9 @@ useEffect(() => {
             <p className="mt-2 font-body text-sm text-[#0D3B3B]/70">
               {paymentReturn.message}
             </p>
+            {paymentReturn.status === "success" && (
+              <ShopSupportStrip setPage={(id) => { setPaymentReturn({ status: "idle", message: "" }); setPage(id); }} tone="modal" />
+            )}
             {paymentReturn.status !== "checking" && (
               <div className="mt-4 flex justify-center gap-3">
                 {paymentReturn.requestId && (
