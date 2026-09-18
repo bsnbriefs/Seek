@@ -499,6 +499,40 @@ function impactPublicUrl(storagePath) {
   );
 }
 
+export async function getAdminAppreciation() {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/request_appreciation?select=*&order=created_at.desc`,
+    { headers: { apikey: SUPABASE_KEY, Authorization: `Bearer ${session.access_token}` } }
+  );
+  const data = await response.json().catch(() => []);
+  return Array.isArray(data) ? data : [];
+}
+
+export async function updateAdminAppreciationStatus(id, status) {
+  const session = getAdminSession();
+  if (!session?.access_token) throw new Error("Admin session expired. Please sign in again.");
+  const response = await fetch(
+    `${SUPABASE_URL}/rest/v1/request_appreciation?id=eq.${encodeURIComponent(id)}`,
+    {
+      method: "PATCH",
+      headers: {
+        apikey: SUPABASE_KEY,
+        Authorization: `Bearer ${session.access_token}`,
+        "Content-Type": "application/json",
+        Prefer: "return=minimal",
+      },
+      body: JSON.stringify({ status }),
+    }
+  );
+  if (!response.ok) {
+    const data = await response.json().catch(() => ({}));
+    throw new Error(data?.message || "Could not update appreciation.");
+  }
+  await writeAuditLog("appreciation_" + status, "request_appreciation", id, { status });
+}
+
 export async function getAdminImpactPosts() {
   const session = getAdminSession();
   if (!session?.access_token) {

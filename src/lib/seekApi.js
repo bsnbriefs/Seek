@@ -1149,12 +1149,18 @@ export async function uploadAppreciationMedia(requestId, file, onProgress) {
 }
 
 
-export async function getRequestAppreciation(requestId) {
+function isApprovedAppreciation(row) {
+  const status = String(row?.status || row?.moderation_status || "").toLowerCase();
+  if (!status) return false;
+  return status === "approved" || status === "published";
+}
+
+export async function getRequestAppreciation(requestId, { mine = false } = {}) {
   if (!supabaseConfigured || !requestId) return [];
   const rows = await supabaseFetch(
     `request_appreciation?request_id=eq.${encodeURIComponent(requestId)}&select=*&order=created_at.asc`
-  );
-  const list = Array.isArray(rows) ? rows : [];
+  ).catch(() => []);
+  const list = (Array.isArray(rows) ? rows : []).filter((row) => mine || isApprovedAppreciation(row));
   const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
   return list.filter((row) => row?.storage_path).map((row) => {
     const path = String(row.storage_path);
@@ -1193,12 +1199,12 @@ export async function listAppreciationStories() {
   let mediaRows = [];
   try {
     mediaRows = await supabaseFetch(
-      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,requests(title,location,status,public_update,public_update_at)&order=created_at.desc"
+      "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,status,requests(title,location,status,public_update,public_update_at)&order=created_at.desc"
     );
   } catch (_e) {
     try {
       mediaRows = await supabaseFetch(
-        "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at&order=created_at.desc"
+        "request_appreciation?select=id,request_id,storage_path,mime_type,media_kind,file_name,created_at,status&order=created_at.desc"
       );
     } catch (_err) {
       mediaRows = [];
@@ -1208,24 +1214,9 @@ export async function listAppreciationStories() {
 
   const byRequest = new Map();
 
-  for (const req of requests) {
-    const text = String(req.public_update || "").trim();
-    if (!text) continue;
-    byRequest.set(req.id, {
-      id: "thanks-" + req.id,
-      title: req.title || "A thank you from someone Seek helped",
-      story: text,
-      location: req.location || "",
-      media_kind: "",
-      public_url: "",
-      request_id: req.id,
-      created_at: req.public_update_at || "",
-      public_update_at: req.public_update_at || "",
-    });
-  }
-
   for (const row of mediaRows) {
     if (!row?.storage_path) continue;
+    if (!isApprovedAppreciation(row)) continue;
     const req = row.requests || {};
     if (req.status && req.status !== "fulfilled") continue;
     const requestId = row.request_id;
