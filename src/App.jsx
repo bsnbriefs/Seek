@@ -47,6 +47,7 @@ import {
   sendMagicLink,
   requestPasswordReset,
   startGoogleSignIn,
+  captureAuthRedirect,
   listMyRequests,
   listMyOffers,
   listMyGifts,
@@ -5641,9 +5642,15 @@ export default function App() {
 
   const [userSession, setUserSession] = useState(() => getUserSession());
   useEffect(() => {
-    refreshUserSession()
-      .then((s) => { if (s?.access_token) setUserSession(s); })
-      .catch(() => {});
+    (async () => {
+      const fromGoogle = await captureAuthRedirect().catch(() => null);
+      if (fromGoogle?.access_token) {
+        setUserSession(fromGoogle);
+        return;
+      }
+      const refreshed = await refreshUserSession().catch(() => null);
+      if (refreshed?.access_token) setUserSession(refreshed);
+    })();
   }, []);
   const [paymentReturn, setPaymentReturn] = useState({ status: "idle", message: "" });
 
