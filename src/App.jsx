@@ -978,8 +978,9 @@ function SectionLabel({ children }) {
 function getSeekTheme() {
   try {
     const saved = localStorage.getItem("seek_theme");
+    if (saved === "dark") return "dark";
     if (saved === "light") return "light";
-    return "dark";
+    return "light";
   } catch (_e) {
     return "light";
   }
@@ -5624,11 +5625,6 @@ function InstallSeekPrompt() {
 }
 
 export default function App() {
-  useEffect(() => {
-    document.documentElement.classList.remove("seek-dark");
-    try { localStorage.removeItem("seek_theme"); } catch (_e) {}
-  }, []);
-
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
   const setPage = (id) => {
     setPageState(id);
