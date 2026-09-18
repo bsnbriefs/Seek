@@ -687,6 +687,56 @@ export function startGoogleSignIn() {
   window.location.href = `${AUTH_URL}/auth/v1/authorize?provider=google&redirect_to=${redirect}`;
 }
 
+export async function captureAuthRedirect() {
+  if (typeof window === "undefined") return getUserSession();
+  const hash = new URLSearchParams(String(window.location.hash || "").replace(/^#/, ""));
+  const query = new URLSearchParams(window.location.search || "");
+  const access = hash.get("access_token");
+  const refresh = hash.get("refresh_token");
+  const code = query.get("code");
+
+  if (access) {
+    let user = null;
+    try {
+      const response = await fetch(`${AUTH_URL}/auth/v1/user`, {
+        headers: { apikey: AUTH_KEY, Authorization: `Bearer ${access}` },
+      });
+      user = await response.json().catch(() => null);
+    } catch (_e) {}
+    const session = {
+      access_token: access,
+      refresh_token: refresh || "",
+      user: user?.id ? user : user?.user || null,
+    };
+    setUserSession(session);
+    window.history.replaceState({}, document.title, window.location.pathname);
+    return session;
+  }
+
+  if (code) {
+    try {
+      const response = await fetch(`${AUTH_URL}/auth/v1/token?grant_type=pkce`, {
+        method: "POST",
+        headers: { apikey: AUTH_KEY, "Content-Type": "application/json" },
+        body: JSON.stringify({ auth_code: code }),
+      });
+      const data = await response.json().catch(() => ({}));
+      if (response.ok && data?.access_token) {
+        const session = {
+          access_token: data.access_token,
+          refresh_token: data.refresh_token || "",
+          user: data.user || null,
+        };
+        setUserSession(session);
+        window.history.replaceState({}, document.title, window.location.pathname);
+        return session;
+      }
+    } catch (_e) {}
+  }
+
+  return getUserSession();
+}
+
 export async function deleteRejectedRequest(requestId) {
   const session = getUserSession();
   if (!session?.access_token) throw new Error("Please sign in first.");
