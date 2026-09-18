@@ -4737,8 +4737,6 @@ function MySeekDashboard({ setPage, userSession }) {
             <div className="mt-2 flex flex-wrap gap-x-6 gap-y-2 text-sm text-white/75">
               <span><strong className="text-white">{requests.length}</strong> requests</span>
               <span><strong className="text-white">{offers.length}</strong> giveaways</span>
-              <span><strong className="text-white">{gifts.length}</strong> gifts</span>
-              <span><strong className="text-white">{unreadNotifications}</strong> new messages</span>
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/10 p-4">
@@ -4761,9 +4759,10 @@ function MySeekDashboard({ setPage, userSession }) {
           {[
             ["My requests", () => go("my-requests", "/my-requests"), requests.length],
             ["My giveaways", () => go("offers", "/offers"), offers.length],
-            ["My support", () => go("my-seek"), gifts.length],
+            ["My support", () => go("give", "/give"), ""],
             ["Messages", () => go("notifications", "/notifications"), unreadNotifications],
             ["Account & privacy", () => go("account", "/account"), ""],
+            ["Help & safety", () => go("guidelines", "/guidelines"), ""],
           ].map(([label, action, count]) => (
             <button key={label} type="button" onClick={action} className="w-full flex items-center justify-between px-5 py-4 text-left">
               <span className="font-semibold text-[#0D3B3B]">{label}</span>
@@ -4795,25 +4794,10 @@ function MySeekDashboard({ setPage, userSession }) {
           </div>
 
           <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3 mb-4"><div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Give & receive</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your giveaways</h2></div><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>Explore →</button></div>
+            <div className="flex items-center justify-between gap-3 mb-4"><div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Give & receive</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your giveaways</h2></div><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>See all →</button></div>
             {offers.length === 0 ? <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">You haven't created a giveaway yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Offer goods, services, opportunities or other support to someone in the SEEK community.</p><button type="button" onClick={() => go("offers", "/offers")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Give support</button></div> : (
               <div className="space-y-2">
                 {offers.slice(0, 3).map((offer) => <div key={offer.id} className="rounded-2xl border border-[#0D3B3B]/8 p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold text-[#0D3B3B] line-clamp-1">{offer.description || offer.category || "SEEK giveaway"}</p><span className="text-xs font-semibold text-[#1BAA9C]">{offer.status || "Open"}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{offer.category || "Support"}{offer.city ? ` · ${offer.city}` : ""}</p></div>)}
-              </div>
-            )}
-          </div>
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your gifts</p>
-            <h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Help you have given</h2>
-            <p className="mt-1 text-xs text-[#0D3B3B]/45">Amounts stay on your account only.</p>
-            {gifts.length === 0 ? <p className="mt-3 text-sm text-[#0D3B3B]/55">No confirmed gifts on this email yet.</p> : (
-              <div className="mt-3 space-y-2">
-                {gifts.slice(0, 8).map((g) => (
-                  <div key={g.id} className="rounded-2xl border border-[#0D3B3B]/8 p-3 flex justify-between gap-3 text-sm">
-                    <span>{g.donor_name || "Gift"}</span>
-                    <span className="font-semibold">₦{Number(g.amount || 0).toLocaleString()}</span>
-                  </div>
-                ))}
               </div>
             )}
           </div>
@@ -4827,12 +4811,6 @@ function MySeekDashboard({ setPage, userSession }) {
               {[['seek-help','Ask for Help','Tell SEEK what you need',HeartHandshake],['give','Give Support','Help someone today',HandHeart],['offers','Create Giveaway','Offer what you can',Package],['celebrate','Connect & Celebrate','Connect with people and moments',Users]].map(([id,label,note,Icon]) => <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white/10 px-4 py-3 text-left hover:bg-white/15 transition"><span className="flex items-center gap-3"><span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10"><Icon size={18}/></span><span><span className="block text-sm font-bold">{label}</span><span className="block text-[11px] text-white/55">{note}</span></span></span></button>)}
             </div>
           </div>
-
-          <button type="button" onClick={() => go("notifications", "/notifications")} className="w-full rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-            <div className="flex items-center justify-between gap-3"><span className="inline-flex h-10 w-10 items-center justify-center rounded-full bg-[#1BAA9C]/10 text-[#1BAA9C]"><Bell size={19}/></span><ArrowRight size={17} className="text-[#0D3B3B]/35"/></div>
-            <h2 className="mt-4 font-display font-bold text-lg text-[#0D3B3B]">Notifications</h2>
-            <p className="mt-1 text-sm text-[#0D3B3B]/55">{unreadNotifications > 0 ? `${unreadNotifications} unread notification${unreadNotifications === 1 ? "" : "s"}` : "You're all caught up."}</p>
-          </button>
 
           <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
             <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your progress</p>
