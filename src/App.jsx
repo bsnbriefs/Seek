@@ -62,6 +62,7 @@ import {
   uploadAppreciationMedia,
   getRequestAppreciation,
   listPublishedImpact,
+  searchSeekPublic,
   listPublicOffers,
   getOfferMedia,
   submitOfferInterest,
@@ -1160,6 +1161,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
+          <button type="button" aria-label="Search SEEK" className="p-2" onClick={() => go("discover")}><Search size={20} /></button>
           <ThemeToggle />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
@@ -1175,6 +1177,7 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
+        <button type="button" aria-label="Search SEEK" className="p-2" onClick={() => go("discover")}><Search size={20} /></button>
         <ThemeToggle />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -2018,6 +2021,10 @@ function DiscoverPage({ setPage }) {
   const [tab, setTab] = useState("latest");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [query, setQuery] = useState("");
+  const [searching, setSearching] = useState(false);
+  const [results, setResults] = useState(null);
+  const [searchError, setSearchError] = useState("");
   const go = (page, path) => {
     if (path) window.history.pushState({}, "", path);
     setPage(page);
@@ -2079,11 +2086,29 @@ function DiscoverPage({ setPage }) {
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
+  useEffect(() => {
+    const q = query.trim();
+    if (q.length < 2) { setResults(null); setSearchError(""); return; }
+    let cancelled = false;
+    const t = setTimeout(() => {
+      setSearching(true);
+      searchSeekPublic(q).then((data) => {
+        if (!cancelled) { setResults(data); setSearchError(""); }
+      }).catch(() => {
+        if (!cancelled) setSearchError("Something went wrong. Please try again.");
+      }).finally(() => { if (!cancelled) setSearching(false); });
+    }, 320);
+    return () => { cancelled = true; clearTimeout(t); };
+  }, [query]);
   const shown = tab === "trending"
     ? items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20)
-    : tab === "impact"
-      ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
-      : items.slice(0, 40);
+    : tab === "requests"
+      ? items.filter((item) => item.kind === "Request" || item.kind === "Celebrate")
+      : tab === "giveaways"
+        ? items.filter((item) => ["Giveaway", "Job", "Mentorship", "Counselling"].includes(item.kind))
+        : tab === "videos"
+          ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
+          : items.slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
@@ -2091,16 +2116,27 @@ function DiscoverPage({ setPage }) {
           <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
           <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
           <p className="mt-1 text-sm text-[#0D3B3B]/70">Current requests, giveaways, impact and thank-yous on SEEK.</p>
+          <label className="mt-4 flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-2.5">
+            <Search size={16} className="text-white/70 shrink-0" />
+            <input
+              value={query}
+              onChange={(e) => setQuery(e.target.value)}
+              placeholder="Search SEEK"
+              className="w-full bg-transparent text-sm text-white placeholder:text-white/50 outline-none"
+            />
+          </label>
         </div>
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
             {[
               ["latest", "Latest"],
               ["trending", "Trending"],
+              ["requests", "Requests"],
+              ["giveaways", "Giveaways"],
+              ["videos", "Videos"],
+              ["organisations", "Organizations"],
               ["shop", "Shop"],
-              ["organisations", "Organisations"],
               ["volunteer", "Volunteer"],
-              ["impact", "Impact"],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -2114,7 +2150,67 @@ function DiscoverPage({ setPage }) {
           </div>
         </div>
       </section>
-      {tab === "volunteer" ? <VolunteerPage /> : tab === "shop" ? <ShopPage setPage={setPage} /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
+      {query.trim().length >= 2 ? (
+      <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
+        {searching && <p className="text-sm text-[#0D3B3B]/50">Searching…</p>}
+        {searchError && <p className="text-sm text-[#0D3B3B]/70">{searchError}</p>}
+        {results && !searching && !(results.people.length || results.requests.length || results.giveaways.length || results.videos.length || results.organizations.length || results.topics.length) && (
+          <p className="text-sm text-[#0D3B3B]/60">No results found for “{query.trim()}”</p>
+        )}
+        {results?.people?.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">People</p>
+            {results.people.map((p) => (
+              <button key={p.id} type="button" onClick={() => go("member:" + p.id, "/member/" + p.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 flex gap-3">
+                {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#0D3B3B]/10" />}
+                <span><span className="block font-display font-bold text-[#0D3B3B]">{p.name} <VerifiedBadge /></span><span className="block text-sm text-[#0D3B3B]/55">{p.username}</span></span>
+              </button>
+            ))}
+          </div>
+        )}
+        {results?.requests?.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Requests</p>
+            {results.requests.map((r) => (
+              <button key={r.id} type="button" onClick={() => go("request:" + r.id, "/request/" + r.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
+                <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
+                <p className="text-sm text-[#0D3B3B]/55">{[r.category, r.location].filter(Boolean).join(" · ")}</p>
+              </button>
+            ))}
+          </div>
+        )}
+        {results?.giveaways?.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Giveaways</p>
+            {results.giveaways.map((o) => (
+              <button key={o.id} type="button" onClick={() => go("offers", "/offers")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
+                <p className="font-display font-bold text-[#0D3B3B]">{String(o.description || "").slice(0, 90)}</p>
+                <p className="text-sm text-[#0D3B3B]/55">{[o.category, o.city].filter(Boolean).join(" · ")}</p>
+              </button>
+            ))}
+          </div>
+        )}
+        {results?.videos?.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Videos / updates</p>
+            {results.videos.map((v) => (
+              <button key={v.id} type="button" onClick={() => go(v.request_id ? "request:" + v.request_id : "impact", v.request_id ? "/request/" + v.request_id : "/impact")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
+                <p className="font-display font-bold text-[#0D3B3B]">{v.title}</p>
+                <p className="text-sm text-[#0D3B3B]/55 line-clamp-2">{v.story}</p>
+              </button>
+            ))}
+          </div>
+        )}
+        {results?.topics?.length > 0 && (
+          <div>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Topics</p>
+            {results.topics.map((t) => (
+              <button key={t.id} type="button" onClick={() => go(t.page, t.path)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 font-display font-bold text-[#0D3B3B]">{t.title}</button>
+            ))}
+          </div>
+        )}
+      </section>
+      ) : tab === "volunteer" ? <VolunteerPage /> : tab === "shop" ? <ShopPage setPage={setPage} /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
       <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-3">
         {loading && <p className="text-sm text-[#0D3B3B]/50">Loading…</p>}
         {!loading && !shown.length && (
