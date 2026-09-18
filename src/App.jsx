@@ -5167,6 +5167,7 @@ const SEEK_SHOP = [
   { id: "merch-notebook", title: "SEEK Notebook", price: 10000, note: "For notes on the field.", sizes: ["One size"], image: "/shop/seek-notebook.png" },
   { id: "merch-vest", title: "SEEK Volunteer Vest", price: 25000, note: "For outreach days.", sizes: ["S", "M", "L", "XL"], image: "/shop/seek-volunteer-vest.png" },
   { id: "merch-umbrella", title: "SEEK Umbrella", price: 20000, note: "Official mark.", sizes: ["One size"], image: "/shop/seek-umbrella.png" },
+  { id: "merch-mug", title: "SEEK Mug", price: 8000, note: "Official mark.", sizes: ["One size"], image: "/shop/seek-mug.png" },
 ];
 
 function ShopPage({ setPage }) {
