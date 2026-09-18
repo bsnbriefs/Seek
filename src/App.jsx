@@ -2012,7 +2012,7 @@ function LiveSupportCard({ request, setPage }) {
 
 
 function DiscoverPage({ setPage }) {
-  const [tab, setTab] = useState("latest");
+  const [tab, setTab] = useState("impact");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const go = (page, path) => {
@@ -2076,20 +2076,25 @@ function DiscoverPage({ setPage }) {
     }).finally(() => { if (!cancelled) setLoading(false); });
     return () => { cancelled = true; };
   }, []);
-  const latest = items.slice(0, 40);
-  const trending = items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20);
-  const shown = tab === "trending" ? trending : latest;
+  const shown = tab === "impact"
+    ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
+    : tab === "job"
+      ? items.filter((item) => String(item.kind).toLowerCase().includes("job"))
+      : tab === "mentorship"
+        ? items.filter((item) => String(item.kind).toLowerCase().includes("mentor"))
+        : tab === "counselling"
+          ? items.filter((item) => String(item.kind).toLowerCase().includes("counsel"))
+          : items;
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-2xl px-5 pt-10 pb-4">
-        <SectionLabel>Discover</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening on SEEK</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/55">Latest public requests, giveaways, impact and thank-yous.</p>
-        <div className="mt-5 -mx-5 px-5 overflow-x-auto scrollbar-none border-b border-[#0D3B3B]/10">
-          <div className="flex gap-1 min-w-max">
+    <div className="min-h-[70vh]" style={{ background: C.bg }}>
+      <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
+        <div className="mx-auto max-w-2xl px-5 pt-4">
+          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]">Discover</p>
+          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">Another layer of SEEK life</h1>
+        </div>
+        <div className="mt-3 overflow-x-auto scrollbar-none">
+          <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
             {[
-              ["latest", "Latest"],
-              ["trending", "Trending"],
               ["impact", "Impact"],
               ["volunteer", "Volunteer"],
               ["job", "Jobs"],
@@ -2100,16 +2105,8 @@ function DiscoverPage({ setPage }) {
               <button
                 key={id}
                 type="button"
-                onClick={() => {
-                  if (id === "latest" || id === "trending") { setTab(id); return; }
-                  if (id === "job" || id === "mentorship" || id === "counselling") {
-                    try { sessionStorage.setItem("seek_offer_filter", id); } catch (_e) {}
-                    go("offers", "/offers");
-                    return;
-                  }
-                  go(id, "/" + id);
-                }}
-                className={"shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + ((id === "latest" || id === "trending") && tab === id ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/50 border-transparent")}
+                onClick={() => setTab(id)}
+                className={"shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + (tab === id ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/45 border-transparent")}
               >
                 {label}
               </button>
@@ -2117,9 +2114,15 @@ function DiscoverPage({ setPage }) {
           </div>
         </div>
       </section>
-      <section className="mx-auto max-w-2xl px-5 pb-28 space-y-3">
-        {loading && <p className="text-sm text-[#0D3B3B]/50">Loading SEEK activity…</p>}
-        {!loading && !shown.length && <p className="text-sm text-[#0D3B3B]/55">Nothing public to show yet.</p>}
+      {tab === "volunteer" ? <VolunteerPage /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
+      <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-3">
+        {loading && <p className="text-sm text-[#0D3B3B]/50">Loading…</p>}
+        {!loading && !shown.length && (
+          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
+            <p className="font-display font-bold text-[#0D3B3B]">Nothing in this space yet.</p>
+            <button type="button" className="mt-3 text-sm font-bold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>Open giveaways</button>
+          </div>
+        )}
         {shown.map((item) => (
           <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
             <p className="text-[10px] font-bold uppercase tracking-widest text-[#1BAA9C]">{item.kind}{item.at ? " · " + daysPosted(new Date(item.at).toISOString()) : ""}</p>
@@ -2128,6 +2131,7 @@ function DiscoverPage({ setPage }) {
           </button>
         ))}
       </section>
+      )}
     </div>
   );
 }
