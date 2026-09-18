@@ -1065,10 +1065,6 @@ function CaseDonateSheet({ request, onClose }) {
 
 
 function FeatureStrip({ page, setPage }) {
-  const [moreOpen, setMoreOpen] = useState(false);
-  let currentOfferFilter = "";
-  try { currentOfferFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
-  const moreActive = ["volunteer", "about", "impact", "shop", "jobs", "mentorship", "counselling"].includes(page) || (page === "offers" && ["job", "mentorship", "counselling"].includes(currentOfferFilter));
   const items = [
     { id: "home", label: "Home" },
     { id: "for-you", label: "For You" },
@@ -1087,7 +1083,6 @@ function FeatureStrip({ page, setPage }) {
       try { sessionStorage.removeItem("seek_offer_filter"); } catch (_e) {}
       setPage(item.id);
     }
-    setMoreOpen(false);
     window.scrollTo(0, 0);
   };
   return (
@@ -1109,43 +1104,6 @@ function FeatureStrip({ page, setPage }) {
               </button>
             );
           })}
-          <div className="relative shrink-0">
-            <button
-              type="button"
-              aria-expanded={moreOpen}
-              onClick={() => setMoreOpen((v) => !v)}
-              className={`px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${moreActive || moreOpen ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
-            >
-              More
-            </button>
-            {moreOpen && (
-              <div className="fixed right-3 top-32 w-56 max-h-[70vh] overflow-y-auto rounded-2xl border border-[#0D3B3B]/10 bg-white p-2 shadow-2xl z-[160]">
-                {[
-                  ["organisations", "For organisations"],
-                  ["impact", "Impact"],
-                  ["volunteer", "Volunteer"],
-                  ["jobs", "Jobs", "job"],
-                  ["mentorship", "Mentorship", "mentorship"],
-                  ["counselling", "Counselling", "counselling"],
-                ].map(([id, label, filter]) => (
-                  <button
-                    key={id}
-                    type="button"
-                    onClick={() => {
-                      if (filter) { try { sessionStorage.setItem("seek_offer_filter", filter); } catch (_e) {} }
-                      else { try { sessionStorage.removeItem("seek_offer_filter"); } catch (_e) {} }
-                      setMoreOpen(false);
-                      setPage(filter ? "offers" : id);
-                      window.scrollTo(0, 0);
-                    }}
-                    className="w-full rounded-xl px-3 py-2.5 text-left text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]"
-                  >
-                    {label}
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
         </div>
       </div>
     </div>
@@ -2127,9 +2085,36 @@ function DiscoverPage({ setPage }) {
         <SectionLabel>Discover</SectionLabel>
         <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">What is happening on SEEK</h1>
         <p className="mt-2 text-sm text-[#0D3B3B]/55">Latest public requests, giveaways, impact and thank-yous.</p>
-        <div className="mt-4 flex gap-2">
-          <button type="button" onClick={() => setTab("latest")} className={"rounded-full px-4 py-2 text-sm font-semibold " + (tab === "latest" ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15")}>Latest</button>
-          <button type="button" onClick={() => setTab("trending")} className={"rounded-full px-4 py-2 text-sm font-semibold " + (tab === "trending" ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15")}>Trending</button>
+        <div className="mt-5 -mx-5 px-5 overflow-x-auto scrollbar-none border-b border-[#0D3B3B]/10">
+          <div className="flex gap-1 min-w-max">
+            {[
+              ["latest", "Latest"],
+              ["trending", "Trending"],
+              ["impact", "Impact"],
+              ["volunteer", "Volunteer"],
+              ["job", "Jobs"],
+              ["mentorship", "Mentorship"],
+              ["counselling", "Counselling"],
+              ["organisations", "Organisations"],
+            ].map(([id, label]) => (
+              <button
+                key={id}
+                type="button"
+                onClick={() => {
+                  if (id === "latest" || id === "trending") { setTab(id); return; }
+                  if (id === "job" || id === "mentorship" || id === "counselling") {
+                    try { sessionStorage.setItem("seek_offer_filter", id); } catch (_e) {}
+                    go("offers", "/offers");
+                    return;
+                  }
+                  go(id, "/" + id);
+                }}
+                className={"shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + ((id === "latest" || id === "trending") && tab === id ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/50 border-transparent")}
+              >
+                {label}
+              </button>
+            ))}
+          </div>
         </div>
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-28 space-y-3">
