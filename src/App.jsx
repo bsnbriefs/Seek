@@ -2012,7 +2012,7 @@ function LiveSupportCard({ request, setPage }) {
 
 
 function DiscoverPage({ setPage }) {
-  const [tab, setTab] = useState("impact");
+  const [tab, setTab] = useState("shop");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const go = (page, path) => {
@@ -2095,12 +2095,10 @@ function DiscoverPage({ setPage }) {
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
             {[
-              ["impact", "Impact"],
-              ["volunteer", "Volunteer"],
-              ["job", "Jobs"],
-              ["mentorship", "Mentorship"],
-              ["counselling", "Counselling"],
+              ["shop", "Shop"],
               ["organisations", "Organisations"],
+              ["volunteer", "Volunteer"],
+              ["impact", "Impact"],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -2114,7 +2112,7 @@ function DiscoverPage({ setPage }) {
           </div>
         </div>
       </section>
-      {tab === "volunteer" ? <VolunteerPage /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
+      {tab === "volunteer" ? <VolunteerPage /> : tab === "shop" ? <ShopPage setPage={setPage} /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
       <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-3">
         {loading && <p className="text-sm text-[#0D3B3B]/50">Loading…</p>}
         {!loading && !shown.length && (
