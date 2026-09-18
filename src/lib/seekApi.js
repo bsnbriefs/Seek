@@ -1246,6 +1246,61 @@ export async function listAppreciationStories() {
 }
 
 
+export async function searchSeekPublic(rawQuery) {
+  const q = String(rawQuery || "").trim();
+  const empty = { people: [], requests: [], giveaways: [], videos: [], organizations: [], topics: [] };
+  if (!q || !supabaseConfigured) return { ...empty, query: q };
+  const needle = q.replace(/^[#@]/, "").replace(/[%*,]/g, " ").trim();
+  if (!needle) return { query: q, ...empty };
+  const like = "*" + needle + "*";
+  const enc = encodeURIComponent(like);
+  const safe = (p) => supabaseFetch(p).catch(() => []);
+
+  const [requestRows, offerRows, impactRows, thanksRows, peopleRows] = await Promise.all([
+    safe("requests?select=id,title,description,location,category,status,is_public&is_public=eq.true&status=in.(published,partially_funded)&or=(title.ilike." + enc + ",description.ilike." + enc + ",location.ilike." + enc + ",category.ilike." + enc + ")&order=created_at.desc&limit=20"),
+    safe("offers?select=id,description,category,city,status&status=in.(published,open,matched)&or=(description.ilike." + enc + ",category.ilike." + enc + ",city.ilike." + enc + ")&order=created_at.desc&limit=20"),
+    safe("community_impact?select=id,title,story,location,status&or=(title.ilike." + enc + ",story.ilike." + enc + ",location.ilike." + enc + ")&order=created_at.desc&limit=12"),
+    listAppreciationStories().catch(() => []),
+    q.trim().startsWith("@") || needle.length >= 2
+      ? safe("profiles?select=id,username,full_name,bio,avatar_url&or=(username.ilike." + enc + ",full_name.ilike." + enc + ")&limit=12")
+      : Promise.resolve([]),
+  ]);
+
+  const lower = needle.toLowerCase();
+  const videos = (Array.isArray(thanksRows) ? thanksRows : []).filter((row) => {
+    const blob = [row.title, row.story, row.location].join(" ").toLowerCase();
+    return blob.includes(lower);
+  }).slice(0, 12);
+
+  const sloganHit = /ask|seek|find|neighbour|community|help|offer what you can|ask for what you need/.test(lower);
+  const topics = [];
+  if (sloganHit || lower === "seek") {
+    topics.push({ id: "seek-help", title: "Ask for what you need", page: "seek-help", path: "/seek-help" });
+    topics.push({ id: "give", title: "Offer what you can", page: "give", path: "/give" });
+    topics.push({ id: "celebrate", title: "Find someone to connect with", page: "celebrate", path: "/celebrate" });
+  }
+  if (/job|employ/.test(lower)) topics.push({ id: "jobs", title: "Jobs on Giveaways", page: "offers", path: "/offers" });
+  if (/mentor/.test(lower)) topics.push({ id: "mentorship", title: "Mentorship", page: "offers", path: "/offers" });
+  if (/counsel/.test(lower)) topics.push({ id: "counselling", title: "Counselling", page: "offers", path: "/offers" });
+  if (/org|partner|sponsor/.test(lower)) topics.push({ id: "organisations", title: "Organizations", page: "organisations", path: "/organisations" });
+
+  return {
+    query: q,
+    people: (Array.isArray(peopleRows) ? peopleRows : []).map((p) => ({
+      id: p.id,
+      name: p.full_name || p.username || "A neighbour",
+      username: p.username ? "@" + p.username : "",
+      bio: p.bio || "",
+      avatar_url: p.avatar_url || "",
+    })),
+    requests: (Array.isArray(requestRows) ? requestRows : []).map((row) => (row.title ? row : mapRequestRow(row))),
+    giveaways: Array.isArray(offerRows) ? offerRows : [],
+    videos,
+    organizations: /org|bsn|foundation|partner/.test(lower) ? [{ id: "orgs", title: "SEEK organizations", page: "organisations" }] : [],
+    topics,
+  };
+}
+
 export async function savePushSubscription(subscription) {
   const session = getUserSession();
   if (!session?.access_token || !session?.user?.id) return;
