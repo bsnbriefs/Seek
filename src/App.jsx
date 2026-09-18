@@ -260,6 +260,8 @@ const FONTS = (
     html.seek-dark header + div, html.seek-dark .sticky.top-24 { background: #121414 !important; border-color: rgba(255,255,255,0.06) !important; }
     html.seek-dark .seek-tabs button { color: #D7E6E2 !important; }
     html.seek-dark .seek-tabs button.border-\[\#1BAA9C\] { color: #8DE3C5 !important; }
+    html.seek-dark .seek-discover-tab { color: #C9D6D2 !important; }
+    html.seek-dark .seek-discover-tab-on { color: #8DE3C5 !important; }
     html.seek-dark header .text-\[\#0D3B3B\],
     html.seek-dark header button { color: #F4F1EA !important; }
     html.seek-dark .bg-white { background-color: #152220 !important; color: #E8F2EF; }
@@ -2086,8 +2088,8 @@ function DiscoverPage({ setPage }) {
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
         <div className="mx-auto max-w-2xl px-5 pt-4">
           <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]">Discover</p>
-          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What is happening on SEEK</h1>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55">Latest public requests, giveaways, impact and thank-yous.</p>
+          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">See what just went live.</h1>
+          <p className="mt-1 text-sm text-[#0D3B3B]/70">A neighbour asked. Someone offered. Help landed. This is that board.</p>
         </div>
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
@@ -2103,7 +2105,7 @@ function DiscoverPage({ setPage }) {
                 key={id}
                 type="button"
                 onClick={() => setTab(id)}
-                className={"shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + (tab === id ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/45 border-transparent")}
+                className={"seek-discover-tab shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + (tab === id ? "seek-discover-tab-on text-[#1BAA9C] border-[#1BAA9C]" : "text-[#0D3B3B] border-transparent")}
               >
                 {label}
               </button>
