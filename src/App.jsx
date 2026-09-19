@@ -2112,19 +2112,18 @@ function DiscoverPage({ setPage }) {
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
-        <div className="mx-auto max-w-2xl px-5 pt-4">
-          <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
-          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
-          <p className="mt-1 text-sm text-[#0D3B3B]/70">Current requests, giveaways, impact and thank-yous on SEEK.</p>
-          <label className="mt-4 flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-2.5">
-            <Search size={16} className="text-white/70 shrink-0" />
+        <div className="mx-auto max-w-2xl px-5 pt-3">
+          <label className="flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3">
+            <Search size={18} className="text-white/80 shrink-0" />
             <input
               value={query}
               onChange={(e) => setQuery(e.target.value)}
               placeholder="Search SEEK"
-              className="w-full bg-transparent text-sm text-white placeholder:text-white/50 outline-none"
+              className="w-full bg-transparent text-base text-white placeholder:text-white/50 outline-none"
             />
           </label>
+          <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
+          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
         </div>
         <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
