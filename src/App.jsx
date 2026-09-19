@@ -107,7 +107,7 @@ import {
   updateAdminRequestStatus
 } from "./lib/adminApi";
   import {
-  Menu, X, ArrowRight, HandHeart, HeartHandshake, Search, ShoppingBag,
+  Menu, X, ArrowLeft, ArrowRight, HandHeart, HeartHandshake, Search, ShoppingBag,
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
@@ -2028,6 +2028,11 @@ function DiscoverPage({ setPage }) {
   const [searching, setSearching] = useState(false);
   const [results, setResults] = useState(null);
   const [searchError, setSearchError] = useState("");
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [recent, setRecent] = useState(() => {
+    try { return JSON.parse(localStorage.getItem("seek_recent_searches") || "[]"); } catch { return []; }
+  });
+  const searchRef = useRef(null);
   const go = (page, path) => {
     if (path) window.history.pushState({}, "", path);
     setPage(page);
@@ -2096,13 +2101,26 @@ function DiscoverPage({ setPage }) {
     const t = setTimeout(() => {
       setSearching(true);
       searchSeekPublic(q).then((data) => {
-        if (!cancelled) { setResults(data); setSearchError(""); }
+        if (!cancelled) {
+          setResults(data);
+          setSearchError("");
+          try {
+            const next = [q, ...JSON.parse(localStorage.getItem("seek_recent_searches") || "[]").filter((s) => s !== q)].slice(0, 8);
+            localStorage.setItem("seek_recent_searches", JSON.stringify(next));
+            setRecent(next);
+          } catch (_e) {}
+        }
       }).catch(() => {
         if (!cancelled) setSearchError("Something went wrong. Please try again.");
       }).finally(() => { if (!cancelled) setSearching(false); });
     }, 320);
     return () => { cancelled = true; clearTimeout(t); };
   }, [query]);
+  useEffect(() => {
+    if (searchOpen && searchRef.current) {
+      searchRef.current.focus();
+    }
+  }, [searchOpen]);
   const shown = tab === "trending"
     ? items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20)
     : tab === "requests"
@@ -2116,19 +2134,34 @@ function DiscoverPage({ setPage }) {
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
         <div className="mx-auto max-w-2xl px-5 pt-3">
-          <label className="flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3">
-            <Search size={18} className="text-white/80 shrink-0" />
-            <input
-              value={query}
-              onChange={(e) => setQuery(e.target.value)}
-              placeholder="Search SEEK"
-              className="w-full bg-transparent text-base text-white placeholder:text-white/50 outline-none"
-            />
-          </label>
-          <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
-          <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
+          {searchOpen ? (
+            <div className="flex items-center gap-2">
+              <button type="button" aria-label="Back to Discover" className="p-2" onClick={() => { setSearchOpen(false); setQuery(""); setResults(null); }}>
+                <ArrowLeft size={20} />
+              </button>
+              <label className="flex-1 flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3">
+                <Search size={18} className="text-white/80 shrink-0" />
+                <input
+                  ref={searchRef}
+                  value={query}
+                  onChange={(e) => setQuery(e.target.value)}
+                  placeholder="Search SEEK"
+                  className="w-full bg-transparent text-base text-white placeholder:text-white/50 outline-none"
+                />
+              </label>
+            </div>
+          ) : (
+            <>
+              <button type="button" onClick={() => setSearchOpen(true)} className="w-full flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3 text-left">
+                <Search size={18} className="text-white/80 shrink-0" />
+                <span className="text-white/50 text-base">Search SEEK</span>
+              </button>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
+              <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
+            </>
+          )}
         </div>
-        <div className="mt-3 overflow-x-auto scrollbar-none">
+        {!searchOpen && <div className="mt-3 overflow-x-auto scrollbar-none">
           <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
             {[
               ["latest", "Latest"],
@@ -2149,8 +2182,22 @@ function DiscoverPage({ setPage }) {
           </div>
         </div>
       </section>
-      {query.trim().length >= 2 ? (
+      {searchOpen ? (
       <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
+        {query.trim().length < 2 && (
+          <div>
+            <div className="flex items-center justify-between mb-2">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Recent</p>
+              {recent.length > 0 && (
+                <button type="button" className="text-xs text-[#0D3B3B]/45" onClick={() => { try { localStorage.removeItem("seek_recent_searches"); } catch (_e) {} setRecent([]); }}>Clear</button>
+              )}
+            </div>
+            {!recent.length && <p className="text-sm text-[#0D3B3B]/50">Your recent searches will show here.</p>}
+            {recent.map((term) => (
+              <button key={term} type="button" className="block w-full text-left py-2 text-[#0D3B3B]" onClick={() => setQuery(term)}>{term}</button>
+            ))}
+          </div>
+        )}
         {searching && <p className="text-sm text-[#0D3B3B]/50">Searching…</p>}
         {searchError && <p className="text-sm text-[#0D3B3B]/70">{searchError}</p>}
         {results && !searching && !(results.people.length || results.requests.length || results.giveaways.length || results.videos.length || results.organizations.length || results.topics.length) && (
