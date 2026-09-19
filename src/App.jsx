@@ -97,6 +97,7 @@ import {
 } from "./lib/notificationApi";
 import { listCommunityInteractions, addCommunityReaction, addCommunityComment } from "./lib/communityApi";
 import { getSeekViewCount, recordSeekView } from "./lib/viewApi";
+import { getForYouFeed, recordFeedSignal } from "./lib/seekFeed";
 
 import {
   adminLogin,
@@ -1928,6 +1929,8 @@ function LiveSupportCard({ request, setPage }) {
   const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
 
   const goToCase = () => {
+    recordFeedSignal("view", { id: request.id });
+    recordFeedSignal("topic", { topic: request.category || request.location || "" });
     if (request.feedKind === "impact") {
       window.history.pushState({}, "", `/impact/${request.id}`);
       setPage(`impact:${request.id}`);
@@ -2133,9 +2136,6 @@ function DiscoverPage({ setPage }) {
               ["requests", "Requests"],
               ["giveaways", "Giveaways"],
               ["videos", "Videos"],
-              ["organisations", "Organizations"],
-              ["shop", "Shop"],
-              ["volunteer", "Volunteer"],
             ].map(([id, label]) => (
               <button
                 key={id}
@@ -2209,7 +2209,7 @@ function DiscoverPage({ setPage }) {
           </div>
         )}
       </section>
-      ) : tab === "volunteer" ? <VolunteerPage /> : tab === "shop" ? <ShopPage setPage={setPage} /> : tab === "organisations" ? <OrganisationsPage setPage={setPage} /> : (
+      ) : (
       <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-3">
         {loading && <p className="text-sm text-[#0D3B3B]/50">Loading…</p>}
         {!loading && !shown.length && (
@@ -2238,10 +2238,10 @@ function ForYouPage({ setPage }) {
 
   useEffect(() => {
     let cancelled = false;
-    listLiveSupportCases(16)
+    getForYouFeed(16)
       .then((rows) => {
         if (cancelled) return;
-        setLiveCases((Array.isArray(rows) ? rows : []).filter((item) => item && Array.isArray(item.media) && item.media.length));
+        setLiveCases(Array.isArray(rows) ? rows : []);
       })
       .catch((err) => { if (!cancelled) setError(err?.message || "Could not load neighbour stories."); })
       .finally(() => { if (!cancelled) setLoading(false); });
