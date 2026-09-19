@@ -1674,7 +1674,17 @@ function OfferCard({ offer, setPage }) {
           {media.map((m) => (
             m.media_kind === "video" ? (
               <div className="relative overflow-hidden rounded-xl bg-black">
-                <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+                <video
+  key={m.public_url}
+  src={m.public_url}
+  controls
+  playsInline
+  preload="none"
+  className="w-full max-h-80 bg-black"
+  controlsList="nodownload noremoteplayback"
+  disablePictureInPicture
+  onContextMenu={(e) => e.preventDefault()}
+/>
                 <SeekVideoWatermark />
               </div>
             ) : (
@@ -3661,7 +3671,17 @@ function RequestPage({ requestId, setPage }) {
               {(request.appreciationItems || [{ public_url: request.appreciationUrl, media_kind: request.appreciationKind }].filter((item) => item.public_url)).map((item) => (
                 item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
                   <div className="relative overflow-hidden rounded-xl bg-black">
-                    <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
+                    <video
+  key={item.public_url}
+  src={item.public_url}
+  controls
+  playsInline
+  preload="none"
+  className="w-full max-h-80 bg-black"
+  controlsList="nodownload noremoteplayback"
+  disablePictureInPicture
+  onContextMenu={(e) => e.preventDefault()}
+/>
                     <SeekVideoWatermark />
                   </div>
                 ) : (
