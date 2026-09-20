@@ -506,9 +506,9 @@ function daysPosted(iso) {
 
 function VerifiedBadge({ className = "" }) {
   return (
-    <span className={"inline-flex items-center gap-1 rounded-full bg-[#1BAA9C]/12 text-[#0D3B3B] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + className} title="Verified SEEK account">
+    <span className={"inline-flex items-center gap-1 rounded-full bg-[#1BAA9C]/12 text-[#0D3B3B] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + className} title="This person has a SEEK account">
       <BadgeCheck size={12} />
-      Verified
+      SEEK member
     </span>
   );
 }
@@ -530,8 +530,8 @@ function formatSeekStatus(status) {
 function SeekVerifiedCheck({ className = "" }) {
   return (
     <span
-      title="Seeker"
-      aria-label="Seeker"
+      title="SEEK member"
+      aria-label="SEEK member"
       className={`inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-[#1D9BF0] text-white shrink-0 ${className}`}
     >
       <Check size={11} strokeWidth={3} />
@@ -1674,17 +1674,7 @@ function OfferCard({ offer, setPage }) {
           {media.map((m) => (
             m.media_kind === "video" ? (
               <div className="relative overflow-hidden rounded-xl bg-black">
-                <video
-  key={m.public_url}
-  src={m.public_url}
-  controls
-  playsInline
-  preload="none"
-  className="w-full max-h-80 bg-black"
-  controlsList="nodownload noremoteplayback"
-  disablePictureInPicture
-  onContextMenu={(e) => e.preventDefault()}
-/>
+                <video key={m.public_url} src={m.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
                 <SeekVideoWatermark />
               </div>
             ) : (
@@ -2166,7 +2156,7 @@ function DiscoverPage({ setPage }) {
                 <Search size={18} className="text-white/80 shrink-0" />
                 <span className="text-white/50 text-base">Search SEEK</span>
               </button>
-              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> LIVE · Discover</p>
+              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> Now on SEEK</p>
               <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
             </>
           )}
@@ -3671,17 +3661,7 @@ function RequestPage({ requestId, setPage }) {
               {(request.appreciationItems || [{ public_url: request.appreciationUrl, media_kind: request.appreciationKind }].filter((item) => item.public_url)).map((item) => (
                 item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
                   <div className="relative overflow-hidden rounded-xl bg-black">
-                    <video
-  key={item.public_url}
-  src={item.public_url}
-  controls
-  playsInline
-  preload="none"
-  className="w-full max-h-80 bg-black"
-  controlsList="nodownload noremoteplayback"
-  disablePictureInPicture
-  onContextMenu={(e) => e.preventDefault()}
-/>
+                    <video key={item.public_url} src={item.public_url} controls playsInline className="w-full max-h-80 bg-black" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} />
                     <SeekVideoWatermark />
                   </div>
                 ) : (
