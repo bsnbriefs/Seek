@@ -350,14 +350,18 @@ async function attachAvatars(rows) {
   const ids = [...new Set(list.map((row) => row.user_id || row.created_by).filter(Boolean))];
   if (!ids.length) return list;
   try {
-    const photos = await supabaseFetch(
+    let photos = await supabaseFetch(
       "public_profile_photos?select=id,avatar_path&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
-    );
-    const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+    ).catch(() => []);
+    if (!Array.isArray(photos) || !photos.length) {
+      photos = await supabaseFetch(
+        "profiles?select=id,avatar_path,avatar_url&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
+      ).catch(() => []);
+    }
     const map = {};
     (Array.isArray(photos) ? photos : []).forEach((p) => {
-      if (!p?.avatar_path) return;
-      map[p.id] = seekImageUrl(p.avatar_path, 96);
+      const url = p.avatar_url || (p.avatar_path ? seekImageUrl(p.avatar_path, 96) : "");
+      if (url) map[p.id] = url;
     });
     const me = getUserSession()?.user?.id;
     const mine = getCachedAvatarUrl();
