@@ -1191,7 +1191,7 @@ function Navbar({ page, setPage, userSession }) {
   }, [userSession]);
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
-    { id: "seek-help-form", label: "Fundraiser", icon: HeartHandshake },
+    { id: "fundraiser", label: "Fundraiser", icon: HeartHandshake },
     { id: "give", label: "Help Someone", icon: Wallet },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
@@ -1257,7 +1257,7 @@ function Navbar({ page, setPage, userSession }) {
         <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
-            { id: "seek-help-form", label: "Fundraiser", icon: Search },
+            { id: "fundraiser", label: "Fundraiser", icon: Search },
             { id: "impact", label: "Impact", icon: BadgeCheck },
             { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
@@ -5492,7 +5492,8 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "home", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
   ];
