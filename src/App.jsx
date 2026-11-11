@@ -4510,6 +4510,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
   const [mode, setMode] = useState("signin"); // signin | signup
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [showPassword, setShowPassword] = useState(false);
   const [error, setError] = useState("");
   const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
@@ -4638,11 +4639,6 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </p>
         </div>
 
-        <button type="button" className="w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold mb-3" onClick={() => startGoogleSignIn()}>
-          Continue with Google
-        </button>
-        <p className="text-center text-xs text-[#0D3B3B]/45 mb-6">Stays signed in on this phone.</p>
-        <p className="text-center text-xs text-[#0D3B3B]/40 mb-3">Or use email</p>
         <form
           onSubmit={handleSubmit}
           className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
@@ -4659,15 +4655,25 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           </Field>
           {mode !== "recover" && (
           <Field label="Password">
-            <input
-              required={mode !== "recover"}
-              type="password"
-              minLength={6}
-              className={inputCls}
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              placeholder="At least 6 characters"
-            />
+            <div className="relative">
+              <input
+                required={mode !== "recover"}
+                type={showPassword ? "text" : "password"}
+                minLength={6}
+                className={inputCls + " pr-16"}
+                value={password}
+                onChange={(e) => setPassword(e.target.value)}
+                placeholder="At least 6 characters"
+              />
+              <button
+                type="button"
+                onClick={() => setShowPassword((v) => !v)}
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#1BAA9C]"
+                aria-label={showPassword ? "Hide password" : "Show password"}
+              >
+                {showPassword ? "Hide" : "Show"}
+              </button>
+            </div>
           </Field>
           )}
 
