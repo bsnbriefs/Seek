@@ -1134,8 +1134,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "seek-help-form", label: "Seek Help" },
     { id: "fundraiser", label: "Fundraiser" },
-    { id: "give", label: "Give" },
-    { id: "bsn", label: "BSN Outreach" },
+    { id: "bsn", label: "Campaign" },
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
@@ -1194,7 +1193,6 @@ function Navbar({ page, setPage, userSession }) {
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "seek-help-form", label: "Fundraiser", icon: HeartHandshake },
     { id: "give", label: "Help Someone", icon: Wallet },
-    { id: "offers", label: "Giveaways", icon: Package },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
@@ -5495,7 +5493,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
     { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
-    { id: "bsn", label: "BSN Outreach", note: "Support a programme", icon: BadgeCheck },
+    { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
   ];
 
