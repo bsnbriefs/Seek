@@ -2085,7 +2085,7 @@ function WalletPage({ setPage, userSession }) {
   const [total, setTotal] = useState(0);
   useEffect(() => {
     if (!userSession?.access_token) return;
-    supabaseFetch("donations?select=amount,created_at,request_id&order=created_at.desc&limit=20").then((rows) => {
+    listMyGifts().then((rows) => {
       setDonations(rows || []);
       setTotal((rows || []).reduce((sum, d) => sum + Number(d.amount || 0), 0));
     }).catch(() => {});
@@ -2723,6 +2723,16 @@ if (!cancelled) {
             Or give a general donation
           </button>
         )}
+        <div className="mb-6">
+          <p className="text-xs uppercase tracking-widest text-[#1BAA9C] mb-3 font-bold">Support BSN Foundation</p>
+          <div className="grid grid-cols-2 gap-2">
+            {OUTREACH_CAMPAIGNS.map((c) => (
+              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="rounded-xl bg-[#0D3B3B] text-white p-3 text-left">
+                <p className="font-semibold text-sm">{c.title}</p>
+              </button>
+            ))}
+          </div>
+        </div>
         <div className="mb-4 flex flex-wrap gap-2">
           {[
             ["all", "All"],
