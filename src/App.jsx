@@ -3248,20 +3248,14 @@ function VolunteerPage() {
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Tell us how you would like to help, and we will keep you in mind for opportunities.</p>
       </section>
 
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pb-14">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {roles.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setForm((prev) => ({ ...prev, role: r.title, interests: prev.interests || r.desc }))}
-              className={`rounded-2xl bg-white border p-5 text-left ${form.role === r.title ? "border-[#1BAA9C]" : "border-[#0D3B3B]/6"}`}
-            >
-              <Users size={16} className="text-[#1BAA9C] mb-3" />
-              <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
-              <p className="mt-2 font-body text-sm text-[#0D3B3B]/65">{r.desc}</p>
-            </button>
-          ))}
+      <section className="mx-auto max-w-xl px-5 sm:px-8 pb-14">
+        <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-6">
+          <Field label="Choose a role">
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+              <option value="">Select a role</option>
+              {roles.map((r) => <option key={r.id} value={r.title}>{r.title}</option>)}
+            </select>
+          </Field>
         </div>
       </section>
 
