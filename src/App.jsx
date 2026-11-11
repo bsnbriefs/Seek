@@ -218,7 +218,11 @@ const FONTS = (
     .font-display { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: -0.03em; }
     .font-body { font-family: ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif; letter-spacing: 0.005em; line-height: 1.6; }
     @keyframes seekSpinIn { from { transform: rotate(-90deg) scale(0.6); opacity: 0; } to { transform: rotate(0) scale(1); opacity: 1; } }
+    @keyframes seekFadeUp { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
     .seek-theme-icon { animation: seekSpinIn 0.35s ease; }
+    button, a { transition: transform 0.15s ease, opacity 0.15s ease; }
+    button:active { transform: scale(0.97); }
+    .rounded-2xl, .rounded-3xl { animation: seekFadeUp 0.4s ease-out; }
     html { scroll-behavior: smooth; }
 
     html, body { background-color: var(--seek-bg, #F2F5F3); }
