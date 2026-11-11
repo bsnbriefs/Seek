@@ -1767,73 +1767,15 @@ function GiveOfferForm({ setPage }) {
 
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white pb-28">
-      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">What can you give away?</h2>
-      <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">Start by choosing who or what your offer is for.</p>
-
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Who would you like to support?</p>
-      <div className="grid sm:grid-cols-3 gap-3 mb-6">
-        {targetOptions.map((item) => {
-          const Icon = item.icon;
-          const active = offerTarget === item.id;
-          return (
-            <button
-              key={item.id}
-              type="button"
-              onClick={() => { setOfferTarget(item.id); if (item.id !== "request") setOfferRequestId(""); }}
-              className={`text-left rounded-2xl border p-4 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 ring-2 ring-[#1BAA9C]/15" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
-            >
-              <span className="inline-flex h-10 w-10 items-center justify-center rounded-xl bg-[#0D3B3B]/7 text-[#0D3B3B] mb-3"><Icon size={18} /></span>
-              <span className="block font-display font-bold text-sm text-[#0D3B3B]">{item.title}</span>
-              <span className="block mt-1 text-xs leading-relaxed text-[#0D3B3B]/55">{item.desc}</span>
-            </button>
-          );
-        })}
-      </div>
-
-      {offerTarget === "request" && (
-        <div className="mb-6">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">Choose the request</p>
-          {requests.length === 0 ? (
-            <p className="rounded-2xl bg-[#F2F5F3] p-4 text-sm text-[#0D3B3B]/60">There are no eligible published requests to choose from right now.</p>
-          ) : (
-            <div className="grid sm:grid-cols-2 gap-2 max-h-72 overflow-y-auto pr-1">
-              {requests.map((r) => {
-                const active = offerRequestId === r.id;
-                return (
-                  <button
-                    key={r.id}
-                    type="button"
-                    onClick={() => setOfferRequestId(r.id)}
-                    className={`rounded-xl border p-3 text-left transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8" : "border-[#0D3B3B]/10 hover:border-[#0D3B3B]/25"}`}
-                  >
-                    <span className="block text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{r.category}</span>
-                    <span className="block mt-1 text-sm font-semibold text-[#0D3B3B] line-clamp-2">{r.title}</span>
-                    {r.location && <span className="block mt-1 text-xs text-[#0D3B3B]/45">{r.location}</span>}
-                  </button>
-                );
-              })}
-            </div>
-          )}
-        </div>
-      )}
+      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Post a giveaway</h2>
 
       <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What would you like to offer?</p>
-      <div className="grid grid-cols-2 sm:grid-cols-3 gap-2 mb-6">
-        {offerTypes.map(([id, label, Icon]) => {
-          const active = offerCategory === id;
-          return (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setOfferCategory(id)}
-              className={`rounded-xl border p-3 text-left flex items-center gap-2.5 min-h-[3.25rem] transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}
-            >
-              <Icon size={16} className="shrink-0" />
-              <span className="text-xs sm:text-sm font-semibold leading-tight">{label}</span>
-            </button>
-          );
-        })}
-      </div>
+      <select value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-6 font-body text-[#0D3B3B]">
+        <option value="">Select a category</option>
+        {offerTypes.map(([id, label]) => (
+          <option key={id} value={id}>{label}</option>
+        ))}
+      </select>
 
       <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">City</p>
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-4 font-body text-[#0D3B3B]" />
