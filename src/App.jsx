@@ -5490,7 +5490,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   ];
 
   const actions = [
-    { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
+    { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "home", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
