@@ -1,35 +1,45 @@
-const CACHE = 'seek-shell-v1';
-const APP_SHELL = ['/', '/index.html', '/manifest.webmanifest', '/favicon.png', '/pwa-192.png', '/pwa-512.png'];
+const CACHE = 'seek-shell-v2';
 
 self.addEventListener('install', (event) => {
-  event.waitUntil(caches.open(CACHE).then((cache) => cache.addAll(APP_SHELL)).then(() => self.skipWaiting()));
+  event.waitUntil(
+    caches.open(CACHE).then((cache) => cache.addAll(['/']).catch(() => {})).then(() => self.skipWaiting())
+  );
 });
 
 self.addEventListener('activate', (event) => {
-  event.waitUntil(caches.keys().then((keys) => Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))).then(() => self.clients.claim()));
+  event.waitUntil(
+    caches.keys().then((keys) =>
+      Promise.all(keys.filter((key) => key !== CACHE).map((key) => caches.delete(key)))
+    ).then(() => self.clients.claim())
+  );
 });
 
 self.addEventListener('fetch', (event) => {
   if (event.request.method !== 'GET' || !event.request.url.startsWith(self.location.origin)) return;
   event.respondWith(
-    caches.match(event.request).then((cached) => cached || fetch(event.request).then((response) => {
-      const copy = response.clone();
-      caches.open(CACHE).then((cache) => cache.put(event.request, copy));
-      return response;
-    }).catch(() => caches.match('/index.html')))
+    caches.match(event.request).then((cached) => {
+      if (cached) return cached;
+      return fetch(event.request).then((response) => {
+        if (response && response.status === 200 && response.type === 'basic') {
+          const copy = response.clone();
+          caches.open(CACHE).then((cache) => cache.put(event.request, copy)).catch(() => {});
+        }
+        return response;
+      }).catch(() => caches.match('/'));
+    })
   );
 });
 
 self.addEventListener('push', (event) => {
-  let payload = { title: 'Seek', body: 'You have a new Seek update.', url: '/' };
+  let payload = { title: 'SEEK', body: 'You have a new SEEK update.', url: '/' };
   try {
     if (event.data) payload = { ...payload, ...event.data.json() };
   } catch (_e) {}
   event.waitUntil(
-    self.registration.showNotification(payload.title || 'Seek', {
+    self.registration.showNotification(payload.title || 'SEEK', {
       body: payload.body || '',
-      icon: '/pwa-192.png',
-      badge: '/pwa-192.png',
+      icon: '/seek-logo.png',
+      badge: '/seek-logo.png',
       data: { url: payload.url || '/' },
     })
   );
