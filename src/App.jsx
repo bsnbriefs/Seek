@@ -778,6 +778,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
   const [name, setName] = useState(session?.user?.user_metadata?.full_name || session?.user?.email?.split("@")[0] || "");
   const [email, setEmail] = useState(session?.user?.email || "");
   const [amount, setAmount] = useState(String(campaign?.amount || 10000));
+  const [monthly, setMonthly] = useState(false);
   const [error, setError] = useState("");
   const [loading, setLoading] = useState(false);
   const title = request?.title || campaign?.title || "SEEK";
@@ -805,9 +806,10 @@ function SeekDonateModal({ request, campaign, onClose }) {
               campaignId: campaign?.id || null,
               anonymous: false,
               donorName: request
-                ? String(name).trim()
-                : String(name).trim() + " · " + title + (campaign?.id ? " [" + campaign.id + "]" : ""),
+                ? String(name).trim() + (monthly ? " (monthly)" : "")
+                : String(name).trim() + " · " + title + (campaign?.id ? " [" + campaign.id + "]" : "") + (monthly ? " (monthly)" : ""),
               coverFee: true,
+              monthly,
               callbackUrl: request
                 ? window.location.origin + "/request/" + request.id
                 : `${window.location.origin}/give${campaign?.id ? "?outreach=" + encodeURIComponent(campaign.id) : ""}`,
@@ -836,9 +838,14 @@ function SeekDonateModal({ request, campaign, onClose }) {
           ))}
         </div>
         <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
+        <label className="mt-3 flex items-center gap-2 text-sm text-white/80">
+          <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
+          Give this amount every month
+        </label>
+        {monthly && <p className="mt-1 text-xs text-white/50">Paystack will charge this amount monthly. You can cancel anytime.</p>}
         {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
         <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-[#0D3B3B] py-3 text-sm font-extrabold">
-          {loading ? "Opening Paystack…" : "Authorize ₦" + Number(amount || 0).toLocaleString()}
+          {loading ? "Opening Paystack…" : monthly ? "Start monthly ₦" + Number(amount || 0).toLocaleString() : "Authorize ₦" + Number(amount || 0).toLocaleString()}
         </button>
       </form>
     </div>
@@ -1991,6 +1998,20 @@ function LiveSupportCard({ request, setPage }) {
               const path = request.feedKind === "impact" || request.feedKind === "appreciation"
                 ? `/impact/${request.id}`
                 : `/request/${request.id}`;
+              const url = `${window.location.origin}${path}`;
+              const text = `${request.title || "A neighbour on SEEK"} — ${url}`;
+              window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
+            }}
+          >
+            WhatsApp
+          </button>
+          <button
+            type="button"
+            className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]"
+            onClick={async () => {
+              const path = request.feedKind === "impact" || request.feedKind === "appreciation"
+                ? `/impact/${request.id}`
+                : `/request/${request.id}`;
               await shareSeekStory({
                 title: request.title || "A neighbour on SEEK",
                 path,
@@ -2882,6 +2903,7 @@ function SeekHelpRequestPage() {
   bankName: "",
   accountName: "",
   accountNumber: "",
+  coOrganizerEmail: "",
 });
 const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   if (submitted) {
@@ -3007,6 +3029,10 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
             <Field label="Account number"><input className={inputCls} value={form.accountNumber} onChange={set("accountNumber")} placeholder="10 digits" inputMode="numeric" /></Field>
           </div>
+          <Field label="Co-organizer email (optional)">
+            <input type="email" className={inputCls} value={form.coOrganizerEmail} onChange={set("coOrganizerEmail")} placeholder="Someone who will help share this fundraiser" />
+            <p className="mt-1 text-xs text-[#0D3B3B]/50">They can share the fundraiser. They cannot change bank details or close it.</p>
+          </Field>
           <Field label="Your video story">
             <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Look into the camera and tell people why this help matters. A short video reaches hearts faster than a form. Add photos if you have them.</p>
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
@@ -5159,6 +5185,12 @@ function MyRequestsPage({ setPage, userSession }) {
 
         {!loading && items.length > 0 && (
           <>
+            {items.some((r) => r.status === "published" || r.status === "partially_funded") && (
+              <div className="mb-4 rounded-2xl bg-[#1BAA9C]/10 border border-[#1BAA9C]/20 p-4">
+                <p className="text-sm font-semibold text-[#0D3B3B]">Keep your fundraiser moving</p>
+                <p className="mt-1 text-xs text-[#0D3B3B]/60">Fundraisers that post an update get more gifts. Share your progress or say thank you.</p>
+              </div>
+            )}
             <input className="mb-3 w-full rounded-xl border px-4 py-3 text-sm" placeholder="Search your requests" value={q} onChange={(e) => setQ(e.target.value)} />
             <div className="mb-4 flex flex-wrap gap-2">
               {[
