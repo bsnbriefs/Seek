@@ -418,9 +418,18 @@ const OUTREACH_CAMPAIGNS = [
 /* ---------------- Small building blocks ---------------- */
 
 function Logo({ light = false, className = "h-12" }) {
+  const [isDark, setIsDark] = useState(() => typeof document !== "undefined" && document.documentElement.classList.contains("seek-dark"));
+  useEffect(() => {
+    const check = () => setIsDark(document.documentElement.classList.contains("seek-dark"));
+    check();
+    const obs = new MutationObserver(check);
+    obs.observe(document.documentElement, { attributes: true, attributeFilter: ["class"] });
+    return () => obs.disconnect();
+  }, []);
+  const src = isDark ? "/seek-logo.png" : "/seek-logo-light.png";
   return (
     <div className="flex items-center gap-2">
-      <img loading="lazy" decoding="async" src="/seek-logo.png" alt="SEEK" className={className + " w-auto object-contain mix-blend-screen"} />
+      <img loading="lazy" decoding="async" src={src} alt="SEEK" className={className + " w-auto object-contain" + (isDark ? " mix-blend-screen" : "")} />
     </div>
   );
 }
