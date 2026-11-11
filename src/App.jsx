@@ -5204,11 +5204,10 @@ function ShopPage({ setPage }) {
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
               className="rounded-2xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
             >
-              <div className="bg-[#101415] p-2">
-                <img
-                  src={row.image}
-                  alt={row.title}
-                  className="w-full h-48 object-contain object-center rounded-lg"
+              <img
+                src={row.image}
+                alt={row.title}
+                className="w-full h-40 object-cover object-center"
                   onError={(e) => {
                     if (row.fallback && e.currentTarget.src.indexOf(row.fallback) === -1) {
                       e.currentTarget.src = row.fallback;
@@ -5217,7 +5216,6 @@ function ShopPage({ setPage }) {
                     }
                   }}
                 />
-              </div>
               <div className="p-3">
                 <p className="font-display font-bold text-sm text-[#0D3B3B]">{row.title}</p>
                 <p className="font-display font-bold text-sm text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
