@@ -3627,69 +3627,22 @@ function RequestPage({ requestId, setPage }) {
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
-        <SectionLabel>Public request</SectionLabel>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-4">
-          Seek reviewed this request. The check mark identifies a Seeker account; request review is shown separately below. Names, phones and emails stay private.
-        </p>
-        <div className="flex flex-wrap items-center gap-2 mb-4">
-          <span className="text-xs font-semibold font-body uppercase tracking-wide text-[#1BAA9C]">
-            {request.category}
-          </span>
-          <UrgencyBadge level={request.urgency} />
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-10">
+        <div className="flex flex-wrap items-center gap-2 mb-3">
+          <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{request.category}</span>
           <VerificationBadge status={request.status} />
-          <span className="text-xs font-semibold text-[#0D3B3B]/50">{formatSeekStatus(request.status)}</span>
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">
-            {request.title}
-          </h1>
-          <button
-            type="button"
-            className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
-            onClick={async () => {
-              const url = `${window.location.origin}/request/${request.id}`;
-              const amount = request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "";
-              const headline = request.publicUpdate
-                ? String(request.publicUpdate).slice(0, 80)
-                : request.title;
-              const text = headline + " — " + (request.location || "") + amount;
-              try {
-                if (navigator.share) {
-                  await navigator.share({ title: headline, text, url });
-                } else if (navigator.clipboard) {
-                  await navigator.clipboard.writeText(text + " " + url);
-                  window.alert("Share text copied");
-                }
-              } catch (_e) {}
-            }}
-          >
-            Share
-          </button>
-          <a
-            className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]"
-            href={`https://wa.me/?text=${encodeURIComponent(
-              (request.publicUpdate ? String(request.publicUpdate).slice(0, 80) : request.title) +
-              " — " + (request.location || "") +
-              (request.amountNeeded ? " Target: NGN " + Number(request.amountNeeded).toLocaleString() + "." : "") +
-              " " + window.location.origin + "/request/" + request.id
-            )}`}
-            target="_blank"
-            rel="noreferrer"
-          >
-            <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" className="inline-block mr-1.5 align-[-2px]"><path d="M20 3.5A10 10 0 0 0 3.2 17.6L2 22l4.5-1.2A10 10 0 1 0 20 3.5zm-8 16.2a8.2 8.2 0 0 1-4.2-1.2l-.3-.2-2.6.7.7-2.5-.2-.3A8.2 8.2 0 1 1 12 19.7zm4.7-6.1c-.3-.1-1.5-.7-1.7-.8s-.4-.1-.6.1-.7.8-.8 1-.3.2-.6.1a6.7 6.7 0 0 1-2-1.2 7.4 7.4 0 0 1-1.4-1.7c-.1-.3 0-.4.1-.6l.4-.5.1-.3a.5.5 0 0 0 0-.5c0-.1-.6-1.5-.8-2s-.4-.5-.6-.5h-.5a1 1 0 0 0-.7.3 2.9 2.9 0 0 0-.9 2.2 5 5 0 0 0 1.1 2.6 11.5 11.5 0 0 1 4.4 3.9 15 15 0 0 0 1.5.5 3.6 3.6 0 0 0 1.6.1 2.7 2.7 0 0 0 1.8-1.2 2.2 2.2 0 0 0 .2-1.2c-.1-.1-.3-.2-.6-.3z"/></svg>
-            WhatsApp
-          </a>
+          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">{request.title}</h1>
+          <button type="button" className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]" onClick={async () => {
+            const url = `${window.location.origin}/request/${request.id}`;
+            try { if (navigator.share) await navigator.share({ title: request.title, url }); } catch (_e) {}
+          }}>Share</button>
         </div>
-        <div className="flex flex-wrap items-center gap-3 text-sm text-[#0D3B3B]/60 font-body mb-6">
-          <span className="inline-flex items-center gap-1.5"><MapPin size={16} /> {request.location}</span>
-          <span className="inline-flex items-center gap-1.5"><Eye size={15} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
-        </div>
+        <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 mb-6"><MapPin size={16} /> {request.location}</p>
 
         <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-8 shadow-sm">
-          <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">
-            {request.description}
-          </p>
+          <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{request.description}</p>
           {(request.publicUpdate || request.appreciationUrl) && (
             <div className="mt-6 rounded-2xl bg-[#1BAA9C]/8 p-4 space-y-3">
               <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">Update from the requester</p>
