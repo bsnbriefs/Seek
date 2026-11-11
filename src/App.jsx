@@ -1108,8 +1108,6 @@ function FeatureStrip({ page, setPage }) {
     { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "bsn", label: "BSN" },
-    { id: "offers", label: "Giveaways" },
-    { id: "impact", label: "Impact" },
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
@@ -5426,8 +5424,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
-    { id: "offers-job", label: "Offer a Job", note: "Share an opportunity", icon: Briefcase, filter: "Job opportunity", scroll: "make-offer" },
-    { id: "impact", label: "See Impact", note: "What neighbours did", icon: BadgeCheck },
+    { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
   ];
 
   const openAction = (item) => {
