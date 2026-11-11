@@ -2102,9 +2102,14 @@ function BsnPage({ setPage }) {
       <p className="mt-2 text-sm text-[#0D3B3B]/60">Support our yearly outreach programmes.</p>
       <div className="mt-6 grid gap-3">
         {OUTREACH_CAMPAIGNS.map((c, i) => (
-          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-xl bg-white border border-[#0D3B3B]/10 p-4 text-left hover:scale-[1.02] hover:shadow-lg transition-all duration-200" style={{ animationDelay: `${i * 80}ms` }}>
-            <p className="font-semibold text-[#0D3B3B]">{c.title}</p>
-            <p className="text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</p>
+          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-2xl bg-[#0D3B3B] text-white p-4 text-left flex items-center gap-4 hover:bg-[#1BAA9C] transition-colors">
+            <div className="w-12 h-12 rounded-xl bg-[#1BAA9C] flex items-center justify-center shrink-0">
+              <span className="text-xl">{i === 0 ? "🎀" : i === 1 ? "🎒" : i === 2 ? "🔧" : i === 3 ? "🏥" : "🍲"}</span>
+            </div>
+            <div>
+              <p className="font-semibold">{c.title}</p>
+              <p className="text-sm opacity-70 mt-0.5">{c.blurb}</p>
+            </div>
           </button>
         ))}
       </div>
