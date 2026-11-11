@@ -1904,7 +1904,7 @@ function SeekAutoVideo({ src, title }) {
   };
   return (
     <>
-      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-contain bg-black" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
       {ended && (
         <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
@@ -1965,7 +1965,6 @@ function LiveSupportCard({ request, setPage }) {
               <p className="font-display font-bold leading-tight truncate">{displayName} <span className="text-[#8DE3C5]">✓</span></p>
               <p className="text-xs text-white/70 truncate">{daysPosted(request.created_at || request.createdAt || request.published_at)}</p>
             </div>
-            <span className="max-w-[42%] shrink-0 rounded-full bg-black/45 px-2.5 py-1 text-[10px] font-bold uppercase tracking-[0.12em] backdrop-blur text-center leading-tight">{videoKindLabel(request)}</span>
           </div>
         </div>
 
