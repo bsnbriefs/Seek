@@ -1925,7 +1925,7 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto flex h-[calc(100dvh-12.5rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+    <article className="mx-auto flex h-[calc(100dvh-16.5rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
@@ -1965,7 +1965,7 @@ function LiveSupportCard({ request, setPage }) {
         </div>
       </div>
 
-      <div className="shrink-0 bg-white px-4 pt-3 pb-4">
+      <div className="shrink-0 bg-white px-3 pt-2 pb-3">
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-2 flex items-center gap-2">
           {isFinancialNeed(request) ? (
@@ -2286,7 +2286,7 @@ function ForYouPage({ setPage }) {
         {!loading && !error && liveCases.length === 0 && (
           <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved request evidence will appear here.</p>
         )}
-        <div className="mx-auto max-w-[440px] h-[calc(100dvh-12.5rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-4">
+        <div className="mx-auto max-w-[440px] h-[calc(100dvh-14rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-2">
           {liveCases.map((request) => (
             <div key={request.id} className="mb-3 snap-start">
               <LiveSupportCard request={request} setPage={setPage} />
