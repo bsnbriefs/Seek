@@ -1117,7 +1117,7 @@ function FeatureStrip({ page, setPage }) {
     window.scrollTo(0, 0);
   };
   return (
-    <div className="seek-tabs sticky top-24 z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
+    <div className="seek-tabs sticky top-[6.5rem] z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
       <div className="mx-auto max-w-6xl px-5 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
@@ -2743,6 +2743,7 @@ function FundraiserPage({ setPage }) {
     try {
       const session = getUserSession();
       if (!session?.access_token) {
+        try { sessionStorage.setItem("seek_return", "fundraiser"); } catch (_e) {}
         setPage("account");
         return;
       }
@@ -5383,7 +5384,7 @@ function LiveTicker() {
   if (!items.length) return <div className="h-0" />;
   return (
     <>
-    <div className="fixed top-16 inset-x-0 z-[120] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
+    <div className="fixed top-16 inset-x-0 z-[105] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
       <div className="flex items-center gap-2 px-3 py-1">
         <span className="seek-live-blink shrink-0 text-[9px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-1.5 py-0.5 rounded">Live</span>
         <div className="overflow-hidden flex-1">
