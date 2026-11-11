@@ -14,8 +14,12 @@ class ErrorBoundary extends React.Component {
   render() {
     if (this.state.err) {
       return (
-        <div className="min-h-[40vh] flex items-center justify-center px-5">
-          <p className="font-body text-sm text-red-700">{String(this.state.err.message || this.state.err)}</p>
+        <div className="min-h-[50vh] flex items-center justify-center px-5">
+          <div className="max-w-md text-center">
+            <p className="font-display font-bold text-xl text-[#0D3B3B]">Something went wrong</p>
+            <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">{String(this.state.err.message || this.state.err)}</p>
+            <button type="button" className="mt-4 rounded-full bg-[#0D3B3B] text-white px-5 py-2 text-sm font-semibold" onClick={() => { this.setState({ err: null }); window.location.href = "/"; }}>Go home</button>
+          </div>
         </div>
       );
     }
@@ -1924,7 +1928,7 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto flex h-[calc(100dvh-18rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+    <article className="mx-auto flex h-[calc(100dvh-20rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
@@ -2282,7 +2286,7 @@ function ForYouPage({ setPage }) {
         {!loading && !error && liveCases.length === 0 && (
           <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet.</p>
         )}
-        <div className="mx-auto max-w-[440px] h-[calc(100dvh-14rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-8">
+        <div className="mx-auto max-w-[440px] h-[calc(100dvh-16rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-12">
           {liveCases.map((request) => (
             <div key={request.id} className="mb-3 snap-start">
               <LiveSupportCard request={request} setPage={setPage} />
@@ -2887,7 +2891,8 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <ol className="text-left font-body text-sm text-[#0D3B3B]/70 space-y-2 max-w-sm mx-auto">
             <li>1. Seek reviews your request.</li>
             <li>2. If it is approved, it appears publicly.</li>
-            <li>3. People can give or offer help.</li>
+            <li>3. People can give toward your target.</li>
+            <li>4. After it is fulfilled, SEEK settles to the bank details you provided.</li>
           </ol>
         </div>
       </div>
@@ -2990,6 +2995,13 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="How much do you need? e.g. 50000" inputMode="numeric" />
             <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
           </Field>
+          <div className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] p-4 space-y-4">
+            <p className="text-sm font-semibold text-[#0D3B3B]">Where should gifts be sent?</p>
+            <p className="text-xs text-[#0D3B3B]/55">Bank details stay private. SEEK uses them only after a fundraiser is fulfilled.</p>
+            <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
+            <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
+            <Field label="Account number"><input className={inputCls} value={form.accountNumber} onChange={set("accountNumber")} placeholder="10 digits" inputMode="numeric" /></Field>
+          </div>
           <Field label="Your video story">
             <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Look into the camera and tell people why this help matters. A short video reaches hearts faster than a form. Add photos if you have them.</p>
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
@@ -5846,7 +5858,7 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen pb-32 lg:pb-0" style={{ background: C.white, color: C.ink }}>
+    <div className="font-body min-h-screen pb-36 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
       <FeatureStrip page={page} setPage={setPage} />
