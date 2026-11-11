@@ -1101,7 +1101,6 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
-    { id: "wallet", label: "Wallet" },
     { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
