@@ -2080,6 +2080,34 @@ function LiveSupportCard({ request, setPage }) {
 }
 
 
+function BsnPage({ setPage }) {
+  const [selected, setSelected] = useState(null);
+  if (selected) {
+    return (
+      <div className="mx-auto max-w-lg px-5 py-8">
+        <button type="button" onClick={() => setSelected(null)} className="text-sm text-[#1BAA9C] mb-4">← Back</button>
+        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">{selected.title}</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/70">{selected.story}</p>
+        <button type="button" onClick={() => setPage("give")} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+      </div>
+    );
+  }
+  return (
+    <div className="mx-auto max-w-lg px-5 py-8">
+      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">BSN Foundation</h1>
+      <p className="mt-2 text-sm text-[#0D3B3B]/60">Support our yearly outreach programmes.</p>
+      <div className="mt-6 grid gap-3">
+        {OUTREACH_CAMPAIGNS.map((c) => (
+          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-xl bg-white border border-[#0D3B3B]/10 p-4 text-left">
+            <p className="font-semibold text-[#0D3B3B]">{c.title}</p>
+            <p className="text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</p>
+          </button>
+        ))}
+      </div>
+    </div>
+  );
+}
+
 function WalletPage({ setPage, userSession }) {
   const [donations, setDonations] = useState([]);
   const [total, setTotal] = useState(0);
@@ -2723,16 +2751,10 @@ if (!cancelled) {
             Or give a general donation
           </button>
         )}
-        <div className="mb-6">
-          <p className="text-xs uppercase tracking-widest text-[#1BAA9C] mb-3 font-bold">Support BSN Foundation</p>
-          <div className="grid grid-cols-2 gap-2">
-            {OUTREACH_CAMPAIGNS.map((c) => (
-              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="rounded-xl bg-[#0D3B3B] text-white p-3 text-left">
-                <p className="font-semibold text-sm">{c.title}</p>
-              </button>
-            ))}
-          </div>
-        </div>
+        <button type="button" onClick={() => setPage("bsn")} className="mb-6 w-full rounded-xl bg-[#0D3B3B] text-white p-4 text-left">
+          <p className="font-semibold">Support BSN Foundation</p>
+          <p className="text-xs opacity-70 mt-1">Pad a Girl Child, Back to School, Food Drive and more</p>
+        </button>
         <div className="mb-4 flex flex-wrap gap-2">
           {[
             ["all", "All"],
@@ -5854,6 +5876,7 @@ useEffect(() => {
 
   const pages = {
     home: <ForYouPage setPage={setPage} />,
+    bsn: <BsnPage setPage={setPage} />,
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
