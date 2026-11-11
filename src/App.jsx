@@ -2028,12 +2028,18 @@ function LiveSupportCard({ request, setPage }) {
 
 function BsnPage({ setPage }) {
   const [selected, setSelected] = useState(null);
+  const [donating, setDonating] = useState(false);
+  if (donating && selected) {
+    return <SeekDonateModal campaign={selected} onClose={() => setDonating(false)} />;
+  }
   if (selected) {
     return (
       <div className="mx-auto max-w-lg px-5 py-8 animate-[seekFade_0.3s_ease-out]">
         <button type="button" onClick={() => setSelected(null)} className="text-sm text-[#1BAA9C] mb-4">← Back</button>
         <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">{selected.title}</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/70">{selected.story}</p>
+        {selected.photos?.[0] && <img src={selected.photos[0]} alt="" className="mt-4 w-full rounded-xl object-cover" />}
+        <p className="mt-4 text-sm text-[#0D3B3B]/70">{selected.story}</p>
+        {selected.videos?.[0] && <video src={selected.videos[0]} controls className="mt-4 w-full rounded-xl" />}
         <button type="button" onClick={() => setPage("give")} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
       </div>
     );
