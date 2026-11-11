@@ -5195,25 +5195,22 @@ function ShopPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 pt-12 pb-28">
         <SectionLabel>Shop</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Wear SEEK. Support outreach.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/70 max-w-xl">
-          Official SEEK items. You pay through Paystack. We post to the address you give. Part of each sale supports BSN outreach — Food Drive, Pad a Girl Child, Hospital Visitation, and Back to School.
-        </p>
-        <p className="mt-2 text-sm text-[#0D3B3B]/50">This is not a gift exchange between neighbours. SEEK fulfils the order. Collection from ₦10,000.</p>
+        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">Shop</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/60">Official SEEK items. Part of each sale supports BSN outreach.</p>
 
-        <div className="mt-8 grid gap-3">
+        <div className="mt-8 grid grid-cols-2 gap-3">
           {SEEK_SHOP.map((row) => (
             <button
               key={row.id}
               type="button"
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
-              className="rounded-3xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
+              className="rounded-2xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
             >
-              <div className="bg-[#101415] px-3 pt-3">
+              <div className="bg-[#101415] p-2">
                 <img
                   src={row.image}
                   alt={row.title}
-                  className="w-full h-40 object-contain object-center rounded-xl"
+                  className="w-full h-32 object-contain object-center rounded-lg"
                   onError={(e) => {
                     if (row.fallback && e.currentTarget.src.indexOf(row.fallback) === -1) {
                       e.currentTarget.src = row.fallback;
@@ -5223,13 +5220,9 @@ function ShopPage({ setPage }) {
                   }}
                 />
               </div>
-              <div className="p-5">
-                <div className="flex items-start justify-between gap-3">
-                  <p className="font-display font-bold text-xl text-[#0D3B3B]">{row.title}</p>
-                  <p className="shrink-0 font-display font-extrabold text-xl text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
-                </div>
-                <p className="mt-1 text-sm text-[#0D3B3B]/55">{row.note}</p>
-                <p className="mt-3 text-sm font-bold text-[#0D3B3B]">Order</p>
+              <div className="p-3">
+                <p className="font-display font-bold text-sm text-[#0D3B3B]">{row.title}</p>
+                <p className="font-display font-bold text-sm text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
               </div>
             </button>
           ))}
