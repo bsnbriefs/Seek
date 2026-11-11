@@ -429,7 +429,7 @@ function Logo({ light = false, className = "h-12" }) {
   const src = isDark ? "/seek-logo.png" : "/seek-logo-light.png";
   return (
     <div className="flex items-center gap-2">
-      <img loading="lazy" decoding="async" src={src} alt="SEEK" className={className + " w-auto object-contain" + (isDark ? " mix-blend-screen" : "")} />
+      <img loading="lazy" decoding="async" src={src} alt="SEEK" className={className + " w-auto object-contain"} />
     </div>
   );
 }
