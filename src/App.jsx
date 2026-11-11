@@ -2729,6 +2729,7 @@ function FundraiserPage({ setPage }) {
   const [story, setStory] = useState("");
   const [category, setCategory] = useState("Medical");
   const [location, setLocation] = useState("");
+  const [files, setFiles] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState("");
   const [done, setDone] = useState(false);
@@ -2747,12 +2748,13 @@ function FundraiserPage({ setPage }) {
       }
       await submitRequest({
         title,
-        category,
+        category: "Fundraiser · " + category,
         location,
         description: story,
         amountNeeded: Number(goal) || 0,
         email: session.user?.email,
         fullName: session.user?.user_metadata?.full_name || "",
+        files,
       });
       setDone(true);
     } catch (err) {
@@ -2775,7 +2777,7 @@ function FundraiserPage({ setPage }) {
   return (
     <div className="mx-auto max-w-lg px-5 py-8">
       <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Start a fundraiser</h1>
-      <p className="mt-1 text-sm text-[#0D3B3B]/60">Raise money for a cause.</p>
+      <p className="mt-1 text-sm text-[#0D3B3B]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
       <form onSubmit={submit} className="mt-6 space-y-4">
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
@@ -2784,6 +2786,8 @@ function FundraiserPage({ setPage }) {
         <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
         <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
         <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        <input type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} className="w-full text-sm" />
+        <p className="text-xs text-[#0D3B3B]/50">Add a photo or video (up to 3)</p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" disabled={loading} className="w-full rounded-full bg-[#1BAA9C] text-white py-3 text-sm font-bold">
           {loading ? "Submitting..." : "Start fundraiser"}
