@@ -1098,11 +1098,12 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
-    { id: "fundraiser", label: "Fundraiser" },
     { id: "seek-help-form", label: "Seek Help" },
+    { id: "fundraiser", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "bsn", label: "BSN Outreach" },
     { id: "shop", label: "Shop" },
+    { id: "contact", label: "Contact" },
   ];
   const go = (item) => {
     if (item.id === "offers" || item.filter) {
@@ -1164,6 +1165,9 @@ function Navbar({ page, setPage, userSession }) {
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
+    { id: "privacy", label: "Privacy", icon: ShieldCheck },
+    { id: "terms", label: "Terms", icon: ShieldCheck },
+    { id: "contact", label: "Contact", icon: Mail },
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
@@ -1228,6 +1232,7 @@ function Navbar({ page, setPage, userSession }) {
             { id: "impact", label: "Impact", icon: BadgeCheck },
             { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
+            { id: "contact", label: "Contact", icon: Mail },
           ].map((l) => {
             const Icon = l.icon;
             const on = page === l.id;
@@ -3020,28 +3025,6 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Describe it in your own words">
             <textarea className={inputCls} rows={4} value={form.description} onChange={set("description")} placeholder="What happened, who it is for, and what would help." />
           </Field>
-          <div className="flex flex-wrap gap-3">
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
-            const hint = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
-            const local = suggestNeedStructure({ need: form.need, description: form.description, amount: form.amount });
-            setForm((prev) => ({ ...prev, category: hint.category || local.category || prev.category }));
-            setError((hint.missing || local.missing || []).length ? ("You can still submit. Consider adding: " + (hint.missing || local.missing).join(", ") + ".") : "Category updated. You can still edit it.");
-          }}>Suggest a category from what I wrote</button>
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
-            if (!(form.need || form.description).trim()) {
-              setError("Write what you need first, then tap Help me explain this.");
-              return;
-            }
-            const draft = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
-            const local = explainSeekNeed([form.need, form.description].filter(Boolean).join(". "));
-            setForm((prev) => ({
-              ...prev,
-              need: draft.title || local?.title || prev.need,
-              description: draft.description || local?.description || prev.description,
-            }));
-            setError("Draft updated. Edit the description before you submit.");
-          }}>Help me explain this</button>
-          </div>
           <Field label="Fundraising target (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="How much do you need? e.g. 50000" inputMode="numeric" />
             <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
@@ -5490,7 +5473,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
     { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
-    { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
+    { id: "bsn", label: "BSN Outreach", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
   ];
 
