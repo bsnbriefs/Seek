@@ -5697,10 +5697,9 @@ function CookieBanner() {
 
 function InstallSeekPrompt() {
   const standalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone);
-  const installDismissed = (() => { try { return localStorage.getItem("seek_install_prompt_dismissed") === "1" || localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; } })();
   const [installEvent, setInstallEvent] = useState(null);
   const [closed, setClosed] = useState(false);
-  const [showFallback, setShowFallback] = useState(false);
+  const [show, setShow] = useState(false);
   useEffect(() => {
     if ("serviceWorker" in navigator) {
       navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
@@ -5708,43 +5707,40 @@ function InstallSeekPrompt() {
     const onPrompt = (e) => {
       e.preventDefault();
       setInstallEvent(e);
-    };
-    const onInstalled = () => {
-      try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
-      setInstallEvent(null);
-      setClosed(true);
+      setShow(true);
     };
     window.addEventListener("beforeinstallprompt", onPrompt);
-    window.addEventListener("appinstalled", onInstalled);
-    const timer = setTimeout(() => { if (!installEvent && !standalone) setShowFallback(true); }, 3000);
+    const timer = setTimeout(() => setShow(true), 2000);
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
-      window.removeEventListener("appinstalled", onInstalled);
       clearTimeout(timer);
     };
   }, []);
-  if (closed || standalone || installDismissed) return null;
-  if (!installEvent && !showFallback) return null;
+  if (closed || standalone || !show) return null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+  const doInstall = async () => {
+    if (installEvent) {
+      installEvent.prompt();
+      const choice = await installEvent.userChoice.catch(() => null);
+      setInstallEvent(null);
+      if (choice?.outcome === "accepted") setClosed(true);
+    } else if (isIOS) {
+      alert("Tap the Share button at the bottom, then tap Add to Home Screen.");
+    } else {
+      alert("Open the browser menu (three dots) and tap Add to Home Screen or Install app.");
+    }
+  };
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[150] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
-      <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-white/10 bg-[#101415] text-white shadow-2xl p-4">
-        <p className="font-display font-bold text-lg">Install SEEK</p>
-        <p className="mt-1 text-sm text-white/70">{isIOS ? "Tap Share, then Add to Home Screen." : "Add SEEK to your home screen for a full app experience."}</p>
-        <div className="mt-3 flex flex-wrap gap-2">
-          {installEvent && (
-            <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-              installEvent.prompt();
-              const choice = await installEvent.userChoice.catch(() => null);
-              setInstallEvent(null);
-              if (choice?.outcome === "accepted") {
-                try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
-                setClosed(true);
-              }
-            }}>Install</button>
-          )}
-          <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
+    <div className="fixed inset-x-0 bottom-20 z-[150] p-4 pointer-events-none">
+      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/10 bg-[#0D3B3B] text-white shadow-2xl p-4">
+        <div className="flex items-start justify-between gap-3">
+          <div>
+            <p className="font-display font-bold text-base">Install SEEK</p>
+            <p className="mt-1 text-xs text-white/70">{isIOS ? "Tap Share, then Add to Home Screen" : "Add to your home screen"}</p>
+          </div>
+          <button type="button" onClick={() => setClosed(true)} className="text-white/50 text-lg leading-none">×</button>
         </div>
+        <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Install now</button>
       </div>
     </div>
   );
