@@ -1103,7 +1103,6 @@ function FeatureStrip({ page, setPage }) {
     { id: "give", label: "Give" },
     { id: "bsn", label: "BSN Outreach" },
     { id: "shop", label: "Shop" },
-    { id: "contact", label: "Contact" },
   ];
   const go = (item) => {
     if (item.id === "offers" || item.filter) {
@@ -1232,6 +1231,8 @@ function Navbar({ page, setPage, userSession }) {
             { id: "impact", label: "Impact", icon: BadgeCheck },
             { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
+            { id: "privacy", label: "Privacy", icon: ShieldCheck },
+            { id: "terms", label: "Terms", icon: ShieldCheck },
             { id: "contact", label: "Contact", icon: Mail },
           ].map((l) => {
             const Icon = l.icon;
@@ -1242,11 +1243,6 @@ function Navbar({ page, setPage, userSession }) {
               </button>
             );
           })}
-          {userSession?.access_token && (
-            <button onClick={() => go("my-seek")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase text-[#0D3B3B]/70">
-              <User size={16} /> My SEEK
-            </button>
-          )}
           <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
             {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
