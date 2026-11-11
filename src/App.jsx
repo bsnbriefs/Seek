@@ -1098,7 +1098,7 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
-    { id: "seek-help-form", label: "Fundraiser" },
+    { id: "fundraiser", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "bsn", label: "BSN" },
     { id: "shop", label: "Shop" },
@@ -2722,6 +2722,76 @@ function ChoiceChips({ value, onChange, options }) {
 }
 
 const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
+
+function FundraiserPage({ setPage }) {
+  const [title, setTitle] = useState("");
+  const [goal, setGoal] = useState("");
+  const [story, setStory] = useState("");
+  const [category, setCategory] = useState("Medical");
+  const [location, setLocation] = useState("");
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState("");
+  const [done, setDone] = useState(false);
+
+  const categories = ["Medical", "Education", "Emergency", "Community", "Memorial", "Other"];
+
+  const submit = async (e) => {
+    e.preventDefault();
+    setError("");
+    setLoading(true);
+    try {
+      const session = getUserSession();
+      if (!session?.access_token) {
+        setPage("account");
+        return;
+      }
+      await submitRequest({
+        title,
+        category,
+        location,
+        description: story,
+        amountNeeded: Number(goal) || 0,
+        email: session.user?.email,
+        fullName: session.user?.user_metadata?.full_name || "",
+      });
+      setDone(true);
+    } catch (err) {
+      setError(err.message || "Could not start fundraiser.");
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  if (done) {
+    return (
+      <div className="mx-auto max-w-lg px-5 py-10 text-center">
+        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Fundraiser submitted</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/60">SEEK will review it before it goes public.</p>
+        <button type="button" onClick={() => setPage("home")} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Back to home</button>
+      </div>
+    );
+  }
+
+  return (
+    <div className="mx-auto max-w-lg px-5 py-8">
+      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Start a fundraiser</h1>
+      <p className="mt-1 text-sm text-[#0D3B3B]/60">Raise money for a cause.</p>
+      <form onSubmit={submit} className="mt-6 space-y-4">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+          {categories.map((c) => <option key={c} value={c}>{c}</option>)}
+        </select>
+        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        {error && <p className="text-sm text-red-600">{error}</p>}
+        <button type="submit" disabled={loading} className="w-full rounded-full bg-[#1BAA9C] text-white py-3 text-sm font-bold">
+          {loading ? "Submitting..." : "Start fundraiser"}
+        </button>
+      </form>
+    </div>
+  );
+}
 
 function SeekHelpPage({ setPage }) {
   const [requests, setRequests] = useState([]);
@@ -5706,6 +5776,7 @@ useEffect(() => {
     more: <CelebratePage setPage={setPage} />,
     admin: <AdminPage />,
     "seek-help": <SeekHelpPage setPage={setPage} />,
+    fundraiser: <FundraiserPage setPage={setPage} />,
     "seek-help-form": <SeekHelpRequestPage />,
     celebrate: <CelebratePage setPage={setPage} />,
     "celebrate-request": <CelebrateRequestPage setPage={setPage} />,
