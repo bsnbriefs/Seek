@@ -278,7 +278,14 @@ const FONTS = (
     html.seek-dark .bg-white label,
     html.seek-dark .bg-white span,
     html.seek-dark .bg-white button,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #E8F2EF !important; }
+    html.seek-dark .bg-white .text-\[\#0D3B3B\],
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
+    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60 { color: #E8F2EF !important; }
+    html.seek-dark .rounded-2xl.bg-white,
+    html.seek-dark .rounded-3xl.bg-white { background-color: #1C2A28 !important; }
+    html.seek-dark .bg-\[\#F2F5F3\] { background-color: #243330 !important; color: #E8F2EF !important; }
+    html.seek-dark .bg-\[\#F2F5F3\] * { color: #E8F2EF !important; }
     html.seek-dark .bg-white input,
     html.seek-dark .bg-white textarea,
     html.seek-dark .bg-white select {
