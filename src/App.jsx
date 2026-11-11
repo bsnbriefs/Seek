@@ -3601,8 +3601,18 @@ function RequestPage({ requestId, setPage }) {
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">{request.title}</h1>
           <button type="button" className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]" onClick={async () => {
             const url = `${window.location.origin}/request/${request.id}`;
-            try { if (navigator.share) await navigator.share({ title: request.title, url }); } catch (_e) {}
+            const text = request.title + " — " + url;
+            if (navigator.share) {
+              try { await navigator.share({ title: request.title, url }); } catch (_e) {}
+            } else {
+              window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+            }
           }}>Share</button>
+          <div className="flex gap-2">
+            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] text-white px-3 py-1.5 text-xs font-bold">WhatsApp</a>
+            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#1877F2] text-white px-3 py-1.5 text-xs font-bold">Facebook</a>
+            <a href={"https://twitter.com/intent/tweet?text=" + encodeURIComponent(request.title) + "&url=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-black text-white px-3 py-1.5 text-xs font-bold">X</a>
+          </div>
         </div>
         <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 mb-6"><MapPin size={16} /> {request.location}</p>
 
