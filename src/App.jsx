@@ -4925,8 +4925,6 @@ function MySeekDashboard({ setPage, userSession }) {
           </button>
         </div>
       </section>
-
-      </section>
     </div>
   );
 }
