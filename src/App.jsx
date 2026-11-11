@@ -5661,7 +5661,7 @@ function InstallSeekPrompt() {
       clearTimeout(timer);
     };
   }, []);
-  if (closed || standalone || !show) return null;
+  if (closed || standalone || !show || !installEvent) return null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const doInstall = async () => {
     if (installEvent) {
