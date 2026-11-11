@@ -2742,15 +2742,6 @@ if (!cancelled) {
           <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
           <p className="mt-1 text-sm text-[#0D3B3B]/55">Published requests you can support now.</p>
         </div>
-        {!selectedRequest && !generalDonation && (
-          <button
-            type="button"
-            className="mb-4 text-sm font-semibold text-[#1BAA9C]"
-            onClick={() => { setGeneralDonation(true); setSelectedRequest(null); }}
-          >
-            Or give a general donation
-          </button>
-        )}
         <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[#1BAA9C]">
           Support BSN Foundation →
         </button>
