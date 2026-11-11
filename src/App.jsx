@@ -2158,7 +2158,7 @@ function DiscoverPage({ setPage }) {
               </button>
             ))}
           </div>
-        </div>
+        </div>}
       </section>
       {searchOpen ? (
       <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
