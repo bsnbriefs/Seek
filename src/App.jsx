@@ -2040,7 +2040,7 @@ function BsnPage({ setPage }) {
         {selected.photos?.[0] && <img src={selected.photos[0]} alt="" className="mt-4 w-full rounded-xl object-cover" />}
         <p className="mt-4 text-sm text-[#0D3B3B]/70">{selected.story}</p>
         {selected.videos?.[0] && <video src={selected.videos[0]} controls className="mt-4 w-full rounded-xl" />}
-        <button type="button" onClick={() => setPage("give")} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+        <button type="button" onClick={() => setDonating(true)} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
       </div>
     );
   }
