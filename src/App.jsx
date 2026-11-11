@@ -5674,11 +5674,8 @@ function CookieBanner() {
 }
 
 function InstallSeekPrompt() {
-  const permission = typeof Notification !== "undefined" ? Notification.permission : "denied";
   const standalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone);
-  const alertsDismissed = (() => { try { return localStorage.getItem("seek_notifications_prompt_dismissed") === "1"; } catch { return false; } })();
   const installDismissed = (() => { try { return localStorage.getItem("seek_install_prompt_dismissed") === "1" || localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; } })();
-  const showAlerts = permission === "default" && !alertsDismissed;
   const [installEvent, setInstallEvent] = useState(null);
   const [closed, setClosed] = useState(false);
   useEffect(() => {
@@ -5701,51 +5698,24 @@ function InstallSeekPrompt() {
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
-  const showInstall = !standalone && !installDismissed;
-  if (closed || (!showAlerts && !showInstall)) return null;
-  const mode = showInstall ? "install" : "alerts";
+  if (closed || standalone || installDismissed || !installEvent) return null;
   return (
     <div className="fixed inset-x-0 bottom-0 z-[150] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
       <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-white/10 bg-[#101415] text-white shadow-2xl p-4">
-        {mode === "install" ? (
-          <>
-            <p className="font-display font-bold text-lg">Install SEEK</p>
-            <p className="mt-1 text-sm text-white/70">Add SEEK to your home screen for a full app experience.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-                if (installEvent) {
-                  installEvent.prompt();
-                  const choice = await installEvent.userChoice.catch(() => null);
-                  setInstallEvent(null);
-                  if (choice?.outcome === "accepted") {
-                    try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
-                    setClosed(true);
-                  }
-                  return;
-                }
-                if ("serviceWorker" in navigator) {
-                  try { await navigator.serviceWorker.ready; } catch (_e) {}
-                }
-              }}>Install</button>
-              <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
-            </div>
-          </>
-        ) : (
-          <>
-            <p className="font-display font-bold text-lg">Enable alerts</p>
-            <p className="mt-1 text-sm text-white/70">Hear when a neighbour needs you or a giveaway opens.</p>
-            <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-                try {
-                  await enableSeekPush();
-                  try { localStorage.setItem("seek_notifications_prompt_dismissed", "1"); } catch (_e) {}
-                  setClosed(true);
-                } catch (err) {}
-              }}>Enable alerts</button>
-              <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_notifications_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
-            </div>
-          </>
-        )}
+        <p className="font-display font-bold text-lg">Install SEEK</p>
+        <p className="mt-1 text-sm text-white/70">Add SEEK to your home screen for a full app experience.</p>
+        <div className="mt-3 flex flex-wrap gap-2">
+          <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
+            installEvent.prompt();
+            const choice = await installEvent.userChoice.catch(() => null);
+            setInstallEvent(null);
+            if (choice?.outcome === "accepted") {
+              try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+              setClosed(true);
+            }
+          }}>Install</button>
+          <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
+        </div>
       </div>
     </div>
   );
@@ -5905,6 +5875,7 @@ useEffect(() => {
       <Navbar page={page} setPage={setPage} userSession={userSession} />
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
+      <InstallSeekPrompt />
       <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
