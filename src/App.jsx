@@ -872,12 +872,12 @@ function RequestCard({ req, onHelp, onView }) {
   const [donateOpen, setDonateOpen] = useState(false);
   const needed = Number(req.amountNeeded || req.amount_needed || 0);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
-  const face = postAvatar(req.avatarUrl || req.avatar_url, req) || SEEK_FACE;
+  const face = postAvatar(req.avatarUrl || req.avatar_url, req);
   return (
     <div className="flex flex-col rounded-2xl bg-white p-5 border border-[#0D3B3B]/10">
       <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Need"}{isBsnPost(req) ? " · Admin" : ""}</p>
       <div className="mt-3 flex items-start gap-3">
-        <img loading="lazy" decoding="async" src={face} alt="" className="h-12 w-12 rounded-full object-cover bg-white" />
+        {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-12 w-12 rounded-full object-cover bg-white" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
         <div className="min-w-0">
           <h3 className="font-display font-bold text-lg text-[#0D3B3B] leading-snug">{req.title}</h3>
           <p className="mt-1 text-sm text-[#0D3B3B]/55">{[req.location, daysPosted(req.created_at || req.createdAt)].filter(Boolean).join(" · ")}</p>
