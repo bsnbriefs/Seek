@@ -1173,8 +1173,8 @@ function Navbar({ page, setPage, userSession }) {
             {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
             <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
-          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I need help</Button>
-          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("give")}>I want to help</Button>
+          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>I need help</Button>
+          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I want to help</Button>
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
@@ -2830,12 +2830,12 @@ function SeekHelpPage({ setPage }) {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => go("seek-help-form")}>I need help</Button>
-            <Button variant="secondary" onClick={() => go("give")}>I want to help</Button>
+            <Button variant="secondary" onClick={() => document.getElementById("open-requests")?.scrollIntoView({ behavior: "smooth" })}>I want to help</Button>
           </div>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
+      <section id="open-requests" className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
         <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 mb-7">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
