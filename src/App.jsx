@@ -417,10 +417,10 @@ const OUTREACH_CAMPAIGNS = [
 
 /* ---------------- Small building blocks ---------------- */
 
-function Logo({ light = false, className = "h-8" }) {
+function Logo({ light = false, className = "h-12" }) {
   return (
     <div className="flex items-center gap-2">
-      <img loading="lazy" decoding="async" src="/seek-logo.png" alt="Seek" className={className + " w-auto object-contain mix-blend-screen"} />
+      <img loading="lazy" decoding="async" src="/seek-logo.png" alt="SEEK" className={className + " w-auto object-contain mix-blend-screen"} />
     </div>
   );
 }
@@ -488,13 +488,7 @@ async function shareSeekStory({ title, path, mediaUrl }) {
 }
 
 function SeekVideoWatermark() {
-  return (
-    <img
-      src={SEEK_FACE}
-      alt=""
-      className="pointer-events-none absolute bottom-3 right-3 z-20 h-9 w-9 rounded-full object-contain opacity-80 drop-shadow-[0_1px_6px_rgba(0,0,0,0.65)]"
-    />
-  );
+  return null;
 }
 function isBsnPost(row = {}) {
   const blob = [row.title, row.description, row.name, row.contactEmail, row.requester_name, row.display_name, row.category].join(" ").toLowerCase();
