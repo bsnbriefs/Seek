@@ -627,10 +627,12 @@ export default function AdminPage() {
                       {contact.full_name || "—"} • {contact.email || "—"}
                       {contact.phone ? ` • ${contact.phone}` : ""}
                       {(contact.bank_name || contact.account_name || contact.account_number) && (
-                        <p className="mt-2 text-sm">
-                          <span className="font-semibold">Settlement:</span>{" "}
-                          {[contact.bank_name, contact.account_name, contact.account_number].filter(Boolean).join(" • ")}
-                        </p>
+                        <div className="mt-2 rounded-lg bg-white border border-[#1BAA9C]/30 p-2">
+                          <p className="text-xs font-semibold text-[#1BAA9C]">Settlement account</p>
+                          <p className="mt-1 text-sm font-medium text-[#0D3B3B]">
+                            {contact.bank_name || "Bank not set"} · {contact.account_name || "Name not set"} · {contact.account_number || "Number not set"}
+                          </p>
+                        </div>
                       )}
                     </div>
                   )}
@@ -791,9 +793,9 @@ export default function AdminPage() {
 
                         <button
                           onClick={() => settleRequest(req.id)}
-                          className="rounded-xl border px-4 py-2 text-sm"
+                          className="rounded-xl bg-[#1BAA9C] px-4 py-2 text-sm font-semibold text-white"
                         >
-                          Mark fulfilled
+                          Mark fulfilled & settle
                         </button>
 
                         <button

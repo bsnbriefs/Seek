@@ -5920,7 +5920,7 @@ useEffect(() => {
                 ? "Confirming your donation"
                 : paymentReturn.status === "success"
                   ? "Donation confirmed"
-                  : "Still confirming"}
+                  : "Payment received — still updating"}
             </p>
             <p className="mt-2 font-body text-sm text-[#0D3B3B]/70">
               {paymentReturn.message}
