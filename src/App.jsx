@@ -1101,7 +1101,7 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
-    { id: "discover", label: "Discover" },
+    { id: "wallet", label: "Wallet" },
     { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
@@ -2079,6 +2079,20 @@ function LiveSupportCard({ request, setPage }) {
   );
 }
 
+
+function WalletPage({ setPage }) {
+  return (
+    <div className="mx-auto max-w-lg px-5 py-10">
+      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Wallet</h1>
+      <p className="mt-2 text-sm text-[#0D3B3B]/60">Your donations and support activity.</p>
+      <div className="mt-6 rounded-2xl bg-white border border-[#0D3B3B]/10 p-6">
+        <p className="text-xs uppercase tracking-widest text-[#1BAA9C]">Total given</p>
+        <p className="mt-1 font-display font-bold text-3xl text-[#0D3B3B]">₦0</p>
+      </div>
+      <button type="button" onClick={() => setPage("give")} className="mt-4 text-sm font-semibold text-[#1BAA9C]">Give now</button>
+    </div>
+  );
+}
 
 function DiscoverPage({ setPage }) {
   const [tab, setTab] = useState("latest");
@@ -5846,6 +5860,7 @@ useEffect(() => {
 
   const pages = {
     home: <ForYouPage setPage={setPage} />,
+    wallet: <WalletPage setPage={setPage} />,
     discover: <DiscoverPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
