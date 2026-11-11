@@ -2483,22 +2483,12 @@ function OffersPage({ setPage }) {
           {!loading && !error && filteredOffers.length === 0 && (
             <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
               <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">There are no published giveaways matching this filter right now. You can be the first to offer something useful.</p>
-              <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Post a giveaway</button>
+              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">No published giveaways yet.</p>
             </div>
           )}
           {!loading && !error && filteredOffers.map((offer) => (
             <OfferCard key={offer.id} offer={offer} setPage={setPage} />
           ))}
-        </div>
-
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-6 sm:p-8 text-white">
-          <div className="max-w-2xl">
-            <p className="text-[10px] uppercase tracking-[0.2em] font-bold text-[#8DE0D5]">Give in your own way</p>
-            <h2 className="mt-2 font-display font-extrabold text-2xl">Goods, jobs, mentorship or counselling</h2>
-            <p className="mt-2 text-sm leading-relaxed text-white/65">These are all part of Giveaways. Choose the type that best describes what you can offer, and SEEK will review it before it goes public.</p>
-          </div>
-          <button type="button" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })} className="mt-5 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white">Offer something</button>
         </div>
 
         <div id="make-offer" className="pt-12 text-left">
