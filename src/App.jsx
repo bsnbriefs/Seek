@@ -2750,111 +2750,17 @@ if (!cancelled) {
             Or give a general donation
           </button>
         )}
-        <button type="button" onClick={() => setPage("bsn")} className="mb-6 w-full rounded-xl bg-[#0D3B3B] text-white p-4 text-left">
-          <p className="font-semibold">Support BSN Foundation</p>
-          <p className="text-xs opacity-70 mt-1">Pad a Girl Child, Back to School, Food Drive and more</p>
-        </button>
-        <div className="mb-4 flex flex-wrap gap-2">
-          {[
-            ["all", "All"],
-            ["Financial Assistance", "Financial"],
-            ["Food", "Food"],
-            ["Education", "Education"],
-            ["Medical", "Medical"],
-            ["Housing", "Housing"],
-          ].map(([id, label]) => (
-            <button
-              key={id}
-              type="button"
-              onClick={() => setCategoryFilter(id)}
-              className={`rounded-full px-4 py-2 text-sm font-semibold ${categoryFilter === id ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
-            >
-              {label}
-            </button>
-          ))}
-        </div>
-        <div className="mb-6 flex flex-wrap gap-2">
-          {["all", ...Array.from(new Set(requests.map((r) => r.location).filter(Boolean)))].map((loc) => (
-            <button
-              key={loc}
-              type="button"
-              onClick={() => setLocationFilter(loc)}
-              className={`rounded-full px-3 py-1.5 text-sm ${locationFilter === loc ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
-            >
-              {loc === "all" ? "All locations" : loc}
-            </button>
-          ))}
-        </div>
         {requestsLoading ? (
           <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
         ) : requestsError ? (
           <p className="font-body text-sm text-red-600">{requestsError}</p>
         ) : requests.length === 0 ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">There are no published requests yet — check back soon, or give a general donation above.</p>
+          <p className="font-body text-sm text-[#0D3B3B]/50">No published requests yet.</p>
         ) : (
-          (() => {
-            const visible = requests.filter((r) => {
-              const q = searchFilter.trim().toLowerCase();
-              const matchesCat = (categoryFilter === "all" || r.category === categoryFilter) && !CONNECT_CATS.includes(r.category);
-              const matchesLoc = locationFilter === "all" || r.location === locationFilter;
-              const matchesQ = !q || [r.title, r.description, r.location, r.category].filter(Boolean).join(" ").toLowerCase().includes(q);
-              return matchesCat && matchesLoc && matchesQ;
-            });
-            return (
-              <>
-                <div className="mb-4 flex items-center justify-between gap-3">
-                  <p className="font-body text-sm text-[#0D3B3B]/55">
-                    Showing {visible.length} of {requests.length}
-                  </p>
-                  {(categoryFilter !== "all" || locationFilter !== "all" || searchFilter.trim()) && (
-                    <button
-                      type="button"
-                      className="text-sm font-semibold text-[#1BAA9C]"
-                      onClick={() => {
-                        setCategoryFilter("all");
-                        setLocationFilter("all");
-                        setSearchFilter("");
-                      }}
-                    >
-                      Clear filters
-                    </button>
-                  )}
-                </div>
-                {visible.length === 0 ? (
-                  <p className="font-body text-sm text-[#0D3B3B]/50">No requests match those filters.</p>
-                ) : (
-                  <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-                    {visible.map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
-                  </div>
-                )}
-              </>
-            );
-          })()
-        )}
-      </section>
-
-      <section id="bsn-work" className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
-        <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">BSN Foundation</p>
-        <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B] mb-3">Support a BSN outreach this year.</h2>
-        <p className="font-body text-sm text-[#0D3B3B]/55 mb-6">Pick someone Seek has published, or a BSN outreach. If you have goods or time, use Giveaways.</p>
-        {storyCampaign ? (
-          <OutreachStory campaign={storyCampaign} onBack={() => setStoryCampaign(null)} onDonate={() => setOutreach(storyCampaign)} />
-        ) : (
-          <div className="grid sm:grid-cols-2 gap-4">
-            {OUTREACH_CAMPAIGNS.map((c) => (
-              <button key={c.id} type="button" onClick={() => setStoryCampaign(c)} className="text-left rounded-3xl overflow-hidden bg-white border border-[#0D3B3B]/8 shadow-sm hover:-translate-y-0.5 hover:shadow-md transition">
-                {c.photos?.[0] && <img src={c.photos[0]} alt="" className="h-36 w-full object-cover" />}
-                <div className="p-4">
-                  <span className="block font-display font-bold text-lg text-[#0D3B3B]">{c.title}</span>
-                  <span className="block text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</span>
-                  {c.budget ? <p className="mt-2 text-xs font-semibold text-[#0D3B3B]/55">Annual budget ₦{Number(c.budget).toLocaleString()} </p> : null}
-                  <span className="mt-3 inline-flex text-sm font-semibold text-[#1BAA9C]">See this work →</span>
-                </div>
-              </button>
-            ))}
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {requests.filter((r) => !CONNECT_CATS.includes(r.category)).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
-        {outreach && <OutreachCheckout campaign={outreach} onClose={() => setOutreach(null)} />}
       </section>
     </div>
   );
