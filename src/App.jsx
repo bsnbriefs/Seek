@@ -1072,7 +1072,7 @@ function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
     { id: "discover", label: "Discover" },
-    { id: "seek-help-form", label: "Seek Help" },
+    { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
     { id: "celebrate", label: "Connect" },
@@ -2900,9 +2900,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
-        <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask a neighbour for what you need.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/60">Say what you need in plain words. SEEK reviews it before neighbours see it.</p>
+        <SectionLabel>Fundraiser</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Start a fundraiser.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/60">Set a target. Tell your story. Neighbours can give through Paystack. SEEK reviews it before it goes public.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -2989,8 +2989,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             setError("Draft updated. Edit the description before you submit.");
           }}>Help me explain this</button>
           </div>
-          <Field label="Amount needed (₦)">
-            <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="e.g. 25000" inputMode="numeric" />
+          <Field label="Fundraising target (₦)">
+            <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="How much do you need? e.g. 50000" inputMode="numeric" />
+            <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
           </Field>
           <Field label="Your video story">
             <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Look into the camera and tell people why this help matters. A short video reaches hearts faster than a form. Add photos if you have them.</p>
@@ -5515,11 +5516,11 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   ];
 
   const actions = [
+    { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
     { id: "offers-job", label: "Offer a Job", note: "Share an opportunity", icon: Briefcase, filter: "Job opportunity", scroll: "make-offer" },
-    { id: "offers-mentorship", label: "Offer Mentorship", note: "Share your experience", icon: Users, filter: "Mentorship", scroll: "make-offer" },
     { id: "celebrate", label: "Connect", note: "Celebrate a moment", icon: Users },
   ];
 
