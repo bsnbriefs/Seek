@@ -2080,7 +2080,7 @@ function BsnPage({ setPage }) {
         {OUTREACH_CAMPAIGNS.map((c, i) => (
           <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-2xl bg-[#0D3B3B] text-white p-4 text-left flex items-center gap-4 hover:bg-[#1BAA9C] transition-colors">
             <div className="w-12 h-12 rounded-xl bg-[#1BAA9C] flex items-center justify-center shrink-0">
-              <span className="text-xl">{i === 0 ? "🎀" : i === 1 ? "🎒" : i === 2 ? "🔧" : i === 3 ? "🏥" : "🍲"}</span>
+              <span className="text-xl">{c.id === "pad-a-girl" ? "🎀" : c.id === "back-to-school" ? "🎒" : c.id === "skills" ? "🔧" : c.id === "hospital" ? "🏥" : c.id === "food-drive" ? "🍲" : c.id === "widows" ? "👩" : c.id === "orphans" ? "👶" : c.id === "elderly" ? "👴" : c.id === "clean-water" ? "💧" : c.id === "disability" ? "♿" : "💚"}</span>
             </div>
             <div>
               <p className="font-semibold">{c.title}</p>
