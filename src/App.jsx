@@ -286,8 +286,15 @@ const FONTS = (
       color: #1A1D24 !important;
       border-color: rgba(26,29,36,0.18) !important;
     }
-    html.seek-dark .bg-white input::placeholder,
-    html.seek-dark .bg-white textarea::placeholder { color: #6B7280 !important; opacity: 1; }
+    html.seek-dark label, html.seek-dark .text-xs { color: #C5D4D0 !important; }
+    html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
+      background: #FFFFFF !important;
+      color: #1A1D24 !important;
+      border-color: rgba(26,29,36,0.18) !important;
+    }
+    html.seek-dark input::placeholder, html.seek-dark textarea::placeholder { color: #6B7280 !important; opacity: 1; }
+    html.seek-dark .bg-\[\#F2F5F3\] { background-color: #1C2A28 !important; }
+    html.seek-dark .bg-\[\#F2F5F3\] label, html.seek-dark .bg-\[\#F2F5F3\] p { color: #E8F2EF !important; }
 
         @keyframes seek-loop {
       0% { stroke-dashoffset: 0; }
@@ -1889,12 +1896,11 @@ function SeekAutoVideo({ src, title }) {
     e.stopPropagation();
     const v = ref.current;
     if (!v) return;
-    const next = !v.muted;
-    v.muted = next;
-    v.volume = 1;
-    setMuted(next);
-    const play = v.play();
-    if (play && play.catch) play.catch(() => {});
+    if (v.paused) {
+      v.play().catch(() => {});
+    } else {
+      v.pause();
+    }
   };
   return (
     <>
@@ -1918,7 +1924,7 @@ function LiveSupportCard({ request, setPage }) {
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
   const rawName = member.name || request.full_name || request.name || member.username || request.username || "";
-  const displayName = /^seek member$|^seeker$|^a neighbour/i.test(String(rawName).trim()) ? (member.username || request.username || "Neighbour") : (rawName || member.username || request.username || "Neighbour");
+  const displayName = member.username || request.username || rawName || "Seeker";
   const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
 
   const goToCase = () => {
@@ -2143,14 +2149,8 @@ function DiscoverPage({ setPage }) {
     }
   }, [searchOpen]);
   const shown = tab === "trending"
-    ? items.filter((item) => ["Impact", "Appreciation", "Giveaway", "Job"].includes(item.kind)).slice(0, 20)
-    : tab === "requests"
-      ? items.filter((item) => item.kind === "Request" || item.kind === "Celebrate")
-      : tab === "giveaways"
-        ? items.filter((item) => ["Giveaway", "Job", "Mentorship", "Counselling"].includes(item.kind))
-        : tab === "videos"
-          ? items.filter((item) => item.kind === "Impact" || item.kind === "Appreciation")
-          : items.slice(0, 40);
+    ? items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 20)
+    : items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
@@ -2187,9 +2187,6 @@ function DiscoverPage({ setPage }) {
             {[
               ["latest", "Latest"],
               ["trending", "Trending"],
-              ["requests", "Requests"],
-              ["giveaways", "Giveaways"],
-              ["videos", "Videos"],
             ].map(([id, label]) => (
               <button
                 key={id}
