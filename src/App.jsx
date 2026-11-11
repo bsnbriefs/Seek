@@ -2958,9 +2958,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
-        <SectionLabel>Fundraiser</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Start a fundraiser.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/60">Set a target. Tell your story. Neighbours can give through Paystack. SEEK reviews it before it goes public.</p>
+        <SectionLabel>Seek Help</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask for help.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -3003,18 +3003,12 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What do you need help with?</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => {
-                const Icon = c.icon;
-                const active = form.category === c.label;
-                return (
-                  <button type="button" key={c.id} onClick={() => setForm({ ...form, category: c.label })} className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}>
-                    {Icon ? <Icon size={16} className="shrink-0" /> : null}
-                    <span className="text-xs sm:text-sm font-semibold leading-tight">{c.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+              <option value="">Select a category</option>
+              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
+                <option key={c.id} value={c.label}>{c.label}</option>
+              ))}
+            </select>
           </div>
           {CONNECT_CATS.includes(form.category) && (
             <p className="text-sm text-[#0D3B3B]/65 rounded-xl bg-[#1BAA9C]/10 p-3">
