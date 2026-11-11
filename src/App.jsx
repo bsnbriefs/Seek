@@ -1898,7 +1898,7 @@ function SeekAutoVideo({ src, title }) {
   };
   return (
     <>
-      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-contain bg-black" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
       {ended && (
         <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
@@ -1940,7 +1940,7 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto flex h-[calc(100dvh-20rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+    <article className="mx-auto flex h-[calc(100dvh-22rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
@@ -1998,6 +1998,18 @@ function LiveSupportCard({ request, setPage }) {
               const path = request.feedKind === "impact" || request.feedKind === "appreciation"
                 ? `/impact/${request.id}`
                 : `/request/${request.id}`;
+              const mediaUrl = current?.public_url || "";
+              if (mediaUrl && navigator.canShare) {
+                try {
+                  const res = await fetch(mediaUrl);
+                  const blob = await res.blob();
+                  const file = new File([blob], "seek-video.mp4", { type: blob.type || "video/mp4" });
+                  if (navigator.canShare({ files: [file] })) {
+                    await navigator.share({ files: [file], title: request.title || "SEEK", text: request.title || "" });
+                    return;
+                  }
+                } catch (_e) {}
+              }
               const url = `${window.location.origin}${path}`;
               const text = `${request.title || "A neighbour on SEEK"} — ${url}`;
               window.open(`https://wa.me/?text=${encodeURIComponent(text)}`, "_blank", "noopener,noreferrer");
@@ -3023,27 +3035,20 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
           </Field>
           <div className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] p-4 space-y-4">
-            <p className="text-sm font-semibold text-[#0D3B3B]">Where should gifts be sent?</p>
-            <p className="text-xs text-[#0D3B3B]/55">Bank details stay private. SEEK uses them only after a fundraiser is fulfilled.</p>
             <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
             <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
             <Field label="Account number"><input className={inputCls} value={form.accountNumber} onChange={set("accountNumber")} placeholder="10 digits" inputMode="numeric" /></Field>
           </div>
           <Field label="Co-organizer email (optional)">
-            <input type="email" className={inputCls} value={form.coOrganizerEmail} onChange={set("coOrganizerEmail")} placeholder="Someone who will help share this fundraiser" />
-            <p className="mt-1 text-xs text-[#0D3B3B]/50">They can share the fundraiser. They cannot change bank details or close it.</p>
+            <input type="email" className={inputCls} value={form.coOrganizerEmail} onChange={set("coOrganizerEmail")} placeholder="Someone who will help share" />
           </Field>
-          <Field label="Your video story">
-            <p className="font-body text-sm text-[#0D3B3B]/60 mb-2">Look into the camera and tell people why this help matters. A short video reaches hearts faster than a form. Add photos if you have them.</p>
+          <Field label="Video or photos">
             <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
               <Upload size={18} />
-              <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a video (MP4, MOV, WEBM) or photos"}</span>
+              <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a video or photos"}</span>
               <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf" className="hidden" onChange={(e) => setForm((prev) => ({ ...prev, evidenceFiles: Array.from(e.target.files || []).slice(0, 5) }))} />
             </label>
           </Field>
-          <p className="text-xs font-body text-[#0D3B3B]/45 leading-relaxed">
-            Your privacy matters. Please only share sensitive information — like full addresses or medical details — where it's genuinely necessary. Seek and BSN Foundation never display this publicly.
-          </p>
           {error && <p className="text-sm text-red-600">{error}</p>}
           {uploadProgress && <p className="text-sm text-[#1BAA9C]">{uploadProgress}</p>}
           <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? (uploadProgress || "Submitting…") : "Submit request"}</Button>
