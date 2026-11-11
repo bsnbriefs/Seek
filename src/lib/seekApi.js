@@ -351,17 +351,19 @@ async function attachAvatars(rows) {
   if (!ids.length) return list;
   try {
     let photos = await supabaseFetch(
-      "public_profile_photos?select=id,avatar_path&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
+      "profiles?select=id,username,full_name,avatar_path,avatar_url&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
     ).catch(() => []);
     if (!Array.isArray(photos) || !photos.length) {
       photos = await supabaseFetch(
-        "profiles?select=id,avatar_path,avatar_url&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
+        "public_profile_photos?select=id,avatar_path&id=in.(" + ids.map((id) => `"${id}"`).join(",") + ")"
       ).catch(() => []);
     }
     const map = {};
+    const names = {};
     (Array.isArray(photos) ? photos : []).forEach((p) => {
       const url = p.avatar_url || (p.avatar_path ? seekImageUrl(p.avatar_path, 96) : "");
       if (url) map[p.id] = url;
+      if (p.username) names[p.id] = p.username;
     });
     const me = getUserSession()?.user?.id;
     const mine = getCachedAvatarUrl();
@@ -370,6 +372,7 @@ async function attachAvatars(rows) {
       return {
         ...row,
         avatar_url: map[owner] || (owner && me && owner === me ? mine : null) || row.avatar_url || null,
+        username: names[owner] || row.username || "",
       };
     });
   } catch (_e) {
@@ -1491,16 +1494,26 @@ function writeBioCache(bio) {
   try { if (bio != null) localStorage.setItem(SEEK_BIO_CACHE, String(bio)); } catch (_e) {}
 }
 
-function readProfileCache() {
-  try { return JSON.parse(localStorage.getItem(SEEK_PROFILE_CACHE) || "null"); } catch { return null; }
+function readProfileCache(userId) {
+  try {
+    const key = userId ? "seek_profile_" + userId : SEEK_PROFILE_CACHE;
+    return JSON.parse(localStorage.getItem(key) || "null");
+  } catch { return null; }
 }
-function writeProfileCache(row) {
-  try { if (row) localStorage.setItem(SEEK_PROFILE_CACHE, JSON.stringify(row)); } catch (_e) {}
+
+function writeProfileCache(row, userId) {
+  try {
+    if (row) {
+      const key = userId ? "seek_profile_" + userId : SEEK_PROFILE_CACHE;
+      localStorage.setItem(key, JSON.stringify(row));
+    }
+  } catch (_e) {}
 }
 
 export async function getMyProfile() {
   const session = (await refreshUserSession()) || getUserSession();
-  if (!session?.access_token || !session?.user?.id) return readProfileCache();
+  const userId = session?.user?.id;
+  if (!session?.access_token || !userId) return readProfileCache(userId);
 
   let mapped = null;
   try {
@@ -1515,7 +1528,7 @@ export async function getMyProfile() {
   } catch (_e) {
     mapped = null;
   }
-  const cached = readProfileCache();
+  const cached = readProfileCache(userId);
   if (!mapped && cached) mapped = cached;
   else if (mapped && cached) {
     mapped.username = cached.username || mapped.username;
@@ -1523,7 +1536,7 @@ export async function getMyProfile() {
     mapped.bio = readBioCache() || cached.bio || mapped.bio;
   }
   if (mapped?.avatar_url) cacheAvatarUrl(mapped.avatar_url);
-  if (mapped) writeProfileCache(mapped);
+  if (mapped) writeProfileCache(mapped, userId);
   return mapped;
 }
 
