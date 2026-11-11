@@ -1099,8 +1099,9 @@ function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
     { id: "fundraiser", label: "Fundraiser" },
+    { id: "seek-help-form", label: "Seek Help" },
     { id: "give", label: "Give" },
-    { id: "bsn", label: "BSN" },
+    { id: "bsn", label: "BSN Outreach" },
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
