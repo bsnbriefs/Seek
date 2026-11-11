@@ -5410,6 +5410,8 @@ function pageFromPath(pathname) {
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
   if (path === "/seek-help/request") return "seek-help-form";
+  if (path === "/fundraiser") return "fundraiser";
+  if (path === "/campaign") return "bsn";
   if (path === "/celebrate") return "celebrate";
   if (path === "/celebrate/request") return "celebrate-request";
   if (path === "/language") return "language";
@@ -5445,6 +5447,8 @@ function pathFromPage(page) {
     admin: "/admin",
     "seek-help": "/seek-help",
     "seek-help-form": "/seek-help/request",
+    fundraiser: "/fundraiser",
+    bsn: "/campaign",
     celebrate: "/celebrate",
     "celebrate-request": "/celebrate/request",
     volunteer: "/volunteer",
