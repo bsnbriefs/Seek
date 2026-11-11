@@ -5683,7 +5683,7 @@ function InstallSeekPrompt() {
   const [closed, setClosed] = useState(false);
   useEffect(() => {
     if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js").catch(() => {});
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
     }
     const onPrompt = (e) => {
       e.preventDefault();
@@ -5713,13 +5713,18 @@ function InstallSeekPrompt() {
             <p className="mt-1 text-sm text-white/70">Add SEEK to your home screen for a full app experience.</p>
             <div className="mt-3 flex flex-wrap gap-2">
               <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-                if (!installEvent) return;
-                installEvent.prompt();
-                const choice = await installEvent.userChoice.catch(() => null);
-                setInstallEvent(null);
-                if (choice?.outcome === "accepted") {
-                  try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
-                  setClosed(true);
+                if (installEvent) {
+                  installEvent.prompt();
+                  const choice = await installEvent.userChoice.catch(() => null);
+                  setInstallEvent(null);
+                  if (choice?.outcome === "accepted") {
+                    try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+                    setClosed(true);
+                  }
+                  return;
+                }
+                if ("serviceWorker" in navigator) {
+                  try { await navigator.serviceWorker.ready; } catch (_e) {}
                 }
               }}>Install</button>
               <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
@@ -5760,6 +5765,9 @@ export default function App() {
 
   const [userSession, setUserSession] = useState(() => getUserSession());
   useEffect(() => {
+    if ("serviceWorker" in navigator) {
+      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
+    }
     (async () => {
       const fromGoogle = await captureAuthRedirect().catch(() => null);
       if (fromGoogle?.access_token) {
