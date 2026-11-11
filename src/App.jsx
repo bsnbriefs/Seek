@@ -5677,12 +5677,16 @@ function InstallSeekPrompt() {
   const permission = typeof Notification !== "undefined" ? Notification.permission : "denied";
   const standalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone);
   const alertsDismissed = (() => { try { return localStorage.getItem("seek_notifications_prompt_dismissed") === "1"; } catch { return false; } })();
-  const installDismissed = (() => { try { return localStorage.getItem("seek_install_prompt_dismissed") === "1" || localStorage.getItem("seek_pwa_installed") === "1" || localStorage.getItem("seek_install_seen") === "1"; } catch { return false; } })();
+  const installDismissed = (() => { try { return localStorage.getItem("seek_install_prompt_dismissed") === "1" || localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; } })();
   const showAlerts = permission === "default" && !alertsDismissed;
   const [installEvent, setInstallEvent] = useState(null);
   const [msg, setMsg] = useState("");
   const [closed, setClosed] = useState(false);
+  const [firstVisit] = useState(() => {
+    try { return !localStorage.getItem("seek_install_seen"); } catch { return true; }
+  });
   useEffect(() => {
+    try { localStorage.setItem("seek_install_seen", "1"); } catch (_e) {}
     const onPrompt = (e) => { e.preventDefault(); setInstallEvent(e); };
     const onInstalled = () => {
       try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
@@ -5696,36 +5700,39 @@ function InstallSeekPrompt() {
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
-  const showInstall = !standalone && !installDismissed && Boolean(installEvent);
+  const showInstall = !standalone && !installDismissed && (Boolean(installEvent) || firstVisit);
   if (closed || (!showAlerts && !showInstall)) return null;
   const mode = showInstall ? "install" : "alerts";
   return (
-    <div className="mx-auto max-w-3xl px-5 pb-4">
-      <div className="rounded-2xl border border-[#0D3B3B]/10 bg-white p-4">
+    <div className="fixed inset-x-0 bottom-0 z-[150] p-4 pb-[max(1rem,env(safe-area-inset-bottom))] pointer-events-none">
+      <div className="pointer-events-auto mx-auto max-w-md rounded-2xl border border-white/10 bg-[#101415] text-white shadow-2xl p-4">
         {mode === "install" ? (
           <>
-            <p className="font-display font-bold text-[#0D3B3B]">Install SEEK</p>
-            <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">Get the full SEEK experience on your phone.</p>
+            <p className="font-display font-bold text-lg">Install SEEK</p>
+            <p className="mt-1 text-sm text-white/70">Add SEEK to your home screen for a full app experience.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
-                if (!installEvent) return;
-                installEvent.prompt();
-                const choice = await installEvent.userChoice.catch(() => null);
-                setInstallEvent(null);
-                if (choice?.outcome === "accepted") {
-                  try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
-                  setClosed(true);
+              <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
+                if (installEvent) {
+                  installEvent.prompt();
+                  const choice = await installEvent.userChoice.catch(() => null);
+                  setInstallEvent(null);
+                  if (choice?.outcome === "accepted") {
+                    try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+                    setClosed(true);
+                  }
+                } else {
+                  setMsg("Use your browser menu to add SEEK to the home screen.");
                 }
-              }}>Install SEEK</button>
-              <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
+              }}>Install</button>
+              <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_install_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
             </div>
           </>
         ) : (
           <>
-            <p className="font-display font-bold text-[#0D3B3B]">Enable alerts</p>
-            <p className="mt-1 font-body text-sm text-[#0D3B3B]/70">Hear when a neighbour needs you or a giveaway opens.</p>
+            <p className="font-display font-bold text-lg">Enable alerts</p>
+            <p className="mt-1 text-sm text-white/70">Hear when a neighbour needs you or a giveaway opens.</p>
             <div className="mt-3 flex flex-wrap gap-2">
-              <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
+              <button type="button" className="rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-sm font-semibold" onClick={async () => {
                 try {
                   await enableSeekPush();
                   try { localStorage.setItem("seek_notifications_prompt_dismissed", "1"); } catch (_e) {}
@@ -5734,7 +5741,7 @@ function InstallSeekPrompt() {
                   setMsg("Allow notifications when the browser asks.");
                 }
               }}>Enable alerts</button>
-              <button type="button" className="rounded-full border px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_notifications_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
+              <button type="button" className="rounded-full border border-white/20 px-4 py-2 text-sm" onClick={() => { try { localStorage.setItem("seek_notifications_prompt_dismissed", "1"); } catch (_e) {} setClosed(true); }}>Not now</button>
             </div>
           </>
         )}
