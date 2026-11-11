@@ -2084,7 +2084,7 @@ function BsnPage({ setPage }) {
   const [selected, setSelected] = useState(null);
   if (selected) {
     return (
-      <div className="mx-auto max-w-lg px-5 py-8">
+      <div className="mx-auto max-w-lg px-5 py-8 animate-[seekFade_0.3s_ease-out]">
         <button type="button" onClick={() => setSelected(null)} className="text-sm text-[#1BAA9C] mb-4">← Back</button>
         <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">{selected.title}</h1>
         <p className="mt-2 text-sm text-[#0D3B3B]/70">{selected.story}</p>
@@ -2097,8 +2097,8 @@ function BsnPage({ setPage }) {
       <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">BSN Foundation</h1>
       <p className="mt-2 text-sm text-[#0D3B3B]/60">Support our yearly outreach programmes.</p>
       <div className="mt-6 grid gap-3">
-        {OUTREACH_CAMPAIGNS.map((c) => (
-          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-xl bg-white border border-[#0D3B3B]/10 p-4 text-left">
+        {OUTREACH_CAMPAIGNS.map((c, i) => (
+          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-xl bg-white border border-[#0D3B3B]/10 p-4 text-left hover:scale-[1.02] hover:shadow-lg transition-all duration-200" style={{ animationDelay: `${i * 80}ms` }}>
             <p className="font-semibold text-[#0D3B3B]">{c.title}</p>
             <p className="text-sm text-[#0D3B3B]/60 mt-1">{c.blurb}</p>
           </button>
@@ -2497,17 +2497,8 @@ function OffersPage({ setPage }) {
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-14 pb-8">
-        <div className="flex flex-col sm:flex-row sm:items-end sm:justify-between gap-5">
-          <div className="max-w-2xl">
-            <SectionLabel>Giveaways</SectionLabel>
-            <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Have something useful to offer?</h1>
-            <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65">
-              Share goods, opportunities, skills or your time. Someone in the SEEK community may need exactly what you can give.
-            </p>
-          </div>
-          <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
-        </div>
+      <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-8 pb-4">
+        <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
