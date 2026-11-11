@@ -1103,6 +1103,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
+    { id: "bsn", label: "BSN" },
     { id: "offers", label: "Giveaways" },
     { id: "impact", label: "Impact" },
     { id: "shop", label: "Shop" },
@@ -2750,6 +2751,9 @@ if (!cancelled) {
             Or give a general donation
           </button>
         )}
+        <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[#1BAA9C]">
+          Support BSN Foundation →
+        </button>
         {requestsLoading ? (
           <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
         ) : requestsError ? (
