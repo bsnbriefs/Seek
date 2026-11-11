@@ -5213,7 +5213,7 @@ function ShopPage({ setPage }) {
                 <img
                   src={row.image}
                   alt={row.title}
-                  className="w-full h-auto max-h-[22rem] object-contain object-center rounded-2xl"
+                  className="w-full h-40 object-contain object-center rounded-xl"
                   onError={(e) => {
                     if (row.fallback && e.currentTarget.src.indexOf(row.fallback) === -1) {
                       e.currentTarget.src = row.fallback;
