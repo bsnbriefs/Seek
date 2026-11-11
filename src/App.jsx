@@ -1197,7 +1197,7 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button type="button" aria-label="Search SEEK" className="p-2" onClick={() => go("discover")}><Search size={20} /></button>
+          <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
           <ThemeToggle />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
@@ -1213,7 +1213,7 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <button type="button" aria-label="Search SEEK" className="p-2" onClick={() => go("discover")}><Search size={20} /></button>
+        <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
         <ThemeToggle />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -2080,16 +2080,46 @@ function LiveSupportCard({ request, setPage }) {
 }
 
 
-function WalletPage({ setPage }) {
+function WalletPage({ setPage, userSession }) {
+  const [donations, setDonations] = useState([]);
+  const [total, setTotal] = useState(0);
+  useEffect(() => {
+    if (!userSession?.access_token) return;
+    supabaseFetch("donations?select=amount,created_at,request_id&order=created_at.desc&limit=20").then((rows) => {
+      setDonations(rows || []);
+      setTotal((rows || []).reduce((sum, d) => sum + Number(d.amount || 0), 0));
+    }).catch(() => {});
+  }, [userSession]);
+  if (!userSession?.access_token) {
+    return (
+      <div className="mx-auto max-w-lg px-5 py-10 text-center">
+        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Wallet</h1>
+        <p className="mt-2 text-sm text-[#0D3B3B]/60">Sign in to see your giving history.</p>
+        <button type="button" onClick={() => setPage("account")} className="mt-4 rounded-full bg-[#1BAA9C] text-white px-6 py-2 text-sm font-semibold">Sign in</button>
+      </div>
+    );
+  }
   return (
     <div className="mx-auto max-w-lg px-5 py-10">
       <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Wallet</h1>
-      <p className="mt-2 text-sm text-[#0D3B3B]/60">Your donations and support activity.</p>
-      <div className="mt-6 rounded-2xl bg-white border border-[#0D3B3B]/10 p-6">
-        <p className="text-xs uppercase tracking-widest text-[#1BAA9C]">Total given</p>
-        <p className="mt-1 font-display font-bold text-3xl text-[#0D3B3B]">₦0</p>
+      <div className="mt-6 rounded-2xl bg-[#1BAA9C] text-white p-6">
+        <p className="text-xs uppercase tracking-widest opacity-80">Total given</p>
+        <p className="mt-1 font-display font-bold text-3xl">₦{total.toLocaleString()}</p>
       </div>
-      <button type="button" onClick={() => setPage("give")} className="mt-4 text-sm font-semibold text-[#1BAA9C]">Give now</button>
+      <div className="mt-6">
+        <p className="text-xs uppercase tracking-widest text-[#1BAA9C] mb-3">Recent gifts</p>
+        {donations.length === 0 ? (
+          <p className="text-sm text-[#0D3B3B]/50">No donations yet.</p>
+        ) : (
+          donations.map((d, i) => (
+            <div key={i} className="flex justify-between py-2 border-b border-[#0D3B3B]/8 text-sm">
+              <span className="text-[#0D3B3B]/60">{new Date(d.created_at).toLocaleDateString()}</span>
+              <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount).toLocaleString()}</span>
+            </div>
+          ))
+        )}
+      </div>
+      <button type="button" onClick={() => setPage("give")} className="mt-6 w-full rounded-full bg-[#1BAA9C] text-white py-3 text-sm font-bold">Give now</button>
     </div>
   );
 }
@@ -2693,21 +2723,22 @@ if (!cancelled) {
             Or give a general donation
           </button>
         )}
-        <input
-          value={searchFilter}
-          onChange={(e) => setSearchFilter(e.target.value)}
-          placeholder="Search requests"
-          className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-sm"
-        />
-        <div className="mb-3 flex flex-wrap gap-2">
-          {["all", ...Array.from(new Set(requests.map((r) => r.category).filter(Boolean)))].map((cat) => (
+        <div className="mb-4 flex flex-wrap gap-2">
+          {[
+            ["all", "All"],
+            ["Financial Assistance", "Financial"],
+            ["Food", "Food"],
+            ["Education", "Education"],
+            ["Medical", "Medical"],
+            ["Housing", "Housing"],
+          ].map(([id, label]) => (
             <button
-              key={cat}
+              key={id}
               type="button"
-              onClick={() => setCategoryFilter(cat)}
-              className={`rounded-full px-3 py-1.5 text-sm ${categoryFilter === cat ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
+              onClick={() => setCategoryFilter(id)}
+              className={`rounded-full px-4 py-2 text-sm font-semibold ${categoryFilter === id ? "bg-[#1BAA9C] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]"}`}
             >
-              {cat === "all" ? "All categories" : cat}
+              {label}
             </button>
           ))}
         </div>
@@ -5813,7 +5844,7 @@ useEffect(() => {
 
   const pages = {
     home: <ForYouPage setPage={setPage} />,
-    wallet: <WalletPage setPage={setPage} />,
+    wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
