@@ -2284,7 +2284,7 @@ function ForYouPage({ setPage }) {
         {loading && <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/50">Loading videos…</p>}
         {error && <p className="mx-auto max-w-[440px] text-center text-sm text-red-700">{error}</p>}
         {!loading && !error && liveCases.length === 0 && (
-          <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet.</p>
+          <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved fundraisers with video will appear here.</p>
         )}
         <div className="mx-auto max-w-[440px] h-[calc(100dvh-16rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-12">
           {liveCases.map((request) => (
@@ -4135,23 +4135,27 @@ function LanguagePage({ setPage }) {
 function LegalPage({ title }) {
   const copy = {
     Privacy: [
-      "Seek collects only what is needed to operate the platform: request details, contact information for matching, donation references, and account emails.",
-      "Supporting evidence is stored so Seek and BSN Foundation can review a request. Published pages show only what admins have approved as public.",
-      "We do not sell personal information. Access to private contact fields is limited to authorised admins.",
-      "You may ask for your account or request data to be reviewed by contacting BSN Foundation through Seek.",
+      "SEEK collects only what is needed to run the platform: your name, email, phone, request details, bank details for settlement, and donation references.",
+      "Bank details and private contact information are visible only to authorised admins. They are never shown on public pages.",
+      "Supporting evidence (photos, videos, PDFs) is stored so SEEK can review a request. Only what an admin publishes appears publicly.",
+      "We do not sell personal information. We do not share your data with advertisers.",
+      "You can ask SEEK to review or remove your account data by contacting BSN Foundation through the support chat or email.",
+      "SEEK uses cookies to keep you signed in, remember your preferences, and understand how the platform is used. You can accept or reject non-essential cookies.",
     ],
     Terms: [
-      "SEEK keeping the lights on. When you give through Paystack, SEEK asks to add 5% on top of the amount that goes to the request or BSN outreach. That 5% helps run SEEK (hosting, review, messages). You can untick it before you pay. SEEK does not take 5% out of the gift if you do not add it.",
-      "Seek is a community assistance project of BSN Foundation.",
-      "Submitting a request, offer, donation or volunteer form does not guarantee funding or a match.",
-      "Users must provide truthful information and must not use Seek to harass, defraud or exploit others.",
-      "Seek may decline, unpublish or remove content that breaks these terms or our community guidelines.",
+      "SEEK is a community assistance platform of BSN Foundation.",
+      "When you give through Paystack, SEEK asks to add 5% on top of the amount that goes to the request or BSN outreach. That 5% helps run SEEK (hosting, review, messages). You can untick it before you pay. SEEK does not take 5% out of the gift if you do not add it.",
+      "Submitting a request, offer, donation or volunteer form does not guarantee funding, a match, or a response.",
+      "Fundraisers are reviewed before they go public. SEEK may decline, unpublish, or remove content that breaks these terms or the community guidelines.",
+      "Settlement to a requester happens only after SEEK verifies the need and the raised amount. SEEK is not a bank and does not hold funds beyond the settlement process.",
+      "Users must provide truthful information and must not use SEEK to harass, defraud, or exploit others.",
     ],
     Guidelines: [
       "Share only what is needed. Do not post full home addresses, hospital card numbers, or other people's private details.",
-      "Be honest about the need. Evidence should support the request without exposing sensitive bystanders.",
-      "Treat requesters and helpers with dignity. Hate, threats and scams are not allowed.",
-      "If you see something unsafe, use Report this request. Seek will review it.",
+      "Be honest about the need. Evidence should support the request without exposing bystanders.",
+      "Treat requesters and helpers with dignity. Hate, threats, and scams are not allowed.",
+      "If you see something unsafe, use Report on the request page. SEEK will review it and may unpublish the content or suspend the account.",
+      "Do not post the same request or giveaway more than once. Duplicates may be removed.",
     ],
   };
 
@@ -4886,7 +4890,7 @@ function MySeekDashboard({ setPage, userSession }) {
               <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("my-requests", "/my-requests")}>See all →</button>
             </div>
             {loading ? <p className="text-sm text-[#0D3B3B]/50">Loading your activity…</p> : requests.length === 0 ? (
-              <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">Nothing here yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">When you ask SEEK for help, your requests will appear here.</p><button type="button" onClick={() => go("seek-help", "/seek-help")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Ask for help</button></div>
+              <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">No requests yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Start a fundraiser and it will appear here after SEEK reviews it.</p><button type="button" onClick={() => go("seek-help-form", "/seek-help/request")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Start a fundraiser</button></div>
             ) : (
               <div className="space-y-2">
                 {requests.slice(0, 4).map((r) => (
