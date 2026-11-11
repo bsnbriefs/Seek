@@ -420,7 +420,7 @@ const OUTREACH_CAMPAIGNS = [
 function Logo({ light = false, className = "h-8" }) {
   return (
     <div className="flex items-center gap-2">
-      <img loading="lazy" decoding="async" src="/favicon.png" alt="Seek" className={className + " w-auto object-contain"} />
+      <img loading="lazy" decoding="async" src="/seek-logo.png" alt="Seek" className={className + " w-auto object-contain mix-blend-screen"} />
     </div>
   );
 }
@@ -1348,7 +1348,7 @@ function HomePage({ setPage, userSession }) {
 
       {/* HERO */}
       <section className="px-5 pt-10 pb-20 text-center">
-        <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-16 w-auto object-contain" />
+        <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-16 w-auto object-contain mix-blend-screen" />
         <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] dark:text-white text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
           ASK. SEEK. FIND.
         </h1>
