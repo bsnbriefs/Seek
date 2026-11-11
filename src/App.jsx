@@ -1316,7 +1316,7 @@ function HomePage({ setPage, userSession }) {
     <>
 
       {/* HERO */}
-      <section className="px-5 pt-10 pb-8 text-center">
+      <section className="px-5 pt-10 pb-20 text-center">
         <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-14 w-auto object-contain" />
         <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
           ASK. SEEK. FIND.
@@ -5900,12 +5900,11 @@ useEffect(() => {
   const needsUserGate = !userSession?.access_token && gatedPages.includes(page);
 
   return (
-    <div className="font-body min-h-screen pb-28 lg:pb-0" style={{ background: C.white, color: C.ink }}>
+    <div className="font-body min-h-screen pb-32 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
-      <InstallSeekPrompt />
       <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
