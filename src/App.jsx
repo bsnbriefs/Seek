@@ -4906,69 +4906,26 @@ function MySeekDashboard({ setPage, userSession }) {
           {[
             ["My requests", () => go("my-requests", "/my-requests"), requests.length],
             ["My giveaways", () => go("offers", "/offers"), offers.length],
-            ["My support", () => go("give", "/give"), ""],
-            ["Messages", () => go("notifications", "/notifications"), unreadNotifications],
-            ["Account & privacy", () => go("account", "/account"), ""],
-            ["Help & safety", () => go("guidelines", "/guidelines"), ""],
+            ["Inbox", () => go("notifications", "/notifications"), unreadNotifications],
+            ["Edit profile", () => go("account", "/account"), ""],
           ].map(([label, action, count]) => (
             <button key={label} type="button" onClick={action} className="w-full flex items-center justify-between px-5 py-4 text-left">
               <span className="font-semibold text-[#0D3B3B]">{label}</span>
               <span className="text-sm text-[#0D3B3B]/45">{count === "" ? "→" : count}</span>
             </button>
           ))}
+          <button type="button" onClick={() => {
+            if (window.confirm("Delete your SEEK account? This removes your profile. Your published requests stay public.")) {
+              userLogout();
+              window.location.href = "/";
+            }
+          }} className="w-full flex items-center justify-between px-5 py-4 text-left text-red-600">
+            <span className="font-semibold">Delete account</span>
+            <span>→</span>
+          </button>
         </div>
       </section>
 
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-10 grid lg:grid-cols-3 gap-5">
-        <div className="lg:col-span-2 space-y-5">
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3 mb-4">
-              <div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your activity</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Requests you've made</h2></div>
-              <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("my-requests", "/my-requests")}>See all →</button>
-            </div>
-            {loading ? <p className="text-sm text-[#0D3B3B]/50">Loading your activity…</p> : requests.length === 0 ? (
-              <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">No requests yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Start a fundraiser and it will appear here after SEEK reviews it.</p><button type="button" onClick={() => go("seek-help-form", "/seek-help/request")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Start a fundraiser</button></div>
-            ) : (
-              <div className="space-y-2">
-                {requests.slice(0, 4).map((r) => (
-                  <button key={r.id} type="button" className="w-full text-left rounded-2xl border border-[#0D3B3B]/8 p-4 hover:bg-[#F2F5F3] transition" onClick={() => go(`request:${r.id}`, `/request/${r.id}`)}>
-                    <div className="flex items-center justify-between gap-3"><span className="font-display font-bold text-[#0D3B3B] line-clamp-1">{r.title}</span><span className="shrink-0 text-xs font-semibold text-[#1BAA9C]">{formatSeekStatus(r.status)}</span></div>
-                    <p className="mt-1 text-xs text-[#0D3B3B]/45">{r.category}{r.location ? ` · ${r.location}` : ""}</p>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 sm:p-6">
-            <div className="flex items-center justify-between gap-3 mb-4"><div><p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Give & receive</p><h2 className="mt-1 font-display font-bold text-xl text-[#0D3B3B]">Your giveaways</h2></div><button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>See all →</button></div>
-            {offers.length === 0 ? <div className="rounded-2xl bg-[#F2F5F3] p-5"><p className="font-semibold text-[#0D3B3B]">You haven't created a giveaway yet.</p><p className="mt-1 text-sm text-[#0D3B3B]/55">Offer goods, services, opportunities or other support to someone in the SEEK community.</p><button type="button" onClick={() => go("offers", "/offers")} className="mt-4 rounded-full bg-[#1BAA9C] px-4 py-2 text-sm font-bold text-white">Give support</button></div> : (
-              <div className="space-y-2">
-                {offers.slice(0, 3).map((offer) => <div key={offer.id} className="rounded-2xl border border-[#0D3B3B]/8 p-4"><div className="flex items-center justify-between gap-3"><p className="font-semibold text-[#0D3B3B] line-clamp-1">{offer.description || offer.category || "SEEK giveaway"}</p><span className="text-xs font-semibold text-[#1BAA9C]">{offer.status || "Open"}</span></div><p className="mt-1 text-xs text-[#0D3B3B]/45">{offer.category || "Support"}{offer.city ? ` · ${offer.city}` : ""}</p></div>)}
-              </div>
-            )}
-          </div>
-        </div>
-
-        <div className="space-y-5">
-          <div className="rounded-3xl bg-[#0D3B3B] text-white p-6">
-            <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5]">Quick actions</p>
-            <h2 className="mt-2 font-display font-bold text-2xl">Keep help moving.</h2>
-            <div className="mt-5 grid gap-2">
-              {[['seek-help','Ask for Help','Tell SEEK what you need',HeartHandshake],['give','Give Support','Help someone today',HandHeart],['offers','Create Giveaway','Offer what you can',Package],['celebrate','Connect & Celebrate','Connect with people and moments',Users]].map(([id,label,note,Icon]) => <button key={id} type="button" onClick={() => go(id)} className="rounded-2xl bg-white/10 px-4 py-3 text-left hover:bg-white/15 transition"><span className="flex items-center gap-3"><span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10"><Icon size={18}/></span><span><span className="block text-sm font-bold">{label}</span><span className="block text-[11px] text-white/55">{note}</span></span></span></button>)}
-            </div>
-          </div>
-
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your progress</p>
-            <div className="mt-4 space-y-3 text-sm">
-              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Requests fulfilled</span><strong className="text-[#0D3B3B]">{fulfilledRequests.length}</strong></div>
-              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Open giveaways</span><strong className="text-[#0D3B3B]">{openOffers.length}</strong></div>
-              <div className="flex items-center justify-between gap-3"><span className="text-[#0D3B3B]/65">Completed giveaways</span><strong className="text-[#0D3B3B]">{completedOffers}</strong></div>
-            </div>
-            <p className="mt-4 pt-4 border-t border-[#0D3B3B]/8 text-xs leading-relaxed text-[#0D3B3B]/50">These figures reflect activity available to your SEEK account. No estimated or invented impact numbers are shown.</p>
-          </div>
-        </div>
       </section>
     </div>
   );
