@@ -1,4 +1,4 @@
-const CACHE = "seek-v1";
+const CACHE = "seek-v2";
 const PRECACHE = ["/", "/index.html", "/manifest.webmanifest"];
 
 self.addEventListener("install", (event) => {
