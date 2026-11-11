@@ -2754,7 +2754,7 @@ function FundraiserPage({ setPage }) {
         amountNeeded: Number(goal) || 0,
         email: session.user?.email,
         fullName: session.user?.user_metadata?.full_name || "",
-        files,
+        evidenceFiles: files,
       });
       setDone(true);
     } catch (err) {
