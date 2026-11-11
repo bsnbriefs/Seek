@@ -1871,43 +1871,65 @@ function GiveOfferForm({ setPage }) {
 function SeekAutoVideo({ src, title }) {
   const ref = useRef(null);
   const [muted, setMuted] = useState(true);
+  const [paused, setPaused] = useState(false);
   const [ended, setEnded] = useState(false);
   useEffect(() => {
     const node = ref.current;
     if (!node) return;
     node.muted = true;
     setEnded(false);
+    setPaused(false);
     const io = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
         if (entry.isIntersecting && entry.intersectionRatio >= 0.55) {
           node.play().catch(() => {});
+          setPaused(false);
         } else {
           node.pause();
           node.muted = true;
           setMuted(true);
+          setPaused(true);
         }
       });
     }, { threshold: [0, 0.55, 1] });
     io.observe(node);
     return () => io.disconnect();
   }, [src]);
-  const toggleSound = (e) => {
+  const togglePlay = (e) => {
     e.preventDefault();
     e.stopPropagation();
     const v = ref.current;
     if (!v) return;
     if (v.paused) {
       v.play().catch(() => {});
+      setPaused(false);
     } else {
       v.pause();
+      setPaused(true);
     }
+  };
+  const toggleMute = (e) => {
+    e.preventDefault();
+    e.stopPropagation();
+    const v = ref.current;
+    if (!v) return;
+    const next = !v.muted;
+    v.muted = next;
+    v.volume = 1;
+    setMuted(next);
   };
   return (
     <>
-      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={toggleSound} onEnded={() => setEnded(true)} />
+      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
+      <button type="button" onClick={toggleMute} className="absolute right-3 top-16 z-20 h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center" aria-label={muted ? "Unmute" : "Mute"}>
+        {muted ? "🔇" : "🔊"}
+      </button>
+      {paused && !ended && (
+        <button type="button" onClick={togglePlay} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/90 text-[#0D3B3B] text-2xl">▶</button>
+      )}
       {ended && (
-        <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
+        <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); setPaused(false); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
       )}
     </>
   );
@@ -1946,7 +1968,7 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto flex h-[calc(100dvh-22rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+    <article className="mx-auto flex h-[calc(100dvh-18rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
