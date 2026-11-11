@@ -353,7 +353,7 @@ const CATEGORIES = [
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
-const SWIPE_SEQ = ["home", "seek-help", "give", "offers", "celebrate"];
+const SWIPE_SEQ = ["home", "seek-help", "give", "offers", "impact"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
 function isFinancialNeed(req) {
   if (!req) return false;
@@ -1075,8 +1075,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "seek-help-form", label: "Fundraiser" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
-    { id: "celebrate", label: "Connect" },
-    { id: "organisations", label: "Organizations" },
+    { id: "impact", label: "Impact" },
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
@@ -1105,7 +1104,7 @@ function FeatureStrip({ page, setPage }) {
                 key={item.id}
                 type="button"
                 onClick={() => go(item)}
-                className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[#0D3B3B] border-[#1BAA9C]" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
+                className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[#0D3B3B] border-[#1BAA9C]" : item.id === "impact" ? "text-[#1BAA9C] border-transparent font-bold" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
               >
                 {item.label}
               </button>
@@ -1128,12 +1127,11 @@ function Navbar({ page, setPage, userSession }) {
   }, [userSession]);
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
-    { id: "seek-help", label: "Seek Help", icon: HeartHandshake },
-    { id: "celebrate", label: "Connect & Celebrate", icon: Users },
+    { id: "seek-help-form", label: "Fundraiser", icon: HeartHandshake },
     { id: "give", label: "Help Someone", icon: Wallet },
     { id: "offers", label: "Giveaways", icon: Package },
     { id: "impact", label: "Impact", icon: BadgeCheck },
-    { id: "volunteer", label: "Volunteer", icon: Users },
+    { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
@@ -1193,12 +1191,11 @@ function Navbar({ page, setPage, userSession }) {
         <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
-            { id: "seek-help-form", label: "Seek Help", icon: Search },
-            { id: "celebrate", label: "Connect & Celebrate", icon: Users },
+            { id: "seek-help-form", label: "Fundraiser", icon: Search },
             { id: "give", label: "Give", icon: HeartHandshake },
             { id: "offers", label: "Giveaways", icon: Package },
             { id: "impact", label: "Impact", icon: BadgeCheck },
-            { id: "volunteer", label: "Volunteer", icon: Users },
+            { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
           ].map((l) => {
             const Icon = l.icon;
@@ -5521,7 +5518,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
     { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
     { id: "offers-job", label: "Offer a Job", note: "Share an opportunity", icon: Briefcase, filter: "Job opportunity", scroll: "make-offer" },
-    { id: "celebrate", label: "Connect", note: "Celebrate a moment", icon: Users },
+    { id: "impact", label: "See Impact", note: "What neighbours did", icon: BadgeCheck },
   ];
 
   const openAction = (item) => {
