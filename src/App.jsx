@@ -5701,7 +5701,7 @@ function InstallSeekPrompt() {
       window.removeEventListener("appinstalled", onInstalled);
     };
   }, []);
-  const showInstall = !standalone && !installDismissed && Boolean(installEvent);
+  const showInstall = !standalone && !installDismissed;
   if (closed || (!showAlerts && !showInstall)) return null;
   const mode = showInstall ? "install" : "alerts";
   return (
