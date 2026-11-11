@@ -1073,7 +1073,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "for-you", label: "For You" },
     { id: "discover", label: "Discover" },
-    { id: "seek-help", label: "Seek Help" },
+    { id: "seek-help-form", label: "Seek Help" },
     { id: "give", label: "Give" },
     { id: "offers", label: "Giveaways" },
     { id: "celebrate", label: "Connect" },
@@ -1097,7 +1097,7 @@ function FeatureStrip({ page, setPage }) {
           {items.map((item) => {
             let offerFilter = "";
             try { offerFilter = sessionStorage.getItem("seek_offer_filter") || ""; } catch (_e) {}
-            const active = page === item.id || (item.filter && page === "offers" && offerFilter === item.filter);
+            const active = page === item.id || (item.id === "seek-help-form" && page === "seek-help-form") || (item.filter && page === "offers" && offerFilter === item.filter);
             return (
               <button
                 key={item.id}
@@ -1191,7 +1191,7 @@ function Navbar({ page, setPage, userSession }) {
         <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
-            { id: "seek-help", label: "Seek Help", icon: Search },
+            { id: "seek-help-form", label: "Seek Help", icon: Search },
             { id: "celebrate", label: "Connect & Celebrate", icon: Users },
             { id: "give", label: "Give", icon: HeartHandshake },
             { id: "offers", label: "Giveaways", icon: Package },
@@ -1345,7 +1345,7 @@ function HomePage({ setPage, userSession }) {
       <section className="px-5 pb-10">
         <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
           {[
-            ["seek-help", "Seek Help"],
+            ["seek-help-form", "Seek Help"],
             ["give", "Give"],
             ["offers", "Giveaways"],
             ["celebrate", "Connect"],
@@ -1925,7 +1925,7 @@ function LiveSupportCard({ request, setPage }) {
   const supportCase = () => setDonateOpen(true);
 
   return (
-    <article className="mx-auto flex h-[calc(100dvh-16.5rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
+    <article className="mx-auto flex h-[calc(100dvh-18rem)] w-full max-w-[440px] snap-start snap-always flex-col overflow-hidden rounded-[1.5rem] bg-black shadow-[0_16px_40px_rgba(13,59,59,0.16)]">
       <div className="relative min-h-0 flex-1 overflow-hidden bg-[#101415]">
         {current?.media_kind === "video" ? (
           <SeekAutoVideo src={current.public_url} title={request.title || "SEEK support video"} />
@@ -2288,7 +2288,7 @@ function ForYouPage({ setPage }) {
         {!loading && !error && liveCases.length === 0 && (
           <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved request evidence will appear here.</p>
         )}
-        <div className="mx-auto max-w-[440px] h-[calc(100dvh-14rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-2">
+        <div className="mx-auto max-w-[440px] h-[calc(100dvh-16rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-8">
           {liveCases.map((request) => (
             <div key={request.id} className="mb-3 snap-start">
               <LiveSupportCard request={request} setPage={setPage} />
@@ -5547,7 +5547,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   ];
 
   const actions = [
-    { id: "seek-help", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
+    { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
     { id: "give", label: "Give Support", note: "Help a person or cause", icon: HandHeart },
     { id: "offers", label: "Create Giveaway", note: "Offer goods or support", icon: Package },
     { id: "offers-job", label: "Offer a Job", note: "Create a job opportunity", icon: Briefcase, filter: "Job opportunity" },
