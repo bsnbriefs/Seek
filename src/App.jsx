@@ -1221,28 +1221,6 @@ function Navbar({ page, setPage, userSession }) {
   );
 }
 
-function Footer({ setPage }) {
-  const go = (id) => { setPage(id); window.scrollTo(0, 0); };
-  return (
-    <footer style={{ background: C.deepTeal }} className="text-white/75 font-body">
-      <div className="mx-auto max-w-3xl px-5 py-8 text-center">
-        <Logo className="h-6 mx-auto" />
-        <p className="mt-3 text-sm text-white/55">A project of BSN Foundation</p>
-        <div className="mt-4 flex flex-wrap justify-center gap-x-4 gap-y-2 text-xs">
-          <button type="button" onClick={() => go("about")} className="hover:text-white">About</button>
-          <button type="button" onClick={() => go("guidelines")} className="hover:text-white">Guidelines</button>
-          <button type="button" onClick={() => go("language")} className="hover:text-white">{tSeek("language")}</button>
-          <button type="button" onClick={() => go("privacy")} className="hover:text-white">Privacy</button>
-          <button type="button" onClick={() => go("terms")} className="hover:text-white">Terms</button>
-          <button type="button" onClick={() => go("contact")} className="hover:text-white">Contact</button>
-        </div>
-        <div className="mt-4 flex justify-center"><SocialLinks light /></div>
-        <p className="mt-5 text-[11px] text-white/35">© {new Date().getFullYear()} SEEK</p>
-      </div>
-    </footer>
-  );
-}
-
 /* ---------------- Signature connector (infinity motif) ---------------- */
 
 function Connector() {
@@ -6024,7 +6002,6 @@ useEffect(() => {
       )}
 
       <SeekMobileBottomNav page={page} setPage={setPage} userSession={userSession} />
-      <Footer setPage={setPage} />
     </div>
   );
 }
