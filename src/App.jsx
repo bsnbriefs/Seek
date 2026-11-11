@@ -881,30 +881,23 @@ function RequestCard({ req, onHelp, onView }) {
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
   return (
-    <div className="flex flex-col rounded-2xl bg-white p-5 border border-[#0D3B3B]/10">
-      <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Need"}{isBsnPost(req) ? " · Admin" : ""}</p>
-      <div className="mt-3 flex items-start gap-3">
-        {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-12 w-12 rounded-full object-cover bg-white" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
-        <div className="min-w-0">
-          <h3 className="font-display font-bold text-lg text-[#0D3B3B] leading-snug">{req.title}</h3>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55">{[req.location, daysPosted(req.created_at || req.createdAt)].filter(Boolean).join(" · ")}</p>
+    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
+      <div className="p-4">
+        <div className="flex items-center gap-3">
+          {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
+          <div className="min-w-0 flex-1">
+            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight">{req.title}</h3>
+            <p className="text-xs text-[#0D3B3B]/50">{req.location || req.category}</p>
+          </div>
         </div>
+        {needed > 0 && <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>}
       </div>
-      {req.description ? <p className="mt-3 text-sm text-[#0D3B3B]/70 line-clamp-2">{req.description}</p> : null}
-      {CONNECT_CATS.includes(req.category) ? (
-        <p className="mt-3 text-sm text-[#0D3B3B]/70">Looking for company, not money.</p>
-      ) : needed > 0 ? (
-        <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>
-      ) : (
-        <p className="mt-3 text-sm font-semibold text-[#0D3B3B]">Any amount helps.</p>
-      )}
-      <div className="mt-4 flex items-center gap-2">
-        {onView && <button type="button" onClick={() => onView(req)} className="flex-1 rounded-full border border-[#0D3B3B]/15 py-2.5 text-sm font-semibold text-[#0D3B3B]">View story</button>}
-        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : setDonateOpen(true)} className="flex-1 rounded-full bg-[#1BAA9C] py-2.5 text-sm font-bold text-white">
-          {CONNECT_CATS.includes(req.category) ? "I can be there" : "Give now"}
+      <div className="flex border-t border-[#0D3B3B]/8">
+        {onView && <button type="button" onClick={() => onView(req)} className="flex-1 py-3 text-sm font-semibold text-[#0D3B3B]/70 hover:bg-[#F2F5F3]">View</button>}
+        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : setDonateOpen(true)} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
+          {CONNECT_CATS.includes(req.category) ? "Join" : "Give"}
         </button>
       </div>
-      <CommunityInteractions targetType="request" targetId={req.id} compact />
       {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
     </div>
   );
@@ -1878,7 +1871,7 @@ function SeekAutoVideo({ src, title }) {
     <>
       <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
-      <button type="button" onClick={toggleMute} className="absolute right-3 top-16 z-20 h-10 w-10 rounded-full bg-black/50 text-white backdrop-blur flex items-center justify-center" aria-label={muted ? "Unmute" : "Mute"}>
+      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-20 z-20 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center text-xs" aria-label={muted ? "Unmute" : "Mute"}>
         {muted ? "🔇" : "🔊"}
       </button>
       {paused && !ended && (
