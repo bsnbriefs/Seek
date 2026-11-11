@@ -460,7 +460,7 @@ function Button({ children, variant = "primary", className = "", ...props }) {
 
 
 
-const SEEK_FACE = "/seek-logo.png";
+const SEEK_FACE = "/favicon.png";
 
 async function shareSeekStory({ title, path, mediaUrl }) {
   const url = `${window.location.origin}${path.startsWith("/") ? path : "/" + path}`;
