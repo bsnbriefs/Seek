@@ -1230,7 +1230,6 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
           <ThemeToggle />
           <CurrencyPicker />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
@@ -1247,8 +1246,8 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
         <ThemeToggle />
+        <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1261,8 +1260,6 @@ function Navbar({ page, setPage, userSession }) {
           {[
             { id: "home", label: "Home", icon: HomeIcon },
             { id: "seek-help-form", label: "Fundraiser", icon: Search },
-            { id: "give", label: "Give", icon: HeartHandshake },
-            { id: "offers", label: "Giveaways", icon: Package },
             { id: "impact", label: "Impact", icon: BadgeCheck },
             { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
