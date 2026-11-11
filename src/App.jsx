@@ -138,6 +138,39 @@ const C = {
 };
 
 
+const CURRENCIES = [
+  { code: "NGN", symbol: "₦", rate: 1 },
+  { code: "USD", symbol: "$", rate: 0.00065 },
+  { code: "GBP", symbol: "£", rate: 0.00051 },
+  { code: "EUR", symbol: "€", rate: 0.00060 },
+];
+
+function getCurrency() {
+  try { return localStorage.getItem("seek_currency") || "NGN"; } catch { return "NGN"; }
+}
+
+function formatMoney(naira) {
+  const code = getCurrency();
+  const c = CURRENCIES.find((x) => x.code === code) || CURRENCIES[0];
+  const value = Math.round(naira * c.rate);
+  return c.symbol + value.toLocaleString();
+}
+
+function CurrencyPicker() {
+  const [code, setCode] = useState(getCurrency);
+  const change = (e) => {
+    const v = e.target.value;
+    setCode(v);
+    try { localStorage.setItem("seek_currency", v); } catch {}
+    window.location.reload();
+  };
+  return (
+    <select value={code} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+      {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+    </select>
+  );
+}
+
 const SEEK_LANGS = [
   { id: "en", label: "English" },
   { id: "pcm", label: "Nigerian Pidgin" },
@@ -861,6 +894,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
           ))}
         </div>
         <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
+        <p className="mt-1 text-xs text-white/40">Amounts are in Naira. International cards are accepted.</p>
         <label className="mt-3 flex items-center gap-2 text-sm text-white/80">
           <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
           Give this amount every month
@@ -1198,6 +1232,7 @@ function Navbar({ page, setPage, userSession }) {
         <div className="hidden lg:flex items-center gap-3">
           <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
           <ThemeToggle />
+          <CurrencyPicker />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
