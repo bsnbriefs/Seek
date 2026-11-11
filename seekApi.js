@@ -1494,16 +1494,26 @@ function writeBioCache(bio) {
   try { if (bio != null) localStorage.setItem(SEEK_BIO_CACHE, String(bio)); } catch (_e) {}
 }
 
-function readProfileCache() {
-  try { return JSON.parse(localStorage.getItem(SEEK_PROFILE_CACHE) || "null"); } catch { return null; }
+function readProfileCache(userId) {
+  try {
+    const key = userId ? "seek_profile_" + userId : SEEK_PROFILE_CACHE;
+    return JSON.parse(localStorage.getItem(key) || "null");
+  } catch { return null; }
 }
-function writeProfileCache(row) {
-  try { if (row) localStorage.setItem(SEEK_PROFILE_CACHE, JSON.stringify(row)); } catch (_e) {}
+
+function writeProfileCache(row, userId) {
+  try {
+    if (row) {
+      const key = userId ? "seek_profile_" + userId : SEEK_PROFILE_CACHE;
+      localStorage.setItem(key, JSON.stringify(row));
+    }
+  } catch (_e) {}
 }
 
 export async function getMyProfile() {
   const session = (await refreshUserSession()) || getUserSession();
-  if (!session?.access_token || !session?.user?.id) return readProfileCache();
+  const userId = session?.user?.id;
+  if (!session?.access_token || !userId) return readProfileCache(userId);
 
   let mapped = null;
   try {
@@ -1518,7 +1528,7 @@ export async function getMyProfile() {
   } catch (_e) {
     mapped = null;
   }
-  const cached = readProfileCache();
+  const cached = readProfileCache(userId);
   if (!mapped && cached) mapped = cached;
   else if (mapped && cached) {
     mapped.username = cached.username || mapped.username;
@@ -1526,7 +1536,7 @@ export async function getMyProfile() {
     mapped.bio = readBioCache() || cached.bio || mapped.bio;
   }
   if (mapped?.avatar_url) cacheAvatarUrl(mapped.avatar_url);
-  if (mapped) writeProfileCache(mapped);
+  if (mapped) writeProfileCache(mapped, userId);
   return mapped;
 }
 
