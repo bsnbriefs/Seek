@@ -1034,9 +1034,9 @@ function NavInboxButton({ userSession, setPage }) {
     const load = () => listMyNotifications(30).then((rows) => {
       if (stop) return;
       setUnread((Array.isArray(rows) ? rows : []).filter((n) => !n.read_at).length);
-    }).catch(() => {});
+    }).catch(() => { if (!stop) setUnread(0); });
     load();
-    const id = setInterval(load, 12000);
+    const id = setInterval(load, 8000);
     return () => { stop = true; clearInterval(id); };
   }, [userSession?.access_token, userSession?.user?.id]);
   return (
@@ -1127,7 +1127,12 @@ function Navbar({ page, setPage, userSession }) {
     if (!userSession?.access_token) { setAvatar(""); return; }
     const cached = getCachedAvatarUrl();
     if (cached) setAvatar(cached);
-    getMyProfile().then((p) => { if (p?.avatar_url) setAvatar(p.avatar_url); }).catch(() => {});
+    getMyProfile().then((p) => {
+      if (p?.avatar_url) {
+        setAvatar(p.avatar_url);
+        cacheAvatarUrl(p.avatar_url);
+      }
+    }).catch(() => {});
   }, [userSession]);
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
@@ -4412,7 +4417,12 @@ function AccountAvatar() {
   useEffect(() => {
     const cached = getCachedAvatarUrl();
     if (cached) setPhoto(cached);
-    getMyProfile().then((p) => { if (p?.avatar_url) setPhoto(p.avatar_url); }).catch(() => {});
+    getMyProfile().then((p) => {
+      if (p?.avatar_url) {
+        setPhoto(p.avatar_url);
+        cacheAvatarUrl(p.avatar_url);
+      }
+    }).catch(() => {});
   }, []);
   return (
     <div className="mt-6 text-left">
