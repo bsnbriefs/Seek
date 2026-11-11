@@ -1081,6 +1081,9 @@ function FeatureStrip({ page, setPage }) {
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
+    if (item.id === "offers" || item.filter) {
+      try { sessionStorage.setItem("seek_scroll_to", "make-offer"); } catch (_e) {}
+    }
     if (item.filter) {
       try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {}
       setPage("offers");
@@ -2321,6 +2324,11 @@ function OffersPage({ setPage }) {
         if (!cancelled) setLoading(false);
       }
     })();
+    const scrollTo = (() => { try { return sessionStorage.getItem("seek_scroll_to"); } catch { return ""; } })();
+    if (scrollTo) {
+      try { sessionStorage.removeItem("seek_scroll_to"); } catch (_e) {}
+      setTimeout(() => document.getElementById(scrollTo)?.scrollIntoView({ behavior: "smooth" }), 300);
+    }
     return () => { cancelled = true; };
   }, []);
 
@@ -5548,16 +5556,19 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
 
   const actions = [
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "give", label: "Give Support", note: "Help a person or cause", icon: HandHeart },
-    { id: "offers", label: "Create Giveaway", note: "Offer goods or support", icon: Package },
-    { id: "offers-job", label: "Offer a Job", note: "Create a job opportunity", icon: Briefcase, filter: "Job opportunity" },
-    { id: "offers-mentorship", label: "Offer Mentorship", note: "Share your experience", icon: Users, filter: "Mentorship" },
-    { id: "celebrate", label: "Connect & Celebrate", note: "Connect with people and moments", icon: Users },
+    { id: "seek-help", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
+    { id: "offers-job", label: "Offer a Job", note: "Share an opportunity", icon: Briefcase, filter: "Job opportunity", scroll: "make-offer" },
+    { id: "offers-mentorship", label: "Offer Mentorship", note: "Share your experience", icon: Users, filter: "Mentorship", scroll: "make-offer" },
+    { id: "celebrate", label: "Connect", note: "Celebrate a moment", icon: Users },
   ];
 
   const openAction = (item) => {
     if (item.filter) {
       try { sessionStorage.setItem("seek_offer_filter", item.filter); } catch (_e) {}
+    }
+    if (item.scroll) {
+      try { sessionStorage.setItem("seek_scroll_to", item.scroll); } catch (_e) {}
     }
     go(item.id === "offers-job" || item.id === "offers-mentorship" ? "offers" : item.id);
   };
