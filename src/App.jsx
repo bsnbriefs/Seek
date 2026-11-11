@@ -353,7 +353,7 @@ const CATEGORIES = [
   { id: "financial", label: "Financial Assistance", icon: Wallet },
   { id: "other", label: "Other", icon: MoreHorizontal },
 ];
-const SWIPE_SEQ = ["home", "for-you", "seek-help", "give", "offers", "celebrate"];
+const SWIPE_SEQ = ["home", "seek-help", "give", "offers", "celebrate"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
 function isFinancialNeed(req) {
   if (!req) return false;
@@ -1071,7 +1071,6 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
-    { id: "for-you", label: "For You" },
     { id: "discover", label: "Discover" },
     { id: "seek-help-form", label: "Seek Help" },
     { id: "give", label: "Give" },
@@ -2283,7 +2282,7 @@ function ForYouPage({ setPage }) {
       <section className="px-5 pt-10 pb-16">
         <div className="mx-auto max-w-[440px] text-center mb-6">
           <SectionLabel>SEEK Videos</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">For You</h1>
+          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">Home</h1>
           <p className="mt-2 text-sm text-[#0D3B3B]/55">Hear the story. Then decide how to help.</p>
         </div>
         {loading && <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/50">Loading videos…</p>}
@@ -5476,7 +5475,7 @@ function pageFromPath(pathname) {
   if (path === "/admin") return "admin";
   if (path === "/volunteer") return "volunteer";
   if (path === "/give") return "give";
-  if (path === "/for-you") return "for-you";
+  if (path === "/for-you") return "home";
   if (path === "/discover") return "discover";
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
@@ -5509,7 +5508,7 @@ function pathFromPage(page) {
   if (id.startsWith("member:")) return "/member/" + id.split(":")[1];
   const map = {
     home: "/",
-    "for-you": "/for-you",
+    "for-you": "/",
     discover: "/discover",
     give: "/give",
     offers: "/offers",
@@ -5836,8 +5835,7 @@ useEffect(() => {
   }, [page]);
 
   const pages = {
-    home: <HomePage setPage={setPage} userSession={userSession} />,
-    "for-you": <ForYouPage setPage={setPage} />,
+    home: <ForYouPage setPage={setPage} />,
     discover: <DiscoverPage setPage={setPage} />,
     give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
@@ -5920,7 +5918,7 @@ useEffect(() => {
           if (Math.abs(dy) > 36) return;
           if (Math.abs(dx) < 120 || Math.abs(dx) < Math.abs(dy) * 2.2) return;
           if (Date.now() - s.t > 500) return;
-          if (page === "for-you" && Math.abs(dy) > 18) return;
+          if (page === "home" && Math.abs(dy) > 18) return;
           const i = SWIPE_SEQ.indexOf(page);
           const next = dx < 0 ? SWIPE_SEQ[i + 1] : SWIPE_SEQ[i - 1];
           if (next) setPage(next);
