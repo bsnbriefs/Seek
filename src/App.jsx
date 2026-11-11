@@ -1953,7 +1953,7 @@ function LiveSupportCard({ request, setPage }) {
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
   const rawName = member.name || request.full_name || request.name || member.username || request.username || "";
-  const displayName = member.username || request.username || rawName || "Seeker";
+  const displayName = member.username || request.username || member.name || request.full_name || request.name || "Seeker";
   const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
 
   const goToCase = () => {
@@ -5225,13 +5225,13 @@ function MyRequestsPage({ setPage, userSession }) {
                 </div>
               ) : null}
               <div className="mb-5 rounded-2xl bg-[#F2F5F3] p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#0D3B3B]/45 mb-3">Request journey</p>
+                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#0D3B3B]/60 mb-3">Request journey</p>
                 <div className="grid grid-cols-5 gap-1">
                   {[['pending_review','Submitted'],['published','Published'],['partially_funded','Help started'],['fulfilled','Need met'],['closed','Closed']].map(([id,label], index) => {
                     const order = {pending_review:0,verification_required:0,published:1,partially_funded:2,matched:2,fulfilled:3,closed:4,rejected:-1};
                     const current = order[req.status] ?? 0;
                     const active = current >= index && req.status !== 'rejected';
-                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[#1BAA9C]' : 'bg-[#0D3B3B]/10'}`}></div><span className={`mt-1 block text-[9px] leading-tight ${active ? 'text-[#0D3B3B] font-semibold' : 'text-[#0D3B3B]/40'}`}>{label}</span></div>;
+                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[#1BAA9C]' : 'bg-[#0D3B3B]/20'}`}></div><span className={`mt-1 block text-[10px] leading-tight ${active ? 'text-[#0D3B3B] font-bold' : 'text-[#0D3B3B]/70'}`}>{label}</span></div>;
                   })}
                 </div>
               </div>
