@@ -1969,11 +1969,13 @@ function LiveSupportCard({ request, setPage }) {
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-2 flex items-center gap-2">
           {isFinancialNeed(request) ? (
-            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Give</button>
+            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Donate</button>
           ) : (
             <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View</button>
           )}
-          <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">More</button>
+          {isFinancialNeed(request) && (
+            <button type="button" onClick={goToCase} className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]">View</button>
+          )}
           <button
             type="button"
             className="flex-1 rounded-full border border-[#0D3B3B]/15 px-3 py-2.5 text-sm font-semibold text-[#0D3B3B]"
