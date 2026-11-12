@@ -2726,6 +2726,7 @@ if (!cancelled) {
         <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[#1BAA9C]">
           Support BSN Foundation →
         </button>
+        <input type="search" value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} placeholder="Search requests..." className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 p-3 text-sm" />
         {requestsLoading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
@@ -2736,7 +2737,7 @@ if (!cancelled) {
           <p className="font-body text-sm text-[#0D3B3B]/50">No published requests yet.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {requests.filter((r) => !CONNECT_CATS.includes(r.category)).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+            {requests.filter((r) => !CONNECT_CATS.includes(r.category) && (!searchFilter || r.title?.toLowerCase().includes(searchFilter.toLowerCase()) || r.location?.toLowerCase().includes(searchFilter.toLowerCase()))).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
       </section>
