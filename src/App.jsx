@@ -1487,11 +1487,21 @@ function HomePage({ setPage, userSession }) {
             <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-3">Fundraisers</p>
             <div className="space-y-3">
               {requests.filter((r) => String(r.category || "").includes("Fundraiser")).slice(0, 3).map((r) => (
-                <button key={r.id} type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
-                  <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
-                  <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
-                  {r.amountNeeded > 0 && <p className="text-sm text-[#1BAA9C] mt-2">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>}
-                </button>
+                <div key={r.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                  <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full text-left">
+                    <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
+                    <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
+                    {r.amountNeeded > 0 && (
+                      <div className="mt-2">
+                        <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
+                          <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
+                        </div>
+                        <p className="text-sm text-[#1BAA9C] mt-1">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>
+                      </div>
+                    )}
+                  </button>
+                  <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
+                </div>
               ))}
             </div>
           </div>
