@@ -1317,7 +1317,6 @@ function Navbar({ page, setPage, userSession }) {
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
-          <LanguagePicker />
           <CurrencyPicker />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
@@ -1334,7 +1333,6 @@ function Navbar({ page, setPage, userSession }) {
 
         <div className="lg:hidden flex items-center gap-1">
         <ThemeToggle />
-        <LanguagePicker />
         <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -1535,22 +1533,6 @@ function HomePage({ setPage, userSession }) {
           <ShopSupportStrip setPage={setPage} />
         </div>
       </section>
-
-      {stories.length > 0 && (
-        <section className="px-5 pb-12">
-          <div className="mx-auto max-w-[440px]">
-            <SectionLabel>Outcomes</SectionLabel>
-            <div className="mt-3 space-y-3">
-              {stories.slice(0, 3).map((story) => (
-                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
-                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
-                  <p className="p-3 font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
     </>
   );
@@ -2018,7 +2000,7 @@ function SeekAutoVideo({ src, title }) {
     <>
       <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
-      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-20 z-20 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center text-xs" aria-label={muted ? "Unmute" : "Mute"}>
+      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-28 z-20 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center text-xs" aria-label={muted ? "Unmute" : "Mute"}>
         {muted ? "🔇" : "🔊"}
       </button>
       {paused && !ended && (
@@ -3944,6 +3926,17 @@ function RequestPage({ requestId, setPage }) {
           This is a verified public request on Seek · A project of BSN Foundation
         </p>
       </section>
+      {isFinancialNeed(request) && (
+        <div className="fixed bottom-20 inset-x-0 z-[140] p-4 bg-white/95 backdrop-blur border-t border-[#0D3B3B]/10">
+          <div className="mx-auto max-w-lg flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#0D3B3B]">₦{Number(request.amountRaised || 0).toLocaleString()} raised</p>
+              <p className="text-xs text-[#0D3B3B]/50">of ₦{Number(request.amountNeeded || 0).toLocaleString()}</p>
+            </div>
+            <button type="button" onClick={() => setCaseDonateOpen(true)} className="rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
