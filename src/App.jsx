@@ -1221,6 +1221,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "seek-help-form", label: "Seek Help" },
     { id: "fundraiser", label: "Fundraiser" },
+    { id: "give", label: "Give" },
     { id: "bsn", label: "Campaign" },
     { id: "shop", label: "Shop" },
   ];

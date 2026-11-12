@@ -305,7 +305,7 @@ export default function AdminPage() {
 
   if (!(session?.accessToken || session?.access_token)) {
     return (
-      <main className="min-h-screen bg-[#F2F5F3] px-5 py-16">
+      <main className="min-h-screen bg-[#F2F5F3] dark:bg-[#0D3B3B] px-5 py-16">
         <div className="mx-auto max-w-md rounded-3xl bg-white p-8 shadow-sm">
           <h1 className="font-display text-3xl font-bold text-[#0D3B3B]">
             Seek Admin
@@ -354,7 +354,7 @@ export default function AdminPage() {
   }
 
   return (
-    <main className="min-h-screen bg-[#F2F5F3] px-5 py-12">
+    <main className="min-h-screen bg-[#F2F5F3] dark:bg-[#0D3B3B] px-5 py-12">
       <div className="mx-auto max-w-6xl">
         <div className="mb-6 flex flex-wrap items-center justify-between gap-4">
           <div>
