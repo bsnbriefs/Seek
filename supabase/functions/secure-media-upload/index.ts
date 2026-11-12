@@ -1,30 +1,44 @@
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.45.4";
 
-const SUPABASE_URL = Deno.env.get("SUPABASE_URL") || "";
+const SUPABASE_URL =
+  Deno.env.get("SUPABASE_URL") ||
+  Deno.env.get("SB_URL") ||
+  "";
 
-function resolveServiceKey(): string {
+function resolveServiceKey(): { key: string; source: string } {
   const secretKeysRaw = Deno.env.get("SUPABASE_SECRET_KEYS");
   if (secretKeysRaw) {
     try {
       const parsed = JSON.parse(secretKeysRaw);
       const key = parsed?.default || Object.values(parsed)[0];
-      if (key) return key as string;
+      if (key) return { key: String(key), source: "SUPABASE_SECRET_KEYS" };
     } catch (_e) {
       // fall through
     }
   }
-  return Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || "";
+
+  const candidates: [string, string][] = [
+    ["SUPABASE_SERVICE_ROLE_KEY", Deno.env.get("SUPABASE_SERVICE_ROLE_KEY") || ""],
+    ["SERVICE_ROLE_KEY", Deno.env.get("SERVICE_ROLE_KEY") || ""],
+    ["SB_SERVICE_ROLE_KEY", Deno.env.get("SB_SERVICE_ROLE_KEY") || ""],
+  ];
+
+  for (const [source, key] of candidates) {
+    if (key) return { key, source };
+  }
+  return { key: "", source: "NONE" };
 }
 
-const SERVICE_KEY = resolveServiceKey();
+const resolved = resolveServiceKey();
+const SERVICE_KEY = resolved.key;
+const SERVICE_KEY_SOURCE = resolved.source;
 
 // ---- Limits (bytes) ----
-const MAX_IMAGE_BYTES = 10 * 1024 * 1024; // 10 MB
-const MAX_VIDEO_BYTES = 50 * 1024 * 1024; // 50 MB
-const MAX_PDF_BYTES = 10 * 1024 * 1024; // 10 MB
+const MAX_IMAGE_BYTES = 10 * 1024 * 1024;
+const MAX_VIDEO_BYTES = 50 * 1024 * 1024;
+const MAX_PDF_BYTES = 10 * 1024 * 1024;
 const MAX_ANY_BYTES = MAX_VIDEO_BYTES;
 
-// ---- Magic-byte detection ----
 function bytesMatch(buf: Uint8Array, offset: number, sig: number[]): boolean {
   if (buf.length < offset + sig.length) return false;
   for (let i = 0; i < sig.length; i++) {
@@ -109,6 +123,28 @@ function getBearerToken(req: Request): string {
   return authHeader.replace(/^Bearer\s+/i, "").trim();
 }
 
+/** Upload with service role via Storage REST API (explicit, no session bleed). */
+async function storageUpload(params: {
+  bucket: string;
+  path: string;
+  bytes: Uint8Array;
+  mime: string;
+}): Promise<{ ok: boolean; status: number; body: string }> {
+  const url = `${SUPABASE_URL}/storage/v1/object/${params.bucket}/${params.path}`;
+  const res = await fetch(url, {
+    method: "POST",
+    headers: {
+      Authorization: `Bearer ${SERVICE_KEY}`,
+      apikey: SERVICE_KEY,
+      "Content-Type": params.mime,
+      "x-upsert": "false",
+    },
+    body: params.bytes,
+  });
+  const body = await res.text();
+  return { ok: res.ok, status: res.status, body };
+}
+
 Deno.serve(async (req) => {
   if (req.method === "OPTIONS") {
     return jsonResponse({ ok: true });
@@ -119,12 +155,28 @@ Deno.serve(async (req) => {
   }
 
   try {
-    if (!SUPABASE_URL || !SERVICE_KEY) {
-      return jsonResponse({ error: "Server misconfigured" }, 500);
+    if (!SUPABASE_URL) {
+      return jsonResponse(
+        { error: "Server misconfigured: SUPABASE_URL missing" },
+        500
+      );
     }
 
-    // Service client for privileged DB/storage only (never returned to client)
-    const supabase = createClient(SUPABASE_URL, SERVICE_KEY);
+    if (!SERVICE_KEY) {
+      return jsonResponse(
+        {
+          error:
+            "Server misconfigured: service role key not found. Set SERVICE_ROLE_KEY on this function to the service_role secret.",
+          keySource: SERVICE_KEY_SOURCE,
+        },
+        500
+      );
+    }
+
+    // DB client with service role (RLS bypass for Postgres)
+    const supabase = createClient(SUPABASE_URL, SERVICE_KEY, {
+      auth: { persistSession: false, autoRefreshToken: false },
+    });
 
     const contentType = req.headers.get("content-type") || "";
     if (!contentType.includes("multipart/form-data")) {
@@ -141,7 +193,6 @@ Deno.serve(async (req) => {
     const file = form.get("file");
     const purpose = String(form.get("purpose") || "evidence").toLowerCase();
     const requestId = String(form.get("request_id") || "").trim();
-    const offerId = String(form.get("offer_id") || "").trim();
     const originalName = String(
       form.get("original_name") ||
         (file && typeof file === "object" && "name" in file
@@ -153,47 +204,39 @@ Deno.serve(async (req) => {
       return jsonResponse({ error: "file is required" }, 400);
     }
 
-    if (purpose !== "evidence" && purpose !== "impact" && purpose !== "appreciation" && purpose !== "offer" && purpose !== "profile") {
+    if (purpose !== "evidence" && purpose !== "impact") {
       return jsonResponse(
-        { error: "purpose must be evidence, impact, appreciation, offer, or profile" },
+        { error: "purpose must be evidence or impact" },
         400
       );
     }
 
     const token = getBearerToken(req);
-    if (!token && purpose !== "offer") {
+    if (!token) {
       return jsonResponse(
         { error: "Authentication required. Sign in to upload media." },
         401
       );
     }
 
-    let user = null;
-    if (purpose !== "offer") {
-      const { data: userData, error: userErr } = await supabase.auth.getUser(
-        token
-      );
-      if (userErr || !userData?.user) {
-        return jsonResponse({ error: "Invalid or expired session" }, 401);
-      }
-      user = userData.user;
-    } else if (token) {
-      const { data: userData } = await supabase.auth.getUser(token);
-      user = userData?.user || null;
+    const { data: userData, error: userErr } = await supabase.auth.getUser(
+      token
+    );
+    if (userErr || !userData?.user) {
+      return jsonResponse({ error: "Invalid or expired session" }, 401);
     }
 
-    const userEmail = (user?.email || "").trim().toLowerCase();
-    let isAdmin = false;
-    if (user?.id) {
-      const { data: profile } = await supabase
-        .from("profiles")
-        .select("role")
-        .eq("id", user.id)
-        .maybeSingle();
-      isAdmin = profile?.role === "admin";
-    }
+    const user = userData.user;
+    const userEmail = (user.email || "").trim().toLowerCase();
 
-    // ---- Authorization by purpose ----
+    const { data: profile } = await supabase
+      .from("profiles")
+      .select("role")
+      .eq("id", user.id)
+      .maybeSingle();
+
+    const isAdmin = profile?.role === "admin";
+
     if (purpose === "evidence") {
       if (!requestId) {
         return jsonResponse(
@@ -212,89 +255,59 @@ Deno.serve(async (req) => {
         return jsonResponse({ error: "Request not found" }, 404);
       }
 
-      // Admins may upload evidence for any request
       if (!isAdmin) {
-        // Requesters: must own the request via request_private.email
-        if (!userEmail) {
-          return jsonResponse(
-            { error: "Your account has no email; cannot verify ownership." },
-            403
-          );
-        }
-
-        const { data: privateRow, error: privateErr } = await supabase
-          .from("request_private")
-          .select("email")
-          .eq("request_id", requestId)
+        const { data: reqOwner } = await supabase
+          .from("requests")
+          .select("user_id, email")
+          .eq("id", requestId)
           .maybeSingle();
 
-        if (privateErr || !privateRow?.email) {
-          return jsonResponse(
-            { error: "Not authorized to upload evidence for this request." },
-            403
-          );
-        }
+        const isOwner = reqOwner?.user_id === user.id ||
+          (reqOwner?.email && reqOwner.email.toLowerCase() === userEmail);
 
-        const ownerEmail = String(privateRow.email).trim().toLowerCase();
-        if (ownerEmail !== userEmail) {
-          return jsonResponse(
-            { error: "Not authorized to upload evidence for this request." },
-            403
-          );
+        if (!isOwner) {
+          if (!userEmail) {
+            return jsonResponse(
+              { error: "Your account has no email; cannot verify ownership." },
+              403
+            );
+          }
+
+          const { data: privateRow, error: privateErr } = await supabase
+            .from("request_private")
+            .select("email")
+            .eq("request_id", requestId)
+            .maybeSingle();
+
+          if (privateErr) {
+            return jsonResponse(
+              { error: "Could not verify request ownership." },
+              500
+            );
+          }
+
+          if (!privateRow?.email) {
+            return jsonResponse(
+              { error: "Not authorized to upload evidence for this request." },
+              403
+            );
+          }
+
+          const ownerEmail = String(privateRow.email).trim().toLowerCase();
+          if (ownerEmail !== userEmail) {
+            return jsonResponse(
+              { error: "Not authorized to upload evidence for this request." },
+              403
+            );
+          }
         }
       }
     }
 
-    if (purpose === "impact") {
-      // Community Impact: admin only
-      if (!isAdmin) {
-        return jsonResponse({ error: "Admin only" }, 403);
-      }
+    if (purpose === "impact" && !isAdmin) {
+      return jsonResponse({ error: "Admin only" }, 403);
     }
 
-    if (purpose === "appreciation") {
-      if (!requestId) {
-        return jsonResponse(
-          { error: "request_id is required for appreciation uploads" },
-          400
-        );
-      }
-      const { data: reqRow, error: reqErr } = await supabase
-        .from("requests")
-        .select("id, status")
-        .eq("id", requestId)
-        .maybeSingle();
-      if (reqErr || !reqRow) {
-        return jsonResponse({ error: "Request not found" }, 404);
-      }
-      if (reqRow.status !== "fulfilled") {
-        return jsonResponse(
-          { error: "Appreciation media is only allowed after a request is fulfilled." },
-          403
-        );
-      }
-      if (!isAdmin) {
-        if (!userEmail) {
-          return jsonResponse(
-            { error: "Your account has no email; cannot verify ownership." },
-            403
-          );
-        }
-        const { data: privateRow, error: privateErr } = await supabase
-          .from("request_private")
-          .select("email")
-          .eq("request_id", requestId)
-          .maybeSingle();
-        if (privateErr || !privateRow?.email) {
-          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
-        }
-        if (String(privateRow.email).trim().toLowerCase() !== userEmail) {
-          return jsonResponse({ error: "Not authorized to upload appreciation media." }, 403);
-        }
-      }
-    }
-
-    // ---- Size pre-check ----
     if (file.size <= 0 || file.size > MAX_ANY_BYTES) {
       return jsonResponse(
         {
@@ -336,9 +349,9 @@ Deno.serve(async (req) => {
       );
     }
 
-    if ((purpose === "impact" || purpose === "appreciation") && detected.kind === "pdf") {
+    if (purpose === "impact" && detected.kind === "pdf") {
       return jsonResponse(
-        { error: "PDF is not allowed for this media." },
+        { error: "PDF is not allowed for Community Impact media." },
         400
       );
     }
@@ -350,40 +363,37 @@ Deno.serve(async (req) => {
 
     const uuid =
       crypto.randomUUID?.() ||
-      `\( {Date.now()}- \){Math.random().toString(16).slice(2)}`;
+      `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 
-    let storagePath: string;
-    let bucket: string;
+    const bucket =
+      purpose === "evidence" ? "seek-evidence" : "seek-impact";
+    const storagePath =
+      purpose === "evidence"
+        ? `${requestId}/${uuid}.${detected.ext}`
+        : `${uuid}.${detected.ext}`;
 
-    if (purpose === "evidence") {
-      bucket = "seek-evidence";
-      storagePath = requestId + "/" + uuid + "." + detected.ext;
-    } else if (purpose === "appreciation") {
-      bucket = "seek-impact";
-      storagePath = "appreciation/" + requestId + "/" + uuid + "." + detected.ext;
-    } else if (purpose === "offer") {
-      bucket = "seek-impact";
-      storagePath = "offers/" + offerId + "/" + uuid + "." + detected.ext;
-    } else if (purpose === "profile") {
-      bucket = "seek-impact";
-      storagePath = "profiles/" + (user?.id || "anon") + "/" + uuid + "." + detected.ext;
-    } else {
-      bucket = "seek-impact";
-      storagePath = uuid + "." + detected.ext;
-    }
+    // Explicit service-role Storage REST upload
+    const uploaded = await storageUpload({
+      bucket,
+      path: storagePath,
+      bytes,
+      mime: detected.mime,
+    });
 
-    const { error: uploadError } = await supabase.storage
-      .from(bucket)
-      .upload(storagePath, bytes, {
-        contentType: detected.mime,
-        upsert: false,
-      });
-
-    if (uploadError) {
+    if (!uploaded.ok) {
       return jsonResponse(
         {
           error: "Storage upload failed",
-          details: uploadError.message,
+          details: uploaded.body,
+          httpStatus: uploaded.status,
+          keySource: SERVICE_KEY_SOURCE,
+          keyPrefix: SERVICE_KEY.slice(0, 12),
+          hint:
+            uploaded.status === 403 ||
+            uploaded.body.includes("AccessDenied") ||
+            uploaded.body.includes("row-level security")
+              ? "SERVICE_ROLE_KEY is missing or is not the service_role secret. Set it under Edge Function secrets from Project Settings → API → service_role."
+              : undefined,
         },
         500
       );
@@ -399,71 +409,21 @@ Deno.serve(async (req) => {
       });
 
       if (metaErr) {
-        await supabase.storage.from(bucket).remove([storagePath]);
+        // best-effort cleanup
+        await fetch(
+          `${SUPABASE_URL}/storage/v1/object/${bucket}/${storagePath}`,
+          {
+            method: "DELETE",
+            headers: {
+              Authorization: `Bearer ${SERVICE_KEY}`,
+              apikey: SERVICE_KEY,
+            },
+          }
+        );
         return jsonResponse(
           {
             error: "Failed to save evidence metadata",
             details: metaErr.message,
-          },
-          500
-        );
-      }
-    }
-
-    if (purpose === "offer") {
-      if (!offerId) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse({ error: "offer_id is required for offer uploads" }, 400);
-      }
-      const { error: offErr } = await supabase.from("offer_media").insert({
-        offer_id: offerId,
-        storage_path: storagePath,
-        mime_type: detected.mime,
-        media_kind: detected.kind === "video" ? "video" : "image",
-        file_name: safeBase || `offer.${detected.ext}`,
-      });
-      if (offErr) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse(
-          { error: "Failed to save offer media", details: offErr.message },
-          500
-        );
-      }
-    }
-
-    if (purpose === "profile") {
-      if (!user?.id) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse({ error: "Sign in to set a profile photo." }, 401);
-      }
-      const { data: existing } = await supabase
-        .from("profiles")
-        .select("id")
-        .eq("id", user.id)
-        .maybeSingle();
-      const profErr = existing
-        ? (await supabase.from("profiles").update({ avatar_path: storagePath }).eq("id", user.id)).error
-        : (await supabase.from("profiles").insert({ id: user.id, avatar_path: storagePath })).error;
-      if (profErr) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse({ error: "Failed to save profile photo", details: profErr.message }, 500);
-      }
-    }
-
-    if (purpose === "appreciation") {
-      const { error: updErr } = await supabase.from("request_appreciation").insert({
-        request_id: requestId,
-        storage_path: storagePath,
-        mime_type: detected.mime,
-        media_kind: detected.kind === "video" ? "video" : "image",
-        file_name: safeBase || `appreciation.${detected.ext}`,
-      });
-      if (updErr) {
-        await supabase.storage.from(bucket).remove([storagePath]);
-        return jsonResponse(
-          {
-            error: "Failed to save appreciation media",
-            details: updErr.message,
           },
           500
         );
