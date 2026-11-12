@@ -988,17 +988,30 @@ function RequestCard({ req, onHelp, onView }) {
   const needed = Number(req.amountNeeded || req.amount_needed || 0);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
+  const pct = needed > 0 ? Math.min(100, Math.round((raised / needed) * 100)) : 0;
   return (
     <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
           <div className="min-w-0 flex-1">
-            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight">{req.title}</h3>
-            <p className="text-xs text-[#0D3B3B]/50">{req.location || req.category}</p>
+            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight line-clamp-1">{req.title}</h3>
+            <p className="text-xs text-[#0D3B3B]/50">{req.location}</p>
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         </div>
-        {needed > 0 && <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>}
+        {req.description && <p className="text-sm text-[#0D3B3B]/70 line-clamp-2 mb-3">{req.description}</p>}
+        {needed > 0 && (
+          <div className="mb-2">
+            <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
+              <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: pct + "%" }} />
+            </div>
+            <div className="mt-1 flex justify-between text-xs">
+              <span className="font-semibold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
+              <span className="text-[#0D3B3B]/50">{pct}%</span>
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex border-t border-[#0D3B3B]/8">
         {onView && <button type="button" onClick={() => onView(req)} className="flex-1 py-3 text-sm font-semibold text-[#0D3B3B]/70 hover:bg-[#F2F5F3]">View</button>}
@@ -1467,7 +1480,22 @@ function HomePage({ setPage, userSession }) {
         </div>
       </section>
 
-      {userSession?.access_token && mine.length > 0 && (
+      {requests.filter((r) => String(r.category || "").includes("Fundraiser")).length > 0 && (
+        <section className="px-5 pb-10">
+          <div className="mx-auto max-w-lg">
+            <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-3">Fundraisers</p>
+            <div className="space-y-3">
+              {requests.filter((r) => String(r.category || "").includes("Fundraiser")).slice(0, 3).map((r) => (
+                <button key={r.id} type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 text-left">
+                  <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
+                  <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
+                  {r.amountNeeded > 0 && <p className="text-sm text-[#1BAA9C] mt-2">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>}
+                </button>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
         <section className="mx-auto max-w-lg px-5 pb-6">
           <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
           {mine.slice(0, 2).map((req) => (
@@ -1483,9 +1511,9 @@ function HomePage({ setPage, userSession }) {
         <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
           {[
             ["seek-help-form", "Seek Help"],
+            ["fundraiser", "Fundraiser"],
             ["give", "Give"],
             ["offers", "Giveaways"],
-            ["celebrate", "Connect"],
           ].map(([id, label]) => (
             <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
               {label}
@@ -5635,7 +5663,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "home", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
