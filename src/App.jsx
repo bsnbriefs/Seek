@@ -3912,13 +3912,13 @@ function RequestPage({ requestId, setPage }) {
                 {CONNECT_CATS.includes(request.category) || /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
                   <CelebrateRsvp request={request} setPage={setPage} helpLabel={/job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "I can be there"} />
                 ) : isFinancialNeed(request) ? (
-                  <Button
-                    variant="primary"
-                    className="w-full sm:w-auto"
+                  <button
+                    type="button"
+                    className="w-full rounded-full bg-[#1BAA9C] text-white py-4 text-lg font-bold"
                     onClick={() => setCaseDonateOpen(true)}
                   >
-                    Support this case <HandHeart size={16} />
-                  </Button>
+                    Donate now
+                  </button>
                 ) : (
                   <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
                 )}
