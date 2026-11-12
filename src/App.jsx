@@ -666,6 +666,21 @@ function UrgencyBadge({ level }) {
   );
 }
 
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-[#0D3B3B]/10" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-3/4 rounded bg-[#0D3B3B]/10" />
+          <div className="h-3 w-1/2 rounded bg-[#0D3B3B]/10" />
+        </div>
+      </div>
+      <div className="mt-3 h-2 w-full rounded-full bg-[#0D3B3B]/10" />
+    </div>
+  );
+}
+
 function ProgressBar({ raised, needed }) {
   const n = Number(needed);
   if (!n) return null;
@@ -920,7 +935,7 @@ function RequestCard({ req, onHelp, onView }) {
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
   return (
-    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
+    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
         <div className="flex items-center gap-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
@@ -2712,7 +2727,9 @@ if (!cancelled) {
           Support BSN Foundation →
         </button>
         {requestsLoading ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
+          </div>
         ) : requestsError ? (
           <p className="font-body text-sm text-red-600">{requestsError}</p>
         ) : requests.length === 0 ? (
