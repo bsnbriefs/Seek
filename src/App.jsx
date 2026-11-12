@@ -5385,7 +5385,6 @@ function MyRequestsPage({ setPage, userSession }) {
                   }}
                 />
               )}
-              </div>
             </details>
           ))}
         </div>
