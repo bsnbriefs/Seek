@@ -2866,6 +2866,7 @@ function FundraiserPage({ setPage }) {
         amountNeeded: Number(goal) || 0,
         email: session.user?.email,
         fullName: session.user?.user_metadata?.full_name || "",
+        evidenceFiles: files,
       });
       setDone(true);
     } catch (err) {
@@ -5260,7 +5261,23 @@ function MyRequestsPage({ setPage, userSession }) {
                   })}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-3">
+              {req.status === "published" || req.status === "partially_funded" ? (
+                <div className="mt-4 rounded-xl bg-[#F2F5F3] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">Post an update</p>
+                  <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[#0D3B3B]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
+                  <button type="button" onClick={async () => {
+                    const text = document.getElementById("update-" + req.id)?.value;
+                    if (!text?.trim()) return;
+                    try {
+                      await postRequestPublicUpdate(req.id, text);
+                      alert("Update posted.");
+                      document.getElementById("update-" + req.id).value = "";
+                    } catch (err) {
+                      alert(err.message || "Could not post update.");
+                    }
+                  }} className="mt-2 rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-xs font-bold">Post update</button>
+                </div>
+              ) : null}
                 <button
                   type="button"
                   onClick={() => {
@@ -5272,6 +5289,19 @@ function MyRequestsPage({ setPage, userSession }) {
                 >
                   View public page
                 </button>
+                <label className="text-sm font-semibold text-[#1BAA9C] hover:underline cursor-pointer">
+                  Add evidence
+                  <input type="file" accept="image/*,video/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      await uploadRequestEvidence(req.id, file);
+                      alert("Evidence uploaded. Admin will review it.");
+                    } catch (err) {
+                      alert(err.message || "Could not upload evidence.");
+                    }
+                  }} />
+                </label>
                 {req.status === "rejected" && (
                   <button
                     type="button"
