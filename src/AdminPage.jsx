@@ -412,7 +412,6 @@ export default function AdminPage() {
             { id: "requests", label: "Requests" },
             { id: "offers", label: "Offers" },
             { id: "volunteers", label: "Volunteers" },
-            { id: "money", label: "Money" },
             { id: "trust", label: "Trust" },
             { id: "thanks", label: "Thanks" },
             { id: "impact", label: "Impact" },
