@@ -138,6 +138,39 @@ const C = {
 };
 
 
+const CURRENCIES = [
+  { code: "NGN", symbol: "₦", rate: 1 },
+  { code: "USD", symbol: "$", rate: 0.00065 },
+  { code: "GBP", symbol: "£", rate: 0.00051 },
+  { code: "EUR", symbol: "€", rate: 0.00060 },
+];
+
+function getCurrency() {
+  try { return localStorage.getItem("seek_currency") || "NGN"; } catch { return "NGN"; }
+}
+
+function formatMoney(naira) {
+  const code = getCurrency();
+  const c = CURRENCIES.find((x) => x.code === code) || CURRENCIES[0];
+  const value = Math.round(naira * c.rate);
+  return c.symbol + value.toLocaleString();
+}
+
+function CurrencyPicker() {
+  const [code, setCode] = useState(getCurrency);
+  const change = (e) => {
+    const v = e.target.value;
+    setCode(v);
+    try { localStorage.setItem("seek_currency", v); } catch {}
+    window.location.reload();
+  };
+  return (
+    <select value={code} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+      {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
+    </select>
+  );
+}
+
 const SEEK_LANGS = [
   { id: "en", label: "English" },
   { id: "pcm", label: "Nigerian Pidgin" },
@@ -417,6 +450,11 @@ const OUTREACH_CAMPAIGNS = [
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
   { id: "hospital", title: "Hospital Visitations", blurb: "Someone in a ward should not eat alone.", amount: 10000, budget: 5000000, story: "BSN walks into wards with food and a face that stayed. The next ward visit needs ₦5 million this year. A gift today is a basket on a bedside table this month.", photos: ["/outreach/IMG_20260701_104225 (2).jpg", "/outreach/IMG_20260701_105547.jpg", "/outreach/IMG_20260701_111430.jpg", "/outreach/file_000000009dec722f87f63a47ae3202fd (3).png"], videos: ["/outreach/lv_0_20260913172307.mp4"] },
   { id: "food-drive", title: "Charity / Food Drive", blurb: "A family should not sleep hungry this week.", amount: 5000, budget: 5500000, story: "Those packs on the table went to homes last outreach. The cupboard is empty again. ₦5.5 million fills packs for the year. Give one pack. We will take it.", photos: ["/outreach/FB_IMG_1789290417201.jpg", "/outreach/FB_IMG_1789290419768.jpg"], videos: ["/outreach/5y_puvyl-vIFzHJa.mp4", "/outreach/TWMate.com-af962006a3f58cf503f15dfc230444a6.mp4"] },
+  { id: "widows", title: "Widows Support", blurb: "A widow should not raise children alone.", amount: 10000, budget: 3000000, story: "BSN visits widows with food, school fees, and a listening ear. This year we need ₦3 million to keep those visits going.", photos: [], videos: [] },
+  { id: "orphans", title: "Orphan Care", blurb: "A child without parents still needs a home.", amount: 15000, budget: 4000000, story: "Some children have no one to call. BSN places them with families and covers school fees. ₦4 million keeps the programme running.", photos: [], videos: [] },
+  { id: "elderly", title: "Elderly Care", blurb: "An elder should not be forgotten.", amount: 5000, budget: 2000000, story: "BSN checks on elders who live alone. A gift covers food, medicine, and a visit. ₦2 million for the year.", photos: [], videos: [] },
+  { id: "clean-water", title: "Clean Water", blurb: "A village should not drink from a stream.", amount: 20000, budget: 6000000, story: "One borehole serves a whole community. ₦6 million builds two this year. Give toward clean water.", photos: [], videos: [] },
+  { id: "disability", title: "Disability Care", blurb: "A person with a disability should not be left behind.", amount: 10000, budget: 3500000, story: "BSN provides wheelchairs, school support, and daily care for people living with disabilities. ₦3.5 million covers the year.", photos: [], videos: [] },
 ];
 
 /* ---------------- Small building blocks ---------------- */
@@ -625,6 +663,21 @@ function UrgencyBadge({ level }) {
     <span className={`inline-flex items-center gap-1 rounded-full px-3 py-1 text-xs font-semibold font-body uppercase tracking-wide ${map[level]}`}>
       {level}
     </span>
+  );
+}
+
+function SkeletonCard() {
+  return (
+    <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 animate-pulse">
+      <div className="flex items-center gap-3">
+        <div className="h-10 w-10 rounded-full bg-[#0D3B3B]/10" />
+        <div className="flex-1 space-y-2">
+          <div className="h-4 w-3/4 rounded bg-[#0D3B3B]/10" />
+          <div className="h-3 w-1/2 rounded bg-[#0D3B3B]/10" />
+        </div>
+      </div>
+      <div className="mt-3 h-2 w-full rounded-full bg-[#0D3B3B]/10" />
+    </div>
   );
 }
 
@@ -861,6 +914,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
           ))}
         </div>
         <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
+        <p className="mt-1 text-xs text-white/40">Amounts are in Naira. International cards are accepted.</p>
         <label className="mt-3 flex items-center gap-2 text-sm text-white/80">
           <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
           Give this amount every month
@@ -881,7 +935,7 @@ function RequestCard({ req, onHelp, onView }) {
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
   return (
-    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
+    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
         <div className="flex items-center gap-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
@@ -1098,9 +1152,9 @@ function CaseDonateSheet({ request, onClose }) {
 function FeatureStrip({ page, setPage }) {
   const items = [
     { id: "home", label: "Home" },
+    { id: "seek-help-form", label: "Seek Help" },
     { id: "fundraiser", label: "Fundraiser" },
-    { id: "give", label: "Give" },
-    { id: "bsn", label: "BSN" },
+    { id: "bsn", label: "Campaign" },
     { id: "shop", label: "Shop" },
   ];
   const go = (item) => {
@@ -1157,12 +1211,14 @@ function Navbar({ page, setPage, userSession }) {
   }, [userSession]);
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
-    { id: "seek-help-form", label: "Fundraiser", icon: HeartHandshake },
+    { id: "fundraiser", label: "Fundraiser", icon: HeartHandshake },
     { id: "give", label: "Help Someone", icon: Wallet },
-    { id: "offers", label: "Giveaways", icon: Package },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
+    { id: "privacy", label: "Privacy", icon: ShieldCheck },
+    { id: "terms", label: "Terms", icon: ShieldCheck },
+    { id: "contact", label: "Contact", icon: Mail },
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
@@ -1192,8 +1248,8 @@ function Navbar({ page, setPage, userSession }) {
         </nav>
 
         <div className="hidden lg:flex items-center gap-3">
-          <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
           <ThemeToggle />
+          <CurrencyPicker />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
@@ -1208,8 +1264,8 @@ function Navbar({ page, setPage, userSession }) {
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
-        <button type="button" aria-label="Search" className="p-2" onClick={() => go("give")}><Search size={20} /></button>
         <ThemeToggle />
+        <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1221,12 +1277,13 @@ function Navbar({ page, setPage, userSession }) {
         <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
-            { id: "seek-help-form", label: "Fundraiser", icon: Search },
-            { id: "give", label: "Give", icon: HeartHandshake },
-            { id: "offers", label: "Giveaways", icon: Package },
+            { id: "fundraiser", label: "Fundraiser", icon: Search },
             { id: "impact", label: "Impact", icon: BadgeCheck },
             { id: "shop", label: "Shop", icon: Package },
             { id: "about", label: "About", icon: ShieldCheck },
+            { id: "privacy", label: "Privacy", icon: ShieldCheck },
+            { id: "terms", label: "Terms", icon: ShieldCheck },
+            { id: "contact", label: "Contact", icon: Mail },
           ].map((l) => {
             const Icon = l.icon;
             const on = page === l.id;
@@ -1236,11 +1293,6 @@ function Navbar({ page, setPage, userSession }) {
               </button>
             );
           })}
-          {userSession?.access_token && (
-            <button onClick={() => go("my-seek")} className="w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase text-[#0D3B3B]/70">
-              <User size={16} /> My SEEK
-            </button>
-          )}
           <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
             {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
@@ -2043,7 +2095,7 @@ function BsnPage({ setPage }) {
         {OUTREACH_CAMPAIGNS.map((c, i) => (
           <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-2xl bg-[#0D3B3B] text-white p-4 text-left flex items-center gap-4 hover:bg-[#1BAA9C] transition-colors">
             <div className="w-12 h-12 rounded-xl bg-[#1BAA9C] flex items-center justify-center shrink-0">
-              <span className="text-xl">{i === 0 ? "🎀" : i === 1 ? "🎒" : i === 2 ? "🔧" : i === 3 ? "🏥" : "🍲"}</span>
+              <span className="text-xl">{c.id === "pad-a-girl" ? "🎀" : c.id === "back-to-school" ? "🎒" : c.id === "skills" ? "🔧" : c.id === "hospital" ? "🏥" : c.id === "food-drive" ? "🍲" : c.id === "widows" ? "👩" : c.id === "orphans" ? "👶" : c.id === "elderly" ? "👴" : c.id === "clean-water" ? "💧" : c.id === "disability" ? "♿" : "💚"}</span>
             </div>
             <div>
               <p className="font-semibold">{c.title}</p>
@@ -2674,15 +2726,18 @@ if (!cancelled) {
         <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[#1BAA9C]">
           Support BSN Foundation →
         </button>
+        <input type="search" value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} placeholder="Search requests..." className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 p-3 text-sm" />
         {requestsLoading ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">Loading open requests…</p>
+          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
+            {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
+          </div>
         ) : requestsError ? (
           <p className="font-body text-sm text-red-600">{requestsError}</p>
         ) : requests.length === 0 ? (
           <p className="font-body text-sm text-[#0D3B3B]/50">No published requests yet.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
-            {requests.filter((r) => !CONNECT_CATS.includes(r.category)).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
+            {requests.filter((r) => !CONNECT_CATS.includes(r.category) && (!searchFilter || r.title?.toLowerCase().includes(searchFilter.toLowerCase()) || r.location?.toLowerCase().includes(searchFilter.toLowerCase()))).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
           </div>
         )}
       </section>
@@ -2952,9 +3007,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
-        <SectionLabel>Fundraiser</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Start a fundraiser.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/60">Set a target. Tell your story. Neighbours can give through Paystack. SEEK reviews it before it goes public.</p>
+        <SectionLabel>Seek Help</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask for help.</h1>
+        <p className="mt-3 font-body text-[#0D3B3B]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -2997,18 +3052,12 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What do you need help with?</p>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-2">
-              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => {
-                const Icon = c.icon;
-                const active = form.category === c.label;
-                return (
-                  <button type="button" key={c.id} onClick={() => setForm({ ...form, category: c.label })} className={`rounded-xl border p-3 text-left flex items-center gap-2.5 transition ${active ? "border-[#1BAA9C] bg-[#1BAA9C]/8 text-[#0D3B3B]" : "border-[#0D3B3B]/10 text-[#0D3B3B]/70 hover:border-[#0D3B3B]/25"}`}>
-                    {Icon ? <Icon size={16} className="shrink-0" /> : null}
-                    <span className="text-xs sm:text-sm font-semibold leading-tight">{c.label}</span>
-                  </button>
-                );
-              })}
-            </div>
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+              <option value="">Select a category</option>
+              {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
+                <option key={c.id} value={c.label}>{c.label}</option>
+              ))}
+            </select>
           </div>
           {CONNECT_CATS.includes(form.category) && (
             <p className="text-sm text-[#0D3B3B]/65 rounded-xl bg-[#1BAA9C]/10 p-3">
@@ -3019,28 +3068,6 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Describe it in your own words">
             <textarea className={inputCls} rows={4} value={form.description} onChange={set("description")} placeholder="What happened, who it is for, and what would help." />
           </Field>
-          <div className="flex flex-wrap gap-3">
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
-            const hint = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
-            const local = suggestNeedStructure({ need: form.need, description: form.description, amount: form.amount });
-            setForm((prev) => ({ ...prev, category: hint.category || local.category || prev.category }));
-            setError((hint.missing || local.missing || []).length ? ("You can still submit. Consider adding: " + (hint.missing || local.missing).join(", ") + ".") : "Category updated. You can still edit it.");
-          }}>Suggest a category from what I wrote</button>
-          <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
-            if (!(form.need || form.description).trim()) {
-              setError("Write what you need first, then tap Help me explain this.");
-              return;
-            }
-            const draft = await seekAiAssist({ purpose: "classify", title: form.need, description: form.description || form.need });
-            const local = explainSeekNeed([form.need, form.description].filter(Boolean).join(". "));
-            setForm((prev) => ({
-              ...prev,
-              need: draft.title || local?.title || prev.need,
-              description: draft.description || local?.description || prev.description,
-            }));
-            setError("Draft updated. Edit the description before you submit.");
-          }}>Help me explain this</button>
-          </div>
           <Field label="Fundraising target (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="How much do you need? e.g. 50000" inputMode="numeric" />
             <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
@@ -3244,20 +3271,14 @@ function VolunteerPage() {
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Tell us how you would like to help, and we will keep you in mind for opportunities.</p>
       </section>
 
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pb-14">
-        <div className="grid sm:grid-cols-3 gap-4">
-          {roles.map((r) => (
-            <button
-              key={r.id}
-              type="button"
-              onClick={() => setForm((prev) => ({ ...prev, role: r.title, interests: prev.interests || r.desc }))}
-              className={`rounded-2xl bg-white border p-5 text-left ${form.role === r.title ? "border-[#1BAA9C]" : "border-[#0D3B3B]/6"}`}
-            >
-              <Users size={16} className="text-[#1BAA9C] mb-3" />
-              <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
-              <p className="mt-2 font-body text-sm text-[#0D3B3B]/65">{r.desc}</p>
-            </button>
-          ))}
+      <section className="mx-auto max-w-xl px-5 sm:px-8 pb-14">
+        <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-6">
+          <Field label="Choose a role">
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+              <option value="">Select a role</option>
+              {roles.map((r) => <option key={r.id} value={r.title}>{r.title}</option>)}
+            </select>
+          </Field>
         </div>
       </section>
 
@@ -3603,8 +3624,18 @@ function RequestPage({ requestId, setPage }) {
           <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">{request.title}</h1>
           <button type="button" className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]" onClick={async () => {
             const url = `${window.location.origin}/request/${request.id}`;
-            try { if (navigator.share) await navigator.share({ title: request.title, url }); } catch (_e) {}
+            const text = request.title + " — " + url;
+            if (navigator.share) {
+              try { await navigator.share({ title: request.title, url }); } catch (_e) {}
+            } else {
+              window.open("https://wa.me/?text=" + encodeURIComponent(text), "_blank");
+            }
           }}>Share</button>
+          <div className="flex gap-2">
+            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] text-white px-3 py-1.5 text-xs font-bold">WhatsApp</a>
+            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#1877F2] text-white px-3 py-1.5 text-xs font-bold">Facebook</a>
+            <a href={"https://twitter.com/intent/tweet?text=" + encodeURIComponent(request.title) + "&url=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-black text-white px-3 py-1.5 text-xs font-bold">X</a>
+          </div>
         </div>
         <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 mb-6"><MapPin size={16} /> {request.location}</p>
 
@@ -5362,17 +5393,26 @@ function LiveTicker() {
         const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
           const raw = String(g.donor_name || "");
           const parts = raw.split("·").map((s) => s.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
-          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "A neighbour" : parts[0];
-          const purpose = parts.slice(1).join(" · ") || "a SEEK request";
-          return who + " sent ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose + " · " + daysPosted(g.created_at);
+          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "Someone" : parts[0];
+          const purpose = parts.slice(1).join(" · ") || "a request";
+          return "💚 " + who + " supported " + purpose;
+        });
+        const requestBits = (Array.isArray(reqRows) ? reqRows : []).map((r) => {
+          const title = r.title || r.need || r.category || "a request";
+          const loc = r.location ? " in " + r.location : "";
+          if (CONNECT_CATS.includes(r.category)) return "🎉 " + title + loc;
+          if (/job|mentor|counsel/i.test(String(r.category || ""))) return "🤝 New " + (r.category || "opportunity") + loc;
+          return "🔴 " + title + loc;
+        });
+        const offerBits = (Array.isArray(offerRows) ? offerRows : []).slice(0, 4).map((o) => {
+          const desc = String(o.description || o.category || "giveaway").slice(0, 50);
+          return "🎁 " + desc;
         });
         const bits = [
-          stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
+          stats?.raised ? ("💚 ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
           ...giftBits,
-          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => (CONNECT_CATS.includes(r.category) ? "CELEBRATE · " : "SEEK REQUEST · ") + (r.title || r.need || r.category || "Open request") + " · " + daysPosted(r.created_at || r.createdAt)),
-          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70) + " · " + daysPosted(o.created_at || o.createdAt)),
-          ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
-          ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
+          ...requestBits,
+          ...offerBits,
         ].filter(Boolean);
         if (!cancelled) setItems(bits.filter(Boolean));
       } catch (_e) {}
@@ -5412,6 +5452,8 @@ function pageFromPath(pathname) {
   if (path === "/offers") return "offers";
   if (path === "/seek-help") return "seek-help";
   if (path === "/seek-help/request") return "seek-help-form";
+  if (path === "/fundraiser") return "fundraiser";
+  if (path === "/campaign") return "bsn";
   if (path === "/celebrate") return "celebrate";
   if (path === "/celebrate/request") return "celebrate-request";
   if (path === "/language") return "language";
@@ -5447,6 +5489,8 @@ function pathFromPage(page) {
     admin: "/admin",
     "seek-help": "/seek-help",
     "seek-help-form": "/seek-help/request",
+    fundraiser: "/fundraiser",
+    bsn: "/campaign",
     celebrate: "/celebrate",
     "celebrate-request": "/celebrate/request",
     volunteer: "/volunteer",
@@ -5486,10 +5530,11 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   ];
 
   const actions = [
-    { id: "seek-help-form", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
+    { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
-    { id: "offers", label: "Give Something", note: "Post a giveaway", icon: Package, scroll: "make-offer" },
+    { id: "home", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
+    { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
   ];
 
@@ -5643,18 +5688,17 @@ function InstallSeekPrompt() {
       clearTimeout(timer);
     };
   }, []);
-  if (closed || standalone || !show) return null;
+  if (closed || standalone || !show || !installEvent) return null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const doInstall = async () => {
-    if (installEvent) {
-      installEvent.prompt();
-      const choice = await installEvent.userChoice.catch(() => null);
+    if (!installEvent) return;
+    try {
+      await installEvent.prompt();
+      const choice = await installEvent.userChoice;
       setInstallEvent(null);
-      if (choice?.outcome === "accepted") setClosed(true);
-    } else if (isIOS) {
-      alert("Tap the Share button at the bottom, then tap Add to Home Screen.");
-    } else {
-      alert("Open the browser menu (three dots) and tap Add to Home Screen or Install app.");
+      setClosed(true);
+    } catch (_e) {
+      setClosed(true);
     }
   };
   return (
