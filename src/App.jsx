@@ -143,6 +143,8 @@ const CURRENCIES = [
   { code: "USD", symbol: "$", rate: 0.00065 },
   { code: "GBP", symbol: "£", rate: 0.00051 },
   { code: "EUR", symbol: "€", rate: 0.00060 },
+  { code: "CAD", symbol: "C$", rate: 0.00088 },
+  { code: "AUD", symbol: "A$", rate: 0.00098 },
 ];
 
 function getCurrency() {
@@ -173,12 +175,16 @@ function CurrencyPicker() {
 
 const SEEK_LANGS = [
   { id: "en", label: "English" },
+  { id: "fr", label: "Français" },
+  { id: "es", label: "Español" },
+  { id: "pt", label: "Português" },
+  { id: "ar", label: "العربية" },
+  { id: "zh", label: "中文" },
+  { id: "hi", label: "हिन्दी" },
   { id: "pcm", label: "Nigerian Pidgin" },
   { id: "ha", label: "Hausa" },
   { id: "yo", label: "Yoruba" },
   { id: "ig", label: "Igbo" },
-  { id: "fr", label: "Francais" },
-  { id: "es", label: "Espanol" },
 ];
 const SEEK_I18N = {
   en: {
@@ -236,6 +242,38 @@ const SEEK_I18N = {
     wantHelp: "Quiero ayudar",
     seeStories: "Ver historias",
     language: "Idioma",
+  },
+  pt: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "Peça o que precisa. Ofereça o que puder.",
+    needHelp: "Preciso de ajuda",
+    wantHelp: "Quero ajudar",
+    seeStories: "Ver histórias",
+    language: "Idioma",
+  },
+  ar: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "اطلب ما تحتاجه. قدم ما تستطيع.",
+    needHelp: "أحتاج مساعدة",
+    wantHelp: "أريد المساعدة",
+    seeStories: "شاهد القصص",
+    language: "اللغة",
+  },
+  zh: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "请求你需要的。提供你能给的。",
+    needHelp: "我需要帮助",
+    wantHelp: "我想帮助",
+    seeStories: "查看故事",
+    language: "语言",
+  },
+  hi: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "जो चाहिए वो मांगो। जो दे सको वो दो।",
+    needHelp: "मुझे मदद चाहिए",
+    wantHelp: "मैं मदद करना चाहता हूं",
+    seeStories: "कहानियां देखें",
+    language: "भाषा",
   },
 };
 function readSeekLang() {
@@ -862,6 +900,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
   const kind = request ? "neighbour" : "outreach";
   if (!request && !campaign) return null;
   const chips = [5000, 10000, 25000, 50000];
+  const currency = CURRENCIES.find((c) => c.code === getCurrency()) || CURRENCIES[0];
   return (
     <div className="fixed inset-0 z-[180] bg-black/40 flex items-center justify-center p-5" onClick={onClose}>
       <form
@@ -910,11 +949,11 @@ function SeekDonateModal({ request, campaign, onClose }) {
         <input required type="email" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for receipt" />
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((n) => (
-            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>₦{n.toLocaleString()}</button>
+            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>{currency.symbol}{Math.round(n * currency.rate).toLocaleString()}</button>
           ))}
         </div>
-        <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
-        <p className="mt-1 text-xs text-white/40">Amounts are in Naira. International cards are accepted.</p>
+        <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={"Amount " + currency.symbol} />
+        <p className="mt-1 text-xs text-white/40">Showing in {currency.code}. Charged in Naira. International cards accepted.</p>
         <label className="mt-3 flex items-center gap-2 text-sm text-white/80">
           <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
           Give this amount every month
@@ -1259,8 +1298,8 @@ function Navbar({ page, setPage, userSession }) {
             {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
             <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
-          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>I need help</Button>
-          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I want to help</Button>
+          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>{tSeek("needHelp")}</Button>
+          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>{tSeek("wantHelp")}</Button>
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
@@ -1400,11 +1439,11 @@ function HomePage({ setPage, userSession }) {
       <section className="px-5 pt-10 pb-20 text-center">
         <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-16 w-auto object-contain mix-blend-screen" />
         <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] dark:text-white text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
-          ASK. SEEK. FIND.
+          {tSeek("hero")}
         </h1>
         <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1BAA9C]">What SEEK is all about</p>
         <p className="mt-3 font-body text-sm leading-relaxed text-[#0D3B3B]/70 max-w-md mx-auto">
-          SEEK is a community assistance platform built to connect people who need help with people who can offer it. Ask for what you need. Offer what you can — whether it is financial support, goods, opportunities, mentorship, counselling, or simply showing up for someone.
+          {tSeek("askOffer")}
         </p>
         <div className="mt-6">
           <Button variant="primary" onClick={() => go("for-you")}>Explore SEEK</Button>
