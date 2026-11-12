@@ -5673,15 +5673,14 @@ function InstallSeekPrompt() {
   if (closed || standalone || !show || !installEvent) return null;
   const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
   const doInstall = async () => {
-    if (installEvent) {
-      installEvent.prompt();
-      const choice = await installEvent.userChoice.catch(() => null);
+    if (!installEvent) return;
+    try {
+      await installEvent.prompt();
+      const choice = await installEvent.userChoice;
       setInstallEvent(null);
-      if (choice?.outcome === "accepted") setClosed(true);
-    } else if (isIOS) {
-      alert("Tap the Share button at the bottom, then tap Add to Home Screen.");
-    } else {
-      alert("Open the browser menu (three dots) and tap Add to Home Screen or Install app.");
+      setClosed(true);
+    } catch (_e) {
+      setClosed(true);
     }
   };
   return (
