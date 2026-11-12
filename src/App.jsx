@@ -5375,17 +5375,26 @@ function LiveTicker() {
         const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
           const raw = String(g.donor_name || "");
           const parts = raw.split("·").map((s) => s.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
-          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "A neighbour" : parts[0];
-          const purpose = parts.slice(1).join(" · ") || "a SEEK request";
-          return who + " sent ₦" + Math.round(Number(g.amount) || 0).toLocaleString() + " for " + purpose + " · " + daysPosted(g.created_at);
+          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "Someone" : parts[0];
+          const purpose = parts.slice(1).join(" · ") || "a request";
+          return "💚 " + who + " supported " + purpose;
+        });
+        const requestBits = (Array.isArray(reqRows) ? reqRows : []).map((r) => {
+          const title = r.title || r.need || r.category || "a request";
+          const loc = r.location ? " in " + r.location : "";
+          if (CONNECT_CATS.includes(r.category)) return "🎉 " + title + loc;
+          if (/job|mentor|counsel/i.test(String(r.category || ""))) return "🤝 New " + (r.category || "opportunity") + loc;
+          return "🔴 " + title + loc;
+        });
+        const offerBits = (Array.isArray(offerRows) ? offerRows : []).slice(0, 4).map((o) => {
+          const desc = String(o.description || o.category || "giveaway").slice(0, 50);
+          return "🎁 " + desc;
         });
         const bits = [
-          stats?.raised ? ("SEEK GIFTS · ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
+          stats?.raised ? ("💚 ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
           ...giftBits,
-          ...(Array.isArray(reqRows) ? reqRows : []).map((r) => (CONNECT_CATS.includes(r.category) ? "CELEBRATE · " : "SEEK REQUEST · ") + (r.title || r.need || r.category || "Open request") + " · " + daysPosted(r.created_at || r.createdAt)),
-          ...(Array.isArray(offerRows) ? offerRows : []).slice(0, 5).map((o) => "GIVEAWAY · " + String(o.description || o.category || "Open giveaway").slice(0, 70) + " · " + daysPosted(o.created_at || o.createdAt)),
-          ...(Array.isArray(disasters) ? disasters : []).map((name) => "GLOBAL CRISIS · " + name),
-          ...(Array.isArray(nigeria) ? nigeria : []).map((name) => "NIGERIA · " + name),
+          ...requestBits,
+          ...offerBits,
         ].filter(Boolean);
         if (!cancelled) setItems(bits.filter(Boolean));
       } catch (_e) {}
