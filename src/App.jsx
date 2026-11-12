@@ -158,6 +158,21 @@ function formatMoney(naira) {
   return c.symbol + value.toLocaleString();
 }
 
+function LanguagePicker() {
+  const [lang, setLang] = useState(readSeekLang);
+  const change = (e) => {
+    const v = e.target.value;
+    setLang(v);
+    try { localStorage.setItem("seek_lang", v); } catch {}
+    window.location.reload();
+  };
+  return (
+    <select value={lang} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+      {SEEK_LANGS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+    </select>
+  );
+}
+
 function CurrencyPicker() {
   const [code, setCode] = useState(getCurrency);
   const change = (e) => {
@@ -1288,6 +1303,7 @@ function Navbar({ page, setPage, userSession }) {
 
         <div className="hidden lg:flex items-center gap-3">
           <ThemeToggle />
+          <LanguagePicker />
           <CurrencyPicker />
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
@@ -1304,6 +1320,7 @@ function Navbar({ page, setPage, userSession }) {
 
         <div className="lg:hidden flex items-center gap-1">
         <ThemeToggle />
+        <LanguagePicker />
         <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
@@ -2849,7 +2866,6 @@ function FundraiserPage({ setPage }) {
         amountNeeded: Number(goal) || 0,
         email: session.user?.email,
         fullName: session.user?.user_metadata?.full_name || "",
-        evidenceFiles: files,
       });
       setDone(true);
     } catch (err) {
