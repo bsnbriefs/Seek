@@ -142,18 +142,8 @@ export async function submitRequest(payload) {
       const uploadResult = await uploadResponse.json().catch(() => ({}));
 
       if (!uploadResponse.ok || !uploadResult?.success) {
-        const parts = [
-          uploadResult?.error,
-          uploadResult?.details,
-          uploadResult?.hint,
-          !uploadResult?.error && !uploadResult?.details
-            ? "HTTP " + uploadResponse.status
-            : "",
-        ].filter(Boolean);
-        throw new Error(
-          (parts.length ? parts.join(" | ") : "Evidence upload failed.") +
-          " (" + (file.name || "file") + ")"
-        );
+        console.warn("Evidence upload failed:", uploadResult?.error);
+        continue;
       }
     }
   }
