@@ -5309,6 +5309,7 @@ function MyRequestsPage({ setPage, userSession }) {
                   </label>
                 </div>
               )}
+              {["published", "partially_funded"].includes(req.status) && (
                 <div className="mt-4 rounded-xl bg-[#F2F5F3] p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">Post an update</p>
                   <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[#0D3B3B]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
@@ -5324,7 +5325,7 @@ function MyRequestsPage({ setPage, userSession }) {
                     }
                   }} className="mt-2 rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-xs font-bold">Post update</button>
                 </div>
-              ) : null}
+              )}
                 <button
                   type="button"
                   onClick={() => {
