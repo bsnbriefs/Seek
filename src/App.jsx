@@ -5261,7 +5261,25 @@ function MyRequestsPage({ setPage, userSession }) {
                   })}
                 </div>
               </div>
-              {req.status === "published" || req.status === "partially_funded" ? (
+              {req.status === "verification_required" && (
+                <div className="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4">
+                  <p className="text-sm font-semibold text-amber-800">Admin needs more evidence</p>
+                  <p className="mt-1 text-xs text-amber-700">Please upload additional photos or documents to support your fundraiser.</p>
+                  <label className="mt-2 inline-block text-sm font-semibold text-[#1BAA9C] cursor-pointer">
+                    Upload evidence
+                    <input type="file" accept="image/*,video/*,application/pdf" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        await uploadRequestEvidence(req.id, file);
+                        alert("Evidence uploaded. Admin will review it.");
+                      } catch (err) {
+                        alert(err.message || "Could not upload.");
+                      }
+                    }} />
+                  </label>
+                </div>
+              )}
                 <div className="mt-4 rounded-xl bg-[#F2F5F3] p-4">
                   <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">Post an update</p>
                   <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[#0D3B3B]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
