@@ -1333,7 +1333,6 @@ function Navbar({ page, setPage, userSession }) {
 
         <div className="lg:hidden flex items-center gap-1">
         <ThemeToggle />
-        <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1393,6 +1392,7 @@ function Connector() {
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
   const [mine, setMine] = useState([]);
+  const [donateReq, setDonateReq] = useState(null);
   useEffect(() => {
     if (!userSession?.access_token) { setMine([]); return; }
     listMyRequests().then((rows) => setMine((rows || []).map(mapRequestRow).slice(0, 3))).catch(() => setMine([]));
@@ -1498,13 +1498,14 @@ function HomePage({ setPage, userSession }) {
                       </div>
                     )}
                   </button>
-                  <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
+                  <button type="button" onClick={() => setDonateReq(r)} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
                 </div>
               ))}
             </div>
           </div>
         </section>
       )}
+      {donateReq && <SeekDonateModal request={donateReq} onClose={() => setDonateReq(null)} />}
         <section className="mx-auto max-w-lg px-5 pb-6">
           <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
           {mine.slice(0, 2).map((req) => (
@@ -2000,7 +2001,7 @@ function SeekAutoVideo({ src, title }) {
     <>
       <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
-      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-28 z-20 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center text-xs" aria-label={muted ? "Unmute" : "Mute"}>
+      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-32 z-20 h-6 w-6 rounded-full bg-black/30 text-white/70 flex items-center justify-center text-[10px]" aria-label={muted ? "Unmute" : "Mute"}>
         {muted ? "🔇" : "🔊"}
       </button>
       {paused && !ended && (
@@ -2263,7 +2264,7 @@ function DiscoverPage({ setPage }) {
           const connect = CONNECT_CATS.includes(r.category);
           return {
             key: "req-" + r.id,
-            kind: connect ? "Celebrate" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
+            kind: connect ? "Celebrate" : String(r.category || "").includes("Fundraiser") ? "Fundraiser" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
             title: r.title || "Open request",
             body: r.location || r.category || "",
             at: stamp(r),
@@ -2331,8 +2332,8 @@ function DiscoverPage({ setPage }) {
     }
   }, [searchOpen]);
   const shown = tab === "trending"
-    ? items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 20)
-    : items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 40);
+    ? items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 20)
+    : items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
