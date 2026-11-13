@@ -316,8 +316,21 @@ const FONTS = (
     html.seek-dark { color-scheme: dark; }
     /* Keep the header notification bell legible in both SEEK themes. */
     html.seek-dark .seek-inbox-button { color: #ffffff !important; }
-    html.seek-dark .seek-inbox-button:hover { color: var(--seek-success) !important; }
-    html.seek-dark .seek-inbox-button > span { color: var(--seek-primary) !important; }
+    html:not(.seek-dark) .seek-inbox-button { color: #193524 !important; }
+    html.seek-dark .seek-inbox-button:hover,
+    html:not(.seek-dark) .seek-inbox-button:hover { color: var(--seek-success) !important; }
+    .seek-inbox-button .seek-notification-badge {
+      background: #ffffff !important;
+      color: #193524 !important;
+      border: 1px solid rgba(25,53,36,.12) !important;
+      box-shadow: 0 1px 5px rgba(0,0,0,.16) !important;
+    }
+    html.seek-dark .seek-inbox-button .seek-notification-badge {
+      background: #ffffff !important;
+      color: #193524 !important;
+    }
+    .seek-inbox-button .seek-notification-badge.is-live { animation: seekBadgePop .42s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes seekBadgePop { 0% { transform: scale(.65); opacity: .4; } 65% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
     html.seek-dark h1, html.seek-dark h2 { color: var(--seek-mint) !important; }
     html.seek-dark h3 { color: var(--seek-light) !important; }
     html.seek-dark .text-\[\var(--seek-primary)\] { color: var(--seek-mint) !important; }
@@ -1285,7 +1298,7 @@ function NavInboxButton({ userSession, setPage }) {
     >
       <Bell size={22} strokeWidth={2} aria-hidden="true" />
       {unread > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--seek-success)] text-[var(--seek-primary)] text-[10px] leading-none font-extrabold flex items-center justify-center ring-2 ring-[var(--seek-card,var(--seek-white))]">
+        <span key={unread} className="seek-notification-badge is-live absolute -top-0.5 -right-0.5 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full text-[10px] leading-none font-extrabold flex items-center justify-center ring-2 ring-[var(--seek-card,var(--seek-white))]">
           {unread > 9 ? "9+" : unread}
         </span>
       )}

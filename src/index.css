@@ -2188,3 +2188,45 @@ html:not(.seek-dark) .seek-outcome-form button[type="submit"] {
   -webkit-text-fill-color: #FFFFFF !important;
   opacity: 1 !important;
 }
+
+/* Live SEEK inbox: theme-aware contrast and restrained notification motion. */
+.seek-messages-page { color: var(--seek-primary); }
+.seek-messages-count { color: var(--seek-accent); }
+.seek-messages-live { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; border:1px solid rgba(41,75,67,.14); background:rgba(255,255,255,.72); color:#294B43; font-size:10px; font-weight:900; letter-spacing:.12em; }
+.seek-messages-live.is-connected svg { color:#2D9B67; animation:seekLiveRadio 2s ease-in-out infinite; }
+.seek-messages-live.is-checking svg { color:#A5A5A5; }
+.seek-messages-live-track { height:2px; overflow:hidden; border-radius:999px; background:rgba(41,75,67,.10); }
+.seek-messages-live-track span { display:block; width:28%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8BCB55,#D5FF85); animation:seekLiveTrack 3.2s ease-in-out infinite; }
+.seek-message-section-label { color:#39785B; }
+.seek-message-count-pill { display:inline-flex; min-width:21px; height:21px; align-items:center; justify-content:center; border-radius:999px; background:#D9FF9B; color:#193524; font-size:10px; font-weight:900; }
+.seek-message-card { display:block; background:#FFFFFF; border-color:rgba(41,75,67,.14); box-shadow:0 5px 18px rgba(20,48,37,.045); }
+.seek-message-card:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(20,48,37,.09); }
+.seek-message-card.is-unread { border-color:rgba(57,120,91,.38); background:#F5FAF4; }
+.seek-message-title { color:#193D2D; font-size:16px; line-height:1.35; }
+.seek-message-body { color:#53665B; }
+.seek-message-meta { color:#718078; }
+.seek-message-unread-dot { width:8px; height:8px; border-radius:50%; background:#79C94B; box-shadow:0 0 0 0 rgba(121,201,75,.5); animation:seekMessagePulse 2s infinite; }
+.seek-message-new-tag { color:#39785B; font-size:9px; font-weight:900; letter-spacing:.14em; }
+.seek-message-empty { background:#FFFFFF; border-color:rgba(41,75,67,.13); color:#294B43; }
+.seek-message-empty > span { background:#EAF5E8; color:#294B43; }
+.seek-message-enter { animation:seekMessageEnter .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(min(var(--message-index,0),5) * 65ms); }
+@keyframes seekMessageEnter { from { opacity:0; transform:translateY(14px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
+@keyframes seekMessagePulse { 0% { box-shadow:0 0 0 0 rgba(121,201,75,.48); } 70% { box-shadow:0 0 0 7px rgba(121,201,75,0); } 100% { box-shadow:0 0 0 0 rgba(121,201,75,0); } }
+@keyframes seekLiveRadio { 0%,100% { opacity:1; } 50% { opacity:.45; } }
+@keyframes seekLiveTrack { 0% { transform:translateX(-110%); } 100% { transform:translateX(430%); } }
+html.seek-dark .seek-messages-page { color:#F2F6F0; }
+html.seek-dark .seek-messages-page h1 { color:#DDF4C9 !important; }
+html.seek-dark .seek-messages-count { color:#D2DDD4 !important; }
+html.seek-dark .seek-messages-live { background:#294B3B; border-color:rgba(214,255,181,.22); color:#F4F8F1; }
+html.seek-dark .seek-messages-live-track { background:rgba(255,255,255,.12); }
+html.seek-dark .seek-message-section-label { color:#CFF69B; }
+html.seek-dark .seek-message-card,
+html.seek-dark .seek-message-card.is-unread { background:#294B3B; border-color:rgba(214,255,181,.24); }
+html.seek-dark .seek-message-card.is-read { background:#243C32; border-color:rgba(255,255,255,.13); }
+html.seek-dark .seek-message-title { color:#F7FAF4 !important; }
+html.seek-dark .seek-message-body { color:#DCE7DE !important; }
+html.seek-dark .seek-message-meta { color:#B8C9BD !important; }
+html.seek-dark .seek-message-new-tag { color:#D7FF9A !important; }
+html.seek-dark .seek-message-empty { background:#294B3B; border-color:rgba(255,255,255,.15); color:#F7FAF4; }
+html.seek-dark .seek-message-empty > span { background:#D7FF9A; color:#193524; }
+@media (prefers-reduced-motion:reduce) { .seek-messages-live-track span,.seek-messages-live.is-connected svg,.seek-message-unread-dot,.seek-message-enter,.seek-inbox-button .seek-notification-badge.is-live { animation:none !important; } }
