@@ -2419,59 +2419,42 @@ function DiscoverPage({ setPage }) {
   };
   useEffect(() => {
     let cancelled = false;
-    Promise.all([
-      listPublishedRequests(24).catch(() => []),
-      listPublicOffers().catch(() => []),
-      listPublishedImpact().catch(() => []),
-      listAppreciationStories().catch(() => []),
-    ]).then(([requests, offers, impact, thanks]) => {
-      if (cancelled) return;
-      const stamp = (row) => new Date(row.created_at || row.createdAt || row.published_at || row.happened_on || 0).getTime() || 0;
-      const feed = [
-        ...(Array.isArray(requests) ? requests : []).map((row) => {
-          const r = row.title ? row : mapRequestRow(row);
-          const connect = CONNECT_CATS.includes(r.category);
-          return {
-            key: "req-" + r.id,
-            kind: connect ? "Celebrate" : String(r.category || "").includes("Fundraiser") ? "Fundraiser" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
-            title: r.title || "Open request",
-            body: r.location || r.category || "",
-            at: stamp(r),
-            page: "request:" + r.id,
-            path: "/request/" + r.id,
-          };
-        }),
-        ...(Array.isArray(offers) ? offers : []).map((o) => ({
-          key: "off-" + o.id,
-          kind: /job/i.test(String(o.category || "")) ? "Job" : /mentor/i.test(String(o.category || "")) ? "Mentorship" : /counsel/i.test(String(o.category || "")) ? "Counselling" : "Giveaway",
-          title: String(o.description || "Open giveaway").slice(0, 90),
-          body: [o.category, o.city].filter(Boolean).join(" · "),
-          at: stamp(o),
-          page: "offers",
-          path: "/offers",
-        })),
-        ...(Array.isArray(impact) ? impact : []).map((row) => ({
-          key: "imp-" + row.id,
-          kind: "Impact",
-          title: row.title || "Community impact",
-          body: row.location || "",
-          at: stamp(row),
-          page: "impact:" + row.id,
-          path: "/impact/" + row.id,
-        })),
-        ...(Array.isArray(thanks) ? thanks : []).map((row) => ({
-          key: "thx-" + (row.id || row.request_id),
-          kind: "Appreciation",
-          title: row.title || "Thank you",
-          body: row.location || "",
-          at: stamp(row),
-          page: row.request_id ? "request:" + row.request_id : "impact",
-          path: row.request_id ? "/request/" + row.request_id : "/impact",
-        })),
-      ].sort((a, b) => b.at - a.at);
-      setItems(feed);
-    }).finally(() => { if (!cancelled) setLoading(false); });
-    return () => { cancelled = true; };
+    let busy = false;
+    const loadDiscover = async () => {
+      if (busy || (typeof document !== "undefined" && document.visibilityState === "hidden")) return;
+      busy = true;
+      try {
+        const [requests, offers, impact, thanks] = await Promise.all([
+          listPublishedRequests(24).catch(() => []),
+          listPublicOffers().catch(() => []),
+          listPublishedImpact().catch(() => []),
+          listAppreciationStories().catch(() => []),
+        ]);
+        if (cancelled) return;
+        const stamp = (row) => new Date(row.created_at || row.createdAt || row.published_at || row.happened_on || 0).getTime() || 0;
+        const feed = [
+          ...(Array.isArray(requests) ? requests : []).map((row) => {
+            const r = row.title ? row : mapRequestRow(row);
+            const connect = CONNECT_CATS.includes(r.category);
+            return { key: "req-" + r.id, kind: connect ? "Celebrate" : String(r.category || "").includes("Fundraiser") ? "Fundraiser" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request", title: r.title || "Open request", body: r.location || r.category || "", at: stamp(r), page: "request:" + r.id, path: "/request/" + r.id };
+          }),
+          ...(Array.isArray(offers) ? offers : []).map((o) => ({ key: "off-" + o.id, kind: /job/i.test(String(o.category || "")) ? "Job" : /mentor/i.test(String(o.category || "")) ? "Mentorship" : /counsel/i.test(String(o.category || "")) ? "Counselling" : "Giveaway", title: String(o.description || "Open giveaway").slice(0, 90), body: [o.category, o.city].filter(Boolean).join(" · "), at: stamp(o), page: "offers", path: "/offers" })),
+          ...(Array.isArray(impact) ? impact : []).map((row) => ({ key: "imp-" + row.id, kind: "Impact", title: row.title || "Community impact", body: row.location || "", at: stamp(row), page: "impact:" + row.id, path: "/impact/" + row.id })),
+          ...(Array.isArray(thanks) ? thanks : []).map((row) => ({ key: "thx-" + (row.id || row.request_id), kind: "Appreciation", title: row.title || "Thank you", body: row.location || "", at: stamp(row), page: row.request_id ? "request:" + row.request_id : "impact", path: row.request_id ? "/request/" + row.request_id : "/impact" })),
+        ].sort((a, b) => b.at - a.at);
+        setItems(feed);
+      } catch (_error) {
+        // Keep the last successful Discover feed visible if a refresh fails.
+      } finally {
+        if (!cancelled) setLoading(false);
+        busy = false;
+      }
+    };
+    loadDiscover();
+    const timer = window.setInterval(loadDiscover, 60000);
+    const onVisible = () => { if (document.visibilityState === "visible") loadDiscover(); };
+    document.addEventListener("visibilitychange", onVisible);
+    return () => { cancelled = true; window.clearInterval(timer); document.removeEventListener("visibilitychange", onVisible); };
   }, []);
   useEffect(() => {
     const q = query.trim();
@@ -2547,6 +2530,18 @@ function DiscoverPage({ setPage }) {
           )}
         </div>
       </section>
+      {!searchOpen && (
+        <section className="seek-discover-livebar" aria-label="Live community updates">
+          <div className="seek-discover-livebar-label"><span className="seek-discover-live-dot" /> LIVE <span>DISCOVER</span></div>
+          <div className="seek-discover-livebar-window" aria-live="polite">
+            <div className="seek-discover-livebar-track">
+              {(items.length ? [...items.slice(0, 10), ...items.slice(0, 10)] : [{ key: "welcome", kind: "SEEK COMMUNITY", title: "New requests, offers and impact stories appear here." }, { key: "welcome-2", kind: "DISCOVER", title: "Explore ways to give and receive support." }]).map((entry, index) => (
+                <span className="seek-discover-livebar-item" key={entry.key + "-ticker-" + index}><b>{String(entry.kind).toUpperCase()}</b><span>{entry.title}</span><i>✦</i></span>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
       {searchOpen ? (
       <section className="seek-discover-search-results mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
         {query.trim().length < 2 && (
@@ -5639,21 +5634,29 @@ function ShopPage({ setPage }) {
   const [loading, setLoading] = useState(false);
 
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 pt-12 pb-28">
-        <SectionLabel>Shop</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">Shop</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/60">Official SEEK items. Part of each sale supports BSN outreach.</p>
+    <div className="seek-shop-page" style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 pt-10 pb-28">
+        <div className="seek-shop-hero">
+          <span className="seek-shop-orb seek-shop-orb-one" aria-hidden="true" />
+          <span className="seek-shop-orb seek-shop-orb-two" aria-hidden="true" />
+          <div className="relative z-10">
+            <SectionLabel>SEEK STORE</SectionLabel>
+            <h1 className="seek-shop-title font-display font-extrabold text-3xl">Wear the mission.</h1>
+            <p className="seek-shop-subtitle mt-2 text-sm">Official SEEK items. Every purchase helps support BSN community outreach.</p>
+            <div className="seek-shop-pulse mt-4"><span /> Thoughtful finds. Real-world impact.</div>
+          </div>
+        </div>
 
-        <div className="mt-8 grid grid-cols-2 gap-3">
+        <div className="seek-shop-grid mt-7 grid grid-cols-2 gap-3">
           {SEEK_SHOP.map((row) => (
             <button
               key={row.id}
               type="button"
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
-              className="rounded-2xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
+              className="seek-shop-product rounded-2xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
+              style={{ "--seek-shop-index": SEEK_SHOP.findIndex((product) => product.id === row.id) }}
             >
-              <img
+              <div className="seek-shop-image-wrap"><img
                 src={row.image}
                 alt={row.title}
                 className="w-full h-40 object-cover object-center"
@@ -5664,7 +5667,7 @@ function ShopPage({ setPage }) {
                       e.currentTarget.src = SEEK_FACE;
                     }
                   }}
-                />
+                /></div>
               <div className="p-3">
                 <p className="font-display font-bold text-sm text-[#0D3B3B]">{row.title}</p>
                 <p className="font-display font-bold text-sm text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
@@ -5828,21 +5831,21 @@ function LiveTicker() {
 
   return (
     <>
-      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden border-b border-white/10 bg-[#0D3B3B] text-white" aria-label="SEEK community activity">
+      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" aria-label="SEEK community activity">
         <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
               <span className="seek-live-ring" />
               <span className="relative h-1.5 w-1.5 rounded-full bg-[#9BE15D]" />
             </span>
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#B8F28B]">Community pulse</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#D8F18A]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
             <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
-                  <span className="font-extrabold tracking-[0.09em] text-[#9BE15D]">{item.label}</span>
+                  <span className="font-extrabold tracking-[0.09em] text-[#FFC98B]">{item.label}</span>
                   <span>{item.text}</span>
                   <span className="ml-2 text-white/25" aria-hidden="true">✦</span>
                 </span>

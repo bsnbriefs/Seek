@@ -466,3 +466,59 @@ html.seek-dark .seek-my-requests-page input[type=file]::file-selector-button { b
   .seek-request-journey { padding:12px !important; }
   .seek-request-actions { gap:9px !important; }
 }
+
+/* SEEK Shop: energetic storefront motion with accessible contrast */
+.seek-shop-page { min-height: 70vh; overflow: hidden; }
+.seek-shop-hero { position: relative; isolation: isolate; overflow: hidden; border: 1px solid rgba(13,59,59,.10); border-radius: 28px; padding: 26px 24px; background: radial-gradient(circle at 90% 5%, rgba(27,170,156,.18), transparent 36%), linear-gradient(135deg,#F4FAF7 0%,#E7F3EE 100%); }
+.seek-shop-orb { position: absolute; z-index: -1; display: block; border-radius: 999px; filter: blur(2px); pointer-events: none; }
+.seek-shop-orb-one { width: 150px; height: 150px; right: 8%; top: -85px; background: rgba(27,170,156,.22); animation: seek-shop-orbit 8s ease-in-out infinite alternate; }
+.seek-shop-orb-two { width: 100px; height: 100px; right: -28px; bottom: -42px; background: rgba(151,210,78,.25); animation: seek-shop-orbit 10s ease-in-out infinite alternate-reverse; }
+.seek-shop-title { color: #123B37; letter-spacing: -.04em; animation: seek-title-in .65s cubic-bezier(.2,.8,.2,1) both; }
+.seek-shop-subtitle { max-width: 32rem; color: #405F57; line-height: 1.65; }
+.seek-shop-pulse { display: inline-flex; align-items: center; gap: 9px; border: 1px solid rgba(13,119,112,.16); border-radius: 999px; padding: 8px 12px; color: #155B50; background: rgba(255,255,255,.72); font-size: 11px; font-weight: 800; }
+.seek-shop-pulse span { width: 7px; height: 7px; border-radius: 50%; background: #69B94E; box-shadow: 0 0 0 0 rgba(105,185,78,.45); animation: seek-dot-pulse 1.9s infinite; }
+.seek-shop-product { display: block; width: 100%; position: relative; animation: seek-shop-card-in .65s cubic-bezier(.2,.8,.2,1) both; animation-delay: min(calc(var(--seek-shop-index,0) * 65ms),585ms); transition: transform .28s ease, box-shadow .28s ease, border-color .28s ease; box-shadow: 0 5px 18px rgba(13,59,59,.05); }
+.seek-shop-product:hover { transform: translateY(-5px) scale(1.012); border-color: rgba(27,170,156,.55); box-shadow: 0 16px 32px rgba(13,59,59,.13); }
+.seek-shop-product:active { transform: scale(.985); }
+.seek-shop-image-wrap { height: 156px; overflow: hidden; background: linear-gradient(145deg,#EAF4EF,#DCEBE4); }
+.seek-shop-image-wrap img { width: 100%; height: 100%; object-fit: cover; object-position: center; transition: transform .55s cubic-bezier(.2,.8,.2,1), filter .35s ease; }
+.seek-shop-product:hover .seek-shop-image-wrap img { transform: scale(1.07); filter: saturate(1.08); }
+.seek-shop-product .p-3 { min-height: 76px; background: #fff; }
+@keyframes seek-shop-card-in { from { opacity: 0; transform: translateY(18px) scale(.985); } to { opacity: 1; transform: translateY(0) scale(1); } }
+@keyframes seek-shop-orbit { from { transform: translate3d(-8px,0,0) scale(.92); } to { transform: translate3d(16px,14px,0) scale(1.12); } }
+html.seek-dark .seek-shop-hero { background: radial-gradient(circle at 90% 5%,rgba(40,180,156,.18),transparent 38%),linear-gradient(135deg,#1B302B,#172521); border-color: rgba(202,235,220,.15); }
+html.seek-dark .seek-shop-title { color: #F0F7F3 !important; }
+html.seek-dark .seek-shop-subtitle { color: #C3D8CE !important; }
+html.seek-dark .seek-shop-pulse { color: #D5F4E6; background: #233D34; border-color: #42695A; }
+html.seek-dark .seek-shop-product { background: #1C2D27 !important; border-color: rgba(216,241,228,.15) !important; }
+html.seek-dark .seek-shop-product .p-3 { background: #1C2D27 !important; }
+html.seek-dark .seek-shop-product .p-3 p:first-child { color: #EDF7F1 !important; }
+html.seek-dark .seek-shop-image-wrap { background: linear-gradient(145deg,#263F36,#1B2D27); }
+
+/* Discover live ticker: sourced from the refreshed public Discover feed */
+.seek-discover-livebar { display: flex; align-items: center; gap: 12px; max-width: 42rem; margin: 12px auto 4px; padding: 9px 20px; }
+.seek-discover-livebar-label { display: inline-flex; align-items: center; gap: 7px; flex: 0 0 auto; color: #174E43; font-size: 9px; font-weight: 900; letter-spacing: .13em; white-space: nowrap; }
+.seek-discover-livebar-label > span:last-child { color: #0D8A78; }
+.seek-discover-live-dot { width: 7px; height: 7px; border-radius: 50%; background: #79BE50; box-shadow: 0 0 0 0 rgba(121,190,80,.5); animation: seek-dot-pulse 1.8s infinite; }
+.seek-discover-livebar-window { min-width: 0; flex: 1; overflow: hidden; mask-image: linear-gradient(90deg,transparent,#000 4%,#000 96%,transparent); }
+.seek-discover-livebar-track { display: flex; width: max-content; animation: seek-marquee 54s linear infinite; }
+.seek-discover-livebar-window:hover .seek-discover-livebar-track { animation-play-state: paused; }
+.seek-discover-livebar-item { display: inline-flex; align-items: center; gap: 9px; padding-right: 24px; color: #526B64; font-size: 10px; white-space: nowrap; }
+.seek-discover-livebar-item b { color: #0D7770; font-size: 9px; letter-spacing: .08em; }
+.seek-discover-livebar-item i { color: #8CBF58; font-style: normal; }
+html.seek-dark .seek-discover-livebar-label { color: #E2F2EA; }
+html.seek-dark .seek-discover-livebar-label > span:last-child { color: #8DE3C5; }
+html.seek-dark .seek-discover-livebar-item { color: #C3D8CE; }
+html.seek-dark .seek-discover-livebar-item b { color: #8DE3C5; }
+@media (max-width:640px) { .seek-discover-livebar { margin: 8px auto 2px; padding: 8px 18px; gap: 9px; } .seek-discover-livebar-item { font-size: 9px; } .seek-shop-hero { padding: 22px 18px; border-radius: 23px; } .seek-shop-image-wrap { height: 132px; } }
+
+/* Community Pulse: move away from the heavy teal strip to charcoal with warm accents */
+.seek-community-pulse { background: #202923 !important; color: #F6F8F4 !important; border-bottom: 1px solid rgba(216,241,138,.24) !important; box-shadow: 0 5px 18px rgba(8,20,15,.18); }
+.seek-community-pulse .seek-ticker-track,
+.seek-community-pulse .seek-ticker-single { color: #F4F5EF !important; }
+.seek-community-pulse .seek-ticker-track > span,
+.seek-community-pulse .seek-ticker-single > span { color: #F0F2EB !important; }
+.seek-community-pulse .seek-ticker-track > span > span:nth-of-type(2),
+.seek-community-pulse .seek-ticker-single > span > span:nth-of-type(2) { color: #FFC98B !important; }
+.seek-community-pulse .seek-live-ring { border-color: rgba(216,241,138,.5) !important; }
+@media (prefers-reduced-motion: reduce) { .seek-shop-orb,.seek-shop-product,.seek-shop-pulse span,.seek-discover-live-dot,.seek-discover-livebar-track { animation: none !important; } }
