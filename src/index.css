@@ -272,3 +272,63 @@ html.seek-dark .seek-discover-card .text-\[\#0D3B3B\] { color: #EAF5F1 !importan
 .seek-dark .seek-campaign-back { color:#fff; }
 .seek-dark .seek-campaign-page .text-\[\#0D3B3B\], .seek-dark .seek-campaign-page .text-\[\#385653\] { color:#d5e5de !important; }
 @media (prefers-reduced-motion:reduce) { .seek-campaign-media-progress span { transition:none!important; } }
+
+/* Campaign page: bind the entire campaign surface to the global SEEK theme toggle.
+   Light mode is clean white; dark mode is deep teal with high-contrast text. */
+html:not(.seek-dark) .seek-campaign-page {
+  background: #ffffff !important;
+  color: #123d38 !important;
+}
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card,
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-support-card,
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-story-card {
+  background: #ffffff !important;
+  color: #173d38 !important;
+  border-color: rgba(13, 59, 59, .13) !important;
+}
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-donor-guide {
+  background: #eff8f4 !important;
+  color: #173d38 !important;
+}
+html.seek-dark .seek-campaign-page {
+  background: #073b38 !important;
+  color: #f1fbf7 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card,
+html.seek-dark .seek-campaign-page .seek-campaign-support-card,
+html.seek-dark .seek-campaign-page .seek-campaign-story-card {
+  background: #104d47 !important;
+  color: #f1fbf7 !important;
+  border-color: rgba(190, 244, 225, .24) !important;
+  box-shadow: 0 12px 32px rgba(0, 20, 18, .24) !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card h3,
+html.seek-dark .seek-campaign-page .seek-campaign-support-card h2,
+html.seek-dark .seek-campaign-page .seek-campaign-story-card p,
+html.seek-dark .seek-campaign-page .seek-campaign-donor-guide li,
+html.seek-dark .seek-campaign-page .text-\[\#0D3B3B\],
+html.seek-dark .seek-campaign-page .text-\[\#385653\] {
+  color: #effbf6 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card p,
+html.seek-dark .seek-campaign-page .seek-campaign-support-card p {
+  color: #c8e5dc !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-donor-guide {
+  background: #0b403b !important;
+  color: #eaf8f2 !important;
+  border-color: rgba(143, 231, 203, .3) !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-donor-guide li b {
+  background: #1b665b !important;
+  color: #eafff6 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-progress {
+  background: linear-gradient(90deg, #45d5d1, #a2ef65) !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-back,
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-back {
+  transition: background .2s ease, border-color .2s ease, transform .2s ease;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-back { background: rgba(255,255,255,.14) !important; border-color: rgba(255,255,255,.35) !important; }
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-back { background: rgba(255,255,255,.16) !important; }
