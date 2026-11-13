@@ -1252,3 +1252,70 @@ html.seek-dark .seek-discover-searchbox { background: #2B362E !important; color:
 html.seek-dark .seek-discover-searchbox :is(input,span,svg) { color: #F7F7F1 !important; }
 html.seek-dark .seek-discover-card { background: #2B362E !important; color: #F7F7F1 !important; border-color: #526457 !important; }
 html.seek-dark .seek-discover-card :is(h1,h2,h3,p,span,strong,b) { color: #E2E9E1 !important; }
+
+
+/* SCREENSHOT-LED MOBILE CONTRAST FIXES */
+.seek-reel-card { isolation: isolate; }
+.seek-reel-media::after {
+  content:""; position:absolute; inset:35% 0 0; z-index:2; pointer-events:none;
+  background:linear-gradient(180deg,rgba(10,18,14,0) 0%,rgba(10,18,14,.58) 38%,rgba(10,18,14,.94) 100%);
+}
+.seek-reel-caption,.seek-reel-side-actions,.seek-reel-topline { z-index:4 !important; }
+.seek-reel-caption,
+.seek-reel-caption :is(p,span,strong,b,button),
+.seek-reel-caption .seek-reel-title,
+.seek-reel-caption .seek-reel-summary,
+.seek-reel-caption .seek-reel-location,
+.seek-reel-funding-label,.seek-reel-funding-label span,.seek-reel-funding-label strong {
+  color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+  text-shadow:0 1px 5px rgba(0,0,0,.55);
+}
+.seek-reel-caption .seek-reel-donate {
+  background:#CCF88E !important; color:#193524 !important; -webkit-text-fill-color:#193524 !important;
+  border:1px solid #CCF88E !important; text-shadow:none !important;
+}
+.seek-reel-caption .seek-reel-open {
+  background:rgba(20,31,25,.9) !important; color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+  border:1px solid rgba(255,255,255,.72) !important; text-shadow:none !important;
+}
+
+/* Cookie/privacy banner: preserve white copy on evergreen panel. */
+.seek-cookie-banner { background:#274A34 !important; color:#FFFFFF !important; border:1px solid rgba(204,248,142,.42) !important; }
+.seek-cookie-banner,.seek-cookie-banner :is(p,span,strong,b,small,button) {
+  color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+}
+.seek-cookie-banner button[aria-label="Close privacy notice"] {
+  background:rgba(255,255,255,.16) !important; color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+  border:1px solid rgba(255,255,255,.3) !important;
+}
+.seek-cookie-banner button.bg-white { background:#FFFFFF !important; color:#193524 !important; -webkit-text-fill-color:#193524 !important; }
+.seek-cookie-banner button:not(.bg-white) {
+  background:transparent !important; color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important;
+  border:1px solid rgba(255,255,255,.65) !important;
+}
+
+/* Mobile navigation: opaque evergreen, not translucent white/blurred. */
+nav[aria-label="SEEK mobile navigation"] {
+  background:#274A34 !important; background-color:#274A34 !important; color:#FFFFFF !important;
+  border-top:1px solid rgba(204,248,142,.42) !important; box-shadow:0 -8px 30px rgba(0,0,0,.2) !important;
+  backdrop-filter:none !important; -webkit-backdrop-filter:none !important;
+}
+nav[aria-label="SEEK mobile navigation"] .seek-mobile-nav-link { color:rgba(255,255,255,.88) !important; opacity:1 !important; }
+nav[aria-label="SEEK mobile navigation"] .seek-mobile-nav-active { color:#CCF88E !important; }
+nav[aria-label="SEEK mobile navigation"] .seek-mobile-create {
+  background:#CCF88E !important; color:#193524 !important; border-color:#193524 !important;
+}
+html.seek-dark nav[aria-label="SEEK mobile navigation"] {
+  background:#17231B !important; color:#FFFFFF !important; border-top-color:rgba(204,248,142,.5) !important;
+}
+
+/* Hero copy: explicit high contrast in both themes. */
+html:not(.seek-dark) .seek-home-hero .seek-hero-kicker,
+html:not(.seek-dark) .seek-home-hero .seek-hero-title { color:#274A34 !important; }
+html:not(.seek-dark) .seek-home-hero .seek-hero-title .seek-gradient-text { color:#356747 !important; }
+html:not(.seek-dark) .seek-home-hero > div > div > p { color:#35463A !important; }
+html.seek-dark .seek-home-hero .seek-hero-kicker,
+html.seek-dark .seek-home-hero .seek-hero-title,
+html.seek-dark .seek-home-hero > div > div > p { color:#F7F7F1 !important; }
+
+@media (prefers-reduced-motion:reduce) { .seek-reel-media::after { transition:none !important; } }
