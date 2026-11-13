@@ -3894,7 +3894,7 @@ function RequestPage({ requestId, setPage }) {
 
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-10">
+      <section className="seek-request-detail mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-10">
         <div className="flex flex-wrap items-center gap-2 mb-3">
           <span className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">{request.category}</span>
           <VerificationBadge status={request.status} />

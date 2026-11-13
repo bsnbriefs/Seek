@@ -1196,3 +1196,59 @@ html:not(.seek-dark) button:disabled, html:not(.seek-dark) [aria-disabled="true"
 html.seek-dark button:disabled, html.seek-dark [aria-disabled="true"] { color: #C5D0C7 !important; opacity: .78; }
 :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline: 3px solid #477A36 !important; outline-offset: 3px !important; }
 html.seek-dark :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline-color: #CCF88E !important; }
+
+/* =========================================================
+   Targeted contrast repair: public request/fundraiser detail,
+   Home calls-to-action and Discover controls.
+   ========================================================= */
+.seek-request-detail { color: #26332B; }
+html:not(.seek-dark) .seek-request-detail { background: #FAF8F3; color: #26332B; }
+html:not(.seek-dark) .seek-request-detail :is(h1,h2,h3,strong,b) { color: #193524 !important; }
+html:not(.seek-dark) .seek-request-detail :is(p,li,span) { color: #35463A; }
+html:not(.seek-dark) .seek-request-detail > .rounded-3xl.bg-white { background: #FFFFFF !important; color: #26332B !important; }
+html:not(.seek-dark) .seek-request-detail > .rounded-3xl.bg-white :is(p,span,li) { color: #35463A !important; }
+html.seek-dark .seek-request-detail { background: #202923 !important; color: #F7F7F1 !important; }
+html.seek-dark .seek-request-detail :is(h1,h2,h3,strong,b) { color: #F7F7F1 !important; }
+html.seek-dark .seek-request-detail :is(p,li,span) { color: #E2E9E1 !important; }
+html.seek-dark .seek-request-detail > .rounded-3xl.bg-white,
+html.seek-dark .seek-request-detail .rounded-2xl.bg-white { background: #2B362E !important; border-color: #526457 !important; color: #F7F7F1 !important; }
+html.seek-dark .seek-request-detail > .rounded-3xl.bg-white :is(p,span,li) { color: #E2E9E1 !important; }
+html.seek-dark .seek-request-detail .text-\[var\(--seek-primary\)\]\/80,
+html.seek-dark .seek-request-detail .text-\[var\(--seek-primary\)\]\/70,
+html.seek-dark .seek-request-detail .text-\[var\(--seek-primary\)\]\/60,
+html.seek-dark .seek-request-detail .text-\[var\(--seek-primary\)\]\/55,
+html.seek-dark .seek-request-detail .text-\[var\(--seek-primary\)\]\/50 { color: #DCE5DC !important; }
+
+/* Home buttons: never allow the hero actions to become transparent. */
+.seek-home-hero .seek-hero-primary,
+.seek-home-hero button.seek-hero-primary {
+  background: #CCF88E !important; background-image: none !important;
+  color: #193524 !important; -webkit-text-fill-color: #193524 !important;
+  border: 1px solid #A9D66F !important; opacity: 1 !important;
+}
+.seek-home-hero button:not(.seek-hero-primary) {
+  background: #FFFFFF !important; color: #274A34 !important;
+  border: 1px solid #B8C8B8 !important; opacity: 1 !important;
+}
+html.seek-dark .seek-home-hero .seek-hero-primary,
+html.seek-dark .seek-home-hero button.seek-hero-primary {
+  background: #CCF88E !important; color: #193524 !important; -webkit-text-fill-color: #193524 !important;
+}
+html.seek-dark .seek-home-hero button:not(.seek-hero-primary) {
+  background: #35463A !important; color: #F7F7F1 !important;
+  border-color: #718477 !important;
+}
+
+/* Discover filters, search and feed cards stay visibly filled in both themes. */
+.seek-discover-filter { background: #FFFFFF !important; color: #274A34 !important; border: 1px solid #AAB7AA !important; opacity: 1 !important; }
+.seek-discover-filter.is-active { background: #CCF88E !important; color: #193524 !important; border-color: #A9D66F !important; }
+.seek-discover-searchbox { background: #FFFFFF !important; color: #26332B !important; border: 1px solid #AAB7AA !important; }
+.seek-discover-searchbox :is(input,span,svg) { color: #26332B !important; }
+.seek-discover-card { background: #FFFFFF !important; color: #26332B !important; opacity: 1 !important; }
+.seek-discover-card :is(h1,h2,h3,p,span,strong,b) { color: #35463A; }
+html.seek-dark .seek-discover-filter { background: #35463A !important; color: #F7F7F1 !important; border-color: #718477 !important; }
+html.seek-dark .seek-discover-filter.is-active { background: #CCF88E !important; color: #193524 !important; border-color: #CCF88E !important; }
+html.seek-dark .seek-discover-searchbox { background: #2B362E !important; color: #F7F7F1 !important; border-color: #718477 !important; }
+html.seek-dark .seek-discover-searchbox :is(input,span,svg) { color: #F7F7F1 !important; }
+html.seek-dark .seek-discover-card { background: #2B362E !important; color: #F7F7F1 !important; border-color: #526457 !important; }
+html.seek-dark .seek-discover-card :is(h1,h2,h3,p,span,strong,b) { color: #E2E9E1 !important; }
