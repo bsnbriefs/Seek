@@ -1803,3 +1803,118 @@ html.seek-dark .seek-outcome-form button[type="submit"] {
   background: #CCF88E !important; color: #193524 !important;
   -webkit-text-fill-color: #193524 !important; border-color: #A6D36B !important;
 }
+
+
+/* FINAL REQUEST CARD CONTRAST CORRECTION
+   The earlier generic journey span rule applied the lemon accent to text on white.
+   Keep the lemon as an accent only; use readable text colours for every label. */
+html:not(.seek-dark) .seek-my-requests-page .seek-request-journey {
+  background: #FFFFFF !important;
+  border-color: #DCE5DC !important;
+}
+html:not(.seek-dark) .seek-my-requests-page .seek-request-journey > p {
+  color: #315E46 !important;
+  -webkit-text-fill-color: #315E46 !important;
+}
+html:not(.seek-dark) .seek-my-requests-page .seek-request-journey span {
+  color: #53645A !important;
+  -webkit-text-fill-color: #53645A !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-my-requests-page .seek-request-journey span.font-bold {
+  color: #244B35 !important;
+  -webkit-text-fill-color: #244B35 !important;
+}
+html:not(.seek-dark) .seek-my-requests-page .seek-request-funding-progress span:first-child {
+  color: #244B35 !important;
+  -webkit-text-fill-color: #244B35 !important;
+}
+html:not(.seek-dark) .seek-my-requests-page .seek-request-funding-progress span:last-child {
+  color: #53645A !important;
+  -webkit-text-fill-color: #53645A !important;
+}
+
+html.seek-dark .seek-my-requests-page .seek-request-journey {
+  background: #263B30 !important;
+  border-color: #A6D36B !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-journey > p {
+  color: #F0F4EC !important;
+  -webkit-text-fill-color: #F0F4EC !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-journey span {
+  color: #CBD8CE !important;
+  -webkit-text-fill-color: #CBD8CE !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-funding-progress span:first-child {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-funding-progress span:last-child {
+  color: #D4DED6 !important;
+  -webkit-text-fill-color: #D4DED6 !important;
+}
+
+
+/* Final My Requests contrast guard: target the actual nested funding labels. */
+.seek-my-requests-page .seek-request-funding-progress > div:last-child > span:first-child {
+  color: #244B35 !important; -webkit-text-fill-color: #244B35 !important; opacity: 1 !important;
+}
+.seek-my-requests-page .seek-request-funding-progress > div:last-child > span:last-child {
+  color: #53645A !important; -webkit-text-fill-color: #53645A !important; opacity: 1 !important;
+}
+.seek-my-requests-page .seek-request-journey span {
+  color: #53645A !important; -webkit-text-fill-color: #53645A !important; opacity: 1 !important;
+}
+.seek-my-requests-page .seek-request-journey span.font-bold {
+  color: #244B35 !important; -webkit-text-fill-color: #244B35 !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-funding-progress > div:last-child > span:first-child {
+  color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-funding-progress > div:last-child > span:last-child {
+  color: #D4DED6 !important; -webkit-text-fill-color: #D4DED6 !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-journey span {
+  color: #D4DED6 !important; -webkit-text-fill-color: #D4DED6 !important; opacity: 1 !important;
+}
+html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold {
+  color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important;
+}
+
+
+/* GLOBAL PRIMARY ACTION CONTRAST FIX — dark ink on SEEK lemon/lime.
+   Never use white text on the bright lime action surface. */
+html :is(button,a,[role="button"],[type="submit"])[style*="linear-gradient(135deg"] {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  font-weight: 750 !important;
+}
+html :is(button,a,[role="button"],[type="submit"])[style*="linear-gradient(135deg"] * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html :is(.seek-hero-primary,.seek-campaign-donate,button.seek-primary-action) {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border-color: #A6D36B !important;
+}
+html :is(.seek-hero-primary,.seek-campaign-donate,button.seek-primary-action) * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+/* Native form submit controls use the same accessible foreground. */
+html :is(form button[type="submit"],form input[type="submit"]) {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html :is(form button[type="submit"],form input[type="submit"]) * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}

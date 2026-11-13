@@ -643,12 +643,12 @@ function ShopSupportStrip({ setPage, tone = "page" }) {
 function Button({ children, variant = "primary", className = "", ...props }) {
   const base = "font-display font-semibold inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
   const variants = {
-    primary: "text-white shadow-[0_8px_24px_-8px_rgba(13,59,59,0.55)] hover:shadow-[0_12px_28px_-8px_rgba(13,59,59,0.65)] hover:-translate-y-0.5 focus-visible:ring-[var(--seek-success)]",
+    primary: "text-[#193524] shadow-[0_8px_24px_-8px_rgba(13,59,59,0.55)] hover:shadow-[0_12px_28px_-8px_rgba(13,59,59,0.65)] hover:-translate-y-0.5 focus-visible:ring-[var(--seek-success)]",
     secondary: "bg-white text-[var(--seek-primary)] border border-[var(--seek-primary)]/15 hover:border-[var(--seek-primary)]/30 hover:-translate-y-0.5 focus-visible:ring-[var(--seek-primary)]",
     ghost: "text-[var(--seek-primary)] hover:bg-[var(--seek-primary)]/5",
     light: "bg-white/10 text-white border border-white/25 hover:bg-white/20 backdrop-blur-sm",
   };
-  const style = variant === "primary" ? { background: `linear-gradient(135deg, ${C.teal}, ${C.green})` } : undefined;
+  const style = variant === "primary" ? { background: `linear-gradient(135deg, ${C.teal}, ${C.green})`, color: "#193524", WebkitTextFillColor: "#193524" } : undefined;
   return (
     <button className={`${base} ${variants[variant]} ${className}`} style={style} {...props}>
       {children}
@@ -829,20 +829,25 @@ function SkeletonCard() {
 }
 
 function ProgressBar({ raised, needed }) {
-  const n = Number(needed);
-  if (!n) return null;
-  const pct = Math.min(100, Math.round((Number(raised || 0) / n) * 100));
+  const n = Number(needed || 0);
+  if (!Number.isFinite(n) || n <= 0) return null;
+  const amount = Number(raised || 0);
+  const safeRaised = Number.isFinite(amount) ? amount : 0;
+  const pct = Math.min(100, Math.max(0, Math.round((safeRaised / n) * 100)));
+  const darkMode = typeof document !== "undefined" && document.documentElement.classList.contains("seek-dark");
+  const raisedText = darkMode ? "#FFFFFF" : "#244B35";
+  const targetText = darkMode ? "#D4DED6" : "#53645A";
   return (
-    <div>
-      <div className="h-2 w-full rounded-full bg-[var(--seek-primary)]/10 overflow-hidden">
+    <div className="seek-request-funding-progress">
+      <div className="h-2 w-full rounded-full bg-[var(--seek-primary)]/10 overflow-hidden" aria-label={`${pct}% funded`}>
         <div
           className="h-full rounded-full transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.green})` }}
         />
       </div>
-      <div className="mt-2 flex items-baseline justify-between text-sm font-body">
-        <span className="font-semibold text-[var(--seek-primary)]">₦{raised.toLocaleString()} raised</span>
-        <span className="text-[var(--seek-primary)]/50">of ₦{needed.toLocaleString()}</span>
+      <div className="mt-2 flex items-baseline justify-between gap-3 text-sm font-body">
+        <span className="font-semibold" style={{ color: raisedText, WebkitTextFillColor: raisedText }}>₦{safeRaised.toLocaleString()} raised</span>
+        <span style={{ color: targetText, WebkitTextFillColor: targetText }}>of ₦{n.toLocaleString()}</span>
       </div>
     </div>
   );
@@ -5515,7 +5520,9 @@ function MyRequestsPage({ setPage, userSession }) {
                     const order = {pending_review:0,verification_required:0,published:1,partially_funded:2,matched:2,fulfilled:3,closed:4,rejected:-1};
                     const current = order[req.status] ?? 0;
                     const active = current >= index && req.status !== 'rejected';
-                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[var(--seek-success)]' : 'bg-[var(--seek-primary)]/20'}`}></div><span className={`mt-1 block text-[10px] leading-tight ${active ? 'text-[var(--seek-primary)] font-bold' : 'text-[var(--seek-primary)]/70'}`}>{label}</span></div>;
+                    const darkMode = typeof document !== "undefined" && document.documentElement.classList.contains("seek-dark");
+                    const labelColor = darkMode ? (active ? "#FFFFFF" : "#D4DED6") : (active ? "#244B35" : "#53645A");
+                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[var(--seek-success)]' : 'bg-[var(--seek-primary)]/20'}`}></div><span style={{ color: labelColor, WebkitTextFillColor: labelColor, opacity: 1 }} className={`mt-1 block text-[10px] leading-tight ${active ? 'font-bold' : 'font-medium'}`}>{label}</span></div>;
                   })}
                 </div>
               </div>
