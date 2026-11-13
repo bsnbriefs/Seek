@@ -2056,35 +2056,23 @@ function SeekAutoVideo({ src, title, onEnded }) {
 function LiveSupportCard({ request, setPage }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [donateOpen, setDonateOpen] = useState(false);
-  const [carouselPaused, setCarouselPaused] = useState(false);
-  const media = Array.isArray(request.media) ? request.media : [];
+  const media = Array.isArray(request.media) ? request.media.filter((item) => item?.public_url) : [];
   const current = media[mediaIndex] || null;
-  const advanceMedia = () => setMediaIndex((index) => (index + 1) % media.length);
-
-  // Automatically advance still images; let videos finish naturally before moving on.
-  // Pause while the card is hovered/focused or the browser tab is hidden.
-  useEffect(() => {
-    if (media.length < 2 || !current || current.media_kind === "video" || carouselPaused) return;
-    let timer;
-    const startTimer = () => {
-      window.clearInterval(timer);
-      if (document.visibilityState === "visible") {
-        timer = window.setInterval(advanceMedia, 5000);
-      }
-    };
-    startTimer();
-    const onVisibilityChange = () => startTimer();
-    document.addEventListener("visibilitychange", onVisibilityChange);
-    return () => {
-      window.clearInterval(timer);
-      document.removeEventListener("visibilitychange", onVisibilityChange);
-    };
-  }, [media.length, mediaIndex, current?.public_url, current?.media_kind, carouselPaused]);
-  const amountNeeded = Number(request.amountNeeded) || 0;
-  const amountRaised = Number(request.amountRaised) || 0;
+  const advanceMedia = () => setMediaIndex((index) => media.length ? (index + 1) % media.length : 0);
+  const amountNeeded = Number(request.amountNeeded || request.amount_needed) || 0;
+  const amountRaised = Number(request.amountRaised || request.amount_raised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
-  const story = String(request.description || request.story || request.need || "Open this request to read the full story.").trim();
   const isFundraiser = isFinancialNeed(request);
+  const title = String(request.title || "A SEEK community story").trim();
+  const story = String(request.description || request.story || request.need || "See how the community can make a difference.").trim();
+  const creator = String(request.username || request.user_name || request.author_username || request.full_name || request.fullName || "").trim();
+
+  // Cycle through still photos. Videos advance naturally when playback ends.
+  useEffect(() => {
+    if (media.length < 2 || !current || current.media_kind === "video") return;
+    const timer = window.setTimeout(advanceMedia, 6500);
+    return () => window.clearTimeout(timer);
+  }, [media.length, mediaIndex, current?.public_url, current?.media_kind]);
 
   const goToCase = () => {
     recordFeedSignal("view", { id: request.id });
@@ -2100,60 +2088,42 @@ function LiveSupportCard({ request, setPage }) {
   };
 
   return (
-    <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-2xl border border-[#0D3B3B]/10 bg-white shadow-sm">
-      {current?.public_url ? (
-        <div
-          className="relative aspect-[16/9] max-h-[230px] overflow-hidden bg-[#EAF3F1]"
-          onMouseEnter={() => setCarouselPaused(true)}
-          onMouseLeave={() => setCarouselPaused(false)}
-          onFocus={() => setCarouselPaused(true)}
-          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setCarouselPaused(false); }}
-        >
-          {current.media_kind === "video" ? (
-            <SeekAutoVideo key={current.public_url} src={current.public_url} title={request.title || "SEEK community story"} onEnded={advanceMedia} />
-          ) : (
-            <img key={current.public_url} src={current.public_url} alt={request.title || "Community story"} loading="lazy" decoding="async" className="h-full w-full object-cover transition-opacity duration-500" />
-          )}
-          {media.length > 1 && (
-            <div className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
-              {mediaIndex + 1} / {media.length}
-            </div>
-          )}
+    <article className="seek-reel-card" aria-label={`SEEK story: ${title}`}>
+      <div className="seek-reel-media">
+        {current?.media_kind === "video" ? (
+          <SeekAutoVideo key={current.public_url} src={current.public_url} title={title} onEnded={advanceMedia} />
+        ) : current?.public_url ? (
+          <img key={current.public_url} src={current.public_url} alt={title} loading="lazy" decoding="async" className="seek-reel-image" />
+        ) : (
+          <div className="seek-reel-fallback" aria-hidden="true"><span>SEEK</span></div>
+        )}
+        <div className="seek-reel-topline">
+          <span className="seek-reel-kind">{request.category || (isFundraiser ? "Fundraiser" : "Community story")}</span>
+          {media.length > 1 ? <span className="seek-reel-count">{mediaIndex + 1}/{media.length}</span> : null}
         </div>
-      ) : null}
-
-      <div className="p-4 sm:p-5">
-        <div className="flex flex-wrap items-center gap-x-2 gap-y-1 text-[10px] font-bold uppercase tracking-[.13em] text-[#0D7770]">
-          <span>{request.category || (isFundraiser ? "Fundraiser" : "Community request")}</span>
-          {request.location ? <><span aria-hidden="true">·</span><span>{request.location}</span></> : null}
+        <div className="seek-reel-side-actions">
+          <button type="button" onClick={goToCase} aria-label="Open full story" className="seek-reel-action"><Eye size={21} /><span>Story</span></button>
         </div>
-        <h2 className="mt-2 font-display text-lg font-extrabold leading-snug text-[#153F3C] line-clamp-2">
-          {request.title || "A community member needs support"}
-        </h2>
-        <p className="mt-2 text-sm leading-6 text-[#526966] line-clamp-2">{story}</p>
-
-        {isFundraiser && amountNeeded > 0 ? (
-          <div className="mt-4">
-            <div className="flex items-center justify-between gap-3 text-xs">
-              <span className="font-bold text-[#153F3C]">₦{amountRaised.toLocaleString()} raised</span>
-              <span className="text-[#526966]">of ₦{amountNeeded.toLocaleString()}</span>
+        <div className="seek-reel-caption">
+          {creator ? <p className="seek-reel-creator">@{creator.replace(/^@/, "")}</p> : null}
+          <button type="button" onClick={goToCase} className="seek-reel-title">{title}</button>
+          <p className="seek-reel-summary">{story}</p>
+          {request.location ? <p className="seek-reel-location"><MapPin size={13} /> {request.location}</p> : null}
+          {isFundraiser && amountNeeded > 0 ? (
+            <div className="seek-reel-funding">
+              <div className="seek-reel-funding-label"><strong>₦{amountRaised.toLocaleString()} raised</strong><span>of ₦{amountNeeded.toLocaleString()}</span></div>
+              <div className="seek-reel-progress"><span style={{ width: `${progress}%` }} /></div>
             </div>
-            <div className="mt-2 h-1.5 overflow-hidden rounded-full bg-[#E7EFED]">
-              <div className="h-full rounded-full bg-gradient-to-r from-[#18B6C2] to-[#65D84B]" style={{ width: `${progress}%` }} />
-            </div>
-          </div>
-        ) : null}
-
-        <div className="mt-4 flex items-center gap-3">
-          {isFundraiser ? (
-            <button type="button" onClick={() => setDonateOpen(true)} className="seek-fundraiser-donate min-h-11 flex-1 rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-bold text-white transition hover:bg-[#0D8F83] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D3B3B]">Donate</button>
           ) : null}
-          <button type="button" onClick={goToCase} className={`${isFundraiser ? "flex-1" : "w-full"} min-h-11 rounded-full border border-[#0D3B3B]/15 px-5 py-2.5 text-sm font-semibold text-[#153F3C] transition hover:border-[#1BAA9C] hover:bg-[#F4FAF8]`}>Read story</button>
+          <div className="seek-reel-cta-row">
+            {isFundraiser ? <button type="button" onClick={() => setDonateOpen(true)} className="seek-reel-donate">Donate <ArrowRight size={16} /></button> : <button type="button" onClick={goToCase} className="seek-reel-donate">Support this story <ArrowRight size={16} /></button>}
+            <button type="button" onClick={goToCase} className="seek-reel-open">View story</button>
+          </div>
         </div>
       </div>
       {media.length > 1 ? (
-        <div className="flex justify-center gap-1.5 pb-3" aria-label={`${media.length} story images`}>
-          {media.map((item, index) => <button key={item.id || item.public_url || index} type="button" onClick={() => setMediaIndex(index)} aria-label={`Show image ${index + 1}`} className={`h-1.5 rounded-full transition-all ${index === mediaIndex ? "w-5 bg-[#1BAA9C]" : "w-1.5 bg-[#B8CBC6]"}`} />)}
+        <div className="seek-reel-progress-dots" aria-label={`${media.length} media items`}>
+          {media.map((item, index) => <button key={item.id || item.public_url || index} type="button" onClick={() => setMediaIndex(index)} aria-label={`Show media ${index + 1}`} className={index === mediaIndex ? "is-active" : ""} />)}
         </div>
       ) : null}
       {donateOpen && <CaseDonateSheet request={request} onClose={() => setDonateOpen(false)} />}
@@ -2544,32 +2514,18 @@ function ForYouPage({ setPage }) {
         </div>
       </section>
 
-      <section className="px-5 pb-16 pt-3 sm:pt-6">
-        <div className="mx-auto max-w-[440px]">
-          <div className="mb-4 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">Real people. Real needs.</p>
-              <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-[#0D3B3B]">Stories from SEEK</h2>
-            </div>
-            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#0D3B3B]/55 shadow-sm">{loading ? "Loading" : `${liveCases.length} stories`}</span>
-          </div>
-          {loading && <div className="seek-feed-skeleton h-40 rounded-3xl" />}
-          {error && <p className="rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
-          {!loading && !error && liveCases.length === 0 && (
-            <div className="rounded-3xl border border-[#0D3B3B]/10 bg-white p-7 text-center shadow-sm">
-              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={22} /></div>
-              <h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Your next connection starts here.</h3>
-              <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Approved community videos will appear here as people share their stories.</p>
-              <button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[#0D7770]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button>
-            </div>
-          )}
-          <div className="seek-video-stack">
-            {liveCases.map((request, index) => (
-              <div key={request.id} className="seek-video-entry" style={{ "--seek-entry-index": index }}>
-                <LiveSupportCard request={request} setPage={setPage} />
-              </div>
-            ))}
-          </div>
+      <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
+        <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[#0D3B3B]">Watch. Connect. Support.</h2></div>
+          <span className="text-xs font-semibold text-[#0D3B3B]/50">{loading ? "Loading…" : `${liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).length} stories`}</span>
+        </div>
+        {loading && <div className="seek-feed-skeleton mx-auto h-[62svh] max-w-[420px] rounded-[28px]" />}
+        {error && <p className="mx-auto max-w-md rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
+        {!loading && !error && liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).length === 0 && (
+          <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Video and photo stories shared by the SEEK community will appear here.</p><button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[#0D7770]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button></div>
+        )}
+        <div className="seek-reels-feed" aria-label="Swipe through SEEK community stories">
+          {liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
         </div>
       </section>
 
