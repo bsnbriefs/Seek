@@ -2359,7 +2359,7 @@ function BsnPage({ setPage }) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OUTREACH_CAMPAIGNS.map((c, i) => {
               const cover = c.photos?.[0];
-              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card seek-campaign-card-content group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
                 <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
                 <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
               </button>;
@@ -2405,11 +2405,11 @@ function BsnPage({ setPage }) {
           {OUTREACH_CAMPAIGNS.slice(0, 6).map((campaign, index) => {
             const cover = campaign.photos?.[0];
             return <article key={campaign.id} className="seek-campaign-card overflow-hidden">
-              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="block w-full text-left">
+              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-card-content block w-full text-left">
                 <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{String(index + 1).padStart(2, "0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
                 <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">{campaign.id === "end-of-year-outreach-2026" ? "Featured annual outreach" : "Foundation programme"}</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{campaign.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{campaign.blurb}</p></div>
               </button>
-              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-view-details text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="seek-campaign-card-donate rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
             </article>;
           })}
         </div>

@@ -2037,34 +2037,62 @@ html:not(.seek-dark) .fixed.bottom-20 {
 }
 
 /* =========================================================
-   FIX: CAMPAIGN-CARD DONATE LABEL CONTRAST
-   The previous global disabled-control rule was painting the
-   Donate label pale grey on the lime action background. Keep
-   campaign donation labels dark and fully opaque in both themes.
+   CAMPAIGN CARD CONTRAST — scoped by actual action role.
+   Never apply Donate colours to the card's content button.
    ========================================================= */
-html .seek-campaign-page button:disabled,
-html .seek-campaign-page button[aria-disabled="true"],
-html .seek-campaign-page button[class*="bg-[var(--seek-success)]"],
-html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"],
-html .seek-campaign-page button[class*="bg-[#CCF88E]"],
-html .seek-campaign-page .seek-campaign-card button {
+html .seek-campaign-page .seek-campaign-card-donate,
+html .seek-campaign-page .seek-campaign-card-donate * {
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
   opacity: 1 !important;
+  background-color: #CCF88E !important;
 }
-html .seek-campaign-page button:disabled *,
-html .seek-campaign-page button[aria-disabled="true"] *,
-html .seek-campaign-page button[class*="bg-[var(--seek-success)]"] *,
-html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"] *,
-html .seek-campaign-page button[class*="bg-[#CCF88E]"] *,
-html .seek-campaign-page .seek-campaign-card button * {
+html .seek-campaign-page .seek-campaign-view-details {
+  color: var(--seek-success) !important;
+  -webkit-text-fill-color: var(--seek-success) !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card {
+  background: #FFFFFF !important;
+  color: #263B2E !important;
+}
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content,
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content h3,
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content p {
+  color: #263B2E !important;
+  -webkit-text-fill-color: #263B2E !important;
+}
+html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content p:first-child {
+  color: #315C45 !important;
+  -webkit-text-fill-color: #315C45 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card {
+  background: #214735 !important;
+  color: #F5F7F2 !important;
+  border-color: rgba(220,245,228,.22) !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card-content,
+html.seek-dark .seek-campaign-page .seek-campaign-card-content h3,
+html.seek-dark .seek-campaign-page .seek-campaign-card-content p {
+  color: #F5F7F2 !important;
+  -webkit-text-fill-color: #F5F7F2 !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card-content p:first-child,
+html.seek-dark .seek-campaign-page .seek-campaign-view-details {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card-donate {
+  background: #CCF88E !important;
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
-}
-html .seek-campaign-page button:disabled,
-html .seek-campaign-page button[aria-disabled="true"] {
-  background-color: #CCF88E !important;
   border-color: #A6D36B !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card-donate * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
 }
 
 
