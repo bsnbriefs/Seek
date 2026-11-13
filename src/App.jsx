@@ -1867,6 +1867,7 @@ function OfferCard({ offer, setPage }) {
 
 function GiveOfferForm({ setPage }) {
   const [offer, setOffer] = useState("");
+  const [offerDetails, setOfferDetails] = useState("");
   const [offerFiles, setOfferFiles] = useState([]);
   const [offerTarget, setOfferTarget] = useState("general");
   const [offerRequestId, setOfferRequestId] = useState("");
@@ -1885,6 +1886,7 @@ function GiveOfferForm({ setPage }) {
       if (raw) {
         const draft = JSON.parse(raw);
         if (draft.offer) setOffer(draft.offer);
+        if (draft.offerDetails) setOfferDetails(draft.offerDetails);
         if (draft.offerCategory) setOfferCategory(draft.offerCategory);
         if (draft.offerTarget) setOfferTarget(draft.offerTarget);
         if (draft.offerRequestId) setOfferRequestId(draft.offerRequestId);
@@ -1903,45 +1905,67 @@ function GiveOfferForm({ setPage }) {
     { id: "outreach", title: "BSN Foundation outreach", desc: "Support a Foundation outreach", icon: BadgeCheck },
   ];
   const offerTypes = [
-    ["money", "Financial support", Wallet],
-    ["food", "Food", Utensils],
-    ["items", "Goods & supplies", Package],
-    ["job", "Job opportunity", Briefcase],
-    ["mentorship", "Mentorship", Users],
-    ["counselling", "Counselling", HeartHandshake],
-    ["education", "Education / training", GraduationCap],
-    ["skills", "Professional skills / services", Handshake],
-    ["transport", "Transportation", Bus],
-    ["shelter", "Accommodation", HomeIcon],
-    ["other", "Other support", MoreHorizontal],
+    ["money", "Money", Wallet, "Support an existing fundraiser or SEEK request."],
+    ["food", "Food & groceries", Utensils, "Meals, groceries, food packs and supplies."],
+    ["clothing", "Clothing & shoes", Package, "New or gently used clothing, shoes and essentials."],
+    ["medicine", "Medicine & medical supplies", HeartHandshake, "Medicines, equipment and approved medical supplies."],
+    ["job", "Jobs & employment", Briefcase, "Job openings, internships and paid opportunities."],
+    ["education", "Education", GraduationCap, "School fees, scholarships, books and learning materials."],
+    ["mentorship", "Mentorship", Users, "Career guidance, coaching and practical learning."],
+    ["skills", "Services & skills", Handshake, "Professional services, repairs and practical skills."],
+    ["transport", "Transportation", Bus, "Rides, delivery and logistics support."],
+    ["shelter", "Accommodation", HomeIcon, "Temporary stays, housing and accommodation."],
+    ["other", "Other support", MoreHorizontal, "Anything useful you can offer to someone."],
   ];
 
   if (submitted) {
     return (
       <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
         <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">We have your giveaway.</h2>
-        <p className="font-body text-[#0D3B3B]/65">SEEK will review it. If approved, it can appear on Giveaways so people can indicate interest. You will see interest by email and in your inbox.</p>
+        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you for offering to help.</h2>
+        <p className="font-body text-[#0D3B3B]/65">Your offer has been sent to SEEK for review. Our team may match it with a relevant published request. We will contact you with the next steps.</p>
       </div>
     );
   }
 
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white pb-28">
-      <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-4">Post a giveaway</h2>
+      <div className="mb-6">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Give what you can</p>
+        <h2 className="mt-2 font-display font-bold text-2xl text-[#0D3B3B]">How would you like to help?</h2>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[#0D3B3B]/65">Choose what you can offer. We’ll guide you through a short form so SEEK can review and connect your offer with someone who needs it.</p>
+      </div>
 
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What would you like to offer?</p>
-      <select value={offerCategory} onChange={(e) => setOfferCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-6 font-body text-[#0D3B3B]">
-        <option value="">Select a category</option>
-        {offerTypes.map(([id, label]) => (
-          <option key={id} value={id}>{label}</option>
+      <div className="mb-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
+        {offerTypes.map(([id, label, Icon, description]) => (
+          <button key={id} type="button" onClick={() => setOfferCategory(id)}
+            className={`rounded-2xl border p-4 text-left transition-all ${offerCategory === id ? "border-[#1BAA9C] bg-[#E9F8F5] ring-2 ring-[#1BAA9C]/20 shadow-sm" : "border-[#0D3B3B]/10 bg-white hover:border-[#1BAA9C]/60 hover:-translate-y-0.5"}`}>
+            <span className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${offerCategory === id ? "bg-[#0D3B3B] text-white" : "bg-[#EAF3F0] text-[#0D3B3B]"}`}><Icon size={19} /></span>
+            <span className="block text-sm font-bold text-[#0D3B3B]">{label}</span>
+            <span className="mt-1 block text-xs leading-5 text-[#0D3B3B]/55">{description}</span>
+          </button>
         ))}
-      </select>
+      </div>
 
+      {offerCategory === "money" && (
+        <div className="mb-6 rounded-2xl border border-[#1BAA9C]/25 bg-[#EFF9F6] p-5">
+          <h3 className="font-bold text-[#0D3B3B]">Support a fundraiser directly</h3>
+          <p className="mt-1 text-sm leading-6 text-[#0D3B3B]/65">Choose a published fundraiser or request on SEEK and donate securely through the existing Paystack checkout.</p>
+          <button type="button" onClick={() => { setPage?.("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mt-4 rounded-full bg-[#0D3B3B] px-5 py-3 text-sm font-bold text-white">Browse fundraisers <ArrowRight size={15} className="ml-2 inline" /></button>
+        </div>
+      )}
+
+      {offerCategory && offerCategory !== "money" && <>
+      <div className="mb-5 flex items-center justify-between">
+        <p className="text-xs font-bold uppercase tracking-wide text-[#0D3B3B]/55">Your {offerTypes.find(([id]) => id === offerCategory)?.[1]} offer</p>
+        <button type="button" onClick={() => setOfferCategory("")} className="text-xs font-semibold text-[#1BAA9C]">Change category</button>
+      </div>
       <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">City</p>
       <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-4 font-body text-[#0D3B3B]" />
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Describe the giveaway</p>
-      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={4} placeholder="Tell people what you can provide…" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-2" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">What exactly can you provide?</p>
+      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={3} placeholder={offerCategory === "food" ? "E.g. 20 food packs, groceries or cooked meals…" : offerCategory === "clothing" ? "E.g. 15 clean shirts, children's clothes, shoes…" : offerCategory === "medicine" ? "List the medicine or medical supplies, quantities and expiry details…" : offerCategory === "job" ? "Describe the role, organisation and how to apply…" : offerCategory === "education" ? "E.g. scholarship, school fees, textbooks or tutoring…" : offerCategory === "transport" ? "Describe the transport or delivery support available…" : "Describe what you can offer…"} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Quantity, availability or other details (optional)</p>
+      <textarea value={offerDetails} onChange={(e) => setOfferDetails(e.target.value)} rows={2} placeholder="How much is available? When can you provide it? Any conditions?" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-2" />
       <button type="button" className="mb-3 text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
         if (!String(offer || "").trim()) {
           setOfferError("Write a short offer first, then tap Help me explain this.");
@@ -1967,20 +1991,21 @@ function GiveOfferForm({ setPage }) {
             try {
               sessionStorage.setItem("seek_return", "offers");
               sessionStorage.setItem("seek_offer_draft", JSON.stringify({
-                offer, offerCategory, offerTarget, offerRequestId, offerCity, offerContactEmail, offerContactPhone,
+                offer, offerDetails, offerCategory, offerTarget, offerRequestId, offerCity, offerContactEmail, offerContactPhone,
               }));
             } catch (_e) {}
             if (setPage) setPage("account");
             else window.location.href = "/account";
             return;
           }
-          await submitOffer({ description: offer, category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || getUserSession()?.user?.email || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
+          await submitOffer({ description: [offer.trim(), offerDetails.trim() ? "Additional details: " + offerDetails.trim() : ""].filter(Boolean).join("\\n\\n"), category: offerCategory || null, requestId: offerTarget === "request" ? offerRequestId : null, contactEmail: offerContactEmail || getUserSession()?.user?.email || null, contactPhone: offerContactPhone || null, city: offerCity || null, files: offerFiles });
           setSubmitted(true);
           try { sessionStorage.removeItem("seek_offer_draft"); } catch (_e) {}
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
       }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
       {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
+      </>}
     </div>
   );
 }
@@ -2545,7 +2570,7 @@ function ForYouPage({ setPage }) {
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <button type="button" onClick={() => setPage("seek-help")} className="seek-hero-primary rounded-full bg-[#0D3B3B] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0D3B3B]/15 transition hover:-translate-y-1 hover:bg-[#145653]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
-              <button type="button" onClick={() => { setPage("home"); window.setTimeout(() => document.getElementById("home-open-requests")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
+              <button type="button" onClick={() => { setPage("offers"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
             </div>
           </div>
           <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
@@ -3047,7 +3072,7 @@ function SeekHelpPage({ setPage }) {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => go("seek-help-form")}>I need help</Button>
-            <Button variant="secondary" onClick={() => document.getElementById("open-requests")?.scrollIntoView({ behavior: "smooth" })}>I want to help</Button>
+            <Button variant="secondary" onClick={() => go("offers")}>I want to help</Button>
           </div>
         </div>
       </section>
