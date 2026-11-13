@@ -6091,50 +6091,105 @@ function CookieBanner() {
 }
 
 function InstallSeekPrompt() {
-  const standalone = typeof window !== "undefined" && (window.matchMedia("(display-mode: standalone)").matches || window.navigator.standalone);
   const [installEvent, setInstallEvent] = useState(null);
   const [closed, setClosed] = useState(false);
-  const [show, setShow] = useState(false);
+  const [installed, setInstalled] = useState(() => {
+    try { return localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; }
+  });
+  const [isStandalone, setIsStandalone] = useState(() =>
+    typeof window !== "undefined" && (
+      window.matchMedia("(display-mode: standalone)").matches ||
+      window.navigator.standalone === true
+    )
+  );
+  const isIOS = typeof navigator !== "undefined" &&
+    (/iPad|iPhone|iPod/.test(navigator.userAgent) ||
+      (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
   useEffect(() => {
-    if ("serviceWorker" in navigator) {
-      navigator.serviceWorker.register("/sw.js", { scope: "/" }).catch(() => {});
-    }
-    const onPrompt = (e) => {
-      e.preventDefault();
-      setInstallEvent(e);
-      setShow(true);
+    const displayMode = window.matchMedia("(display-mode: standalone)");
+    const syncInstalledState = () => {
+      const standaloneNow = displayMode.matches || window.navigator.standalone === true;
+      setIsStandalone(standaloneNow);
+      if (standaloneNow) setInstalled(true);
     };
+    const onPrompt = (event) => {
+      // Keep the browser's native install prompt available for our explicit button.
+      event.preventDefault();
+      setInstallEvent(event);
+      setClosed(false);
+    };
+    const onInstalled = () => {
+      try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+      setInstalled(true);
+      setInstallEvent(null);
+      setClosed(true);
+      setIsStandalone(true);
+    };
+
     window.addEventListener("beforeinstallprompt", onPrompt);
-    const timer = setTimeout(() => setShow(true), 2000);
+    window.addEventListener("appinstalled", onInstalled);
+    displayMode.addEventListener?.("change", syncInstalledState);
+    syncInstalledState();
+
     return () => {
       window.removeEventListener("beforeinstallprompt", onPrompt);
-      clearTimeout(timer);
+      window.removeEventListener("appinstalled", onInstalled);
+      displayMode.removeEventListener?.("change", syncInstalledState);
     };
   }, []);
-  if (closed || standalone || !show || !installEvent) return null;
-  const isIOS = /iPad|iPhone|iPod/.test(navigator.userAgent);
+
+  if (closed || installed || isStandalone) return null;
+
   const doInstall = async () => {
     if (!installEvent) return;
     try {
+      // The native confirmation must be opened from this user click; browsers
+      // do not permit websites to force it open automatically on page load.
       await installEvent.prompt();
       const choice = await installEvent.userChoice;
       setInstallEvent(null);
-      setClosed(true);
-    } catch (_e) {
-      setClosed(true);
+      if (choice?.outcome === "accepted") {
+        try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+        setInstalled(true);
+      } else {
+        // Keep the in-page install card available so the user can try again.
+        setClosed(false);
+      }
+    } catch (_error) {
+      setInstallEvent(null);
     }
   };
+
   return (
-    <div className="fixed inset-x-0 bottom-20 z-[150] p-4 pointer-events-none">
-      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/10 bg-[var(--seek-primary)] text-white shadow-2xl p-4">
+    <div className="fixed inset-x-0 bottom-20 z-[150] p-4 pointer-events-none" role="region" aria-label="Install SEEK app">
+      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/15 bg-[#274A34] p-4 text-white shadow-2xl">
         <div className="flex items-start justify-between gap-3">
-          <div>
-            <p className="font-display font-bold text-base">Install SEEK</p>
-            <p className="mt-1 text-xs text-white/70">{isIOS ? "Tap Share, then Add to Home Screen" : "Add to your home screen"}</p>
+          <div className="min-w-0">
+            <p className="font-display text-base font-bold text-white">Get SEEK on your phone</p>
+            <p className="mt-1 text-sm leading-5 text-white/90">
+              {installEvent
+                ? "Install the SEEK app for quicker access and a full-screen experience."
+                : isIOS
+                  ? "Add SEEK to your Home Screen for quick, app-like access."
+                  : "Your browser can add SEEK to your Home Screen. Open the browser install option to finish setup."}
+            </p>
           </div>
-          <button type="button" onClick={() => setClosed(true)} className="text-white/50 text-lg leading-none">×</button>
+          <button type="button" onClick={() => setClosed(true)} aria-label="Close install prompt" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl leading-none text-white">×</button>
         </div>
-        <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[var(--seek-success)] text-white py-2.5 text-sm font-bold">Install now</button>
+        {installEvent ? (
+          <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[#CCF88E] px-4 py-3 text-sm font-extrabold text-[#193524]">
+            Install SEEK now
+          </button>
+        ) : isIOS ? (
+          <div className="mt-3 rounded-xl bg-white/10 p-3 text-sm leading-5 text-white">
+            Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.
+          </div>
+        ) : (
+          <p className="mt-3 text-xs leading-5 text-white/80">
+            Instant installation is available when this browser exposes its install prompt. The browser controls that eligibility and confirmation.
+          </p>
+        )}
       </div>
     </div>
   );
