@@ -1011,27 +1011,34 @@ function RequestCard({ req, onHelp, onView }) {
   const [donateOpen, setDonateOpen] = useState(false);
   const needed = requestAmountNeeded(req);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
-  const face = postAvatar(req.avatarUrl || req.avatar_url, req);
+  const story = String(req.description || req.need || req.story || "A member of the SEEK community is asking for support.").trim();
+  const financial = isFinancialNeed(req);
+  const openStory = () => onView ? onView(req) : (onHelp && onHelp(req));
   return (
-    <div className="seek-fundraiser-card flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
-      <div className="p-4">
-        <div className="flex items-center gap-3">
-          {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
-          <div className="min-w-0 flex-1">
-            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight">{req.title}</h3>
-            <p className="text-xs text-[#0D3B3B]/50">{req.location || req.category}</p>
-          </div>
-        </div>
-        {needed > 0 && <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>}
+    <article className="seek-fundraiser-card flex flex-col rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#0D8F83]">{req.category || "Community request"}</span>
+        {req.location && <span className="max-w-[52%] truncate text-xs text-[#0D3B3B]/50">{req.location}</span>}
       </div>
-      <div className="flex border-t border-[#0D3B3B]/8">
-        {onView && <button type="button" onClick={() => onView(req)} className="flex-1 py-3 text-sm font-semibold text-[#0D3B3B]/70 hover:bg-[#F2F5F3]">View</button>}
-        <button type="button" onClick={() => isFinancialNeed(req) ? setDonateOpen(true) : (onHelp && onHelp(req))} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
-          {isFinancialNeed(req) ? "Donate" : "Join"}
-        </button>
+      <button type="button" onClick={openStory} className="mt-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
+        <h3 className="font-display text-lg font-extrabold leading-snug text-[#0D3B3B] line-clamp-2">{req.title || "A neighbour needs support"}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-2">{story}</p>
+      </button>
+      {financial && needed > 0 && (
+        <div className="mt-4">
+          <ProgressBar raised={raised} needed={needed} />
+        </div>
+      )}
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#0D3B3B]/8 pt-3">
+        <button type="button" onClick={openStory} className="text-sm font-semibold text-[#0D3B3B]/65 hover:text-[#0D8F83]">Read story</button>
+        {financial ? (
+          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D3B3B]">Donate</button>
+        ) : (
+          <button type="button" onClick={openStory} className="rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
+        )}
       </div>
       {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
-    </div>
+    </article>
   );
 }
 
@@ -1570,28 +1577,20 @@ function HomeRequestCard({ request, setPage }) {
   return (
     <article className="seek-home-request-card rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0D8F83]">{request.category || "Community request"}</span>
-        {request.location && <span className="max-w-[48%] truncate text-xs text-[#0D3B3B]/50">{request.location}</span>}
+        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#0D8F83]">{request.category || "Community request"}</span>
+        {request.location && <span className="max-w-[52%] truncate text-xs text-[#0D3B3B]/50">{request.location}</span>}
       </div>
-      <button type="button" onClick={openRequest} className="mt-2 block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
+      <button type="button" onClick={openRequest} className="mt-3 block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
         <h3 className="font-display text-lg font-extrabold leading-snug text-[#0D3B3B] line-clamp-2">{request.title || "A neighbour needs support"}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-3">{story.length > 190 ? `${story.slice(0, 187).trimEnd()}…` : story}</p>
+        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-2">{story.length > 150 ? `${story.slice(0, 147).trimEnd()}…` : story}</p>
       </button>
-      {financial && needed > 0 && (
-        <div className="mt-4">
-          <div className="mb-2 flex items-center justify-between gap-2 text-xs">
-            <span className="font-bold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
-            <span className="text-[#0D3B3B]/55">of ₦{needed.toLocaleString()}</span>
-          </div>
-          <ProgressBar raised={raised} needed={needed} />
-        </div>
-      )}
-      <div className="mt-4 flex items-center gap-3">
-        <button type="button" onClick={openRequest} className="text-sm font-semibold text-[#0D3B3B]/65">Read story</button>
+      {financial && needed > 0 && <div className="mt-4"><ProgressBar raised={raised} needed={needed} /></div>}
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#0D3B3B]/8 pt-3">
+        <button type="button" onClick={openRequest} className="text-sm font-semibold text-[#0D3B3B]/65 hover:text-[#0D8F83]">Read story</button>
         {financial ? (
-          <button type="button" onClick={() => setDonateOpen(true)} className="ml-auto rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D3B3B]">Donate</button>
+          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83]">Donate</button>
         ) : (
-          <button type="button" onClick={openRequest} className="ml-auto rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
+          <button type="button" onClick={openRequest} className="rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
         )}
       </div>
       {donateOpen && <SeekDonateModal request={request} onClose={() => setDonateOpen(false)} />}
