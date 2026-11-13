@@ -396,7 +396,14 @@ const FONTS = (
     html.seek-dark .bg-\[\#F2F5F3\] { background-color: #1C2A28 !important; }
     html.seek-dark .bg-\[\#F2F5F3\] label, html.seek-dark .bg-\[\#F2F5F3\] p { color: #E8F2EF !important; }
 
-        @keyframes seek-loop {
+        html.seek-dark .seek-offer-category { background: #1C2A28 !important; border-color: #45635C !important; color: #F1F7F5 !important; }
+    html.seek-dark .seek-offer-category:hover { background: #233A35 !important; border-color: #66D5BE !important; }
+    html.seek-dark .seek-offer-category .seek-offer-icon { background: #29443D !important; color: #D9FFF3 !important; }
+    html.seek-dark .seek-offer-category .seek-offer-title { color: #F1F7F5 !important; }
+    html.seek-dark .seek-offer-category .seek-offer-description { color: #C2D5CF !important; }
+    html.seek-dark .seek-offer-category > span:last-child { color: #76E0C7 !important; }
+
+    @keyframes seek-loop {
       0% { stroke-dashoffset: 0; }
       100% { stroke-dashoffset: -120; }
     }
@@ -1300,7 +1307,7 @@ function Navbar({ page, setPage, userSession }) {
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "fundraiser", label: "Fundraiser", icon: HeartHandshake },
-    { id: "home", label: "Offer Help", icon: HandHeart },
+    { id: "offer-help", label: "Offer Help", icon: HandHeart },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
@@ -1865,14 +1872,58 @@ function OfferCard({ offer, setPage }) {
 }
 
 
-function GiveOfferForm({ setPage }) {
+const OFFER_HELP_TYPES = [
+  ["money", "Money", Wallet, "Support an existing fundraiser or SEEK request."],
+  ["food", "Food & groceries", Utensils, "Meals, groceries, food packs and supplies."],
+  ["clothing", "Clothing & shoes", Package, "New or gently used clothing, shoes and essentials."],
+  ["medicine", "Medicine & medical supplies", HeartHandshake, "Medicines, equipment and approved medical supplies."],
+  ["job", "Jobs & employment", Briefcase, "Job openings, internships and paid opportunities."],
+  ["education", "Education", GraduationCap, "School fees, scholarships, books and learning materials."],
+  ["mentorship", "Mentorship", Users, "Career guidance, coaching and practical learning."],
+  ["skills", "Services & skills", Handshake, "Professional services, repairs and practical skills."],
+  ["transport", "Transportation", Bus, "Rides, delivery and logistics support."],
+  ["shelter", "Accommodation", HomeIcon, "Temporary stays, housing and accommodation."],
+  ["other", "Other support", MoreHorizontal, "Anything useful you can offer to someone."],
+];
+
+function OfferHelpCategoriesPage({ setPage }) {
+  const choose = (id) => {
+    setPage(`offer-form:${id}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  return (
+    <main className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 pb-24">
+      <div className="max-w-2xl mb-8">
+        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Offer Help</p>
+        <h1 className="mt-2 font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">What would you like to offer?</h1>
+        <p className="mt-3 text-sm sm:text-base leading-6 text-[#0D3B3B]/65">Choose a category. We’ll take you to a separate page to complete the details of your offer.</p>
+      </div>
+      <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
+        {OFFER_HELP_TYPES.map(([id, label, Icon, description]) => (
+          <button key={id} type="button" aria-pressed="false" onClick={() => choose(id)} className="seek-offer-category group rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#1BAA9C] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1BAA9C]">
+            <span className="seek-offer-icon mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF3F0] text-[#0D3B3B]"><Icon size={20} /></span>
+            <span className="seek-offer-title block text-sm font-bold text-[#0D3B3B]">{label}</span>
+            <span className="seek-offer-description mt-1 block text-xs leading-5 text-[#0D3B3B]/60">{description}</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#168F83]">Choose <ArrowRight size={13} /></span>
+          </button>
+        ))}
+      </div>
+    </main>
+  );
+}
+
+function OfferHelpFormPage({ category, setPage }) {
+  return <main className="mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-24"><GiveOfferForm key={category} setPage={setPage} initialCategory={category} /></main>;
+}
+
+function GiveOfferForm({ setPage, initialCategory = "" }) {
   const [offer, setOffer] = useState("");
   const [offerDetails, setOfferDetails] = useState("");
   const [offerFiles, setOfferFiles] = useState([]);
   const [offerTarget, setOfferTarget] = useState("general");
   const [offerRequestId, setOfferRequestId] = useState("");
   const [offerContactEmail, setOfferContactEmail] = useState("");
-  const [offerCategory, setOfferCategory] = useState("");
+  const [offerCategory, setOfferCategory] = useState(initialCategory);
   const [offerCity, setOfferCity] = useState("");
   const [offerContactPhone, setOfferContactPhone] = useState("");
   const [submitted, setSubmitted] = useState(false);
@@ -1887,7 +1938,7 @@ function GiveOfferForm({ setPage }) {
         const draft = JSON.parse(raw);
         if (draft.offer) setOffer(draft.offer);
         if (draft.offerDetails) setOfferDetails(draft.offerDetails);
-        if (draft.offerCategory) setOfferCategory(draft.offerCategory);
+        if (draft.offerCategory && !initialCategory) setOfferCategory(draft.offerCategory);
         if (draft.offerTarget) setOfferTarget(draft.offerTarget);
         if (draft.offerRequestId) setOfferRequestId(draft.offerRequestId);
         if (draft.offerCity) setOfferCity(draft.offerCity);
@@ -1904,19 +1955,7 @@ function GiveOfferForm({ setPage }) {
     { id: "request", title: "Support a SEEK request", desc: "Choose an existing public request", icon: Search },
     { id: "outreach", title: "BSN Foundation outreach", desc: "Support a Foundation outreach", icon: BadgeCheck },
   ];
-  const offerTypes = [
-    ["money", "Money", Wallet, "Support an existing fundraiser or SEEK request."],
-    ["food", "Food & groceries", Utensils, "Meals, groceries, food packs and supplies."],
-    ["clothing", "Clothing & shoes", Package, "New or gently used clothing, shoes and essentials."],
-    ["medicine", "Medicine & medical supplies", HeartHandshake, "Medicines, equipment and approved medical supplies."],
-    ["job", "Jobs & employment", Briefcase, "Job openings, internships and paid opportunities."],
-    ["education", "Education", GraduationCap, "School fees, scholarships, books and learning materials."],
-    ["mentorship", "Mentorship", Users, "Career guidance, coaching and practical learning."],
-    ["skills", "Services & skills", Handshake, "Professional services, repairs and practical skills."],
-    ["transport", "Transportation", Bus, "Rides, delivery and logistics support."],
-    ["shelter", "Accommodation", HomeIcon, "Temporary stays, housing and accommodation."],
-    ["other", "Other support", MoreHorizontal, "Anything useful you can offer to someone."],
-  ];
+  const offerTypes = OFFER_HELP_TYPES;
 
   if (submitted) {
     return (
@@ -1931,21 +1970,12 @@ function GiveOfferForm({ setPage }) {
   return (
     <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white pb-28">
       <div className="mb-6">
-        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Give what you can</p>
-        <h2 className="mt-2 font-display font-bold text-2xl text-[#0D3B3B]">How would you like to help?</h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-[#0D3B3B]/65">Choose what you can offer. We’ll guide you through a short form so SEEK can review and connect your offer with someone who needs it.</p>
+        <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-[#168F83]"><ArrowLeft size={16} /> All offer categories</button>
+        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Offer Help</p>
+        <h2 className="mt-2 font-display font-bold text-2xl text-[#0D3B3B]">{offerTypes.find(([id]) => id === offerCategory)?.[1] || "Complete your offer"}</h2>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[#0D3B3B]/65">Tell us what you can provide. SEEK will review your offer and help connect it with someone who needs it.</p>
       </div>
 
-      <div className="mb-7 grid grid-cols-2 gap-3 sm:grid-cols-3">
-        {offerTypes.map(([id, label, Icon, description]) => (
-          <button key={id} type="button" onClick={() => setOfferCategory(id)}
-            className={`rounded-2xl border p-4 text-left transition-all ${offerCategory === id ? "border-[#1BAA9C] bg-[#E9F8F5] ring-2 ring-[#1BAA9C]/20 shadow-sm" : "border-[#0D3B3B]/10 bg-white hover:border-[#1BAA9C]/60 hover:-translate-y-0.5"}`}>
-            <span className={`mb-3 flex h-10 w-10 items-center justify-center rounded-xl ${offerCategory === id ? "bg-[#0D3B3B] text-white" : "bg-[#EAF3F0] text-[#0D3B3B]"}`}><Icon size={19} /></span>
-            <span className="block text-sm font-bold text-[#0D3B3B]">{label}</span>
-            <span className="mt-1 block text-xs leading-5 text-[#0D3B3B]/55">{description}</span>
-          </button>
-        ))}
-      </div>
 
       {offerCategory === "money" && (
         <div className="mb-6 rounded-2xl border border-[#1BAA9C]/25 bg-[#EFF9F6] p-5">
@@ -2570,7 +2600,7 @@ function ForYouPage({ setPage }) {
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <button type="button" onClick={() => setPage("seek-help")} className="seek-hero-primary rounded-full bg-[#0D3B3B] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0D3B3B]/15 transition hover:-translate-y-1 hover:bg-[#145653]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
-              <button type="button" onClick={() => { setPage("offers"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
+              <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
             </div>
           </div>
           <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
@@ -2667,7 +2697,7 @@ function OffersPage({ setPage }) {
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pt-8 pb-4">
-        <Button variant="primary" onClick={() => document.getElementById("make-offer")?.scrollIntoView({ behavior: "smooth" })}>Post a giveaway</Button>
+        <Button variant="primary" onClick={() => { setPage("offer-help"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
@@ -2709,8 +2739,9 @@ function OffersPage({ setPage }) {
           ))}
         </div>
 
-        <div id="make-offer" className="pt-12 text-left">
-          <GiveOfferForm setPage={setPage} />
+        <div className="pt-10 text-center">
+          <p className="text-sm text-[#0D3B3B]/60">Have something useful to offer?</p>
+          <Button variant="primary" onClick={() => { setPage("offer-help"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
         </div>
       </section>
     </div>
@@ -3072,7 +3103,7 @@ function SeekHelpPage({ setPage }) {
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
             <Button variant="primary" onClick={() => go("seek-help-form")}>I need help</Button>
-            <Button variant="secondary" onClick={() => go("offers")}>I want to help</Button>
+            <Button variant="secondary" onClick={() => go("offer-help")}>I want to help</Button>
           </div>
         </div>
       </section>
@@ -4565,10 +4596,8 @@ function ImpactPage({ setPage }) {
   }, []);
 
   const stats = [
-    ["Help raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"],
+    ["Amount raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"],
     ["Gifts received", liveStats?.donationCount ?? "—"],
-    ["Published stories", thanks.length],
-    ["Impact posts", posts.length],
   ];
   const impactReels = [
     ...posts.map((post) => ({
@@ -4598,15 +4627,8 @@ function ImpactPage({ setPage }) {
         </p>
       </section>
       <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } } .seek-impact-stat { animation: seekFade .65s ease both; } .seek-impact-stat:nth-child(2) { animation-delay: .08s; } .seek-impact-stat:nth-child(3) { animation-delay: .16s; } .seek-impact-stat:nth-child(4) { animation-delay: .24s; } @media (prefers-reduced-motion: reduce) { .seek-impact-stat { animation: none; } }`}</style>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-9 grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="SEEK community impact numbers">
-        {stats.map(([label, value]) => <div key={label} className="seek-impact-stat rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]"><AnimatedImpactNumber value={value} /></p></div>)}
-      </section>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8">
-        <p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45 mb-2">Related UN goals</p>
-        <p className="text-sm text-[#0D3B3B]/60 mb-3">BSN’s published work sits next to these goals. These labels are not a claim that SEEK has fulfilled an SDG.</p>
-        <div className="flex flex-wrap gap-2">
-          {["SDG 1 No poverty", "SDG 2 Zero hunger", "SDG 3 Good health", "SDG 4 Quality education", "SDG 5 Gender equality"].map((s) => <span key={s} className="rounded-full border border-[#0D3B3B]/15 px-3 py-1 text-xs font-semibold text-[#0D3B3B]">{s}</span>)}
-        </div>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-9 grid grid-cols-2 gap-3" aria-label="SEEK community impact numbers">
+        {stats.map(([label, value]) => <div key={label} className="seek-impact-stat rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/55">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]"><AnimatedImpactNumber value={value} /></p></div>)}
       </section>
       <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
         <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
@@ -4622,7 +4644,7 @@ function ImpactPage({ setPage }) {
       </section>
       <section className="mx-auto max-w-3xl px-5 pb-20 text-center">
         <p className="text-sm text-[#0D3B3B]/60">You can be part of the next story.</p>
-        <Button variant="primary" onClick={() => { setPage("give"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
+        <Button variant="primary" onClick={() => { setPage("offer-help"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
       </section>
     </div>
   );
@@ -5757,6 +5779,8 @@ function pageFromPath(pathname) {
   if (path === "/for-you") return "home";
   if (path === "/discover") return "discover";
   if (path === "/offers") return "offers";
+  if (path === "/offer-help") return "offer-help";
+  if (path.startsWith("/offer-help/")) return "offer-form:" + path.split("/")[2];
   if (path === "/seek-help") return "seek-help";
   if (path === "/seek-help/request") return "seek-help-form";
   if (path === "/fundraiser") return "fundraiser";
@@ -5787,12 +5811,14 @@ function pathFromPage(page) {
   if (id.startsWith("request:")) return "/request/" + id.split(":")[1];
   if (id.startsWith("impact:") && id !== "impact") return "/impact/" + id.split(":")[1];
   if (id.startsWith("member:")) return "/member/" + id.split(":")[1];
+  if (id.startsWith("offer-form:")) return "/offer-help/" + id.split(":")[1];
   const map = {
     home: "/",
     "for-you": "/",
     discover: "/discover",
     give: "/give",
     offers: "/offers",
+    "offer-help": "/offer-help",
     admin: "/admin",
     "seek-help": "/seek-help",
     "seek-help-form": "/seek-help/request",
@@ -5839,7 +5865,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "home", label: "Offer Help", note: "Browse open requests", icon: HandHeart, scroll: "home-open-requests" },
+    { id: "offer-help", label: "Offer Help", note: "Choose what you can contribute", icon: HandHeart },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
@@ -6130,6 +6156,7 @@ useEffect(() => {
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
+    "offer-help": <OfferHelpCategoriesPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
     mentorship: <OffersPage setPage={setPage} />,
     counselling: <OffersPage setPage={setPage} />,
@@ -6173,6 +6200,8 @@ useEffect(() => {
   const isImpactStory = typeof page === "string" && page.startsWith("impact:") && page !== "impact";
   const isMemberPage = typeof page === "string" && page.startsWith("member:");
   const memberId = isMemberPage ? page.split(":")[1] : null;
+  const isOfferFormPage = typeof page === "string" && page.startsWith("offer-form:");
+  const offerFormCategory = isOfferFormPage ? page.split(":")[1] : null;
   const impactId = isImpactStory ? page.split(":")[1] : null;
 
   const gatedPages = ["seek-help-form", "celebrate-request", "my-requests", "my-seek"];
@@ -6226,6 +6255,8 @@ useEffect(() => {
         <MemberPage memberId={memberId} setPage={setPage} />
       ) : isImpactStory ? (
         <ImpactStoryPage impactId={impactId} setPage={setPage} />
+      ) : isOfferFormPage ? (
+        <OfferHelpFormPage category={offerFormCategory} setPage={setPage} />
       ) : (
         pages[page] || pages.home
       )}
