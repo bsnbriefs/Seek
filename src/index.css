@@ -2067,48 +2067,96 @@ html .seek-campaign-page button[aria-disabled="true"] {
   border-color: #A6D36B !important;
 }
 
+
 /* =========================================================
-   SEEK CAMPAIGN CARDS — DARK MODE TEXT CONTRAST FIX
-   The previous broad button rule applied the Donate foreground
-   to every button inside a campaign card, including View details.
-   Keep the card copy light and style the two actions separately.
+   FORM CONTROL CONTRAST FIX — Fundraiser + Share Outcome
+   Explicit component classes prevent global theme rules and
+   browser-native form styles from overriding readable colours.
    ========================================================= */
-html.seek-dark .seek-campaign-page .seek-campaign-card,
-html.seek-dark .seek-campaign-page .seek-campaign-card > div {
-  color: #F7F7F1 !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-card :is(h1,h2,h3,h4,p,small,label,span) {
-  color: #F7F7F1 !important;
-  -webkit-text-fill-color: #F7F7F1 !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-card :is(.text-\[var\(--seek-primary\)],.text-\[var\(--seek-success\)],.text-\[var\(--seek-muted\)]) {
-  color: #F7F7F1 !important;
-  -webkit-text-fill-color: #F7F7F1 !important;
-}
-/* View-details is a secondary action: lime text on the card surface. */
-html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child,
-html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child {
-  color: #CCF88E !important;
-  -webkit-text-fill-color: #CCF88E !important;
-  background: transparent !important;
-}
-/* Donate is the primary action: evergreen text on a lime button. */
-html .seek-campaign-page .seek-campaign-card button:last-child,
-html .seek-campaign-page .seek-campaign-card a:last-child {
-  background: #CCF88E !important;
-  border: 1px solid #A6D36B !important;
-  color: #193524 !important;
-  -webkit-text-fill-color: #193524 !important;
+html:not(.seek-dark) .seek-form-control,
+html:not(.seek-dark) .seek-fundraiser-form :is(input:not([type="file"]),select,textarea),
+html:not(.seek-dark) .seek-outcome-form textarea {
+  background-color: #FFFFFF !important;
+  color: #263B2E !important;
+  -webkit-text-fill-color: #263B2E !important;
+  border-color: #AAB9AC !important;
   opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-form-control::placeholder,
+html:not(.seek-dark) .seek-fundraiser-form :is(input,textarea)::placeholder,
+html:not(.seek-dark) .seek-outcome-form textarea::placeholder {
+  color: #65756A !important;
+  -webkit-text-fill-color: #65756A !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-form-control,
+html.seek-dark .seek-fundraiser-form :is(input:not([type="file"]),select,textarea),
+html.seek-dark .seek-outcome-form textarea {
+  background-color: #182820 !important;
+  color: #F7F8F3 !important;
+  -webkit-text-fill-color: #F7F8F3 !important;
+  border-color: #829687 !important;
+  opacity: 1 !important;
+  color-scheme: dark;
+}
+html.seek-dark .seek-form-control::placeholder,
+html.seek-dark .seek-fundraiser-form :is(input,textarea)::placeholder,
+html.seek-dark .seek-outcome-form textarea::placeholder {
+  color: #C7D3C9 !important;
+  -webkit-text-fill-color: #C7D3C9 !important;
+  opacity: 1 !important;
+}
+html .seek-form-file,
+html .seek-fundraiser-form input[type="file"],
+html .seek-outcome-form input[type="file"] {
+  display: block !important;
+  width: 100% !important;
+  max-width: 100% !important;
+  padding: 10px !important;
+  border: 1px solid #AAB9AC !important;
+  border-radius: 14px !important;
+  background: #F5F7F3 !important;
+  color: #263B2E !important;
+  -webkit-text-fill-color: #263B2E !important;
+  opacity: 1 !important;
+}
+html .seek-form-file::file-selector-button,
+html .seek-fundraiser-form input[type="file"]::file-selector-button,
+html .seek-outcome-form input[type="file"]::file-selector-button {
+  margin-right: 12px !important;
+  padding: 10px 16px !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
   font-weight: 800 !important;
 }
-html .seek-campaign-page .seek-campaign-card button:last-child :is(span,strong,b,svg),
-html .seek-campaign-page .seek-campaign-card a:last-child :is(span,strong,b,svg) {
+html.seek-dark .seek-form-file,
+html.seek-dark .seek-fundraiser-form input[type="file"],
+html.seek-dark .seek-outcome-form input[type="file"] {
+  background: #182820 !important;
+  color: #F7F8F3 !important;
+  -webkit-text-fill-color: #F7F8F3 !important;
+  border-color: #829687 !important;
+}
+html.seek-dark .seek-form-file::file-selector-button,
+html.seek-dark .seek-fundraiser-form input[type="file"]::file-selector-button,
+html.seek-dark .seek-outcome-form input[type="file"]::file-selector-button {
+  background: #CCF88E !important;
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
 }
-html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child :is(span,strong,b,svg),
-html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child :is(span,strong,b,svg) {
-  color: #CCF88E !important;
-  -webkit-text-fill-color: #CCF88E !important;
+html.seek-dark .seek-outcome-form button[type="submit"] {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border-color: #A6D36B !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-outcome-form button[type="submit"] {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
 }
