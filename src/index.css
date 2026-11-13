@@ -738,3 +738,66 @@ html.seek-dark .seek-community-pulse {
   background: #31564B !important;
   color: #FFFFFF !important;
 }
+
+/* Readability and high-visibility Community Pulse correction */
+html, body { color: #292D2B; }
+html:not(.seek-dark) {
+  --seek-ink: #292D2B;
+  --seek-head: #294B43;
+  --seek-muted: #625D57;
+}
+html.seek-dark {
+  --seek-ink: #FFF9F1;
+  --seek-head: #FFF9F1;
+  --seek-muted: #E4DCD2;
+}
+/* Keep body copy readable even where legacy utility classes set muted colours. */
+html:not(.seek-dark) .text-\[var\(--seek-muted\)\],
+html:not(.seek-dark) .text-\[var\(--seek-ink\)\] { color: #514C47 !important; }
+html.seek-dark .text-\[var\(--seek-muted\)\],
+html.seek-dark .text-\[var\(--seek-ink\)\] { color: #F1EAE1 !important; }
+input, textarea, select { color: #292D2B; }
+input::placeholder, textarea::placeholder { color: #716A63; opacity: 1; }
+html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
+  color: #FFF9F1;
+  background-color: #2B302E;
+  border-color: #77716B;
+}
+html.seek-dark input::placeholder, html.seek-dark textarea::placeholder { color: #C9C0B7; }
+
+/* The community ticker is intentionally the most noticeable live element. */
+.seek-community-pulse {
+  background: #E98268 !important;
+  color: #292D2B !important;
+  border-top: 2px solid #B9533F !important;
+  border-bottom: 2px solid #B9533F !important;
+  box-shadow: 0 5px 18px rgba(80, 42, 31, .28) !important;
+}
+.seek-community-pulse > div { min-height: 44px !important; }
+.seek-community-pulse .border-r { border-color: rgba(41,45,43,.35) !important; }
+.seek-community-pulse .seek-live-ring { border-color: #292D2B !important; }
+.seek-community-pulse .bg-\[var\(--seek-mint\)\] { background: #292D2B !important; }
+.seek-community-pulse .text-\[var\(--seek-light\)] { color: #292D2B !important; }
+.seek-community-pulse .seek-ticker-track,
+.seek-community-pulse .seek-ticker-single,
+.seek-community-pulse .seek-ticker-track > span,
+.seek-community-pulse .seek-ticker-single > span { color: #292D2B !important; }
+.seek-community-pulse .seek-ticker-track > span > span:nth-child(2),
+.seek-community-pulse .seek-ticker-single > span > span:nth-child(2) { color: #292D2B !important; font-weight: 800 !important; }
+.seek-community-pulse .seek-ticker-track > span > span:last-child,
+.seek-community-pulse .seek-ticker-single > span > span:last-child { color: rgba(41,45,43,.55) !important; }
+.seek-community-pulse [title="Updating"],
+.seek-community-pulse [title^="Updated"] { color: #292D2B !important; font-weight: 900 !important; letter-spacing: .12em; }
+html.seek-dark .seek-community-pulse {
+  background: #F0957E !important;
+  color: #202322 !important;
+  border-color: #FFC2B1 !important;
+}
+html.seek-dark .seek-community-pulse .seek-ticker-track,
+html.seek-dark .seek-community-pulse .seek-ticker-single,
+html.seek-dark .seek-community-pulse .seek-ticker-track > span,
+html.seek-dark .seek-community-pulse .seek-ticker-single > span,
+html.seek-dark .seek-community-pulse .text-\[var\(--seek-light\)] { color: #202322 !important; }
+@media (prefers-reduced-motion: reduce) {
+  .seek-community-pulse .seek-live-ring { animation: none !important; }
+}
