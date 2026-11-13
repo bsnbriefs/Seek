@@ -1990,10 +1990,31 @@ html:not(.seek-dark) .fixed.bottom-20 {
 .seek-dark .seek-evidence-count { border-color: rgba(255,255,255,.22); background: var(--seek-primary); color: var(--seek-light); }
 .seek-dark .seek-evidence-autoplay { color: var(--seek-light); }
 @media (max-width: 640px) {
-  .seek-evidence-slide { min-height: 170px; max-height: 300px; }
-  .seek-evidence-slide > img { height: 62vw; min-height: 170px; max-height: 300px; }
-  .seek-evidence-video-wrap,.seek-evidence-video-wrap video { max-height: 300px; }
-  .seek-evidence-slide iframe { height: 280px; }
-  .seek-evidence-arrow { width: 32px; height: 32px; }
+  /* Give request evidence a proper, near full-screen viewing area on phones. */
+  .seek-evidence-stage { border-radius: 22px; }
+  .seek-evidence-slide {
+    height: min(74svh, 720px);
+    min-height: 480px;
+    max-height: none;
+  }
+  .seek-evidence-slide > img {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+    object-fit: contain;
+  }
+  .seek-evidence-video-wrap {
+    width: 100%;
+    height: 100%;
+    min-height: 0;
+    max-height: none;
+  }
+  .seek-evidence-video-wrap video {
+    width: 100%;
+    max-height: 100%;
+  }
+  .seek-evidence-slide iframe { height: min(74svh, 720px); }
+  .seek-evidence-arrow { width: 40px; height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { .seek-evidence-track { scroll-behavior: auto; } }
