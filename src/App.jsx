@@ -314,6 +314,10 @@ const FONTS = (
 
     html, body { background-color: var(--seek-bg, var(--seek-white)); }
     html.seek-dark { color-scheme: dark; }
+    /* Keep the header notification bell legible in both SEEK themes. */
+    html.seek-dark .seek-inbox-button { color: #ffffff !important; }
+    html.seek-dark .seek-inbox-button:hover { color: var(--seek-success) !important; }
+    html.seek-dark .seek-inbox-button > span { color: var(--seek-primary) !important; }
     html.seek-dark h1, html.seek-dark h2 { color: var(--seek-mint) !important; }
     html.seek-dark h3 { color: var(--seek-light) !important; }
     html.seek-dark .text-\[\var(--seek-primary)\] { color: var(--seek-mint) !important; }
@@ -1259,10 +1263,21 @@ function NavInboxButton({ userSession, setPage }) {
     return () => { stop = true; clearInterval(id); };
   }, [userSession?.access_token, userSession?.user?.id]);
   return (
-    <button type="button" onClick={() => { setPage(userSession?.access_token ? "notifications" : "account"); window.history.pushState({}, "", userSession?.access_token ? "/notifications" : "/account"); }} aria-label="Inbox" className="relative p-2">
-      <Bell size={20} />
+    <button
+      type="button"
+      onClick={() => {
+        const destination = userSession?.access_token ? "notifications" : "account";
+        setPage(destination);
+        window.history.pushState({}, "", destination === "notifications" ? "/notifications" : "/account");
+      }}
+      aria-label={unread > 0 ? `Inbox, ${unread} unread notifications` : "Inbox"}
+      className="seek-inbox-button relative inline-flex items-center justify-center p-2 rounded-full text-[var(--seek-primary)] hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
+    >
+      <Bell size={22} strokeWidth={2} aria-hidden="true" />
       {unread > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-5 px-1 rounded-full bg-[var(--seek-success)] text-[10px] font-bold text-white flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
+        <span className="absolute -top-0.5 -right-0.5 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full bg-[var(--seek-success)] text-[var(--seek-primary)] text-[10px] leading-none font-extrabold flex items-center justify-center ring-2 ring-[var(--seek-card,var(--seek-white))]">
+          {unread > 9 ? "9+" : unread}
+        </span>
       )}
     </button>
   );
