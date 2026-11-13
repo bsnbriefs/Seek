@@ -1234,7 +1234,6 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "seek-help-form", label: "Seek Help" },
     { id: "fundraiser", label: "Fundraiser" },
-    { id: "give", label: "Give" },
     { id: "bsn", label: "Campaign" },
     { id: "shop", label: "Shop" },
   ];
@@ -1293,7 +1292,7 @@ function Navbar({ page, setPage, userSession }) {
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "fundraiser", label: "Fundraiser", icon: HeartHandshake },
-    { id: "give", label: "Help Someone", icon: Wallet },
+    { id: "home", label: "Help Someone", icon: HandHeart },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
@@ -1538,7 +1537,6 @@ function HomePage({ setPage, userSession }) {
           {[
             ["seek-help-form", "Seek Help"],
             ["fundraiser", "Fundraiser"],
-            ["give", "Give"],
             ["offers", "Giveaways"],
           ].map(([id, label]) => (
             <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
@@ -1558,6 +1556,49 @@ function HomePage({ setPage, userSession }) {
 
 /* ---------------- Help Someone Feed ---------------- */
 
+function HomeRequestCard({ request, setPage }) {
+  const [donateOpen, setDonateOpen] = useState(false);
+  const needed = requestAmountNeeded(request);
+  const raised = Number(request.amountRaised || request.amount_raised || 0);
+  const story = String(request.description || request.need || request.story || "A member of the SEEK community is asking for support.").trim();
+  const financial = isFinancialNeed(request);
+  const openRequest = () => {
+    window.history.pushState({}, "", `/request/${request.id}`);
+    setPage(`request:${request.id}`);
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+  return (
+    <article className="seek-home-request-card rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
+      <div className="flex items-center justify-between gap-3">
+        <span className="text-[10px] font-extrabold uppercase tracking-[.16em] text-[#0D8F83]">{request.category || "Community request"}</span>
+        {request.location && <span className="max-w-[48%] truncate text-xs text-[#0D3B3B]/50">{request.location}</span>}
+      </div>
+      <button type="button" onClick={openRequest} className="mt-2 block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
+        <h3 className="font-display text-lg font-extrabold leading-snug text-[#0D3B3B] line-clamp-2">{request.title || "A neighbour needs support"}</h3>
+        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-3">{story.length > 190 ? `${story.slice(0, 187).trimEnd()}…` : story}</p>
+      </button>
+      {financial && needed > 0 && (
+        <div className="mt-4">
+          <div className="mb-2 flex items-center justify-between gap-2 text-xs">
+            <span className="font-bold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
+            <span className="text-[#0D3B3B]/55">of ₦{needed.toLocaleString()}</span>
+          </div>
+          <ProgressBar raised={raised} needed={needed} />
+        </div>
+      )}
+      <div className="mt-4 flex items-center gap-3">
+        <button type="button" onClick={openRequest} className="text-sm font-semibold text-[#0D3B3B]/65">Read story</button>
+        {financial ? (
+          <button type="button" onClick={() => setDonateOpen(true)} className="ml-auto rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D3B3B]">Donate</button>
+        ) : (
+          <button type="button" onClick={openRequest} className="ml-auto rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
+        )}
+      </div>
+      {donateOpen && <SeekDonateModal request={request} onClose={() => setDonateOpen(false)} />}
+    </article>
+  );
+}
+
 function HelpSomeoneFeed({ setPage, limit = 6, compact = false }) {
   const [requests, setRequests] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -1570,30 +1611,13 @@ function HelpSomeoneFeed({ setPage, limit = 6, compact = false }) {
     return () => { cancelled = true; };
   }, [limit]);
 
-  if (loading) return <p className="font-body text-sm text-[#0D3B3B]/50">Loading people who need help…</p>;
-  if (!requests.length) return <p className="font-body text-sm text-[#0D3B3B]/50">No public requests are available right now. Check back soon.</p>;
+  if (loading) return <div className="grid gap-3 sm:grid-cols-2">{[1,2,3].map((i) => <div key={i} className="h-44 animate-pulse rounded-2xl bg-[#E8F0ED]" />)}</div>;
+  if (!requests.length) return <p className="rounded-2xl border border-[#0D3B3B]/10 bg-white p-5 text-sm text-[#385653]">No published requests are available right now. Please check back soon.</p>;
 
   return (
-    <>
-    <div className="mb-4 rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 text-sm text-[#0D3B3B]/60">
-      <span className="font-semibold text-[#0D3B3B]">A quick trust note:</span> SEEK reviews public requests before they appear. If something looks wrong, use the report option on the request page.
+    <div className={compact ? "grid gap-3 sm:grid-cols-2" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
+      {requests.map((request) => <HomeRequestCard key={request.id} request={request} setPage={setPage} />)}
     </div>
-    <div className={compact ? "grid sm:grid-cols-2 gap-3" : "grid sm:grid-cols-2 lg:grid-cols-3 gap-4"}>
-      {requests.map((req) => (
-        <article key={req.id} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 shadow-sm">
-          <p className="text-[11px] font-semibold uppercase tracking-[0.14em] text-[#1BAA9C]">{req.category || "Support needed"}</p>
-          <h3 className="mt-1 font-display font-bold text-lg text-[#0D3B3B] line-clamp-2">{req.title}</h3>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55 line-clamp-2">{req.description || req.need || "Someone in the SEEK community is asking for support."}</p>
-          {req.location && <p className="mt-2 text-xs text-[#0D3B3B]/45">{req.location}</p>}
-          {req.amountNeeded ? <div className="mt-3"><ProgressBar raised={req.amountRaised} needed={req.amountNeeded} /></div> : null}
-          <div className="mt-4 flex gap-3 items-center">
-            <button type="button" className="text-sm font-semibold text-[#0D3B3B]" onClick={() => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0,0); }}>View need</button>
-            <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("give")}>Help</button>
-          </div>
-        </article>
-      ))}
-    </div>
-    </>
   );
 }
 
@@ -2530,7 +2554,7 @@ function ForYouPage({ setPage }) {
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
               <button type="button" onClick={() => setPage("seek-help")} className="seek-hero-primary rounded-full bg-[#0D3B3B] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0D3B3B]/15 transition hover:-translate-y-1 hover:bg-[#145653]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
-              <button type="button" onClick={() => setPage("give")} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
+              <button type="button" onClick={() => { setPage("home"); window.setTimeout(() => document.getElementById("home-open-requests")?.scrollIntoView({ behavior: "smooth", block: "start" }), 80); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
             </div>
           </div>
           <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
@@ -2573,6 +2597,19 @@ function ForYouPage({ setPage }) {
               </div>
             ))}
           </div>
+        </div>
+      </section>
+
+      <section id="home-open-requests" className="scroll-mt-28 px-5 pb-16 sm:pb-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Make a difference</p>
+              <h2 className="mt-1 font-display text-2xl font-extrabold text-[#0D3B3B]">People who need support</h2>
+              <p className="mt-1 text-sm text-[#385653]">Read their stories and support a request that matters to you.</p>
+            </div>
+          </div>
+          <HelpSomeoneFeed setPage={setPage} limit={6} compact />
         </div>
       </section>
     </div>
@@ -5712,7 +5749,7 @@ function pageFromPath(pathname) {
   const path = String(pathname || "/").replace(/\/+$/, "") || "/";
   if (path === "/admin") return "admin";
   if (path === "/volunteer") return "volunteer";
-  if (path === "/give") return "give";
+  if (path === "/give") return "home";
   if (path === "/for-you") return "home";
   if (path === "/discover") return "discover";
   if (path === "/offers") return "offers";
@@ -5798,7 +5835,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "home", label: "Help Someone", note: "Browse open requests", icon: HandHeart, scroll: "home-open-requests" },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
@@ -5812,6 +5849,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
       try { sessionStorage.setItem("seek_scroll_to", item.scroll); } catch (_e) {}
     }
     go(item.id === "offers-job" || item.id === "offers-mentorship" ? "offers" : item.id);
+    if (item.scroll) window.setTimeout(() => document.getElementById(item.scroll)?.scrollIntoView({ behavior: "smooth", block: "start" }), 100);
   };
 
   return (
@@ -5985,13 +6023,17 @@ function InstallSeekPrompt() {
 
 export default function App() {
   const [page, setPageState] = useState(() => pageFromPath(window.location.pathname));
-  const setPage = (id) => {
+  const setPage = (requestedId) => {
+    const id = requestedId === "give" ? "home" : requestedId;
     setPageState(id);
     const url = pathFromPage(id);
     const current = window.location.pathname.replace(/\/+$/, "") || "/";
     const next = url.replace(/\/+$/, "") || "/";
     if (current !== next) {
       window.history.pushState({ seekPage: id }, "", url);
+    }
+    if (requestedId === "give") {
+      window.setTimeout(() => document.getElementById("home-open-requests")?.scrollIntoView({ behavior: "smooth", block: "start" }), 120);
     }
   };
 
@@ -6083,7 +6125,6 @@ useEffect(() => {
     bsn: <BsnPage setPage={setPage} />,
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
-    give: <GivePage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
     jobs: <OffersPage setPage={setPage} />,
     mentorship: <OffersPage setPage={setPage} />,
