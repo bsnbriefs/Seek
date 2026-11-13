@@ -1217,44 +1217,26 @@ function SectionLabel({ children }) {
 
 function getSeekTheme() {
   try {
-    const saved = localStorage.getItem("seek_theme");
-    if (saved === "dark") return "dark";
-    if (saved === "light") return "light";
-    return "light";
+    return localStorage.getItem("seek_theme") === "dark" ? "dark" : "light";
   } catch (_e) {
     return "light";
   }
 }
 
+// Keep the document class as the single source of truth. Avoid inline colour
+// variables here: they were overriding the CSS theme tokens and causing mixed
+// light/dark surfaces on detail pages, dashboards and modals.
 function applySeekTheme(theme) {
   const next = theme === "dark" ? "dark" : "light";
   const root = document.documentElement;
   root.classList.toggle("seek-dark", next === "dark");
-  if (next === "dark") {
-    root.style.setProperty("--seek-bg", "var(--seek-dark)");
-    root.style.setProperty("--seek-card", "var(--seek-primary)");
-    root.style.setProperty("--seek-ink", "var(--seek-light)");
-    root.style.setProperty("--seek-head", "var(--seek-mint)");
-    root.style.setProperty("--seek-wash", "rgba(18,20,20,0.92)");
-    root.style.setProperty("--seek-photo", "none");
-    root.style.backgroundColor = "var(--seek-dark)";
-    if (document.body) {
-      document.body.style.backgroundColor = "var(--seek-dark)";
-      document.body.style.color = "var(--seek-light)";
-    }
-  } else {
-    root.style.setProperty("--seek-bg", "var(--seek-white)");
-    root.style.setProperty("--seek-card", "var(--seek-white)");
-    root.style.setProperty("--seek-ink", "var(--seek-primary)");
-    root.style.setProperty("--seek-wash", "rgba(242,245,243,0.72)");
-    root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=60')");
-    root.style.backgroundColor = "var(--seek-white)";
-    if (document.body) {
-      document.body.style.backgroundColor = "var(--seek-white)";
-      document.body.style.color = "var(--seek-primary)";
-    }
-  }
+  root.dataset.seekTheme = next;
   try { localStorage.setItem("seek_theme", next); } catch (_e) {}
+  try {
+    const meta = document.querySelector('meta[name="theme-color"]');
+    if (meta) meta.setAttribute("content", next === "dark" ? "#202923" : "#FAF8F3");
+  } catch (_e) {}
+  window.dispatchEvent(new CustomEvent("seek-theme-change", { detail: next }));
   return next;
 }
 
@@ -1283,22 +1265,41 @@ function NavInboxButton({ userSession, setPage }) {
 
 function ThemeToggle() {
   const [theme, setTheme] = useState(() => getSeekTheme());
-  useEffect(() => { applySeekTheme(theme); }, [theme]);
+  useEffect(() => {
+    const syncTheme = (event) => setTheme(event?.detail || getSeekTheme());
+    window.addEventListener("seek-theme-change", syncTheme);
+    const onStorage = (event) => {
+      if (event.key === "seek_theme") {
+        const next = event.newValue === "dark" ? "dark" : "light";
+        applySeekTheme(next);
+        setTheme(next);
+      }
+    };
+    window.addEventListener("storage", onStorage);
+    applySeekTheme(theme);
+    return () => {
+      window.removeEventListener("seek-theme-change", syncTheme);
+      window.removeEventListener("storage", onStorage);
+    };
+  }, []);
   const dark = theme === "dark";
+  const toggleTheme = () => {
+    const next = applySeekTheme(dark ? "light" : "dark");
+    setTheme(next);
+  };
   return (
     <button
       type="button"
       aria-label={dark ? "Switch to light appearance" : "Switch to dark appearance"}
       aria-pressed={dark}
       title={dark ? "Switch to light appearance" : "Switch to dark appearance"}
-      onClick={() => setTheme(dark ? "light" : "dark")}
+      onClick={toggleTheme}
       className="seek-theme-toggle p-2 text-current rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
     >
       {dark ? <Sun size={20} className="seek-theme-icon" /> : <Moon size={20} className="seek-theme-icon" />}
     </button>
   );
 }
-
 
 
 function CaseDonateSheet({ request, onClose }) {
@@ -6090,8 +6091,27 @@ function CookieBanner() {
   );
 }
 
+// Capture the browser event at module load, before React effects mount. Some
+// Android browsers dispatch beforeinstallprompt very early; a component-only
+// listener can miss it and leave the user with a non-working install card.
+if (typeof window !== "undefined" && !window.__seekPwaInstallListenerReady) {
+  window.__seekPwaInstallListenerReady = true;
+  window.__seekDeferredInstallPrompt = window.__seekDeferredInstallPrompt || null;
+  window.addEventListener("beforeinstallprompt", (event) => {
+    event.preventDefault();
+    window.__seekDeferredInstallPrompt = event;
+    window.dispatchEvent(new CustomEvent("seek-install-ready"));
+  });
+  window.addEventListener("appinstalled", () => {
+    try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+    window.__seekDeferredInstallPrompt = null;
+  });
+}
+
 function InstallSeekPrompt() {
-  const [installEvent, setInstallEvent] = useState(null);
+  const [installEvent, setInstallEvent] = useState(() =>
+    typeof window !== "undefined" ? window.__seekDeferredInstallPrompt || null : null
+  );
   const [closed, setClosed] = useState(false);
   const [installed, setInstalled] = useState(() => {
     try { return localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; }
@@ -6113,27 +6133,27 @@ function InstallSeekPrompt() {
       setIsStandalone(standaloneNow);
       if (standaloneNow) setInstalled(true);
     };
-    const onPrompt = (event) => {
-      // Keep the browser's native install prompt available for our explicit button.
-      event.preventDefault();
-      setInstallEvent(event);
-      setClosed(false);
+    const syncInstallPrompt = () => {
+      if (window.__seekDeferredInstallPrompt) {
+        setInstallEvent(window.__seekDeferredInstallPrompt);
+        setClosed(false);
+      }
     };
     const onInstalled = () => {
       try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
+      window.__seekDeferredInstallPrompt = null;
       setInstalled(true);
       setInstallEvent(null);
       setClosed(true);
       setIsStandalone(true);
     };
-
-    window.addEventListener("beforeinstallprompt", onPrompt);
+    window.addEventListener("seek-install-ready", syncInstallPrompt);
     window.addEventListener("appinstalled", onInstalled);
     displayMode.addEventListener?.("change", syncInstalledState);
+    syncInstallPrompt();
     syncInstalledState();
-
     return () => {
-      window.removeEventListener("beforeinstallprompt", onPrompt);
+      window.removeEventListener("seek-install-ready", syncInstallPrompt);
       window.removeEventListener("appinstalled", onInstalled);
       displayMode.removeEventListener?.("change", syncInstalledState);
     };
@@ -6142,53 +6162,53 @@ function InstallSeekPrompt() {
   if (closed || installed || isStandalone) return null;
 
   const doInstall = async () => {
-    if (!installEvent) return;
+    const promptEvent = installEvent || window.__seekDeferredInstallPrompt;
+    if (!promptEvent) return;
     try {
-      // The native confirmation must be opened from this user click; browsers
-      // do not permit websites to force it open automatically on page load.
-      await installEvent.prompt();
-      const choice = await installEvent.userChoice;
+      await promptEvent.prompt();
+      const choice = await promptEvent.userChoice;
+      window.__seekDeferredInstallPrompt = null;
       setInstallEvent(null);
       if (choice?.outcome === "accepted") {
         try { localStorage.setItem("seek_pwa_installed", "1"); } catch (_e) {}
         setInstalled(true);
-      } else {
-        // Keep the in-page install card available so the user can try again.
-        setClosed(false);
       }
     } catch (_error) {
+      // Leave the manual browser-menu instructions visible if native prompting
+      // is unavailable or the browser rejects the deferred event.
+      window.__seekDeferredInstallPrompt = null;
       setInstallEvent(null);
     }
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-20 z-[150] p-4 pointer-events-none" role="region" aria-label="Install SEEK app">
-      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/15 bg-[#274A34] p-4 text-white shadow-2xl">
+    <div className="seek-install-layer fixed inset-x-0 bottom-20 z-[150] p-4" role="region" aria-label="Install SEEK app">
+      <div className="seek-install-card mx-auto max-w-sm rounded-2xl p-4 shadow-2xl">
         <div className="flex items-start justify-between gap-3">
           <div className="min-w-0">
-            <p className="font-display text-base font-bold text-white">Get SEEK on your phone</p>
-            <p className="mt-1 text-sm leading-5 text-white/90">
+            <p className="seek-install-title font-display text-base font-bold">Get SEEK on your phone</p>
+            <p className="seek-install-copy mt-1 text-sm leading-5">
               {installEvent
-                ? "Install the SEEK app for quicker access and a full-screen experience."
+                ? "Install SEEK for quicker access and a full-screen app experience."
                 : isIOS
                   ? "Add SEEK to your Home Screen for quick, app-like access."
-                  : "Your browser can add SEEK to your Home Screen. Open the browser install option to finish setup."}
+                  : "Install SEEK directly from your browser menu for a full-screen app experience."}
             </p>
           </div>
-          <button type="button" onClick={() => setClosed(true)} aria-label="Close install prompt" className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full bg-white/15 text-xl leading-none text-white">×</button>
+          <button type="button" onClick={() => setClosed(true)} aria-label="Close install prompt" className="seek-install-close flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl leading-none">×</button>
         </div>
         {installEvent ? (
-          <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[#CCF88E] px-4 py-3 text-sm font-extrabold text-[#193524]">
+          <button type="button" onClick={doInstall} className="seek-install-action mt-3 w-full rounded-full px-4 py-3 text-sm font-extrabold">
             Install SEEK now
           </button>
         ) : isIOS ? (
-          <div className="mt-3 rounded-xl bg-white/10 p-3 text-sm leading-5 text-white">
-            Tap <strong>Share</strong> in Safari, then choose <strong>Add to Home Screen</strong>.
+          <div className="seek-install-instructions mt-3 rounded-xl p-3 text-sm leading-5">
+            In Safari, tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong>.
           </div>
         ) : (
-          <p className="mt-3 text-xs leading-5 text-white/80">
-            Instant installation is available when this browser exposes its install prompt. The browser controls that eligibility and confirmation.
-          </p>
+          <div className="seek-install-instructions mt-3 rounded-xl p-3 text-sm leading-5">
+            <strong>On Android:</strong> tap the <strong>⋮ menu</strong> at the top-right of your browser, choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm <strong>Install</strong>.
+          </div>
         )}
       </div>
     </div>

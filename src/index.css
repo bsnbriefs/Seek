@@ -1319,3 +1319,46 @@ html.seek-dark .seek-home-hero .seek-hero-title,
 html.seek-dark .seek-home-hero > div > div > p { color:#F7F7F1 !important; }
 
 @media (prefers-reduced-motion:reduce) { .seek-reel-media::after { transition:none !important; } }
+
+
+/* =========================================================
+   SEEK THEME + INSTALL PROMPT CONSISTENCY PATCH
+   This is deliberately last so page-specific legacy selectors cannot
+   leave text or surfaces in the opposite theme.
+   ========================================================= */
+html, html body {
+  background-color: var(--seek-bg, #FAF8F3);
+  color: var(--seek-ink, #26332B);
+  transition: background-color .18s ease, color .18s ease;
+}
+html:not(.seek-dark) {
+  --seek-bg: #FAF8F3; --seek-page: #FAF8F3; --seek-card: #FFFFFF;
+  --seek-ink: #26332B; --seek-copy: #35463A; --seek-head: #274A34;
+  --seek-muted: #58645C; --seek-border: #D7DED5;
+}
+html.seek-dark {
+  --seek-bg: #202923; --seek-page: #202923; --seek-card: #2B362E;
+  --seek-ink: #F7F7F1; --seek-copy: #E2E9E1; --seek-head: #F7F7F1;
+  --seek-muted: #D5DED5; --seek-border: #526457;
+}
+html:not(.seek-dark) :is(.seek-page,.seek-page-content,.seek-dashboard,.seek-request-detail,.seek-fundraiser-page,.seek-campaign-page,.seek-account-page) {
+  background-color: var(--seek-page) !important; color: var(--seek-ink) !important;
+}
+html.seek-dark :is(.seek-page,.seek-page-content,.seek-dashboard,.seek-request-detail,.seek-fundraiser-page,.seek-campaign-page,.seek-account-page) {
+  background-color: var(--seek-page) !important; color: var(--seek-ink) !important;
+}
+html.seek-dark :is(.text-gray-900,.text-gray-800,.text-gray-700,.text-slate-900,.text-slate-800,.text-slate-700,.text-stone-900,.text-stone-800,.text-stone-700,.text-\[\#193524\],.text-\[\#26332B\],.text-\[\#274A34\]) { color: #F7F7F1 !important; }
+html:not(.seek-dark) :is(.text-white,.text-white\/90,.text-white\/80,.text-white\/70) { color: inherit; }
+html.seek-dark :is(.bg-gray-50,.bg-gray-100,.bg-slate-50,.bg-slate-100,.bg-stone-50,.bg-stone-100) { background-color: #2B362E !important; color: #F7F7F1 !important; }
+html.seek-dark :is(.bg-gray-50,.bg-gray-100,.bg-slate-50,.bg-slate-100,.bg-stone-50,.bg-stone-100) :is(p,span,div,label,strong,b,small) { color: inherit !important; }
+html.seek-dark :is(.border-gray-100,.border-gray-200,.border-slate-100,.border-slate-200,.border-stone-100,.border-stone-200) { border-color: #526457 !important; }
+
+.seek-install-layer { pointer-events: none; padding-bottom: max(1rem, env(safe-area-inset-bottom)); }
+.seek-install-card { pointer-events: auto; background: #274A34 !important; color: #FFFFFF !important; border: 1px solid rgba(204,248,142,.42); box-shadow: 0 18px 48px rgba(0,0,0,.28); }
+.seek-install-card :is(p,span,strong,b,small,div) { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-install-card .seek-install-title { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-install-card .seek-install-copy { color: rgba(255,255,255,.92) !important; -webkit-text-fill-color: rgba(255,255,255,.92) !important; }
+.seek-install-card .seek-install-close { background: rgba(255,255,255,.16) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-install-card .seek-install-action { background: #CCF88E !important; color: #193524 !important; -webkit-text-fill-color: #193524 !important; }
+.seek-install-card .seek-install-instructions { background: rgba(255,255,255,.12) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; border: 1px solid rgba(255,255,255,.18); }
+.seek-install-card .seek-install-instructions strong { color: #CCF88E !important; -webkit-text-fill-color: #CCF88E !important; }
