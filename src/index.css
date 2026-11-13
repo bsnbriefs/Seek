@@ -1515,3 +1515,65 @@ html.seek-dark .seek-site-header {
   color: #CCF88E !important;
   -webkit-text-fill-color: #CCF88E !important;
 }
+
+
+/* FINAL ACCESSIBILITY OVERRIDES — Discover ticker, cookie banner and install prompt.
+   These rules are deliberately scoped so the lime accent is never used as small text
+   on a light surface. */
+html:not(.seek-dark) .seek-discover-livebar {
+  background: #F5F7F2 !important;
+  border: 1px solid #DCE6D9 !important;
+  border-radius: 16px !important;
+}
+html:not(.seek-dark) .seek-discover-livebar-label,
+html:not(.seek-dark) .seek-discover-livebar-label > span:last-child,
+html:not(.seek-dark) .seek-discover-livebar-item,
+html:not(.seek-dark) .seek-discover-livebar-item > span,
+html:not(.seek-dark) .seek-discover-livebar-item b,
+html:not(.seek-dark) .seek-discover-livebar-item i {
+  color: #274A34 !important;
+  -webkit-text-fill-color: #274A34 !important;
+}
+html:not(.seek-dark) .seek-discover-live-dot {
+  background: #477A36 !important;
+  box-shadow: 0 0 0 3px rgba(71,122,54,.16) !important;
+}
+html.seek-dark .seek-discover-livebar {
+  background: #20382B !important;
+  border: 1px solid rgba(204,248,142,.28) !important;
+  border-radius: 16px !important;
+}
+html.seek-dark .seek-discover-livebar-label,
+html.seek-dark .seek-discover-livebar-item,
+html.seek-dark .seek-discover-livebar-item > span {
+  color: #F7F9F4 !important;
+  -webkit-text-fill-color: #F7F9F4 !important;
+}
+html.seek-dark .seek-discover-livebar-label > span:last-child,
+html.seek-dark .seek-discover-livebar-item b,
+html.seek-dark .seek-discover-livebar-item i {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+html.seek-dark .seek-discover-live-dot {
+  background: #CCF88E !important;
+  box-shadow: 0 0 0 3px rgba(204,248,142,.18) !important;
+}
+
+.seek-cookie-banner {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-cookie-banner p,
+.seek-cookie-banner p * { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-cookie-banner button[aria-label="Close privacy notice"] { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-cookie-banner button.bg-white { background: #FFFFFF !important; color: #193524 !important; -webkit-text-fill-color: #193524 !important; }
+.seek-cookie-banner button:not(.bg-white) { background: rgba(255,255,255,.08) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; border-color: rgba(255,255,255,.75) !important; }
+
+.seek-install-card { background: #1E2B23 !important; color: #FFFFFF !important; border: 1px solid rgba(204,248,142,.35) !important; }
+.seek-install-title, .seek-install-copy { color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+.seek-install-action { background: #CCF88E !important; color: #193524 !important; -webkit-text-fill-color: #193524 !important; min-height: 48px; font-weight: 800; }
+.seek-install-instructions { background: rgba(255,255,255,.10) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; border: 1px solid rgba(255,255,255,.22); }
+.seek-install-instructions strong { color: #CCF88E !important; -webkit-text-fill-color: #CCF88E !important; }
+.seek-install-close { background: rgba(255,255,255,.14) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }

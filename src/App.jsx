@@ -6055,7 +6055,7 @@ function CookieBanner() {
   };
 
   return (
-    <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[84px] sm:px-4 sm:pb-4">
+    <div className="seek-cookie-banner fixed inset-x-0 bottom-0 z-[90] px-3 pb-[84px] sm:px-4 sm:pb-4">
       <div className="seek-cookie-banner relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[var(--seek-primary)] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
         <button
           type="button"
@@ -6212,7 +6212,7 @@ function InstallSeekPrompt() {
             {isIOS ? (
               <>In Safari, tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong> and tap <strong>Add</strong>.</>
             ) : (
-              <><strong>On Android (Chrome):</strong> tap the <strong>⋮ menu</strong> at the top-right, choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm. If that option is missing, Chrome has not yet recognised this site as installable.</>
+              <><strong>On Android (Chrome):</strong> open SEEK in a normal (not Incognito) Chrome tab, tap the <strong>⋮ menu</strong> at the top-right, choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm. Chrome does not offer PWA installation from Incognito. If the option is missing in a normal tab, Chrome has not yet recognised this site as installable.</>
             )}
           </div>
         )}
