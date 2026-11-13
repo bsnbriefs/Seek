@@ -596,6 +596,7 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
+  { id: "end-of-year-2026", title: "2026 End-of-Year Outreach", blurb: "Help BSN Foundation feed 1,500 people and deliver 300 food boxes to persons with disabilities this December.", amount: 10000, budget: 15000000, story: "This December, BSN Foundation is working to reach 1,500 people with food support and distribute 300 additional food boxes to persons with disabilities through the Nigerian Paralympic Association. That is 1,800 people to be reached with practical support, dignity and care. Our working budget is ₦15 million. Your contribution will help us make this outreach happen.", photos: ["/outreach/2026-end-of-year-outreach.jpg"], videos: [] },
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4", "/outreach/TWMate.com-96cccfdb09d177ca8d521c0d0252d811.mp4"] },
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
@@ -6034,133 +6035,61 @@ function ShopPage({ setPage }) {
   );
 }
 
-function LiveTicker() {
-  const [items, setItems] = useState([]);
-  const [updatedAt, setUpdatedAt] = useState(null);
-  const [loading, setLoading] = useState(true);
-
+function LiveTicker({ setPage }) {
+  const [activeSlide, setActiveSlide] = useState(0);
+  const touchStartX = useRef(null);
+  const slides = [
+    { id: "overview", eyebrow: "BSN FOUNDATION · DECEMBER 2026", title: "End-of-Year Outreach", copy: "Help us bring food, dignity and hope to communities this December.", image: "/outreach/2026-end-of-year-outreach.jpg", action: "Support the outreach" },
+    { id: "reach", eyebrow: "1,800 PEOPLE · ONE COMMUNITY EFFORT", title: "1,500 people to be fed", copy: "Plus 300 food boxes for persons with disabilities, coordinated through the Nigerian Paralympic Association.", action: "See the outreach" },
+    { id: "goal", eyebrow: "OUR 2026 OUTREACH GOAL", title: "Help us raise ₦15 million", copy: "Every contribution brings us closer to reaching families and persons with disabilities with practical support.", action: "Contribute now" },
+  ];
   useEffect(() => {
-    let cancelled = false;
-    let inFlight = false;
-    let intervalId;
-
-    const load = async () => {
-      if (inFlight || document.visibilityState === "hidden") return;
-      inFlight = true;
-      try {
-        const [reqRows, offerRows, stats, gifts] = await Promise.all([
-          listPublishedRequests(8).catch(() => []),
-          listPublicOffers().catch(() => []),
-          getSeekLiveStats().catch(() => null),
-          listRecentGifts(10).catch(() => []),
-        ]);
-
-        const giftBits = (Array.isArray(gifts) ? gifts : [])
-          .filter((g) => !g.status || /successful|success|paid/i.test(String(g.status)))
-          .slice(0, 6)
-          .map((g) => {
-            const raw = String(g.donor_name || "");
-            const parts = raw.split("·").map((part) => part.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
-            const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "Someone" : parts[0];
-            const purpose = parts.slice(1).join(" · ") || "a community request";
-            return { key: "gift-" + (g.created_at || purpose) + "-" + who, label: "SUPPORTED", text: who + " supported " + purpose, icon: "💚" };
-          });
-
-        const requestBits = (Array.isArray(reqRows) ? reqRows : []).slice(0, 8).map((r) => {
-          const title = String(r.title || r.need || r.category || "A community request").trim();
-          const loc = r.location ? " · " + r.location : "";
-          const category = String(r.category || "");
-          const isConnect = CONNECT_CATS.includes(category);
-          const isOpportunity = /job|mentor|counsel|opportunit/i.test(category);
-          return {
-            key: "request-" + (r.id || title),
-            label: isConnect ? "COMMUNITY" : isOpportunity ? "OPPORTUNITY" : "SEEK HELP",
-            text: title + loc,
-            icon: isConnect ? "🎉" : isOpportunity ? "🤝" : "🔎",
-          };
-        });
-
-        const offerBits = (Array.isArray(offerRows) ? offerRows : []).slice(0, 6).map((offer) => {
-          const description = String(offer.description || offer.category || "A new community offer").replace(/\s+/g, " ").trim().slice(0, 72);
-          return { key: "offer-" + (offer.id || description), label: "OFFERED", text: description, icon: "🎁" };
-        });
-
-        const activity = [
-          ...(stats?.raised > 0 ? [{ key: "stats-" + Math.round(stats.raised) + "-" + (stats.donationCount || 0), label: "COMMUNITY IMPACT", text: "₦" + Math.round(stats.raised).toLocaleString() + " raised through " + (stats.donationCount || 0) + " gifts", icon: "💚" }] : []),
-          ...giftBits,
-          ...requestBits,
-          ...offerBits,
-        ];
-        const seen = new Set();
-        const unique = activity.filter((item) => {
-          const key = item.key + "|" + item.text;
-          if (seen.has(key)) return false;
-          seen.add(key);
-          return Boolean(item.text);
-        });
-
-        if (!cancelled) {
-          setItems(unique);
-          setUpdatedAt(new Date());
-          setLoading(false);
-        }
-      } catch (_error) {
-        if (!cancelled) setLoading(false);
-      } finally {
-        inFlight = false;
-      }
-    };
-
-    const start = () => {
-      if (intervalId) window.clearInterval(intervalId);
-      load();
-      intervalId = window.setInterval(load, 45000);
-    };
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") load();
-    };
-    const onFocus = () => load();
-    start();
-    document.addEventListener("visibilitychange", onVisibility);
-    window.addEventListener("focus", onFocus);
-    return () => {
-      cancelled = true;
-      if (intervalId) window.clearInterval(intervalId);
-      document.removeEventListener("visibilitychange", onVisibility);
-      window.removeEventListener("focus", onFocus);
-    };
+    const timer = window.setInterval(() => setActiveSlide((current) => (current + 1) % slides.length), 6500);
+    return () => window.clearInterval(timer);
   }, []);
-
-  if (!items.length) return loading ? <div className="h-0" aria-hidden="true" /> : <div className="h-0" aria-hidden="true" />;
-  const motionItems = items.length > 1 ? [...items, ...items] : items;
+  const goToOutreach = () => {
+    window.history.pushState({}, "", "/campaign");
+    setPage("bsn");
+  };
+  const move = (direction) => setActiveSlide((current) => (current + direction + slides.length) % slides.length);
 
   return (
     <>
-      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" aria-label="SEEK community activity">
-        <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
-          <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
-            <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
-              <span className="seek-live-ring" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-[var(--seek-mint)]" />
-            </span>
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
+      <section className="fixed top-16 inset-x-0 z-[105] overflow-hidden border-b border-[var(--seek-success)]/30 bg-[var(--seek-primary)] text-white shadow-lg" aria-label="Featured SEEK outreach"
+        onTouchStart={(event) => { touchStartX.current = event.touches?.[0]?.clientX ?? null; }}
+        onTouchEnd={(event) => {
+          const endX = event.changedTouches?.[0]?.clientX;
+          if (touchStartX.current != null && endX != null && Math.abs(endX - touchStartX.current) > 35) move(endX < touchStartX.current ? 1 : -1);
+          touchStartX.current = null;
+        }}>
+        <div className="relative mx-auto max-w-7xl px-3 py-2 sm:px-5">
+          <div className="relative min-h-[112px] sm:min-h-[124px]">
+            {slides.map((slide, index) => (
+              <article key={slide.id} aria-hidden={activeSlide !== index}
+                className={`absolute inset-0 overflow-hidden rounded-2xl transition-all duration-500 ${activeSlide === index ? "translate-x-0 opacity-100" : "translate-x-4 opacity-0 pointer-events-none"}`}>
+                <div className="absolute inset-0 bg-gradient-to-r from-[#063f35] via-[#075244] to-[#0c6954]" />
+                {slide.image && <div className="absolute inset-y-0 right-0 w-[42%] sm:w-[34%]"><img src={slide.image} alt="BSN Foundation End-of-Year Outreach" className="h-full w-full object-cover object-center opacity-55" /><div className="absolute inset-0 bg-gradient-to-r from-[#075244] via-[#075244]/55 to-transparent" /></div>}
+                <div className="relative z-10 flex min-h-[112px] items-center justify-between gap-3 px-4 py-3 sm:min-h-[124px] sm:px-7">
+                  <div className="min-w-0 max-w-3xl">
+                    <p className="text-[9px] font-extrabold uppercase tracking-[.17em] text-[var(--seek-mint)] sm:text-[10px]">{slide.eyebrow}</p>
+                    <h2 className="mt-1 font-display text-lg font-black leading-tight text-white sm:text-2xl">{slide.title}</h2>
+                    <p className="mt-1 max-w-2xl text-[10px] leading-4 text-white/85 sm:text-xs sm:leading-5">{slide.copy}</p>
+                    <button type="button" onClick={goToOutreach} className="mt-2 inline-flex items-center gap-1 rounded-full bg-[var(--seek-success)] px-3 py-1.5 text-[10px] font-extrabold text-[var(--seek-primary)] shadow-sm hover:brightness-105 sm:text-xs">{slide.action} <ArrowRight size={13} /></button>
+                  </div>
+                  <div className="relative z-10 hidden shrink-0 items-center gap-2 sm:flex">
+                    <button type="button" onClick={() => move(-1)} aria-label="Previous featured outreach" className="grid h-8 w-8 place-items-center rounded-full border border-white/30 bg-white/10 text-white hover:bg-white/20"><ArrowLeft size={16} /></button>
+                    <button type="button" onClick={() => move(1)} aria-label="Next featured outreach" className="grid h-8 w-8 place-items-center rounded-full border border-white/30 bg-white/10 text-white hover:bg-white/20"><ArrowRight size={16} /></button>
+                  </div>
+                </div>
+              </article>
+            ))}
           </div>
-          <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
-              {motionItems.map((item, index) => (
-                <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
-                  <span aria-hidden="true">{item.icon}</span>
-                  <span className="font-extrabold tracking-[0.09em] text-[var(--seek-muted)]">{item.label}</span>
-                  <span>{item.text}</span>
-                  <span className="ml-2 text-white/25" aria-hidden="true">✦</span>
-                </span>
-              ))}
-            </div>
+          <div className="absolute bottom-3 left-1/2 z-20 flex -translate-x-1/2 items-center gap-1.5 sm:bottom-4">
+            {slides.map((slide, index) => <button key={slide.id} type="button" onClick={() => setActiveSlide(index)} aria-label={`Show outreach card ${index + 1}`} aria-current={activeSlide === index ? "true" : undefined} className={`h-1.5 rounded-full transition-all ${activeSlide === index ? "w-5 bg-[var(--seek-success)]" : "w-1.5 bg-white/50"}`} />)}
           </div>
-          <span className="hidden shrink-0 text-[9px] text-white/45 sm:block" title={updatedAt ? "Updated " + updatedAt.toLocaleTimeString() : "Updating"}>UPDATING</span>
         </div>
       </section>
-      <div className="h-9" aria-hidden="true" />
+      <div className="h-[132px] sm:h-[144px]" aria-hidden="true" />
     </>
   );
 }
@@ -6688,7 +6617,7 @@ useEffect(() => {
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      <LiveTicker />
+      <LiveTicker setPage={setPage} />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
