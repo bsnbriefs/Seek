@@ -1300,7 +1300,7 @@ function Navbar({ page, setPage, userSession }) {
   const links = [
     { id: "home", label: "Home", icon: HomeIcon },
     { id: "fundraiser", label: "Fundraiser", icon: HeartHandshake },
-    { id: "home", label: "Help Someone", icon: HandHeart },
+    { id: "home", label: "Offer Help", icon: HandHeart },
     { id: "impact", label: "Impact", icon: BadgeCheck },
     { id: "shop", label: "Shop", icon: Package },
     { id: "about", label: "About", icon: ShieldCheck },
@@ -4403,7 +4403,7 @@ function ImpactStoryPage({ impactId, setPage }) {
         let row = null;
         if (String(impactId).startsWith("thanks-")) {
           const thanks = await listAppreciationStories().catch(() => []);
-          row = (thanks || []).find((item) => item.id === impactId) || null;
+          row = (thanks || []).find((item) => String(item.id) === String(impactId).replace(/^thanks-/, "")) || null;
         } else {
           row = await getPublishedImpactById(impactId);
         }
@@ -4490,27 +4490,69 @@ function ImpactStoryPage({ impactId, setPage }) {
   );
 }
 
+function AnimatedImpactNumber({ value }) {
+  const [display, setDisplay] = useState("0");
+  const nodeRef = useRef(null);
+  const startedRef = useRef(false);
+
+  useEffect(() => {
+    const raw = String(value ?? "—");
+    const match = raw.match(/^([^\d]*)([\d,]+(?:\.\d+)?)(.*)$/);
+    if (!match) { setDisplay(raw); return; }
+    const prefix = match[1];
+    const target = Number(match[2].replace(/,/g, ""));
+    const suffix = match[3];
+    if (!Number.isFinite(target)) { setDisplay(raw); return; }
+    let frame = 0;
+    let observer;
+    const animate = () => {
+      if (startedRef.current) return;
+      startedRef.current = true;
+      const duration = 1250;
+      const began = performance.now();
+      const tick = (now) => {
+        const progress = Math.min(1, (now - began) / duration);
+        const eased = 1 - Math.pow(1 - progress, 4);
+        const current = target * eased;
+        const formatted = Number.isInteger(target)
+          ? Math.round(current).toLocaleString()
+          : current.toLocaleString(undefined, { maximumFractionDigits: 1 });
+        setDisplay(prefix + formatted + suffix);
+        if (progress < 1) frame = requestAnimationFrame(tick);
+      };
+      frame = requestAnimationFrame(tick);
+    };
+    if (nodeRef.current && "IntersectionObserver" in window) {
+      observer = new IntersectionObserver((entries) => {
+        if (entries.some((entry) => entry.isIntersecting)) { animate(); observer?.disconnect(); }
+      }, { threshold: 0.35 });
+      observer.observe(nodeRef.current);
+    } else animate();
+    return () => { observer?.disconnect(); cancelAnimationFrame(frame); };
+  }, [value]);
+
+  return <span ref={nodeRef} aria-label={String(value)}>{display}</span>;
+}
+
 function ImpactPage({ setPage }) {
   const [posts, setPosts] = useState([]);
   const [thanks, setThanks] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
   const [liveStats, setLiveStats] = useState(null);
 
   useEffect(() => {
     let cancelled = false;
-    let donorTick;
     (async () => {
       try {
-        const [rows, thanks, live] = await Promise.all([
+        const [rows, appreciation, live] = await Promise.all([
           listPublishedImpact(),
           listAppreciationStories().catch(() => []),
           getSeekLiveStats().catch(() => null),
         ]);
         if (!cancelled) {
           setPosts(rows || []);
-          setThanks(thanks || []);
+          setThanks(appreciation || []);
           setLiveStats(live || null);
         }
       } catch (err) {
@@ -4522,94 +4564,65 @@ function ImpactPage({ setPage }) {
     return () => { cancelled = true; };
   }, []);
 
+  const stats = [
+    ["Help raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"],
+    ["Gifts received", liveStats?.donationCount ?? "—"],
+    ["Published stories", thanks.length],
+    ["Impact posts", posts.length],
+  ];
+  const impactReels = [
+    ...posts.map((post) => ({
+      ...post,
+      feedKind: "impact",
+      category: post.category || "Community impact",
+      description: post.story || [post.location, post.happened_on].filter(Boolean).join(" · "),
+      media: post.mediaItems?.length ? post.mediaItems : [{ public_url: post.public_url, media_kind: post.media_kind }].filter((item) => item.public_url),
+    })),
+    ...thanks.map((post) => ({
+      ...post,
+      id: "thanks-" + post.id,
+      feedKind: "appreciation",
+      category: "Thank-you story",
+      description: post.story || "A message from someone in the SEEK community.",
+      media: post.mediaItems?.length ? post.mediaItems : [{ public_url: post.public_url, media_kind: post.media_kind }].filter((item) => item.public_url),
+    })),
+  ];
+
   return (
     <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-8 text-center">
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-14 pb-7 text-center">
         <SectionLabel>Community Impact</SectionLabel>
         <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">See what your help made possible.</h1>
         <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
-          Stories of people and communities reached through Seek and BSN Foundation.
+          Real people. Real stories. Real change made possible by a community that shows up.
         </p>
       </section>
-      <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } }`}</style>
-      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8 grid grid-cols-2 lg:grid-cols-4 gap-3">
-        {[["Help raised", liveStats?.raised ? "₦" + Number(liveStats.raised).toLocaleString() : "—"], ["Gifts received", liveStats?.donationCount ?? "—"], ["Published stories", thanks.length], ["Impact posts", posts.length]].map(([label,value]) => <div key={label} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]">{value}</p></div>)}
+      <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } } .seek-impact-stat { animation: seekFade .65s ease both; } .seek-impact-stat:nth-child(2) { animation-delay: .08s; } .seek-impact-stat:nth-child(3) { animation-delay: .16s; } .seek-impact-stat:nth-child(4) { animation-delay: .24s; } @media (prefers-reduced-motion: reduce) { .seek-impact-stat { animation: none; } }`}</style>
+      <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-9 grid grid-cols-2 lg:grid-cols-4 gap-3" aria-label="SEEK community impact numbers">
+        {stats.map(([label, value]) => <div key={label} className="seek-impact-stat rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]"><AnimatedImpactNumber value={value} /></p></div>)}
       </section>
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pb-8">
         <p className="text-xs uppercase tracking-widest text-[#0D3B3B]/45 mb-2">Related UN goals</p>
         <p className="text-sm text-[#0D3B3B]/60 mb-3">BSN’s published work sits next to these goals. These labels are not a claim that SEEK has fulfilled an SDG.</p>
         <div className="flex flex-wrap gap-2">
-          {["SDG 1 No poverty", "SDG 2 Zero hunger", "SDG 3 Good health", "SDG 4 Quality education", "SDG 5 Gender equality"].map((s) => (
-            <span key={s} className="rounded-full border border-[#0D3B3B]/15 px-3 py-1 text-xs font-semibold text-[#0D3B3B]">{s}</span>
-          ))}
+          {["SDG 1 No poverty", "SDG 2 Zero hunger", "SDG 3 Good health", "SDG 4 Quality education", "SDG 5 Gender equality"].map((s) => <span key={s} className="rounded-full border border-[#0D3B3B]/15 px-3 py-1 text-xs font-semibold text-[#0D3B3B]">{s}</span>)}
         </div>
       </section>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20 space-y-6">
-        {loading && <p className="font-body text-sm text-[#0D3B3B]/50">Loading stories…</p>}
-        {error && <p className="font-body text-sm text-red-600">{error}</p>}
-        {!loading && !error && posts.length === 0 && thanks.length === 0 && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">No published stories yet.</p>
-        )}
-        <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-        {posts.map((post) => (
-          <button
-            key={post.id}
-            type="button"
-            className="rounded-xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
-            onClick={() => {
-              window.history.pushState({}, "", `/impact/${post.id}`);
-              setPage(`impact:${post.id}`);
-              window.scrollTo(0, 0);
-            }}
-          >
-            {post.public_url && post.media_kind === "video" ? (
-              <video src={post.public_url} muted playsInline preload="none" className="h-24 w-full object-cover bg-black" />
-            ) : post.public_url ? (
-              <img loading="lazy" decoding="async" src={post.public_url} alt="" className="h-24 w-full object-cover" />
-            ) : (
-              <div className="h-16 bg-[#0D3B3B]/5" />
-            )}
-            <div className="p-2.5">
-              <h2 className="font-display font-semibold text-sm text-[#0D3B3B] line-clamp-2">{post.title}</h2>
-              <p className="mt-1 font-body text-[11px] text-[#0D3B3B]/50 line-clamp-2">
-                {post.story || [post.location, post.happened_on].filter(Boolean).join(" · ")}
-              </p>
-            </div>
-          </button>
-        ))}
+      <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
+        <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">Community stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[#0D3B3B]">Watch the impact. Feel the difference.</h2></div>
+          <span className="text-xs font-semibold text-[#0D3B3B]/50">{loading ? "Loading…" : `${impactReels.length} stories`}</span>
         </div>
-        {thanks.length > 0 && (
-          <div className="pt-10">
-            <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-4">Thank-you notes from requesters</h2>
-            <div className="grid grid-cols-2 sm:grid-cols-3 gap-3">
-              {thanks.map((post) => (
-                <button
-                  key={post.id}
-                  type="button"
-                  className="rounded-xl bg-white border border-[#0D3B3B]/8 overflow-hidden text-left shadow-sm"
-                  onClick={() => {
-                    window.history.pushState({}, "", `/impact/${post.id}`);
-                    setPage(`impact:${post.id}`);
-                    window.scrollTo(0, 0);
-                  }}
-                >
-                  {post.public_url && post.media_kind === "video" ? (
-                    <video src={post.public_url} muted playsInline preload="none" className="h-24 w-full object-cover bg-black" />
-                  ) : post.public_url ? (
-                    <img loading="lazy" src={post.public_url} alt="" className="h-24 w-full object-cover" />
-                  ) : null}
-                  <div className="p-2.5">
-                    <h3 className="font-display font-semibold text-sm text-[#0D3B3B] line-clamp-2">{post.title}</h3>
-                    <p className="mt-1 font-body text-[11px] text-[#0D3B3B]/50 line-clamp-2">{post.story}</p>
-                  </div>
-                </button>
-              ))}
-            </div>
-          </div>
-        )}
-        <div className="text-center pt-4">
-          <Button variant="primary" onClick={() => setPage("give")}>Help someone <ArrowRight size={16} /></Button>
+        {loading && <div className="seek-feed-skeleton mx-auto h-[62svh] max-w-[420px] rounded-[28px]" />}
+        {error && <p className="mx-auto max-w-md rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
+        {!loading && !error && impactReels.length === 0 && <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Photos and videos from community work will appear here.</p></div>}
+        <div className="seek-reels-feed" aria-label="Swipe through SEEK community impact stories">
+          {impactReels.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
         </div>
+      </section>
+      <section className="mx-auto max-w-3xl px-5 pb-20 text-center">
+        <p className="text-sm text-[#0D3B3B]/60">You can be part of the next story.</p>
+        <Button variant="primary" onClick={() => { setPage("give"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
       </section>
     </div>
   );
@@ -5826,7 +5839,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "home", label: "Help Someone", note: "Browse open requests", icon: HandHeart, scroll: "home-open-requests" },
+    { id: "home", label: "Offer Help", note: "Browse open requests", icon: HandHeart, scroll: "home-open-requests" },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },
