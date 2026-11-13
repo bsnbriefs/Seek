@@ -419,6 +419,14 @@ const FONTS = (
       animation: seekTicker 80s linear infinite;
       white-space: nowrap;
     }
+    .seek-ticker-interactive { width: max-content; min-width: 100%; }
+    .seek-ticker-single { display: inline-flex; align-items: center; gap: 2.5rem; white-space: nowrap; }
+    .seek-community-pulse:focus-within .seek-ticker-track,
+    .seek-community-pulse:hover .seek-ticker-track { animation-play-state: paused; }
+    .seek-community-pulse { box-shadow: 0 5px 18px rgba(4, 31, 31, 0.12); }
+    @media (max-width: 640px) {
+      .seek-ticker-track { gap: 1.5rem; animation-duration: 58s; }
+    }
     @media (prefers-reduced-motion: reduce) {
       .seek-ticker-track { animation: none; }
     }
@@ -1302,18 +1310,20 @@ function Navbar({ page, setPage, userSession }) {
             <button
               key={l.label + i}
               onClick={() => go(l.id)}
-              className={`font-body text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${page === l.id ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              className={`seek-nav-link font-body text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${page === l.id ? "seek-nav-active text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
             >
               {l.icon ? <l.icon size={14} /> : null}
               {l.label}
+              {page === l.id ? <span className="seek-nav-indicator" aria-hidden="true" /> : null}
             </button>
           ))}
           {userSession?.access_token && (
             <button
               onClick={() => go("my-seek")}
-              className={`font-body text-sm font-medium transition-colors ${page === "my-seek" ? "text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              className={`seek-nav-link font-body text-sm font-medium transition-colors ${page === "my-seek" ? "seek-nav-active text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
             >
               My SEEK
+              {page === "my-seek" ? <span className="seek-nav-indicator" aria-hidden="true" /> : null}
             </button>
           )}
         </nav>
@@ -5592,69 +5602,134 @@ function ShopPage({ setPage }) {
 
 function LiveTicker() {
   const [items, setItems] = useState([]);
+  const [updatedAt, setUpdatedAt] = useState(null);
+  const [loading, setLoading] = useState(true);
+
   useEffect(() => {
     let cancelled = false;
+    let inFlight = false;
+    let intervalId;
+
     const load = async () => {
+      if (inFlight || document.visibilityState === "hidden") return;
+      inFlight = true;
       try {
         const [reqRows, offerRows, stats, gifts] = await Promise.all([
-          listPublishedRequests(6).catch(() => []),
+          listPublishedRequests(8).catch(() => []),
           listPublicOffers().catch(() => []),
           getSeekLiveStats().catch(() => null),
-          listRecentGifts(8).catch(() => []),
+          listRecentGifts(10).catch(() => []),
         ]);
-        const disasters = [];
-        const nigeria = [];
-        const giftBits = (Array.isArray(gifts) ? gifts : []).map((g) => {
-          const raw = String(g.donor_name || "");
-          const parts = raw.split("·").map((s) => s.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
-          const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "Someone" : parts[0];
-          const purpose = parts.slice(1).join(" · ") || "a request";
-          return "💚 " + who + " supported " + purpose;
+
+        const giftBits = (Array.isArray(gifts) ? gifts : [])
+          .filter((g) => !g.status || /successful|success|paid/i.test(String(g.status)))
+          .slice(0, 6)
+          .map((g) => {
+            const raw = String(g.donor_name || "");
+            const parts = raw.split("·").map((part) => part.replace(/\[.*?\]/g, "").trim()).filter(Boolean);
+            const who = g.anonymous || !parts[0] || /^anon/i.test(parts[0]) ? "Someone" : parts[0];
+            const purpose = parts.slice(1).join(" · ") || "a community request";
+            return { key: "gift-" + (g.created_at || purpose) + "-" + who, label: "SUPPORTED", text: who + " supported " + purpose, icon: "💚" };
+          });
+
+        const requestBits = (Array.isArray(reqRows) ? reqRows : []).slice(0, 8).map((r) => {
+          const title = String(r.title || r.need || r.category || "A community request").trim();
+          const loc = r.location ? " · " + r.location : "";
+          const category = String(r.category || "");
+          const isConnect = CONNECT_CATS.includes(category);
+          const isOpportunity = /job|mentor|counsel|opportunit/i.test(category);
+          return {
+            key: "request-" + (r.id || title),
+            label: isConnect ? "COMMUNITY" : isOpportunity ? "OPPORTUNITY" : "SEEK HELP",
+            text: title + loc,
+            icon: isConnect ? "🎉" : isOpportunity ? "🤝" : "🔎",
+          };
         });
-        const requestBits = (Array.isArray(reqRows) ? reqRows : []).map((r) => {
-          const title = r.title || r.need || r.category || "a request";
-          const loc = r.location ? " in " + r.location : "";
-          if (CONNECT_CATS.includes(r.category)) return "🎉 " + title + loc;
-          if (/job|mentor|counsel/i.test(String(r.category || ""))) return "🤝 New " + (r.category || "opportunity") + loc;
-          return "🔴 " + title + loc;
+
+        const offerBits = (Array.isArray(offerRows) ? offerRows : []).slice(0, 6).map((offer) => {
+          const description = String(offer.description || offer.category || "A new community offer").replace(/\s+/g, " ").trim().slice(0, 72);
+          return { key: "offer-" + (offer.id || description), label: "OFFERED", text: description, icon: "🎁" };
         });
-        const offerBits = (Array.isArray(offerRows) ? offerRows : []).slice(0, 4).map((o) => {
-          const desc = String(o.description || o.category || "giveaway").slice(0, 50);
-          return "🎁 " + desc;
-        });
-        const bits = [
-          stats?.raised ? ("💚 ₦" + Math.round(stats.raised).toLocaleString() + " from " + stats.donationCount + " gifts") : null,
+
+        const activity = [
+          ...(stats?.raised > 0 ? [{ key: "stats-" + Math.round(stats.raised) + "-" + (stats.donationCount || 0), label: "COMMUNITY IMPACT", text: "₦" + Math.round(stats.raised).toLocaleString() + " raised through " + (stats.donationCount || 0) + " gifts", icon: "💚" }] : []),
           ...giftBits,
           ...requestBits,
           ...offerBits,
-        ].filter(Boolean);
-        if (!cancelled) setItems(bits.filter(Boolean));
-      } catch (_e) {}
+        ];
+        const seen = new Set();
+        const unique = activity.filter((item) => {
+          const key = item.key + "|" + item.text;
+          if (seen.has(key)) return false;
+          seen.add(key);
+          return Boolean(item.text);
+        });
+
+        if (!cancelled) {
+          setItems(unique);
+          setUpdatedAt(new Date());
+          setLoading(false);
+        }
+      } catch (_error) {
+        if (!cancelled) setLoading(false);
+      } finally {
+        inFlight = false;
+      }
     };
-    load();
-    const id = setInterval(load, 60000);
-    return () => { cancelled = true; clearInterval(id); };
+
+    const start = () => {
+      if (intervalId) window.clearInterval(intervalId);
+      load();
+      intervalId = window.setInterval(load, 45000);
+    };
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") load();
+    };
+    const onFocus = () => load();
+    start();
+    document.addEventListener("visibilitychange", onVisibility);
+    window.addEventListener("focus", onFocus);
+    return () => {
+      cancelled = true;
+      if (intervalId) window.clearInterval(intervalId);
+      document.removeEventListener("visibilitychange", onVisibility);
+      window.removeEventListener("focus", onFocus);
+    };
   }, []);
-  if (!items.length) return <div className="h-0" />;
+
+  if (!items.length) return loading ? <div className="h-0" aria-hidden="true" /> : <div className="h-0" aria-hidden="true" />;
+  const motionItems = items.length > 1 ? [...items, ...items] : items;
+
   return (
     <>
-    <div className="fixed top-16 inset-x-0 z-[105] border-b border-[#0D3B3B]/8 bg-[#0D3B3B] text-white overflow-hidden">
-      <div className="flex items-center gap-2 px-3 py-1">
-        <span className="seek-live-blink shrink-0 text-[9px] font-semibold uppercase tracking-widest bg-[#63C167] text-[#0D3B3B] px-1.5 py-0.5 rounded">Live</span>
-        <div className="overflow-hidden flex-1">
-          <div className="seek-ticker-track">
-            {[...items, ...items].map((item, i) => (
-              <span key={i} className="text-xs font-body text-white/80">{item}</span>
-            ))}
+      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden border-b border-white/10 bg-[#0D3B3B] text-white" aria-label="SEEK community activity">
+        <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
+          <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
+            <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
+              <span className="seek-live-ring" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-[#9BE15D]" />
+            </span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#B8F28B]">Community pulse</span>
           </div>
+          <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
+            <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
+              {motionItems.map((item, index) => (
+                <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
+                  <span aria-hidden="true">{item.icon}</span>
+                  <span className="font-extrabold tracking-[0.09em] text-[#9BE15D]">{item.label}</span>
+                  <span>{item.text}</span>
+                  <span className="ml-2 text-white/25" aria-hidden="true">✦</span>
+                </span>
+              ))}
+            </div>
+          </div>
+          <span className="hidden shrink-0 text-[9px] text-white/45 sm:block" title={updatedAt ? "Updated " + updatedAt.toLocaleTimeString() : "Updating"}>UPDATING</span>
         </div>
-      </div>
-    </div>
-    <div className="h-8" aria-hidden="true" />
+      </section>
+      <div className="h-9" aria-hidden="true" />
     </>
   );
 }
-
 
 function pageFromPath(pathname) {
   const path = String(pathname || "/").replace(/\/+$/, "") || "/";
@@ -5797,7 +5872,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
             const Icon = item.icon;
             const active = page === item.id;
             return (
-              <button key={item.id} type="button" onClick={() => item.action ? item.action() : go(item.id)} className={`flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 ${active ? "text-white" : "text-white/55"}`} aria-label={item.label}>
+              <button key={item.id} type="button" onClick={() => item.action ? item.action() : go(item.id)} className={`seek-mobile-nav-link flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 ${active ? "seek-mobile-nav-active text-white" : "text-white/55"}`} aria-label={item.label}>
                 <Icon size={25} strokeWidth={active ? 2.6 : 2} />
                 <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
               </button>
@@ -5809,14 +5884,14 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
           {items.slice(2).map((item) => {
             const Icon = item.icon;
             return (
-              <button key={item.id} type="button" onClick={() => item.action()} className="flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 text-white/55" aria-label={item.label}>
+              <button key={item.id} type="button" onClick={() => item.action()} className="seek-mobile-nav-link flex min-w-[4rem] flex-col items-center justify-center gap-1 py-2 text-white/55" aria-label={item.label}>
                 <Icon size={25} strokeWidth={2} />
                 <span className="text-[9px] font-semibold tracking-wide">{item.label}</span>
               </button>
             );
           })}
 
-          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1BAA9C] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
+          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`seek-mobile-create absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1BAA9C] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
             <Plus size={35} strokeWidth={2.2} />
           </button>
         </div>
