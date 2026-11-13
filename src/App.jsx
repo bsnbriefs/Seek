@@ -403,6 +403,68 @@ const FONTS = (
     html.seek-dark .seek-offer-category .seek-offer-description { color: #C2D5CF !important; }
     html.seek-dark .seek-offer-category > span:last-child { color: #76E0C7 !important; }
 
+    /* High-specificity contrast fixes for Campaign and My Requests in dark appearance */
+    html.seek-dark .seek-campaign-page .seek-campaign-hero h1,
+    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero h1 { color:#FFFFFF !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-hero h1 span { color:#B9F3D9 !important; -webkit-text-fill-color:#B9F3D9 !important; background:none !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-hero p,
+    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero p { color:#E2F3ED !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-kicker { color:#F0FFF8 !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-stats strong { color:#FFFFFF !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-stats span { color:#D5E9E2 !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-donate { color:#062D29 !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-outline { color:#FFFFFF !important; }
+
+    html.seek-dark .seek-my-requests-page { background:#101917 !important; color:#F2F8F5 !important; }
+    html.seek-dark .seek-my-requests-page .seek-my-requests-heading h1 { color:#FFFFFF !important; }
+    html.seek-dark .seek-my-requests-page .seek-my-requests-intro { color:#D1E0D9 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-account { background:#1B2B26 !important; border-color:#47665B !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-account p { color:#E4F0EA !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card { background:#172722 !important; border-color:#47665B !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-summary,
+    html.seek-dark .seek-my-requests-page .seek-request-summary > span:first-child { color:#F5FBF8 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body { border-color:#355047 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body h2 { color:#F5FBF8 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body p,
+    html.seek-dark .seek-my-requests-page .seek-request-card-body label { color:#D4E3DC !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey { background:#263A33 !important; border:1px solid #527166 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey > p { color:#E7F5EE !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey span { color:#D8E9E1 !important; opacity:1 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold { color:#FFFFFF !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\#1BAA9C\] { background:#28B7A2 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\#0D3B3B\]\/20 { background:#60776D !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions { border-color:#3D594F !important; gap:10px !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions button,
+    html.seek-dark .seek-my-requests-page .seek-request-actions label { color:#C9F7E7 !important; background:#244238 !important; border:1px solid #527C6D !important; padding:9px 13px !important; border-radius:999px !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions button:hover,
+    html.seek-dark .seek-my-requests-page .seek-request-actions label:hover { background:#31594B !important; }
+    html.seek-dark .seek-my-requests-page input:not([type=file]),
+    html.seek-dark .seek-my-requests-page textarea { background:#F8FCFA !important; color:#173B34 !important; border-color:#8AA99C !important; }
+    html.seek-dark .seek-my-requests-page input::placeholder,
+    html.seek-dark .seek-my-requests-page textarea::placeholder { color:#61766E !important; }
+    html.seek-dark .seek-my-requests-page input[type=file] { color:#E4F0EA !important; background:#20352D !important; border:1px dashed #719487 !important; border-radius:12px !important; padding:10px !important; max-width:100%; }
+    html.seek-dark .seek-my-requests-page input[type=file]::file-selector-button { background:#BDEEDB !important; color:#123B32 !important; border:0 !important; border-radius:8px !important; padding:8px 12px !important; margin-right:10px !important; font-weight:800 !important; }
+
+    @media (max-width: 640px) {
+      .seek-my-requests-page > section { padding-top:28px !important; }
+      .seek-my-requests-heading { margin-bottom:18px !important; }
+      .seek-request-account { align-items:flex-start !important; }
+      .seek-request-summary { align-items:flex-start !important; flex-wrap:wrap !important; padding:15px !important; }
+      .seek-request-summary > span:first-child { flex:1 1 100% !important; }
+      .seek-request-status { max-width:100% !important; }
+      .seek-request-card-body { padding:0 14px 16px !important; }
+      .seek-request-journey { padding:12px !important; }
+      .seek-request-journey .grid { gap:5px !important; }
+      .seek-request-journey span { font-size:10px !important; line-height:1.3 !important; }
+      .seek-request-actions { gap:9px !important; }
+      .seek-request-actions button,.seek-request-actions label { min-height:40px !important; }
+    }
+    @media (prefers-reduced-motion:no-preference) {
+      .seek-request-journey { animation:seekFadeUp .5s ease both; }
+      .seek-request-journey .bg-\[\#1BAA9C\] { animation:seekJourneyFill .9s cubic-bezier(.2,.7,.2,1) both; transform-origin:left center; }
+      @keyframes seekJourneyFill { from { transform:scaleX(.08); opacity:.5; } to { transform:scaleX(1); opacity:1; } }
+    }
+
     @keyframes seek-loop {
       0% { stroke-dashoffset: 0; }
       100% { stroke-dashoffset: -120; }
@@ -5333,14 +5395,16 @@ function MyRequestsPage({ setPage, userSession }) {
   }
 
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10">
-        <SectionLabel>Your account</SectionLabel>
+    <div className="seek-my-requests-page" style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-6 pt-9 sm:pt-12 pb-24">
+        <div className="seek-my-requests-heading">
+          <SectionLabel>Your account</SectionLabel>
         <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-2">
           My requests
         </h1>
-        {/* avatar loaded below */}
-        <div className="flex items-center gap-3 mb-8">
+        <p className="seek-my-requests-intro">Track your requests, follow their progress and share updates with the people supporting you.</p>
+        </div>
+        <div className="seek-request-account mb-7">
           <div className="relative shrink-0">
             {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
             <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
@@ -5392,7 +5456,7 @@ function MyRequestsPage({ setPage, userSession }) {
                 { id: "fulfilled", label: "Need met" },
                 { id: "rejected", label: "Not published" },
               ].map((f) => (
-                <button key={f.id} type="button" onClick={() => setStatusFilter(f.id)} className={`rounded-full px-3 py-1.5 text-xs font-semibold ${statusFilter === f.id ? "bg-[#0D3B3B] text-white" : "bg-white border"}`}>{f.label}</button>
+                <button key={f.id} type="button" onClick={() => setStatusFilter(f.id)} className={`seek-request-filter rounded-full px-3 py-1.5 text-xs font-semibold ${statusFilter === f.id ? "is-active" : ""}`}>{f.label}</button>
               ))}
             </div>
           </>
@@ -5405,14 +5469,14 @@ function MyRequestsPage({ setPage, userSession }) {
           }).map((req) => (
             <details
               key={req.id}
-              className="rounded-2xl bg-white border border-[#0D3B3B]/08"
+              className="seek-request-card"
             >
-              <summary className="cursor-pointer list-none px-5 py-4 flex items-center justify-between gap-3">
+              <summary className="seek-request-summary cursor-pointer list-none">
                 <span className="font-display font-bold text-[#0D3B3B]">{req.title}</span>
-                <span className="text-xs font-semibold text-[#0D3B3B]/50">{formatSeekStatus(req.status)}</span>
+                <span className="seek-request-status">{formatSeekStatus(req.status)}</span>
               </summary>
-              <div className="px-5 pb-5">
-              <div className="flex flex-wrap items-start justify-between gap-2 mb-2">
+              <div className="seek-request-card-body">
+              <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
                 <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
                   {req.category}
                 </span>
@@ -5431,8 +5495,8 @@ function MyRequestsPage({ setPage, userSession }) {
                   <ProgressBar raised={req.amountRaised} needed={req.amountNeeded} />
                 </div>
               ) : null}
-              <div className="mb-5 rounded-2xl bg-[#F2F5F3] p-4">
-                <p className="text-[11px] font-semibold uppercase tracking-widest text-[#0D3B3B]/60 mb-3">Request journey</p>
+              <div className="seek-request-journey mb-5 rounded-2xl p-4">
+                <p className="text-[11px] font-semibold uppercase tracking-widest mb-3">Request journey</p>
                 <div className="grid grid-cols-5 gap-1">
                   {[['pending_review','Submitted'],['published','Published'],['partially_funded','Help started'],['fulfilled','Need met'],['closed','Closed']].map(([id,label], index) => {
                     const order = {pending_review:0,verification_required:0,published:1,partially_funded:2,matched:2,fulfilled:3,closed:4,rejected:-1};
@@ -5478,7 +5542,8 @@ function MyRequestsPage({ setPage, userSession }) {
                   }} className="mt-2 rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-xs font-bold">Post update</button>
                 </div>
               )}
-                <button
+                <div className="seek-request-actions">
+              <button
                   type="button"
                   onClick={() => {
                     setPage(`request:${req.id}`);
@@ -5537,6 +5602,7 @@ function MyRequestsPage({ setPage, userSession }) {
                   }}
                 />
               )}
+            </div>
             </details>
           ))}
         </div>

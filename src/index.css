@@ -420,3 +420,49 @@ html:not(.seek-dark) .seek-campaign-page .seek-campaign-back { background: rgba(
 .seek-dark .seek-my-requests-page .bg-\[\#F2F5F3\] { background:#22352e !important; }
 .seek-dark .seek-my-requests-page .text-\[\#1BAA9C\] { color:#8cebd7 !important; }
 @media (prefers-reduced-motion:reduce) { .seek-request-card,.seek-request-summary:after,.seek-request-filter { animation:none!important; transition:none!important; } }
+
+
+/* Verified mobile contrast and layout overrides for Campaign + My Requests */
+html.seek-dark .seek-campaign-page .seek-campaign-hero h1,
+html.seek-dark .seek-campaign-page .seek-campaign-detail-hero h1 { color:#fff !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-hero h1 span { color:#b9f3d9 !important; -webkit-text-fill-color:#b9f3d9 !important; background:none !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-hero p,
+html.seek-dark .seek-campaign-page .seek-campaign-detail-hero p { color:#e2f3ed !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-kicker { color:#f0fff8 !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-stats strong { color:#fff !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-stats span { color:#d5e9e2 !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-donate { color:#062d29 !important; }
+html.seek-dark .seek-campaign-page .seek-campaign-outline { color:#fff !important; }
+html.seek-dark .seek-my-requests-page { background:#101917 !important; color:#f2f8f5 !important; }
+html.seek-dark .seek-my-requests-page .seek-my-requests-heading h1 { color:#fff !important; }
+html.seek-dark .seek-my-requests-page .seek-my-requests-intro { color:#d1e0d9 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-account { background:#1b2b26 !important; border-color:#47665b !important; }
+html.seek-dark .seek-my-requests-page .seek-request-account p { color:#e4f0ea !important; }
+html.seek-dark .seek-my-requests-page .seek-request-card { background:#172722 !important; border-color:#47665b !important; }
+html.seek-dark .seek-my-requests-page .seek-request-summary,
+html.seek-dark .seek-my-requests-page .seek-request-summary > span:first-child { color:#f5fbf8 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-card-body { border-color:#355047 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-card-body h2 { color:#f5fbf8 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-card-body p,
+html.seek-dark .seek-my-requests-page .seek-request-card-body label { color:#d4e3dc !important; }
+html.seek-dark .seek-my-requests-page .seek-request-journey { background:#263a33 !important; border:1px solid #527166 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-journey > p { color:#e7f5ee !important; }
+html.seek-dark .seek-my-requests-page .seek-request-journey span { color:#d8e9e1 !important; opacity:1 !important; }
+html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold { color:#fff !important; }
+html.seek-dark .seek-my-requests-page .seek-request-actions { border-color:#3d594f !important; gap:10px !important; }
+html.seek-dark .seek-my-requests-page .seek-request-actions button,
+html.seek-dark .seek-my-requests-page .seek-request-actions label { color:#c9f7e7 !important; background:#244238 !important; border:1px solid #527c6d !important; padding:9px 13px !important; border-radius:999px !important; }
+html.seek-dark .seek-my-requests-page input:not([type=file]),
+html.seek-dark .seek-my-requests-page textarea { background:#f8fcfa !important; color:#173b34 !important; border-color:#8aa99c !important; }
+html.seek-dark .seek-my-requests-page input::placeholder,
+html.seek-dark .seek-my-requests-page textarea::placeholder { color:#61766e !important; }
+html.seek-dark .seek-my-requests-page input[type=file] { color:#e4f0ea !important; background:#20352d !important; border:1px dashed #719487 !important; border-radius:12px !important; padding:10px !important; max-width:100%; }
+html.seek-dark .seek-my-requests-page input[type=file]::file-selector-button { background:#bdeedb !important; color:#123b32 !important; border:0 !important; border-radius:8px !important; padding:8px 12px !important; margin-right:10px !important; font-weight:800 !important; }
+@media (max-width:640px) {
+  .seek-my-requests-page > section { padding-top:28px !important; }
+  .seek-request-summary { align-items:flex-start !important; flex-wrap:wrap !important; }
+  .seek-request-summary > span:first-child { flex:1 1 100% !important; }
+  .seek-request-card-body { padding:0 14px 16px !important; }
+  .seek-request-journey { padding:12px !important; }
+  .seek-request-actions { gap:9px !important; }
+}
