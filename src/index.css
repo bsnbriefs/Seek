@@ -82,3 +82,70 @@ html {
 @keyframes seek-discover-drift { from { transform: translate3d(-8px,0,0) scale(.92); } to { transform: translate3d(18px,14px,0) scale(1.1); } }
 @keyframes seek-discover-card-in { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
 @media (prefers-reduced-motion: reduce) { .seek-discover-marquee-track { animation: none; } .seek-discover-card, .seek-discover-title { animation: none; } .seek-discover-glow { animation: none; } }
+
+/* SEEK fundraiser experience: purposeful, restrained motion */
+.seek-fundraiser-card {
+  position: relative;
+  overflow: hidden;
+  transform: translateZ(0);
+  transition: transform .32s cubic-bezier(.2,.8,.2,1), box-shadow .32s ease, border-color .32s ease;
+  animation: seek-fundraiser-enter .58s cubic-bezier(.2,.8,.2,1) both;
+}
+.seek-fundraiser-card::before {
+  content: "";
+  position: absolute;
+  inset: 0 auto 0 0;
+  width: 3px;
+  background: linear-gradient(180deg, #1BAA9C, #A2CE4A);
+  opacity: .0;
+  transition: opacity .25s ease;
+  pointer-events: none;
+}
+.seek-fundraiser-card:hover {
+  transform: translateY(-4px);
+  border-color: rgba(27,170,156,.3);
+  box-shadow: 0 16px 36px rgba(13,59,59,.09);
+}
+.seek-fundraiser-card:hover::before { opacity: 1; }
+.seek-fundraiser-progress-fill {
+  position: relative;
+  border-radius: inherit;
+  background-image: linear-gradient(100deg, #159F99 0%, #36B78A 55%, #A3CB4B 100%);
+  background-size: 180% 100%;
+  transform-origin: left center;
+  animation: seek-fundraiser-progress .85s cubic-bezier(.2,.8,.2,1) both;
+}
+.seek-fundraiser-progress-fill::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  background: linear-gradient(90deg, transparent, rgba(255,255,255,.35), transparent);
+  transform: translateX(-120%);
+  animation: seek-fundraiser-glint 4.5s ease-in-out 1.5s infinite;
+}
+.seek-fundraiser-donate {
+  position: relative;
+  overflow: hidden;
+  isolation: isolate;
+  box-shadow: 0 6px 16px rgba(27,170,156,.16);
+  transition: transform .2s ease, box-shadow .2s ease, filter .2s ease;
+}
+.seek-fundraiser-donate::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  z-index: -1;
+  background: linear-gradient(110deg, transparent 20%, rgba(255,255,255,.2) 48%, transparent 76%);
+  transform: translateX(-120%);
+  transition: transform .65s ease;
+}
+.seek-fundraiser-donate:hover { transform: translateY(-2px); box-shadow: 0 10px 22px rgba(27,170,156,.24); filter: saturate(1.08); }
+.seek-fundraiser-donate:hover::after { transform: translateX(120%); }
+.seek-fundraiser-donate:active { transform: scale(.98); }
+@keyframes seek-fundraiser-enter { from { opacity: 0; transform: translateY(16px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes seek-fundraiser-progress { from { transform: scaleX(.04); } to { transform: scaleX(1); } }
+@keyframes seek-fundraiser-glint { 0%, 72%, 100% { transform: translateX(-120%); } 88% { transform: translateX(120%); } }
+@media (prefers-reduced-motion: reduce) {
+  .seek-fundraiser-card, .seek-fundraiser-progress-fill, .seek-fundraiser-progress-fill::after { animation: none !important; }
+  .seek-fundraiser-card, .seek-fundraiser-donate { transition: none !important; }
+}

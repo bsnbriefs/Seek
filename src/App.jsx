@@ -1005,7 +1005,7 @@ function RequestCard({ req, onHelp, onView }) {
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
   return (
-    <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
+    <div className="seek-fundraiser-card flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
         <div className="flex items-center gap-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
@@ -1488,20 +1488,20 @@ function HomePage({ setPage, userSession }) {
             <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-3">Fundraisers</p>
             <div className="space-y-3">
               {requests.filter((r) => String(r.category || "").includes("Fundraiser")).slice(0, 3).map((r) => (
-                <div key={r.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                <div key={r.id} className="seek-fundraiser-card rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
                   <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full text-left">
                     <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
                     <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
                     {r.amountNeeded > 0 && (
                       <div className="mt-2">
                         <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
-                          <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
+                          <div className="seek-fundraiser-progress-fill h-full rounded-full bg-[#1BAA9C]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
                         </div>
                         <p className="text-sm text-[#1BAA9C] mt-1">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>
                       </div>
                     )}
                   </button>
-                  <button type="button" onClick={() => setDonateReq(r)} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
+                  <button type="button" onClick={() => setDonateReq(r)} className="seek-fundraiser-donate mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
                 </div>
               ))}
             </div>
@@ -2093,7 +2093,7 @@ function LiveSupportCard({ request, setPage }) {
         {isFinancialNeed(request) && amountNeeded > 0 && <div><div className="flex items-end justify-between gap-3 text-sm"><div><p className="font-semibold text-[#0D3B3B]">₦{amountRaised.toLocaleString()} raised</p><p className="mt-0.5 text-xs text-[#0D3B3B]/50">of ₦{amountNeeded.toLocaleString()}</p></div><span className="font-bold text-[#1BAA9C]">{progress}%</span></div><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#0D3B3B]/10"><div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: `${progress}%` }} /></div></div>}
         <div className="mt-2 flex items-center gap-2">
           {isFinancialNeed(request) ? (
-            <button type="button" onClick={supportCase} className="flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Donate</button>
+            <button type="button" onClick={supportCase} className="seek-fundraiser-donate flex-1 rounded-full bg-[#1BAA9C] px-3 py-2.5 text-sm font-bold text-white">Donate</button>
           ) : (
             <button type="button" onClick={goToCase} className="flex-1 rounded-full bg-[#0D3B3B] px-3 py-2.5 text-sm font-bold text-white">View</button>
           )}
@@ -3975,7 +3975,7 @@ function RequestPage({ requestId, setPage }) {
                 ) : isFinancialNeed(request) ? (
                   <button
                     type="button"
-                    className="w-full rounded-full bg-[#1BAA9C] text-white py-4 text-lg font-bold"
+                    className="seek-fundraiser-donate w-full rounded-full bg-[#1BAA9C] text-white py-4 text-lg font-bold"
                     onClick={() => setCaseDonateOpen(true)}
                   >
                     Donate now
@@ -4012,7 +4012,7 @@ function RequestPage({ requestId, setPage }) {
               <p className="text-sm font-semibold text-[#0D3B3B]">₦{Number(request.amountRaised || 0).toLocaleString()} raised</p>
               <p className="text-xs text-[#0D3B3B]/50">of ₦{Number(request.amountNeeded || 0).toLocaleString()}</p>
             </div>
-            <button type="button" onClick={() => setCaseDonateOpen(true)} className="rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+            <button type="button" onClick={() => setCaseDonateOpen(true)} className="seek-fundraiser-donate rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
           </div>
         </div>
       )}
