@@ -2189,6 +2189,7 @@ function LiveSupportCard({ request, setPage }) {
 
 function BsnPage({ setPage }) {
   const [selected, setSelected] = useState(null);
+  const [showCampaignList, setShowCampaignList] = useState(false);
   const [donating, setDonating] = useState(false);
   const [activeMedia, setActiveMedia] = useState(0);
   const [campaignRaised, setCampaignRaised] = useState(0);
@@ -2245,6 +2246,37 @@ function BsnPage({ setPage }) {
       </main>
     );
   }
+  if (showCampaignList) {
+    return (
+      <main className="seek-campaign-page min-h-screen pb-28">
+        <section className="seek-campaign-detail-hero relative overflow-hidden px-5 pt-7 pb-9 sm:pt-10">
+          <div className="seek-campaign-orb seek-campaign-orb-a" /><div className="seek-campaign-orb seek-campaign-orb-b" />
+          <div className="relative z-10 mx-auto max-w-6xl">
+            <button type="button" onClick={() => setShowCampaignList(false)} className="seek-campaign-back">← Back to campaigns</button>
+            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[#9CEBD4]">BSN Empowerment Foundation</p>
+            <h1 className="mt-3 max-w-3xl font-display text-3xl font-black leading-tight text-white sm:text-5xl">Explore our campaigns.</h1>
+            <p className="mt-3 max-w-2xl text-sm leading-7 text-white/75 sm:text-base">Browse the programmes and choose a campaign to learn about the people, the work and how you can contribute.</p>
+          </div>
+        </section>
+        <section className="mx-auto max-w-6xl px-5 py-8 sm:py-12">
+          <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[#0D8F83]">Available campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[#0D3B3B] sm:text-3xl">Choose where to make a difference.</h2></div>
+            <span className="rounded-full bg-[#E8F5F1] px-4 py-2 text-xs font-bold text-[#08776E]">{OUTREACH_CAMPAIGNS.length} programmes</span>
+          </div>
+          <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+            {OUTREACH_CAMPAIGNS.map((c, i) => {
+              const cover = c.photos?.[0];
+              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[#0D3B3B]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[#385653]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#0D8F83]">View campaign <ArrowRight size={15} /></span></div>
+              </button>;
+            })}
+          </div>
+          {OUTREACH_CAMPAIGNS.length === 0 && <div className="rounded-3xl border border-[#DDEBE7] bg-white p-8 text-center"><h3 className="font-display text-xl font-bold text-[#0D3B3B]">No campaigns available yet</h3><p className="mt-2 text-sm text-[#56736D]">Please check back soon for new community programmes.</p></div>}
+        </section>
+      </main>
+    );
+  }
   return (
     <main className="seek-campaign-page min-h-screen pb-28">
       <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
@@ -2253,20 +2285,8 @@ function BsnPage({ setPage }) {
           <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
           <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => document.getElementById("bsn-campaign-list")?.scrollIntoView({ behavior: "smooth" })} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
           <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
-        </div>
-      </section>
-      <section id="bsn-campaign-list" className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
-        <div className="mb-7 max-w-2xl"><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[#0D8F83]">Choose where to help</p><h2 className="mt-2 font-display text-3xl font-black text-[#0D3B3B] sm:text-4xl">Campaigns that turn care into action.</h2><p className="mt-3 text-sm leading-6 text-[#385653]">Explore a programme to see its story, the work behind it and how your support can help.</p></div>
-        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
-          {OUTREACH_CAMPAIGNS.map((c, i) => {
-            const cover = c.photos?.[0];
-            return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
-              <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
-              <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[#0D3B3B]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[#385653]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#0D8F83]">Explore campaign <ArrowRight size={15} /></span></div>
-            </button>;
-          })}
         </div>
       </section>
     </main>
