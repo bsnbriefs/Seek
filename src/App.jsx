@@ -314,6 +314,23 @@ const FONTS = (
 
     html, body { background-color: var(--seek-bg, var(--seek-white)); }
     html.seek-dark { color-scheme: dark; }
+    /* Keep the header notification bell legible in both SEEK themes. */
+    html.seek-dark .seek-inbox-button { color: #ffffff !important; }
+    html:not(.seek-dark) .seek-inbox-button { color: #193524 !important; }
+    html.seek-dark .seek-inbox-button:hover,
+    html:not(.seek-dark) .seek-inbox-button:hover { color: var(--seek-success) !important; }
+    .seek-inbox-button .seek-notification-badge {
+      background: #ffffff !important;
+      color: #193524 !important;
+      border: 1px solid rgba(25,53,36,.12) !important;
+      box-shadow: 0 1px 5px rgba(0,0,0,.16) !important;
+    }
+    html.seek-dark .seek-inbox-button .seek-notification-badge {
+      background: #ffffff !important;
+      color: #193524 !important;
+    }
+    .seek-inbox-button .seek-notification-badge.is-live { animation: seekBadgePop .42s cubic-bezier(.2,.8,.2,1) both; }
+    @keyframes seekBadgePop { 0% { transform: scale(.65); opacity: .4; } 65% { transform: scale(1.18); } 100% { transform: scale(1); opacity: 1; } }
     html.seek-dark h1, html.seek-dark h2 { color: var(--seek-mint) !important; }
     html.seek-dark h3 { color: var(--seek-light) !important; }
     html.seek-dark .text-\[\var(--seek-primary)\] { color: var(--seek-mint) !important; }
@@ -592,6 +609,16 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
+  {
+    id: "end-of-year-outreach-2026",
+    title: "2026 End-of-Year Outreach",
+    blurb: "Help BSN Foundation feed 1,500 people and distribute 300 food boxes to persons with disabilities this December.",
+    amount: 5000,
+    budget: 15000000,
+    story: "This December, BSN Foundation is working to feed 1,500 people and distribute 300 food boxes to persons with disabilities through the Nigerian Paralympic Association. Your contribution will help provide practical support with care, dignity and hope. The total working budget for this outreach is ₦15,000,000.",
+    photos: ["/outreach/bsn-outreach-design-1.jpg", "/outreach/bsn-outreach-design-2.jpg", "/outreach/bsn-outreach-design-3.jpg"],
+    videos: [],
+  },
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4", "/outreach/TWMate.com-96cccfdb09d177ca8d521c0d0252d811.mp4"] },
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
@@ -1259,10 +1286,21 @@ function NavInboxButton({ userSession, setPage }) {
     return () => { stop = true; clearInterval(id); };
   }, [userSession?.access_token, userSession?.user?.id]);
   return (
-    <button type="button" onClick={() => { setPage(userSession?.access_token ? "notifications" : "account"); window.history.pushState({}, "", userSession?.access_token ? "/notifications" : "/account"); }} aria-label="Inbox" className="relative p-2">
-      <Bell size={20} />
+    <button
+      type="button"
+      onClick={() => {
+        const destination = userSession?.access_token ? "notifications" : "account";
+        setPage(destination);
+        window.history.pushState({}, "", destination === "notifications" ? "/notifications" : "/account");
+      }}
+      aria-label={unread > 0 ? `Inbox, ${unread} unread notifications` : "Inbox"}
+      className="seek-inbox-button relative inline-flex items-center justify-center p-2 rounded-full text-[var(--seek-primary)] hover:opacity-80 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
+    >
+      <Bell size={22} strokeWidth={2} aria-hidden="true" />
       {unread > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-5 px-1 rounded-full bg-[var(--seek-success)] text-[10px] font-bold text-white flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
+        <span key={unread} className="seek-notification-badge is-live absolute -top-0.5 -right-0.5 min-w-[1.15rem] h-[1.15rem] px-1 rounded-full text-[10px] leading-none font-extrabold flex items-center justify-center ring-2 ring-[var(--seek-card,var(--seek-white))]">
+          {unread > 9 ? "9+" : unread}
+        </span>
       )}
     </button>
   );
@@ -2036,7 +2074,7 @@ function GiveOfferForm({ setPage, initialCategory = "" }) {
   }
 
   return (
-    <div className="seek-offer-category-panel rounded-3xl border border-[var(--seek-primary)]/8 p-5 sm:p-8 bg-white pb-28">
+    <div className="rounded-3xl border border-[var(--seek-primary)]/8 p-5 sm:p-8 bg-white pb-28">
       <div className="mb-6">
         <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--seek-success)]"><ArrowLeft size={16} /> All offer categories</button>
         <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">SEEK · Offer Help</p>
@@ -2049,7 +2087,7 @@ function GiveOfferForm({ setPage, initialCategory = "" }) {
         <div className="mb-6 rounded-2xl border border-[var(--seek-success)]/25 bg-[var(--seek-light)] p-5">
           <h3 className="font-bold text-[var(--seek-primary)]">Support a fundraiser directly</h3>
           <p className="mt-1 text-sm leading-6 text-[var(--seek-primary)]/65">Choose a published fundraiser or request on SEEK and donate securely through the existing Paystack checkout.</p>
-          <button type="button" onClick={() => { setPage?.("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-secondary-action mt-4 rounded-full bg-[var(--seek-primary)] px-5 py-3 text-sm font-bold text-white">Browse fundraisers <ArrowRight size={15} className="ml-2 inline" /></button>
+          <button type="button" onClick={() => { setPage?.("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mt-4 rounded-full bg-[var(--seek-primary)] px-5 py-3 text-sm font-bold text-white">Browse fundraisers <ArrowRight size={15} className="ml-2 inline" /></button>
         </div>
       )}
 
@@ -2101,7 +2139,7 @@ function GiveOfferForm({ setPage, initialCategory = "" }) {
           try { sessionStorage.removeItem("seek_offer_draft"); } catch (_e) {}
         } catch (err) { setOfferError(err.message); }
         finally { setOfferLoading(false); }
-      }} className="seek-offer-submit">{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
+      }}>{offerLoading ? "Submitting…" : "Submit giveaway"}</Button>
       {offerError && <p className="mt-3 text-sm text-red-600">{offerError}</p>}
       </>}
     </div>
@@ -2334,7 +2372,7 @@ function BsnPage({ setPage }) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OUTREACH_CAMPAIGNS.map((c, i) => {
               const cover = c.photos?.[0];
-              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card seek-campaign-card-content group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
                 <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
                 <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
               </button>;
@@ -2345,6 +2383,7 @@ function BsnPage({ setPage }) {
       </main>
     );
   }
+  const featuredOutreach = OUTREACH_CAMPAIGNS.find((campaign) => campaign.id === "end-of-year-outreach-2026") || OUTREACH_CAMPAIGNS[0];
   return (
     <main className="seek-campaign-page min-h-screen pb-28">
       <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
@@ -2352,10 +2391,42 @@ function BsnPage({ setPage }) {
         <div className="relative z-10 mx-auto max-w-5xl">
           <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
-          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore our ongoing programmes and help turn compassion into practical action.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate to an outreach <ArrowRight size={17} /></button>
+            <button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-outline">Explore all campaigns</button>
+            <button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button>
+          </div>
           <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-5 sm:pt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Featured outreach</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Help make this December count.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Explore the End-of-Year Outreach and see how your support can reach people with practical help.</p></div>
+          <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate now <ArrowRight size={16} /></button>
+        </div>
+        <HomePromotionCarousel setPage={setPage} onOpen={() => { setSelected(featuredOutreach); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pt-10 sm:pt-14">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Ongoing campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose a cause to support.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Every programme represents people, families and communities who can benefit from collective action.</p></div>
+          <button type="button" onClick={() => setShowCampaignList(true)} className="text-sm font-extrabold text-[var(--seek-success)]">View all campaigns <ArrowRight size={15} className="inline" /></button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {OUTREACH_CAMPAIGNS.slice(0, 6).map((campaign, index) => {
+            const cover = campaign.photos?.[0];
+            return <article key={campaign.id} className="seek-campaign-card overflow-hidden">
+              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-card-content block w-full text-left">
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{String(index + 1).padStart(2, "0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">{campaign.id === "end-of-year-outreach-2026" ? "Featured annual outreach" : "Foundation programme"}</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{campaign.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{campaign.blurb}</p></div>
+              </button>
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-view-details text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="seek-campaign-card-donate rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
+            </article>;
+          })}
+        </div>
+        <div className="mt-7 flex justify-center"><button type="button" onClick={() => setShowCampaignList(true)} className="seek-campaign-donate">Browse all {OUTREACH_CAMPAIGNS.length} campaigns <ArrowRight size={17} /></button></div>
       </section>
     </main>
   );
@@ -2648,6 +2719,124 @@ function DiscoverPage({ setPage }) {
   );
 }
 
+function HomePromotionCarousel({ setPage, onOpen }) {
+  const slides = [
+    {
+      id: "outreach-design-one",
+      image: "/outreach/bsn-outreach-design-1.jpg",
+      alt: "BSN Foundation End-of-Year Outreach: 1,500 people to be fed and 300 food boxes to be distributed.",
+    },
+    {
+      id: "outreach-design-two",
+      image: "/outreach/bsn-outreach-design-2.jpg",
+      alt: "BSN Foundation End-of-Year Outreach supporting persons with disabilities.",
+    },
+    {
+      id: "outreach-design-three",
+      image: "/outreach/bsn-outreach-design-3.jpg",
+      alt: "Support the BSN Foundation End-of-Year Outreach this December.",
+    },
+  ];
+  const [active, setActive] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const trackRef = useRef(null);
+  const touchStart = useRef(null);
+  const pauseUntil = useRef(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && Date.now() > pauseUntil.current) {
+        setActive((current) => (current + 1) % slides.length);
+      }
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      const item = trackRef.current?.children?.[active];
+      setOffset(item ? item.offsetLeft : 0);
+    };
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [active]);
+
+  const goTo = (index) => {
+    setActive((index + slides.length) % slides.length);
+    pauseUntil.current = Date.now() + 10000;
+  };
+  const openOutreach = () => {
+    if (typeof onOpen === "function") onOpen();
+    else setPage("bsn");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <section
+      className="seek-home-promotions mx-auto mt-8 w-full max-w-5xl"
+      aria-label="Featured BSN Foundation outreach promotions"
+      onMouseEnter={() => { pauseUntil.current = Date.now() + 10000; }}
+      onMouseLeave={() => { pauseUntil.current = Date.now(); }}
+      onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 10000; }}
+      onTouchEnd={(event) => {
+        const end = event.changedTouches?.[0]?.clientX;
+        if (touchStart.current != null && end != null && Math.abs(end - touchStart.current) > 40) {
+          goTo(active + (end < touchStart.current ? 1 : -1));
+        }
+        touchStart.current = null;
+      }}
+    >
+      <div className="seek-promo-viewport relative overflow-hidden">
+        <div
+          ref={trackRef}
+          className="seek-promo-track flex items-stretch gap-4 transition-transform duration-700 ease-[cubic-bezier(.22,.8,.25,1)]"
+          style={{ transform: `translate3d(-${offset}px,0,0)` }}
+        >
+          {slides.map((slide, index) => (
+            <article key={slide.id} className="seek-promo-card relative flex shrink-0 overflow-hidden rounded-[16px] bg-[#073d32] shadow-[0_8px_24px_rgba(10,40,30,.16)]">
+              <button
+                type="button"
+                onClick={openOutreach}
+                aria-label={`Open BSN Foundation outreach promotion ${index + 1}`}
+                className="block h-full w-full overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c9f58a]"
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  className="block h-full w-full object-cover object-center"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable="false"
+                />
+              </button>
+            </article>
+          ))}
+        </div>
+        <button type="button" aria-label="Previous outreach design" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">‹</button>
+        <button type="button" aria-label="Next outreach design" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">›</button>
+      </div>
+      <div className="mt-2.5 flex items-center justify-center gap-2" aria-label="Choose outreach design">
+        {slides.map((slide, index) => (
+          <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show outreach design ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />
+        ))}
+      </div>
+      <style>{`
+        .seek-home-promotions { padding-left: 1rem; padding-right: 1rem; }
+        .seek-promo-viewport { padding: 0; }
+        .seek-promo-track { will-change: transform; }
+        .seek-promo-card { width: 84%; aspect-ratio: 1.88 / 1; }
+        .seek-promo-card button { cursor: pointer; }
+        .seek-promo-card img { transition: transform .45s ease; }
+        .seek-promo-card button:hover img { transform: scale(1.015); }
+        @media (max-width: 640px) {
+          .seek-home-promotions { margin-top: 1.35rem; padding-left: 1rem; padding-right: 1rem; }
+          .seek-promo-card { width: 88%; aspect-ratio: 1.78 / 1; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 function ForYouPage({ setPage }) {
   const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2686,17 +2875,7 @@ function ForYouPage({ setPage }) {
               <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[var(--seek-primary)]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[var(--seek-primary)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--seek-success)]">I want to help</button>
             </div>
           </div>
-          <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
-            <div className="seek-motion-ribbon-track">
-              {[0, 1].map((copy) => (
-                <div className="seek-motion-ribbon-group" key={copy} aria-hidden={copy === 1}>
-                  {(liveCases.length ? liveCases.slice(0, 8) : [{ id: "a", title: "Ask for what you need" }, { id: "b", title: "Offer what you can" }, { id: "c", title: "Find your community" }]).map((item, index) => (
-                    <span className="seek-ribbon-item" key={`${copy}-${item.id || index}`}><i />{item.title || item.description || "A new community story"}</span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <HomePromotionCarousel setPage={setPage} />
         </div>
       </section>
 
@@ -3290,9 +3469,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
-        <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Ask for help.</h1>
-        <p className="mt-3 font-body text-[var(--seek-primary)]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
+        <SectionLabel>REQUEST SUPPORT</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Let’s find a way forward.</h1>
+        <p className="mt-3 font-body text-[var(--seek-primary)]/60">Tell us what’s happening and what would make a difference. Our team reviews every request before sharing it with the SEEK community.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -4914,40 +5093,183 @@ function AccountUsernameForm({ onSaved } = {}) {
   const [bio, setBio] = useState("");
   const [hint, setHint] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadedUsername, setLoadedUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
+
   useEffect(() => {
-    getMyProfile().then((p) => {
-      if (!p) return;
-      setUsername(p.username || "");
-      setName(p.full_name || "");
-      setBio(p.bio || "");
-    }).catch(() => {});
+    let active = true;
+    getMyProfile()
+      .then((profile) => {
+        if (!active) return;
+        const currentUsername = profile?.username || "";
+        setUsername(currentUsername);
+        setLoadedUsername(currentUsername);
+        setName(profile?.full_name || "");
+        setBio(profile?.bio || "");
+      })
+      .catch(() => {
+        if (active) setHint("We couldn't load your profile. Please refresh and try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
   }, []);
+
+  const usernameChanged = username.trim().toLowerCase() !== loadedUsername;
+
   return (
-    <form className="seek-account-profile-form mt-6 text-left space-y-3" onSubmit={async (e) => {
-      e.preventDefault();
-      setSaving(true); setHint("");
-      try {
-        const saved = await updateMyUsername({ username, full_name: name, bio });
-        setUsername(saved?.username || username);
-        setName(saved?.full_name || name);
-        setBio(saved?.bio ?? bio);
-        setHint("Profile saved.");
-        if (typeof onSaved === "function") onSaved({ ...(saved || {}), username: saved?.username || username, full_name: saved?.full_name || name, bio: saved?.bio ?? bio });
-      } catch (err) {
-        setHint(err.message || "Could not save.");
-      } finally { setSaving(false); }
-    }}>
-      <p className="font-display font-semibold text-sm">Public profile</p>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="username" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <p className="text-xs text-[var(--seek-primary)]/50">3–24 characters. Letters, numbers, underscore. This becomes /member/username</p>
-      <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={280} placeholder="A short public line (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <button type="submit" className="rounded-full bg-[var(--seek-primary)] text-white px-4 py-2 text-sm" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
-      {hint && <p className="text-sm text-[var(--seek-primary)]/70">{hint}</p>}
+    <form
+      className="mt-6 text-left space-y-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (loading || saving) return;
+
+        const cleanName = name.trim();
+        const cleanUsername = username.trim().toLowerCase();
+
+        if (!cleanName) {
+          setHint("Enter the name you want people to see on your public profile.");
+          return;
+        }
+
+        setSaving(true);
+        setHint("");
+
+        try {
+          // Check the current username too: the secure RPC permits its owner
+          // to keep it, while preventing a duplicate username from being saved.
+          const availability = await checkUsernameAvailable(cleanUsername);
+          if (!availability?.ok) {
+            throw new Error(availability?.error || "That username is unavailable.");
+          }
+
+          const saved = await updateMyUsername({
+            username: cleanUsername,
+            full_name: cleanName,
+            bio,
+          });
+
+          const nextUsername = saved?.username || cleanUsername;
+          const nextName = saved?.full_name ?? cleanName;
+          const nextBio = saved?.bio ?? bio.trim();
+
+          setUsername(nextUsername);
+          setLoadedUsername(nextUsername);
+          setName(nextName);
+          setBio(nextBio);
+          setUsernameTouched(false);
+          setHint("Your public profile has been saved.");
+          if (typeof onSaved === "function") {
+            onSaved({ ...(saved || {}), username: nextUsername, full_name: nextName, bio: nextBio });
+          }
+        } catch (err) {
+          setHint(err?.message || "Your profile could not be saved. Please try again.");
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display font-semibold text-sm">Public profile</p>
+        <span className="text-xs font-medium" style={{ color: "#d7f99b" }}>Visible to everyone</span>
+      </div>
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Display name</span>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={80}
+          autoComplete="name"
+          placeholder="Your public name"
+          className="w-full rounded-xl border px-3 py-3 text-base"
+          style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
+          disabled={loading || saving}
+        />
+      </label>
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Username</span>
+        <div className="flex items-center rounded-xl border bg-white px-3" style={{ borderColor: "#cbd5ce" }}>
+          <span className="text-base" style={{ color: "#587064" }}>@</span>
+          <input
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value.toLowerCase());
+              setUsernameTouched(true);
+              setHint("");
+            }}
+            maxLength={24}
+            minLength={3}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="username"
+            placeholder="choose_username"
+            className="w-full border-0 bg-transparent px-2 py-3 text-base outline-none focus:ring-0"
+            style={{ color: "#20392d" }}
+            disabled={loading || saving}
+          />
+        </div>
+      </label>
+
+      <p className="text-xs leading-relaxed" style={{ color: "#d0ddd3" }}>
+        3–24 characters. Use lowercase letters, numbers and underscores. No spaces; username cannot start or end with an underscore.
+      </p>
+      {usernameTouched && usernameChanged && (
+        <p className="text-xs" style={{ color: "#d7f99b" }}>
+          Your new public address will be /member/{username.trim().toLowerCase() || "username"}.
+        </p>
+      )}
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>About you <span className="font-normal opacity-75">(optional)</span></span>
+        <textarea
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          rows={3}
+          maxLength={280}
+          placeholder="A short introduction people can see on your profile."
+          className="w-full rounded-xl border px-3 py-3 text-base"
+          style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
+          disabled={loading || saving}
+        />
+        <span className="block text-right text-xs" style={{ color: "#d0ddd3" }}>{bio.length}/280</span>
+      </label>
+
+      <button
+        type="submit"
+        className="w-full rounded-full px-5 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+        style={{ background: "#cafa86", color: "#173d2d", border: "1px solid #b8e875" }}
+        disabled={loading || saving || !name.trim() || !username.trim()}
+      >
+        {loading ? "Loading profile…" : saving ? "Saving profile…" : "Save public profile"}
+      </button>
+
+      {hint && (
+        <p
+          className="rounded-xl px-3 py-2 text-sm leading-relaxed"
+          role="status"
+          aria-live="polite"
+          style={{
+            color: hint.toLowerCase().includes("saved") ? "#d7f99b" : "#ffe0dc",
+            background: "rgba(0,0,0,.18)",
+          }}
+        >
+          {hint}
+        </p>
+      )}
+
+      {!loading && loadedUsername && (
+        <p className="text-xs" style={{ color: "#d0ddd3" }}>
+          Your public profile: <span className="font-semibold" style={{ color: "#d7f99b" }}>/member/{loadedUsername}</span>
+        </p>
+      )}
     </form>
   );
 }
-
 function AccountPage({ setPage, userSession, setUserSession }) {
   const [mode, setMode] = useState("signin"); // signin | signup
   const [email, setEmail] = useState("");
@@ -4982,7 +5304,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
-          <div className="seek-account-profile-panel rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
+          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
@@ -5828,7 +6150,7 @@ function ShopPage({ setPage }) {
       {item && (
         <div className="fixed inset-0 z-[180] bg-black/40 flex items-end sm:items-center justify-center p-4" onClick={() => !loading && setItem(null)}>
           <form
-            className="seek-shop-order-form w-full max-w-sm rounded-2xl bg-[var(--seek-dark)] text-white p-4"
+            className="w-full max-w-sm rounded-2xl bg-[var(--seek-dark)] text-white p-4"
             onClick={(e) => e.stopPropagation()}
             onSubmit={async (e) => {
               e.preventDefault();
@@ -5867,7 +6189,7 @@ function ShopPage({ setPage }) {
             <input className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
             <textarea className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" rows={2} placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
             {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
-            <button type="submit" disabled={loading} className="seek-shop-pay-button mt-3 w-full rounded-full bg-[var(--seek-success)] py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Pay ₦" + item.price.toLocaleString()}</button>
+            <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[var(--seek-success)] py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Pay ₦" + item.price.toLocaleString()}</button>
             <button type="button" className="mt-2 w-full text-sm text-white/60" onClick={() => !loading && setItem(null)}>Close</button>
           </form>
         </div>
