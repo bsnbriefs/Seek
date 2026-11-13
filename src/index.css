@@ -1007,3 +1007,73 @@ button.seek-primary-action { background: #CCF88E !important; color: #193524 !imp
 /* Keyboard focus must remain visible in both themes. */
 :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline: 3px solid #8BBE4F !important; outline-offset: 3px !important; }
 html.seek-dark :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline-color: #CCF88E !important; }
+
+/* FINAL targeted contrast corrections: lime must never be used as body text on white. */
+html:not(.seek-dark) :is(.text-\[var\(--seek-accent\)\],.text-\[\#CCF88E\],.text-lime-300,.text-lime-400) {
+  color: #274A34 !important;
+}
+html.seek-dark :is(.text-\[var\(--seek-accent\)\],.text-\[\#CCF88E\],.text-lime-300,.text-lime-400) {
+  color: #CCF88E !important;
+}
+
+/* Lime / lemon filled actions always use dark evergreen lettering. */
+html :is(button,a,[role="button"])[class*="bg-[var(--seek-accent)]"],
+html :is(button,a,[role="button"])[class*="bg-[#CCF88E]"],
+html :is(button,a,[role="button"])[style*="background: rgb(204, 248, 142)"],
+html :is(button,a,[role="button"])[style*="#CCF88E"] {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html :is(button,a,[role="button"])[class*="bg-[var(--seek-accent)]"] *,
+html :is(button,a,[role="button"])[class*="bg-[#CCF88E]"] * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+
+/* Community Pulse: deep green rail, bright LIVE marker, high-contrast ticker copy. */
+.seek-community-pulse {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  border-bottom: 2px solid #CCF88E !important;
+}
+.seek-community-pulse,
+.seek-community-pulse * {
+  text-shadow: none !important;
+}
+.seek-community-pulse .seek-ticker-track > span,
+.seek-community-pulse .seek-ticker-single > span {
+  color: #FFFFFF !important;
+}
+.seek-community-pulse .seek-ticker-track > span > span,
+.seek-community-pulse .seek-ticker-single > span > span {
+  color: #FFFFFF !important;
+}
+.seek-community-pulse .seek-ticker-track > span > span:nth-of-type(2),
+.seek-community-pulse .seek-ticker-single > span > span:nth-of-type(2) {
+  color: #FFFFFF !important;
+  font-weight: 700 !important;
+}
+.seek-community-pulse .seek-ticker-track > span > span:nth-of-type(1),
+.seek-community-pulse .seek-ticker-single > span > span:nth-of-type(1) {
+  color: #CCF88E !important;
+  font-weight: 900 !important;
+}
+.seek-community-pulse .seek-live-ring,
+.seek-community-pulse .seek-live-dot,
+.seek-community-pulse .seek-community-pulse-dot {
+  border-color: #CCF88E !important;
+  background: #CCF88E !important;
+}
+.seek-community-pulse [class*="text-white/"],
+.seek-community-pulse [class*="text-[var(--seek-muted)]"],
+.seek-community-pulse [class*="text-[var(--seek-light)]"] {
+  color: #FFFFFF !important;
+}
+
+/* Home I need support CTA: no white lettering on lemon green. */
+html :is(.seek-home-hero,.seek-home-motion) :is(button,a)[class*="bg-[var(--seek-accent)]"],
+html :is(.seek-home-hero,.seek-home-motion) :is(button,a)[class*="bg-[#CCF88E]"] {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  font-weight: 900 !important;
+}
