@@ -465,14 +465,30 @@ const CATEGORIES = [
 ];
 const SWIPE_SEQ = ["home", "seek-help", "give", "offers", "impact"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
+function requestAmountNeeded(req) {
+  return Number(
+    req?.amountNeeded ?? req?.amount_needed ?? req?.targetAmount ??
+    req?.target_amount ?? req?.fundraising_goal ?? req?.goal_amount ?? 0
+  ) || 0;
+}
+
 function isFinancialNeed(req) {
   if (!req) return false;
-  if (CONNECT_CATS.includes(req.category)) return false;
-  const cat = String(req.category || "").toLowerCase();
-  if (/job|employ|mentor|counsel|compan|friend|celebrat/.test(cat)) return false;
-  const kind = String(req.type || req.need_type || "").toLowerCase();
-  if (["item", "goods", "time", "company", "connect", "job"].includes(kind)) return false;
-  return Number(req.amountNeeded || req.amount_needed || 0) > 0;
+  const category = String(req.category || "").trim().toLowerCase();
+  const assistance = String(req.assistance_type || req.assistanceType || req.need_type || "").trim().toLowerCase();
+  const kind = String(req.type || req.need_type || "").trim().toLowerCase();
+
+  // Connection, opportunity and in-kind requests must never open the donation flow.
+  if (CONNECT_CATS.some((value) => value.toLowerCase() === category)) return false;
+  if (/job|employ|mentor|counsel|compan|friend|celebrat|connect|volunteer/.test(category)) return false;
+  if (["item", "items", "goods", "in-kind", "inkind", "time", "company", "connect", "job", "service"].includes(kind)) return false;
+  if (/^(item|items|goods|in-kind|inkind|time|company|connect|job|service|volunteer)/.test(assistance)) return false;
+
+  // Explicit financial assistance is a fundraiser even if an older row has no goal amount.
+  if (/financial|money|cash|fundrais|medical|education|school fees|rent|housing|emergency/.test(assistance)) return true;
+  if (/financial|medical|education|housing|emergency/.test(category)) return true;
+  if (kind === "money" || kind === "financial") return true;
+  return requestAmountNeeded(req) > 0;
 }
 
 function videoKindLabel(req) {
@@ -985,38 +1001,25 @@ function SeekDonateModal({ request, campaign, onClose }) {
 
 function RequestCard({ req, onHelp, onView }) {
   const [donateOpen, setDonateOpen] = useState(false);
-  const needed = Number(req.amountNeeded || req.amount_needed || 0);
+  const needed = requestAmountNeeded(req);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
-  const pct = needed > 0 ? Math.min(100, Math.round((raised / needed) * 100)) : 0;
   return (
     <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
-        <div className="flex items-center gap-3 mb-3">
+        <div className="flex items-center gap-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
           <div className="min-w-0 flex-1">
-            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight line-clamp-1">{req.title}</h3>
-            <p className="text-xs text-[#0D3B3B]/50">{req.location}</p>
+            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight">{req.title}</h3>
+            <p className="text-xs text-[#0D3B3B]/50">{req.location || req.category}</p>
           </div>
-          <span className="text-[10px] font-semibold uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         </div>
-        {req.description && <p className="text-sm text-[#0D3B3B]/70 line-clamp-2 mb-3">{req.description}</p>}
-        {needed > 0 && (
-          <div className="mb-2">
-            <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
-              <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: pct + "%" }} />
-            </div>
-            <div className="mt-1 flex justify-between text-xs">
-              <span className="font-semibold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
-              <span className="text-[#0D3B3B]/50">{pct}%</span>
-            </div>
-          </div>
-        )}
+        {needed > 0 && <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>}
       </div>
       <div className="flex border-t border-[#0D3B3B]/8">
         {onView && <button type="button" onClick={() => onView(req)} className="flex-1 py-3 text-sm font-semibold text-[#0D3B3B]/70 hover:bg-[#F2F5F3]">View</button>}
-        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : setDonateOpen(true)} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
-          {CONNECT_CATS.includes(req.category) ? "Join" : "Give"}
+        <button type="button" onClick={() => isFinancialNeed(req) ? setDonateOpen(true) : (onHelp && onHelp(req))} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
+          {isFinancialNeed(req) ? "Donate" : "Join"}
         </button>
       </div>
       {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
