@@ -1986,7 +1986,7 @@ function GiveOfferForm({ setPage }) {
 
 
 
-function SeekAutoVideo({ src, title }) {
+function SeekAutoVideo({ src, title, onEnded }) {
   const ref = useRef(null);
   const [muted, setMuted] = useState(true);
   const [paused, setPaused] = useState(false);
@@ -2038,7 +2038,7 @@ function SeekAutoVideo({ src, title }) {
   };
   return (
     <>
-      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
+      <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => { if (onEnded) onEnded(); else setEnded(true); }} />
       <SeekVideoWatermark />
       <button type="button" onClick={toggleMute} className="absolute right-3 bottom-32 z-20 h-6 w-6 rounded-full bg-black/30 text-white/70 flex items-center justify-center text-[10px]" aria-label={muted ? "Unmute" : "Mute"}>
         {muted ? "🔇" : "🔊"}
@@ -2056,8 +2056,30 @@ function SeekAutoVideo({ src, title }) {
 function LiveSupportCard({ request, setPage }) {
   const [mediaIndex, setMediaIndex] = useState(0);
   const [donateOpen, setDonateOpen] = useState(false);
+  const [carouselPaused, setCarouselPaused] = useState(false);
   const media = Array.isArray(request.media) ? request.media : [];
   const current = media[mediaIndex] || null;
+  const advanceMedia = () => setMediaIndex((index) => (index + 1) % media.length);
+
+  // Automatically advance still images; let videos finish naturally before moving on.
+  // Pause while the card is hovered/focused or the browser tab is hidden.
+  useEffect(() => {
+    if (media.length < 2 || !current || current.media_kind === "video" || carouselPaused) return;
+    let timer;
+    const startTimer = () => {
+      window.clearInterval(timer);
+      if (document.visibilityState === "visible") {
+        timer = window.setInterval(advanceMedia, 5000);
+      }
+    };
+    startTimer();
+    const onVisibilityChange = () => startTimer();
+    document.addEventListener("visibilitychange", onVisibilityChange);
+    return () => {
+      window.clearInterval(timer);
+      document.removeEventListener("visibilitychange", onVisibilityChange);
+    };
+  }, [media.length, mediaIndex, current?.public_url, current?.media_kind, carouselPaused]);
   const amountNeeded = Number(request.amountNeeded) || 0;
   const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
@@ -2080,11 +2102,17 @@ function LiveSupportCard({ request, setPage }) {
   return (
     <article className="mx-auto w-full max-w-[440px] overflow-hidden rounded-2xl border border-[#0D3B3B]/10 bg-white shadow-sm">
       {current?.public_url ? (
-        <div className="relative aspect-[16/9] max-h-[230px] overflow-hidden bg-[#EAF3F1]">
+        <div
+          className="relative aspect-[16/9] max-h-[230px] overflow-hidden bg-[#EAF3F1]"
+          onMouseEnter={() => setCarouselPaused(true)}
+          onMouseLeave={() => setCarouselPaused(false)}
+          onFocus={() => setCarouselPaused(true)}
+          onBlur={(event) => { if (!event.currentTarget.contains(event.relatedTarget)) setCarouselPaused(false); }}
+        >
           {current.media_kind === "video" ? (
-            <SeekAutoVideo src={current.public_url} title={request.title || "SEEK community story"} />
+            <SeekAutoVideo key={current.public_url} src={current.public_url} title={request.title || "SEEK community story"} onEnded={advanceMedia} />
           ) : (
-            <img src={current.public_url} alt={request.title || "Community story"} loading="lazy" decoding="async" className="h-full w-full object-cover" />
+            <img key={current.public_url} src={current.public_url} alt={request.title || "Community story"} loading="lazy" decoding="async" className="h-full w-full object-cover transition-opacity duration-500" />
           )}
           {media.length > 1 && (
             <div className="absolute bottom-3 right-3 rounded-full bg-black/60 px-2.5 py-1 text-[11px] font-semibold text-white backdrop-blur">
