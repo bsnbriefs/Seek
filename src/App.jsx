@@ -596,6 +596,16 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
+  {
+    id: "end-of-year-outreach-2026",
+    title: "2026 End-of-Year Outreach",
+    blurb: "Help BSN Foundation feed 1,500 people and distribute 300 food boxes to persons with disabilities this December.",
+    amount: 5000,
+    budget: 15000000,
+    story: "This December, BSN Foundation is working to feed 1,500 people and distribute 300 food boxes to persons with disabilities through the Nigerian Paralympic Association. Your contribution will help provide practical support with care, dignity and hope. The total working budget for this outreach is ₦15,000,000.",
+    photos: ["/outreach/bsn-outreach-design-1.jpg", "/outreach/bsn-outreach-design-2.jpg", "/outreach/bsn-outreach-design-3.jpg"],
+    videos: [],
+  },
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4", "/outreach/TWMate.com-96cccfdb09d177ca8d521c0d0252d811.mp4"] },
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
@@ -2360,6 +2370,7 @@ function BsnPage({ setPage }) {
       </main>
     );
   }
+  const featuredOutreach = OUTREACH_CAMPAIGNS.find((campaign) => campaign.id === "end-of-year-outreach-2026") || OUTREACH_CAMPAIGNS[0];
   return (
     <main className="seek-campaign-page min-h-screen pb-28">
       <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
@@ -2367,10 +2378,42 @@ function BsnPage({ setPage }) {
         <div className="relative z-10 mx-auto max-w-5xl">
           <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
-          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore our ongoing programmes and help turn compassion into practical action.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate to an outreach <ArrowRight size={17} /></button>
+            <button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-outline">Explore all campaigns</button>
+            <button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button>
+          </div>
           <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-5 sm:pt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Featured outreach</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Help make this December count.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Explore the End-of-Year Outreach and see how your support can reach people with practical help.</p></div>
+          <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate now <ArrowRight size={16} /></button>
+        </div>
+        <HomePromotionCarousel setPage={setPage} onOpen={() => { setSelected(featuredOutreach); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pt-10 sm:pt-14">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Ongoing campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose a cause to support.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Every programme represents people, families and communities who can benefit from collective action.</p></div>
+          <button type="button" onClick={() => setShowCampaignList(true)} className="text-sm font-extrabold text-[var(--seek-success)]">View all campaigns <ArrowRight size={15} className="inline" /></button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {OUTREACH_CAMPAIGNS.slice(0, 6).map((campaign, index) => {
+            const cover = campaign.photos?.[0];
+            return <article key={campaign.id} className="seek-campaign-card overflow-hidden">
+              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="block w-full text-left">
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{String(index + 1).padStart(2, "0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">{campaign.id === "end-of-year-outreach-2026" ? "Featured annual outreach" : "Foundation programme"}</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{campaign.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{campaign.blurb}</p></div>
+              </button>
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
+            </article>;
+          })}
+        </div>
+        <div className="mt-7 flex justify-center"><button type="button" onClick={() => setShowCampaignList(true)} className="seek-campaign-donate">Browse all {OUTREACH_CAMPAIGNS.length} campaigns <ArrowRight size={17} /></button></div>
       </section>
     </main>
   );
@@ -2663,7 +2706,7 @@ function DiscoverPage({ setPage }) {
   );
 }
 
-function HomePromotionCarousel({ setPage }) {
+function HomePromotionCarousel({ setPage, onOpen }) {
   const slides = [
     {
       id: "outreach-design-one",
@@ -2711,7 +2754,8 @@ function HomePromotionCarousel({ setPage }) {
     pauseUntil.current = Date.now() + 10000;
   };
   const openOutreach = () => {
-    setPage("bsn");
+    if (typeof onOpen === "function") onOpen();
+    else setPage("bsn");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
