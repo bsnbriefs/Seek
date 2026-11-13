@@ -386,19 +386,21 @@ export function mapRequestRow(row) {
     category: row.category,
     location: row.location,
     description: row.description,
-    amountNeeded: row.amount_needed,
-    amountRaised: row.amount_raised,
+    amountNeeded: row.amount_needed ?? row.target_amount ?? row.fundraising_goal ?? row.goal_amount ?? null,
+    amountRaised: row.amount_raised ?? row.total_raised ?? 0,
+    assistance_type: row.assistance_type || row.assistanceType || "",
     urgency: row.urgency,
     verification: row.verification_status,
     status: row.status,
     created_at: row.created_at || row.createdAt || row.published_at || "",
     createdAt: row.created_at || row.createdAt || row.published_at || "",
-    type:
-      (row.assistance_type || "")
-        .toLowerCase()
-        .includes("item")
-        ? "item"
-        : "money",
+    type: (() => {
+      const assistance = String(row.assistance_type || "").toLowerCase();
+      if (/item|goods|in-kind|inkind/.test(assistance)) return "item";
+      if (/financial|money|cash|fundrais/.test(assistance) || Number(row.amount_needed ?? row.target_amount ?? row.fundraising_goal ?? row.goal_amount ?? 0) > 0) return "money";
+      if (/time|company|connect|job|service|volunteer/.test(assistance)) return "other";
+      return "other";
+    })(),
     publicUpdate: row.public_update || row.publicUpdate || "",
     publicUpdateAt: row.public_update_at || row.publicUpdateAt || "",
     appreciationPath: row.appreciation_storage_path || "",
