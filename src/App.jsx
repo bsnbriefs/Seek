@@ -17,9 +17,9 @@ class ErrorBoundary extends React.Component {
       return (
         <div className="min-h-[50vh] flex items-center justify-center px-5">
           <div className="max-w-md text-center">
-            <p className="font-display font-bold text-xl text-[#0D3B3B]">Something went wrong</p>
-            <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">{String(this.state.err.message || this.state.err)}</p>
-            <button type="button" className="mt-4 rounded-full bg-[#0D3B3B] text-white px-5 py-2 text-sm font-semibold" onClick={() => { this.setState({ err: null }); window.location.href = "/"; }}>Go home</button>
+            <p className="font-display font-bold text-xl text-[var(--seek-primary)]">Something went wrong</p>
+            <p className="mt-2 font-body text-sm text-[var(--seek-primary)]/60">{String(this.state.err.message || this.state.err)}</p>
+            <button type="button" className="mt-4 rounded-full bg-[var(--seek-primary)] text-white px-5 py-2 text-sm font-semibold" onClick={() => { this.setState({ err: null }); window.location.href = "/"; }}>Go home</button>
           </div>
         </div>
       );
@@ -130,12 +130,12 @@ const LOGO_SRC = "/seek-logo.png";
 
 /* ---------------- Design tokens ---------------- */
 const C = {
-  deepTeal: "#0D3B3B",
-  teal: "#1BAA9C",
-  green: "#63C167",
-  bg: "var(--seek-bg, #F2F5F3)",
-  white: "var(--seek-card, #FFFFFF)",
-  ink: "var(--seek-ink, #0F211F)",
+  deepTeal: "var(--seek-primary)",
+  teal: "var(--seek-accent)",
+  green: "var(--seek-success)",
+  bg: "var(--seek-bg, var(--seek-white))",
+  white: "var(--seek-card, var(--seek-white))",
+  ink: "var(--seek-ink, var(--seek-primary))",
 };
 
 
@@ -168,7 +168,7 @@ function LanguagePicker() {
     window.location.reload();
   };
   return (
-    <select value={lang} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+    <select value={lang} onChange={change} className="text-xs bg-transparent border border-[var(--seek-primary)]/20 rounded px-1 py-0.5">
       {SEEK_LANGS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
     </select>
   );
@@ -183,7 +183,7 @@ function CurrencyPicker() {
     window.location.reload();
   };
   return (
-    <select value={code} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+    <select value={code} onChange={change} className="text-xs bg-transparent border border-[var(--seek-primary)]/20 rounded px-1 py-0.5">
       {CURRENCIES.map((c) => <option key={c.code} value={c.code}>{c.code}</option>)}
     </select>
   );
@@ -312,56 +312,56 @@ const FONTS = (
     .rounded-2xl, .rounded-3xl { animation: seekFadeUp 0.4s ease-out; }
     html { scroll-behavior: smooth; }
 
-    html, body { background-color: var(--seek-bg, #F2F5F3); }
+    html, body { background-color: var(--seek-bg, var(--seek-white)); }
     html.seek-dark { color-scheme: dark; }
-    html.seek-dark h1, html.seek-dark h2 { color: #B8EDE3 !important; }
-    html.seek-dark h3 { color: #D7EEE8 !important; }
-    html.seek-dark .text-\[\#0D3B3B\] { color: #B8EDE3 !important; }
-    html.seek-dark .text-\[\#0D3B3B\]\/20,
-    html.seek-dark .text-\[\#0D3B3B\]\/25,
-    html.seek-dark .text-\[\#0D3B3B\]\/30,
-    html.seek-dark .text-\[\#0D3B3B\]\/35,
-    html.seek-dark .text-\[\#0D3B3B\]\/40,
-    html.seek-dark .text-\[\#0D3B3B\]\/45,
-    html.seek-dark .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .text-\[\#0D3B3B\]\/60,
-    html.seek-dark .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .text-\[\#0D3B3B\]\/70,
-    html.seek-dark .text-\[\#0D3B3B\]\/75,
-    html.seek-dark .text-\[\#0D3B3B\]\/80,
-    html.seek-dark .text-\[\#0D3B3B\]\/90 { color: #B7CEC8 !important; }
-    html.seek-dark p, html.seek-dark .font-body { color: #C5D4D0 !important; }
+    html.seek-dark h1, html.seek-dark h2 { color: var(--seek-mint) !important; }
+    html.seek-dark h3 { color: var(--seek-light) !important; }
+    html.seek-dark .text-\[\var(--seek-primary)\] { color: var(--seek-mint) !important; }
+    html.seek-dark .text-\[\var(--seek-primary)\]\/20,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/25,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/30,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/35,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/40,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/45,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/50,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/55,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/60,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/65,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/70,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/75,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/80,
+    html.seek-dark .text-\[\var(--seek-primary)\]\/90 { color: var(--seek-muted) !important; }
+    html.seek-dark p, html.seek-dark .font-body { color: var(--seek-muted) !important; }
     html.seek-dark .bg-white, html.seek-dark .bg-white * { color: unset; }
-    html.seek-dark .bg-white { color: #E8F2EF !important; }
-    html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: #E8F2EF !important; }
-    html.seek-dark .bg-white .text-\[\#0D3B3B\] { color: #E8F2EF !important; }
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/20,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/25,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/30,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/35,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/40,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/45,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/65,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/70,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/75,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/80,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/90 { color: #C5D4D0 !important; }
+    html.seek-dark .bg-white { color: var(--seek-light) !important; }
+    html.seek-dark .bg-white h1, html.seek-dark .bg-white h2, html.seek-dark .bg-white h3 { color: var(--seek-light) !important; }
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\] { color: var(--seek-light) !important; }
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/20,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/25,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/30,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/35,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/40,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/45,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/50,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/55,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/60,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/65,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/70,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/75,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/80,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/90 { color: var(--seek-muted) !important; }
 
 
-    html.seek-dark body { background-color: #121414; color: #C9D6D2; }
-    html.seek-dark header { background: #000000 !important; border-color: #000000 !important; }
-    html.seek-dark header + div, html.seek-dark .sticky.top-24 { background: #121414 !important; border-color: rgba(255,255,255,0.06) !important; }
-    html.seek-dark .seek-tabs button { color: #D7E6E2 !important; }
-    html.seek-dark .seek-tabs button.border-\[\#1BAA9C\] { color: #8DE3C5 !important; }
-    html.seek-dark .seek-discover-tab { color: #C9D6D2 !important; }
-    html.seek-dark .seek-discover-tab-on { color: #8DE3C5 !important; }
-    html.seek-dark header .text-\[\#0D3B3B\],
-    html.seek-dark header button { color: #F4F1EA !important; }
-    html.seek-dark .bg-white { background-color: #152220 !important; color: #E8F2EF; }
+    html.seek-dark body { background-color: var(--seek-dark); color: var(--seek-light); }
+    html.seek-dark header { background: var(--seek-primary) !important; border-color: var(--seek-primary) !important; }
+    html.seek-dark header + div, html.seek-dark .sticky.top-24 { background: var(--seek-dark) !important; border-color: rgba(255,255,255,0.06) !important; }
+    html.seek-dark .seek-tabs button { color: var(--seek-light) !important; }
+    html.seek-dark .seek-tabs button.border-\[\var(--seek-success)\] { color: var(--seek-mint) !important; }
+    html.seek-dark .seek-discover-tab { color: var(--seek-light) !important; }
+    html.seek-dark .seek-discover-tab-on { color: var(--seek-mint) !important; }
+    html.seek-dark header .text-\[\var(--seek-primary)\],
+    html.seek-dark header button { color: var(--seek-light) !important; }
+    html.seek-dark .bg-white { background-color: var(--seek-primary) !important; color: var(--seek-light); }
     html.seek-dark .bg-white h1,
     html.seek-dark .bg-white h2,
     html.seek-dark .bg-white h3,
@@ -369,81 +369,81 @@ const FONTS = (
     html.seek-dark .bg-white label,
     html.seek-dark .bg-white span,
     html.seek-dark .bg-white button,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\],
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/50,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/55,
-    html.seek-dark .bg-white .text-\[\#0D3B3B\]\/60 { color: #E8F2EF !important; }
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\],
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/50,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/55,
+    html.seek-dark .bg-white .text-\[\var(--seek-primary)\]\/60 { color: var(--seek-light) !important; }
     html.seek-dark .rounded-2xl.bg-white,
-    html.seek-dark .rounded-3xl.bg-white { background-color: #1C2A28 !important; }
-    html.seek-dark .bg-\[\#F2F5F3\] { background-color: #1C2A28 !important; }
-    html.seek-dark .bg-\[\#F2F5F3\] * { color: #E8F2EF !important; }
-    html.seek-dark .bg-\[\#F2F5F3\] .text-\[\#0D3B3B\] { color: #E8F2EF !important; }
-    html.seek-dark .bg-\[\#F2F5F3\] .text-\[\#0D3B3B\]\/70 { color: #C5D4D0 !important; }
+    html.seek-dark .rounded-3xl.bg-white { background-color: var(--seek-primary) !important; }
+    html.seek-dark .bg-\[\var(--seek-white)\] { background-color: var(--seek-primary) !important; }
+    html.seek-dark .bg-\[\var(--seek-white)\] * { color: var(--seek-light) !important; }
+    html.seek-dark .bg-\[\var(--seek-white)\] .text-\[\var(--seek-primary)\] { color: var(--seek-light) !important; }
+    html.seek-dark .bg-\[\var(--seek-white)\] .text-\[\var(--seek-primary)\]\/70 { color: var(--seek-muted) !important; }
     html.seek-dark .bg-white input,
     html.seek-dark .bg-white textarea,
     html.seek-dark .bg-white select {
-      background: #FFFFFF !important;
-      color: #1A1D24 !important;
+      background: var(--seek-white) !important;
+      color: var(--seek-dark) !important;
       border-color: rgba(26,29,36,0.18) !important;
     }
-    html.seek-dark label, html.seek-dark .text-xs { color: #C5D4D0 !important; }
+    html.seek-dark label, html.seek-dark .text-xs { color: var(--seek-muted) !important; }
     html.seek-dark input, html.seek-dark textarea, html.seek-dark select {
-      background: #FFFFFF !important;
-      color: #1A1D24 !important;
+      background: var(--seek-white) !important;
+      color: var(--seek-dark) !important;
       border-color: rgba(26,29,36,0.18) !important;
     }
-    html.seek-dark input::placeholder, html.seek-dark textarea::placeholder { color: #6B7280 !important; opacity: 1; }
-    html.seek-dark .bg-\[\#F2F5F3\] { background-color: #1C2A28 !important; }
-    html.seek-dark .bg-\[\#F2F5F3\] label, html.seek-dark .bg-\[\#F2F5F3\] p { color: #E8F2EF !important; }
+    html.seek-dark input::placeholder, html.seek-dark textarea::placeholder { color: var(--seek-muted) !important; opacity: 1; }
+    html.seek-dark .bg-\[\var(--seek-white)\] { background-color: var(--seek-primary) !important; }
+    html.seek-dark .bg-\[\var(--seek-white)\] label, html.seek-dark .bg-\[\var(--seek-white)\] p { color: var(--seek-light) !important; }
 
-        html.seek-dark .seek-offer-category { background: #1C2A28 !important; border-color: #45635C !important; color: #F1F7F5 !important; }
-    html.seek-dark .seek-offer-category:hover { background: #233A35 !important; border-color: #66D5BE !important; }
-    html.seek-dark .seek-offer-category .seek-offer-icon { background: #29443D !important; color: #D9FFF3 !important; }
-    html.seek-dark .seek-offer-category .seek-offer-title { color: #F1F7F5 !important; }
-    html.seek-dark .seek-offer-category .seek-offer-description { color: #C2D5CF !important; }
-    html.seek-dark .seek-offer-category > span:last-child { color: #76E0C7 !important; }
+        html.seek-dark .seek-offer-category { background: var(--seek-primary) !important; border-color: var(--seek-success) !important; color: var(--seek-white) !important; }
+    html.seek-dark .seek-offer-category:hover { background: var(--seek-primary) !important; border-color: var(--seek-success) !important; }
+    html.seek-dark .seek-offer-category .seek-offer-icon { background: var(--seek-primary) !important; color: var(--seek-light) !important; }
+    html.seek-dark .seek-offer-category .seek-offer-title { color: var(--seek-white) !important; }
+    html.seek-dark .seek-offer-category .seek-offer-description { color: var(--seek-muted) !important; }
+    html.seek-dark .seek-offer-category > span:last-child { color: var(--seek-mint) !important; }
 
     /* High-specificity contrast fixes for Campaign and My Requests in dark appearance */
     html.seek-dark .seek-campaign-page .seek-campaign-hero h1,
-    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero h1 { color:#FFFFFF !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-hero h1 span { color:#B9F3D9 !important; -webkit-text-fill-color:#B9F3D9 !important; background:none !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero h1 { color:var(--seek-white) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-hero h1 span { color:var(--seek-mint) !important; -webkit-text-fill-color:var(--seek-mint) !important; background:none !important; }
     html.seek-dark .seek-campaign-page .seek-campaign-hero p,
-    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero p { color:#E2F3ED !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-kicker { color:#F0FFF8 !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-stats strong { color:#FFFFFF !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-stats span { color:#D5E9E2 !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-donate { color:#062D29 !important; }
-    html.seek-dark .seek-campaign-page .seek-campaign-outline { color:#FFFFFF !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-detail-hero p { color:var(--seek-light) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-kicker { color:var(--seek-white) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-stats strong { color:var(--seek-white) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-stats span { color:var(--seek-light) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-donate { color:var(--seek-primary) !important; }
+    html.seek-dark .seek-campaign-page .seek-campaign-outline { color:var(--seek-white) !important; }
 
-    html.seek-dark .seek-my-requests-page { background:#101917 !important; color:#F2F8F5 !important; }
-    html.seek-dark .seek-my-requests-page .seek-my-requests-heading h1 { color:#FFFFFF !important; }
-    html.seek-dark .seek-my-requests-page .seek-my-requests-intro { color:#D1E0D9 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-account { background:#1B2B26 !important; border-color:#47665B !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-account p { color:#E4F0EA !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-card { background:#172722 !important; border-color:#47665B !important; }
+    html.seek-dark .seek-my-requests-page { background:var(--seek-primary) !important; color:var(--seek-white) !important; }
+    html.seek-dark .seek-my-requests-page .seek-my-requests-heading h1 { color:var(--seek-white) !important; }
+    html.seek-dark .seek-my-requests-page .seek-my-requests-intro { color:var(--seek-light) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-account { background:var(--seek-primary) !important; border-color:var(--seek-success) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-account p { color:var(--seek-light) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card { background:var(--seek-primary) !important; border-color:var(--seek-success) !important; }
     html.seek-dark .seek-my-requests-page .seek-request-summary,
-    html.seek-dark .seek-my-requests-page .seek-request-summary > span:first-child { color:#F5FBF8 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-card-body { border-color:#355047 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-card-body h2 { color:#F5FBF8 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-summary > span:first-child { color:var(--seek-white) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body { border-color:var(--seek-primary) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body h2 { color:var(--seek-white) !important; }
     html.seek-dark .seek-my-requests-page .seek-request-card-body p,
-    html.seek-dark .seek-my-requests-page .seek-request-card-body label { color:#D4E3DC !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey { background:#263A33 !important; border:1px solid #527166 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey > p { color:#E7F5EE !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey span { color:#D8E9E1 !important; opacity:1 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold { color:#FFFFFF !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\#1BAA9C\] { background:#28B7A2 !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\#0D3B3B\]\/20 { background:#60776D !important; }
-    html.seek-dark .seek-my-requests-page .seek-request-actions { border-color:#3D594F !important; gap:10px !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-card-body label { color:var(--seek-light) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey { background:var(--seek-primary) !important; border:1px solid var(--seek-accent) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey > p { color:var(--seek-light) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey span { color:var(--seek-light) !important; opacity:1 !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey span.font-bold { color:var(--seek-white) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\var(--seek-success)\] { background:var(--seek-success) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-journey .bg-\[\var(--seek-primary)\]\/20 { background:var(--seek-muted) !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions { border-color:var(--seek-primary) !important; gap:10px !important; }
     html.seek-dark .seek-my-requests-page .seek-request-actions button,
-    html.seek-dark .seek-my-requests-page .seek-request-actions label { color:#C9F7E7 !important; background:#244238 !important; border:1px solid #527C6D !important; padding:9px 13px !important; border-radius:999px !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions label { color:var(--seek-light) !important; background:var(--seek-primary) !important; border:1px solid var(--seek-success) !important; padding:9px 13px !important; border-radius:999px !important; }
     html.seek-dark .seek-my-requests-page .seek-request-actions button:hover,
-    html.seek-dark .seek-my-requests-page .seek-request-actions label:hover { background:#31594B !important; }
+    html.seek-dark .seek-my-requests-page .seek-request-actions label:hover { background:var(--seek-primary) !important; }
     html.seek-dark .seek-my-requests-page input:not([type=file]),
-    html.seek-dark .seek-my-requests-page textarea { background:#F8FCFA !important; color:#173B34 !important; border-color:#8AA99C !important; }
+    html.seek-dark .seek-my-requests-page textarea { background:var(--seek-white) !important; color:var(--seek-primary) !important; border-color:var(--seek-muted) !important; }
     html.seek-dark .seek-my-requests-page input::placeholder,
-    html.seek-dark .seek-my-requests-page textarea::placeholder { color:#61766E !important; }
-    html.seek-dark .seek-my-requests-page input[type=file] { color:#E4F0EA !important; background:#20352D !important; border:1px dashed #719487 !important; border-radius:12px !important; padding:10px !important; max-width:100%; }
-    html.seek-dark .seek-my-requests-page input[type=file]::file-selector-button { background:#BDEEDB !important; color:#123B32 !important; border:0 !important; border-radius:8px !important; padding:8px 12px !important; margin-right:10px !important; font-weight:800 !important; }
+    html.seek-dark .seek-my-requests-page textarea::placeholder { color:var(--seek-muted) !important; }
+    html.seek-dark .seek-my-requests-page input[type=file] { color:var(--seek-light) !important; background:var(--seek-primary) !important; border:1px dashed var(--seek-accent) !important; border-radius:12px !important; padding:10px !important; max-width:100%; }
+    html.seek-dark .seek-my-requests-page input[type=file]::file-selector-button { background:var(--seek-light) !important; color:var(--seek-primary) !important; border:0 !important; border-radius:8px !important; padding:8px 12px !important; margin-right:10px !important; font-weight:800 !important; }
 
     @media (max-width: 640px) {
       .seek-my-requests-page > section { padding-top:28px !important; }
@@ -461,7 +461,7 @@ const FONTS = (
     }
     @media (prefers-reduced-motion:no-preference) {
       .seek-request-journey { animation:seekFadeUp .5s ease both; }
-      .seek-request-journey .bg-\[\#1BAA9C\] { animation:seekJourneyFill .9s cubic-bezier(.2,.7,.2,1) both; transform-origin:left center; }
+      .seek-request-journey .bg-\[\var(--seek-success)\] { animation:seekJourneyFill .9s cubic-bezier(.2,.7,.2,1) both; transform-origin:left center; }
       @keyframes seekJourneyFill { from { transform:scaleX(.08); opacity:.5; } to { transform:scaleX(1); opacity:1; } }
     }
 
@@ -504,14 +504,14 @@ const FONTS = (
       width: 10px;
       height: 10px;
       border-radius: 999px;
-      background: #E11D48;
+      background: var(--seek-danger);
       animation: seekLivePulse 1.1s ease-in-out infinite;
     }
     .seek-live-ring {
       position: absolute;
       inset: -3px;
       border-radius: 999px;
-      background: #E11D48;
+      background: var(--seek-danger);
       opacity: 0.35;
       animation: seekLivePulse 1.1s ease-in-out infinite;
     }
@@ -626,16 +626,16 @@ function Logo({ light = false, className = "h-12" }) {
 function ShopSupportStrip({ setPage, tone = "page" }) {
   const preview = ["/shop/seek-cap.png", "/shop/seek-tee.png", "/shop/seek-hoodie.png"];
   return (
-    <div className={"rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 " + (tone === "modal" ? "mt-4 text-left" : "mt-6")}>
-      <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Support SEEK in another way</p>
-      <p className="mt-1 font-display font-bold text-[#0D3B3B]">Shop official SEEK merchandise and wear the mission.</p>
-      <p className="mt-1 text-sm text-[#0D3B3B]/55">This does not replace a gift to a request. Orders go through the SEEK store.</p>
+    <div className={"rounded-3xl border border-[var(--seek-primary)]/10 bg-white p-5 " + (tone === "modal" ? "mt-4 text-left" : "mt-6")}>
+      <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Support SEEK in another way</p>
+      <p className="mt-1 font-display font-bold text-[var(--seek-primary)]">Shop official SEEK merchandise and wear the mission.</p>
+      <p className="mt-1 text-sm text-[var(--seek-primary)]/55">This does not replace a gift to a request. Orders go through the SEEK store.</p>
       <div className="mt-3 flex gap-2 overflow-x-auto">
         {preview.map((src) => (
-          <img key={src} src={src} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover bg-[#F2F5F3]" onError={(e) => { e.currentTarget.style.display = "none"; }} />
+          <img key={src} src={src} alt="" className="h-16 w-16 shrink-0 rounded-xl object-cover bg-[var(--seek-white)]" onError={(e) => { e.currentTarget.style.display = "none"; }} />
         ))}
       </div>
-      <button type="button" className="mt-3 text-sm font-bold text-[#1BAA9C]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Visit SEEK Store</button>
+      <button type="button" className="mt-3 text-sm font-bold text-[var(--seek-success)]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Visit SEEK Store</button>
     </div>
   );
 }
@@ -643,9 +643,9 @@ function ShopSupportStrip({ setPage, tone = "page" }) {
 function Button({ children, variant = "primary", className = "", ...props }) {
   const base = "font-display font-semibold inline-flex items-center justify-center gap-2 rounded-full px-6 py-3 text-sm transition-all duration-200 focus:outline-none focus-visible:ring-2 focus-visible:ring-offset-2";
   const variants = {
-    primary: "text-white shadow-[0_8px_24px_-8px_rgba(13,59,59,0.55)] hover:shadow-[0_12px_28px_-8px_rgba(13,59,59,0.65)] hover:-translate-y-0.5 focus-visible:ring-[#1BAA9C]",
-    secondary: "bg-white text-[#0D3B3B] border border-[#0D3B3B]/15 hover:border-[#0D3B3B]/30 hover:-translate-y-0.5 focus-visible:ring-[#0D3B3B]",
-    ghost: "text-[#0D3B3B] hover:bg-[#0D3B3B]/5",
+    primary: "text-white shadow-[0_8px_24px_-8px_rgba(13,59,59,0.55)] hover:shadow-[0_12px_28px_-8px_rgba(13,59,59,0.65)] hover:-translate-y-0.5 focus-visible:ring-[var(--seek-success)]",
+    secondary: "bg-white text-[var(--seek-primary)] border border-[var(--seek-primary)]/15 hover:border-[var(--seek-primary)]/30 hover:-translate-y-0.5 focus-visible:ring-[var(--seek-primary)]",
+    ghost: "text-[var(--seek-primary)] hover:bg-[var(--seek-primary)]/5",
     light: "bg-white/10 text-white border border-white/25 hover:bg-white/20 backdrop-blur-sm",
   };
   const style = variant === "primary" ? { background: `linear-gradient(135deg, ${C.teal}, ${C.green})` } : undefined;
@@ -718,7 +718,7 @@ function daysPosted(iso) {
 
 function VerifiedBadge({ className = "" }) {
   return (
-    <span className={"inline-flex items-center gap-1 rounded-full bg-[#1BAA9C]/12 text-[#0D3B3B] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + className} title="This person has a SEEK account">
+    <span className={"inline-flex items-center gap-1 rounded-full bg-[var(--seek-success)]/12 text-[var(--seek-primary)] px-2 py-0.5 text-[10px] font-semibold uppercase tracking-wide " + className} title="This person has a SEEK account">
       <BadgeCheck size={12} />
       SEEK member
     </span>
@@ -744,7 +744,7 @@ function SeekVerifiedCheck({ className = "" }) {
     <span
       title="SEEK member"
       aria-label="SEEK member"
-      className={`inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-[#1D9BF0] text-white shrink-0 ${className}`}
+      className={`inline-flex items-center justify-center h-[18px] w-[18px] rounded-full bg-[var(--seek-accent)] text-white shrink-0 ${className}`}
     >
       <Check size={11} strokeWidth={3} />
     </span>
@@ -766,17 +766,17 @@ function VerificationBadge({ status }) {
     published: {
       label: "Open for help",
       icon: BadgeCheck,
-      cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]",
+      cls: "bg-[var(--seek-success)]/10 text-[var(--seek-primary)]",
     },
     partially_funded: {
       label: "Partly funded",
       icon: BadgeCheck,
-      cls: "bg-[#1BAA9C]/10 text-[#0D3B3B]",
+      cls: "bg-[var(--seek-success)]/10 text-[var(--seek-primary)]",
     },
     fulfilled: {
       label: "Need met",
       icon: CheckCircle2,
-      cls: "bg-[#63C167]/15 text-[#0D3B3B]",
+      cls: "bg-[var(--seek-success)]/15 text-[var(--seek-primary)]",
     },
     closed: {
       label: "Closed",
@@ -815,15 +815,15 @@ function UrgencyBadge({ level }) {
 
 function SkeletonCard() {
   return (
-    <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4 animate-pulse">
+    <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-4 animate-pulse">
       <div className="flex items-center gap-3">
-        <div className="h-10 w-10 rounded-full bg-[#0D3B3B]/10" />
+        <div className="h-10 w-10 rounded-full bg-[var(--seek-primary)]/10" />
         <div className="flex-1 space-y-2">
-          <div className="h-4 w-3/4 rounded bg-[#0D3B3B]/10" />
-          <div className="h-3 w-1/2 rounded bg-[#0D3B3B]/10" />
+          <div className="h-4 w-3/4 rounded bg-[var(--seek-primary)]/10" />
+          <div className="h-3 w-1/2 rounded bg-[var(--seek-primary)]/10" />
         </div>
       </div>
-      <div className="mt-3 h-2 w-full rounded-full bg-[#0D3B3B]/10" />
+      <div className="mt-3 h-2 w-full rounded-full bg-[var(--seek-primary)]/10" />
     </div>
   );
 }
@@ -834,15 +834,15 @@ function ProgressBar({ raised, needed }) {
   const pct = Math.min(100, Math.round((Number(raised || 0) / n) * 100));
   return (
     <div>
-      <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
+      <div className="h-2 w-full rounded-full bg-[var(--seek-primary)]/10 overflow-hidden">
         <div
           className="h-full rounded-full transition-[width] duration-700 ease-out"
           style={{ width: `${pct}%`, background: `linear-gradient(90deg, ${C.teal}, ${C.green})` }}
         />
       </div>
       <div className="mt-2 flex items-baseline justify-between text-sm font-body">
-        <span className="font-semibold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
-        <span className="text-[#0D3B3B]/50">of ₦{needed.toLocaleString()}</span>
+        <span className="font-semibold text-[var(--seek-primary)]">₦{raised.toLocaleString()} raised</span>
+        <span className="text-[var(--seek-primary)]/50">of ₦{needed.toLocaleString()}</span>
       </div>
     </div>
   );
@@ -853,7 +853,7 @@ function CategoryCard({ cat, onClick }) {
   return (
     <button
       onClick={onClick}
-      className="group flex flex-col items-start gap-3 rounded-2xl bg-white p-5 text-left shadow-sm border border-[#0D3B3B]/5 hover:border-[#1BAA9C]/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
+      className="group flex flex-col items-start gap-3 rounded-2xl bg-white p-5 text-left shadow-sm border border-[var(--seek-primary)]/5 hover:border-[var(--seek-success)]/40 hover:shadow-md hover:-translate-y-0.5 transition-all duration-200"
     >
       <span
         className="flex h-11 w-11 items-center justify-center rounded-xl text-white"
@@ -861,7 +861,7 @@ function CategoryCard({ cat, onClick }) {
       >
         <Icon size={20} />
       </span>
-      <span className="font-display font-semibold text-[#0D3B3B]">{cat.label}</span>
+      <span className="font-display font-semibold text-[var(--seek-primary)]">{cat.label}</span>
     </button>
   );
 }
@@ -930,24 +930,24 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
 
   return (
     <div className={`${compact ? "mt-4" : "mt-6"}`}>
-      <div className="flex items-center justify-between gap-2 border-t border-[#0D3B3B]/8 pt-3">
+      <div className="flex items-center justify-between gap-2 border-t border-[var(--seek-primary)]/8 pt-3">
         <button
           type="button"
           onClick={() => { setOpen((v) => !v); setError(""); setNotice(""); }}
-          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${open ? "bg-[#E8F6F2] text-[#168F84]" : "text-[#0D3B3B]/55"}`}
+          className={`rounded-full px-3 py-1.5 text-xs font-semibold ${open ? "bg-[var(--seek-light)] text-[var(--seek-success)]" : "text-[var(--seek-primary)]/55"}`}
         >
           {commentsCount > 0 ? `Comments ${commentsCount}` : "Comment"}
         </button>
       </div>
 
       {(error || notice) && (
-        <p className={`mt-2 px-1 text-xs ${error ? "text-red-600" : "text-[#168F84]"}`}>
+        <p className={`mt-2 px-1 text-xs ${error ? "text-red-600" : "text-[var(--seek-success)]"}`}>
           {error || notice}
         </p>
       )}
 
       {open && (
-        <div className="mt-3 rounded-2xl bg-[#F7FAF8] p-3 sm:p-4">
+        <div className="mt-3 rounded-2xl bg-[var(--seek-white)] p-3 sm:p-4">
           <form onSubmit={submitComment} className="flex gap-2">
             <textarea
               value={comment}
@@ -955,18 +955,18 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
               maxLength={500}
               rows={2}
               placeholder="Write something kind or useful…"
-              className="min-w-0 flex-1 resize-none rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2.5 text-sm text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]/30"
+              className="min-w-0 flex-1 resize-none rounded-xl border border-[var(--seek-primary)]/10 bg-white px-3 py-2.5 text-sm text-[var(--seek-primary)] placeholder:text-[var(--seek-primary)]/35 focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]/30"
             />
             <button
               disabled={saving || !comment.trim()}
               type="submit"
-              className="self-end rounded-xl bg-[#0D3B3B] px-3.5 py-2.5 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-35"
+              className="self-end rounded-xl bg-[var(--seek-primary)] px-3.5 py-2.5 text-xs font-bold text-white transition hover:opacity-90 disabled:opacity-35"
             >
               {saving ? "…" : "Post"}
             </button>
           </form>
 
-          <p className="mt-2 px-1 text-[10px] leading-relaxed text-[#0D3B3B]/40">
+          <p className="mt-2 px-1 text-[10px] leading-relaxed text-[var(--seek-primary)]/40">
             Keep it kind. Never post private contact details, payment credentials or sensitive information.
           </p>
 
@@ -978,17 +978,17 @@ function CommunityInteractions({ targetType, targetId, compact = false }) {
                     {item.avatar_url ? (
                       <img src={item.avatar_url} alt="" className="h-6 w-6 rounded-full object-cover" />
                     ) : (
-                      <div className="h-6 w-6 rounded-full bg-[#DDEBE7]" />
+                      <div className="h-6 w-6 rounded-full bg-[var(--seek-light)]" />
                     )}
-                    <span className="text-xs font-semibold text-[#0D3B3B]">{item.display_name || "A neighbour"}</span>
-                    <span className="text-[10px] text-[#0D3B3B]/30">{daysPosted(item.created_at)}</span>
+                    <span className="text-xs font-semibold text-[var(--seek-primary)]">{item.display_name || "A neighbour"}</span>
+                    <span className="text-[10px] text-[var(--seek-primary)]/30">{daysPosted(item.created_at)}</span>
                   </div>
-                  <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[#0D3B3B]/72 whitespace-pre-wrap">{item.body}</p>
+                  <p className="mt-1.5 pl-8 text-sm leading-relaxed text-[var(--seek-primary)]/72 whitespace-pre-wrap">{item.body}</p>
                 </div>
               ))}
             </div>
           ) : (
-            <p className="mt-3 px-1 text-xs text-[#0D3B3B]/45">Be the first to encourage this person.</p>
+            <p className="mt-3 px-1 text-xs text-[var(--seek-primary)]/45">Be the first to encourage this person.</p>
           )}
         </div>
       )}
@@ -1045,10 +1045,10 @@ function SeekDonateModal({ request, campaign, onClose }) {
             setLoading(false);
           }
         }}
-        className="w-full max-w-[22rem] rounded-2xl bg-[#101415] text-white p-4 shadow-2xl border border-white/10"
+        className="w-full max-w-[22rem] rounded-2xl bg-[var(--seek-dark)] text-white p-4 shadow-2xl border border-white/10"
       >
         <div className="flex items-center justify-between gap-2">
-          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[#8DE3C5]">Secure donation</p>
+          <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--seek-mint)]">Secure donation</p>
           <button type="button" onClick={onClose} className="h-8 w-8 rounded-full bg-white/10">×</button>
         </div>
         <p className="mt-3 text-sm text-white/80">
@@ -1058,7 +1058,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
         <input required type="email" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for receipt" />
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((n) => (
-            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>{currency.symbol}{Math.round(n * currency.rate).toLocaleString()}</button>
+            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[var(--seek-success)] text-[var(--seek-primary)]" : "bg-white/10 text-white")}>{currency.symbol}{Math.round(n * currency.rate).toLocaleString()}</button>
           ))}
         </div>
         <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={"Amount " + currency.symbol} />
@@ -1069,7 +1069,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
         </label>
         {monthly && <p className="mt-1 text-xs text-white/50">Paystack will charge this amount monthly. You can cancel anytime.</p>}
         {error && <p className="mt-2 text-xs text-red-300">{error}</p>}
-        <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-[#0D3B3B] py-3 text-sm font-extrabold">
+        <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[var(--seek-success)] text-[var(--seek-primary)] py-3 text-sm font-extrabold">
           {loading ? "Opening Paystack…" : monthly ? "Start monthly ₦" + Number(amount || 0).toLocaleString() : "Authorize ₦" + Number(amount || 0).toLocaleString()}
         </button>
       </form>
@@ -1085,26 +1085,26 @@ function RequestCard({ req, onHelp, onView }) {
   const financial = isFinancialNeed(req);
   const openStory = () => onView ? onView(req) : (onHelp && onHelp(req));
   return (
-    <article className="seek-fundraiser-card flex flex-col rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
+    <article className="seek-fundraiser-card flex flex-col rounded-2xl border border-[var(--seek-primary)]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#0D8F83]">{req.category || "Community request"}</span>
-        {req.location && <span className="max-w-[52%] truncate text-xs text-[#0D3B3B]/50">{req.location}</span>}
+        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[var(--seek-success)]">{req.category || "Community request"}</span>
+        {req.location && <span className="max-w-[52%] truncate text-xs text-[var(--seek-primary)]/50">{req.location}</span>}
       </div>
-      <button type="button" onClick={openStory} className="mt-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
-        <h3 className="font-display text-lg font-extrabold leading-snug text-[#0D3B3B] line-clamp-2">{req.title || "A neighbour needs support"}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-2">{story}</p>
+      <button type="button" onClick={openStory} className="mt-3 text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--seek-success)]">
+        <h3 className="font-display text-lg font-extrabold leading-snug text-[var(--seek-primary)] line-clamp-2">{req.title || "A neighbour needs support"}</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--seek-primary)] line-clamp-2">{story}</p>
       </button>
       {financial && needed > 0 && (
         <div className="mt-4">
           <ProgressBar raised={raised} needed={needed} />
         </div>
       )}
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#0D3B3B]/8 pt-3">
-        <button type="button" onClick={openStory} className="text-sm font-semibold text-[#0D3B3B]/65 hover:text-[#0D8F83]">Read story</button>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 pt-3">
+        <button type="button" onClick={openStory} className="text-sm font-semibold text-[var(--seek-primary)]/65 hover:text-[var(--seek-success)]">Read story</button>
         {financial ? (
-          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#0D3B3B]">Donate</button>
+          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[var(--seek-success)] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[var(--seek-success)] focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-primary)]">Donate</button>
         ) : (
-          <button type="button" onClick={openStory} className="rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
+          <button type="button" onClick={openStory} className="rounded-full bg-[var(--seek-primary)] px-5 py-2.5 text-sm font-bold text-white">View request</button>
         )}
       </div>
       {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
@@ -1116,7 +1116,7 @@ function RequestCard({ req, onHelp, onView }) {
 function SocialLinks({ light = false }) {
   const cls = light
     ? "h-10 w-10 rounded-full border border-white/20 text-white/80 hover:text-white hover:border-white/50 flex items-center justify-center"
-    : "h-10 w-10 rounded-full border border-[#0D3B3B]/15 text-[#0D3B3B] hover:border-[#1BAA9C] hover:text-[#1BAA9C] flex items-center justify-center bg-white";
+    : "h-10 w-10 rounded-full border border-[var(--seek-primary)]/15 text-[var(--seek-primary)] hover:border-[var(--seek-success)] hover:text-[var(--seek-success)] flex items-center justify-center bg-white";
   return (
     <div className="flex items-center justify-center gap-2">
       <a className={cls} href="https://wa.me/447402427408" target="_blank" rel="noreferrer" aria-label="WhatsApp">
@@ -1171,16 +1171,16 @@ function OutreachStory({ campaign, onBack, onDonate }) {
   if (!campaign) return null;
   return (
     <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-20">
-      <button type="button" onClick={onBack} className="text-sm font-semibold text-[#1BAA9C] mb-6">Back to Give</button>
-      <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[#0D3B3B]/40 mb-2">Already done</p>
-      <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-4">{campaign.title}</h1>
-      <p className="font-body text-[#0D3B3B]/70 mb-6">{campaign.story || campaign.blurb}</p>
+      <button type="button" onClick={onBack} className="text-sm font-semibold text-[var(--seek-success)] mb-6">Back to Give</button>
+      <p className="font-body text-[11px] tracking-[0.22em] uppercase text-[var(--seek-primary)]/40 mb-2">Already done</p>
+      <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--seek-primary)] mb-4">{campaign.title}</h1>
+      <p className="font-body text-[var(--seek-primary)]/70 mb-6">{campaign.story || campaign.blurb}</p>
       {campaign.budget ? (
-        <div className="mb-6 rounded-2xl bg-white border border-[#0D3B3B]/08 p-4">
-          <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">What this year costs</p>
-          <p className="font-display font-bold text-2xl text-[#0D3B3B] mt-1">₦{Number(campaign.budget).toLocaleString()}</p>
+        <div className="mb-6 rounded-2xl bg-white border border-[var(--seek-primary)]/08 p-4">
+          <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45">What this year costs</p>
+          <p className="font-display font-bold text-2xl text-[var(--seek-primary)] mt-1">₦{Number(campaign.budget).toLocaleString()}</p>
           <div className="mt-3"><ProgressBar raised={raised} needed={campaign.budget} /></div>
-          <p className="mt-2 text-xs text-[#0D3B3B]/50">Give what you can. We will take it from there.</p>
+          <p className="mt-2 text-xs text-[var(--seek-primary)]/50">Give what you can. We will take it from there.</p>
         </div>
       ) : null}
       <div className="grid sm:grid-cols-2 gap-3 mb-8">
@@ -1206,7 +1206,7 @@ function OutreachCheckout({ campaign, onClose }) {
 
 function SectionLabel({ children }) {
   return (
-    <span className="inline-block font-body text-xs font-semibold uppercase tracking-[0.18em] text-[#1BAA9C] mb-3">
+    <span className="inline-block font-body text-xs font-semibold uppercase tracking-[0.18em] text-[var(--seek-success)] mb-3">
       {children}
     </span>
   );
@@ -1231,27 +1231,27 @@ function applySeekTheme(theme) {
   const root = document.documentElement;
   root.classList.toggle("seek-dark", next === "dark");
   if (next === "dark") {
-    root.style.setProperty("--seek-bg", "#121414");
-    root.style.setProperty("--seek-card", "#1A2220");
-    root.style.setProperty("--seek-ink", "#C9D6D2");
-    root.style.setProperty("--seek-head", "#B8EDE3");
+    root.style.setProperty("--seek-bg", "var(--seek-dark)");
+    root.style.setProperty("--seek-card", "var(--seek-primary)");
+    root.style.setProperty("--seek-ink", "var(--seek-light)");
+    root.style.setProperty("--seek-head", "var(--seek-mint)");
     root.style.setProperty("--seek-wash", "rgba(18,20,20,0.92)");
     root.style.setProperty("--seek-photo", "none");
-    root.style.backgroundColor = "#121414";
+    root.style.backgroundColor = "var(--seek-dark)";
     if (document.body) {
-      document.body.style.backgroundColor = "#121414";
-      document.body.style.color = "#C9D6D2";
+      document.body.style.backgroundColor = "var(--seek-dark)";
+      document.body.style.color = "var(--seek-light)";
     }
   } else {
-    root.style.setProperty("--seek-bg", "#F2F5F3");
-    root.style.setProperty("--seek-card", "#FFFFFF");
-    root.style.setProperty("--seek-ink", "#0F211F");
+    root.style.setProperty("--seek-bg", "var(--seek-white)");
+    root.style.setProperty("--seek-card", "var(--seek-white)");
+    root.style.setProperty("--seek-ink", "var(--seek-primary)");
     root.style.setProperty("--seek-wash", "rgba(242,245,243,0.72)");
     root.style.setProperty("--seek-photo", "url('https://images.unsplash.com/photo-1469571486292-0ba58a3f068b?auto=format&fit=crop&w=1800&q=60')");
-    root.style.backgroundColor = "#F2F5F3";
+    root.style.backgroundColor = "var(--seek-white)";
     if (document.body) {
-      document.body.style.backgroundColor = "#F2F5F3";
-      document.body.style.color = "#0F211F";
+      document.body.style.backgroundColor = "var(--seek-white)";
+      document.body.style.color = "var(--seek-primary)";
     }
   }
   try { localStorage.setItem("seek_theme", next); } catch (_e) {}
@@ -1275,7 +1275,7 @@ function NavInboxButton({ userSession, setPage }) {
     <button type="button" onClick={() => { setPage(userSession?.access_token ? "notifications" : "account"); window.history.pushState({}, "", userSession?.access_token ? "/notifications" : "/account"); }} aria-label="Inbox" className="relative p-2">
       <Bell size={20} />
       {unread > 0 && (
-        <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-5 px-1 rounded-full bg-[#1BAA9C] text-[10px] font-bold text-white flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
+        <span className="absolute -top-0.5 -right-0.5 min-w-[1.1rem] h-5 px-1 rounded-full bg-[var(--seek-success)] text-[10px] font-bold text-white flex items-center justify-center">{unread > 9 ? "9+" : unread}</span>
       )}
     </button>
   );
@@ -1292,7 +1292,7 @@ function ThemeToggle() {
       aria-pressed={dark}
       title={dark ? "Switch to light appearance" : "Switch to dark appearance"}
       onClick={() => setTheme(dark ? "light" : "dark")}
-      className="seek-theme-toggle p-2 text-current rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1BAA9C]"
+      className="seek-theme-toggle p-2 text-current rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
     >
       {dark ? <Sun size={20} className="seek-theme-icon" /> : <Moon size={20} className="seek-theme-icon" />}
     </button>
@@ -1328,7 +1328,7 @@ function FeatureStrip({ page, setPage }) {
     window.scrollTo(0, 0);
   };
   return (
-    <div className="seek-tabs sticky top-[6.5rem] z-[108] bg-white/95 backdrop-blur border-b border-[#0D3B3B]/8">
+    <div className="seek-tabs sticky top-[6.5rem] z-[108] bg-white/95 backdrop-blur border-b border-[var(--seek-primary)]/8">
       <div className="mx-auto max-w-6xl px-5 overflow-x-auto scrollbar-none">
         <div className="flex gap-1 min-w-max py-2 items-center">
           {items.map((item) => {
@@ -1340,7 +1340,7 @@ function FeatureStrip({ page, setPage }) {
                 key={item.id}
                 type="button"
                 onClick={() => go(item)}
-                className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[#0D3B3B] border-[#1BAA9C]" : item.id === "impact" ? "text-[#1BAA9C] border-transparent font-bold" : "text-[#0D3B3B]/55 border-transparent hover:text-[#0D3B3B]"}`}
+                className={`shrink-0 px-3 py-2.5 text-sm font-semibold border-b-2 transition-colors ${active ? "text-[var(--seek-primary)] border-[var(--seek-success)]" : item.id === "impact" ? "text-[var(--seek-success)] border-transparent font-bold" : "text-[var(--seek-primary)]/55 border-transparent hover:text-[var(--seek-primary)]"}`}
               >
                 {item.label}
               </button>
@@ -1379,7 +1379,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-[110] relative bg-white border-b border-[#0D3B3B]/8">
+    <header className="sticky top-0 z-[110] relative bg-white border-b border-[var(--seek-primary)]/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -1388,7 +1388,7 @@ function Navbar({ page, setPage, userSession }) {
             <button
               key={l.label + i}
               onClick={() => go(l.id)}
-              className={`seek-nav-link font-body text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${page === l.id ? "seek-nav-active text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              className={`seek-nav-link font-body text-sm font-medium inline-flex items-center gap-1.5 transition-colors ${page === l.id ? "seek-nav-active text-[var(--seek-primary)]" : "text-[var(--seek-primary)]/55 hover:text-[var(--seek-primary)]"}`}
             >
               {l.icon ? <l.icon size={14} /> : null}
               {l.label}
@@ -1398,7 +1398,7 @@ function Navbar({ page, setPage, userSession }) {
           {userSession?.access_token && (
             <button
               onClick={() => go("my-seek")}
-              className={`seek-nav-link font-body text-sm font-medium transition-colors ${page === "my-seek" ? "seek-nav-active text-[#0D3B3B]" : "text-[#0D3B3B]/55 hover:text-[#0D3B3B]"}`}
+              className={`seek-nav-link font-body text-sm font-medium transition-colors ${page === "my-seek" ? "seek-nav-active text-[var(--seek-primary)]" : "text-[var(--seek-primary)]/55 hover:text-[var(--seek-primary)]"}`}
             >
               My SEEK
               {page === "my-seek" ? <span className="seek-nav-indicator" aria-hidden="true" /> : null}
@@ -1412,10 +1412,10 @@ function Navbar({ page, setPage, userSession }) {
           {userSession?.access_token ? <NavInboxButton userSession={userSession} setPage={setPage} /> : null}
           <button
             onClick={() => go(userSession?.access_token ? "my-seek" : "account")}
-            className="font-body text-sm font-medium text-[#0D3B3B]/55 hover:text-[#0D3B3B] inline-flex items-center gap-2"
+            className="font-body text-sm font-medium text-[var(--seek-primary)]/55 hover:text-[var(--seek-primary)] inline-flex items-center gap-2"
             aria-label="My SEEK"
           >
-            {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
+            {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[var(--seek-primary)]/10" /> : <span className="h-9 w-9 rounded-full bg-[var(--seek-primary)]/10 inline-flex items-center justify-center"><User size={16} /></span>}
             <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
           <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>{tSeek("needHelp")}</Button>
@@ -1425,14 +1425,14 @@ function Navbar({ page, setPage, userSession }) {
         <div className="lg:hidden flex items-center gap-1">
         <ThemeToggle />
         <NavInboxButton userSession={userSession} setPage={setPage} />
-        <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
+        <button className="p-2 text-[var(--seek-primary)]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
         </button>
         </div>
       </div>
 
       {open && (
-        <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[#0D3B3B]/10 shadow-xl px-4 py-3">
+        <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[var(--seek-primary)]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
             { id: "fundraiser", label: "Fundraiser", icon: Search },
@@ -1446,12 +1446,12 @@ function Navbar({ page, setPage, userSession }) {
             const Icon = l.icon;
             const on = page === l.id;
             return (
-              <button key={l.id} onClick={() => go(l.id)} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase ${on ? "bg-[#0D3B3B]/5 text-[#0D3B3B]" : "text-[#0D3B3B]/70"}`}>
+              <button key={l.id} onClick={() => go(l.id)} className={`w-full flex items-center gap-3 rounded-xl px-4 py-3 text-left text-sm tracking-[0.12em] uppercase ${on ? "bg-[var(--seek-primary)]/5 text-[var(--seek-primary)]" : "text-[var(--seek-primary)]/70"}`}>
                 <Icon size={16} /> {l.label}
               </button>
             );
           })}
-          <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[#0D3B3B] text-white py-3 text-sm tracking-[0.16em] uppercase">
+          <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[var(--seek-primary)] text-white py-3 text-sm tracking-[0.16em] uppercase">
             {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
         </div>
@@ -1558,11 +1558,11 @@ function HomePage({ setPage, userSession }) {
       {/* HERO */}
       <section className="px-5 pt-10 pb-20 text-center">
         <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-16 w-auto object-contain mix-blend-screen" />
-        <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] dark:text-white text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
+        <h1 className="mt-6 font-display font-extrabold text-[var(--seek-primary)] dark:text-white text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
           {tSeek("hero")}
         </h1>
-        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1BAA9C]">What SEEK is all about</p>
-        <p className="mt-3 font-body text-sm leading-relaxed text-[#0D3B3B]/70 max-w-md mx-auto">
+        <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[var(--seek-success)]">What SEEK is all about</p>
+        <p className="mt-3 font-body text-sm leading-relaxed text-[var(--seek-primary)]/70 max-w-md mx-auto">
           {tSeek("askOffer")}
         </p>
         <div className="mt-6">
@@ -1573,23 +1573,23 @@ function HomePage({ setPage, userSession }) {
       {requests.filter((r) => String(r.category || "").includes("Fundraiser")).length > 0 && (
         <section className="px-5 pb-10">
           <div className="mx-auto max-w-lg">
-            <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-3">Fundraisers</p>
+            <p className="text-[11px] uppercase tracking-widest text-[var(--seek-success)] mb-3">Fundraisers</p>
             <div className="space-y-3">
               {requests.filter((r) => String(r.category || "").includes("Fundraiser")).slice(0, 3).map((r) => (
-                <div key={r.id} className="seek-fundraiser-card rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                <div key={r.id} className="seek-fundraiser-card rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-4">
                   <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full text-left">
-                    <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
-                    <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
+                    <p className="font-display font-bold text-[var(--seek-primary)]">{r.title}</p>
+                    <p className="text-xs text-[var(--seek-primary)]/50 mt-1">{r.location}</p>
                     {r.amountNeeded > 0 && (
                       <div className="mt-2">
-                        <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
-                          <div className="seek-fundraiser-progress-fill h-full rounded-full bg-[#1BAA9C]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
+                        <div className="h-2 w-full rounded-full bg-[var(--seek-primary)]/10 overflow-hidden">
+                          <div className="seek-fundraiser-progress-fill h-full rounded-full bg-[var(--seek-success)]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
                         </div>
-                        <p className="text-sm text-[#1BAA9C] mt-1">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>
+                        <p className="text-sm text-[var(--seek-success)] mt-1">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>
                       </div>
                     )}
                   </button>
-                  <button type="button" onClick={() => setDonateReq(r)} className="seek-fundraiser-donate mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
+                  <button type="button" onClick={() => setDonateReq(r)} className="seek-fundraiser-donate mt-3 w-full rounded-full bg-[var(--seek-success)] text-white py-2.5 text-sm font-bold">Donate</button>
                 </div>
               ))}
             </div>
@@ -1599,11 +1599,11 @@ function HomePage({ setPage, userSession }) {
       {donateReq && <SeekDonateModal request={donateReq} onClose={() => setDonateReq(null)} />}
       {mine.length > 0 && (
         <section className="mx-auto max-w-lg px-5 pb-6">
-          <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
+          <p className="text-[11px] uppercase tracking-widest text-[var(--seek-success)] mb-2">Your requests</p>
           {mine.slice(0, 2).map((req) => (
-            <button key={req.id} type="button" onClick={() => go("my-requests")} className="mb-2 w-full rounded-2xl bg-white border border-[#0D3B3B]/8 p-3 text-left">
-              <p className="text-xs text-[#1BAA9C]">{formatSeekStatus(req.status)}</p>
-              <p className="font-display font-bold text-[#0D3B3B]">{req.title}</p>
+            <button key={req.id} type="button" onClick={() => go("my-requests")} className="mb-2 w-full rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-3 text-left">
+              <p className="text-xs text-[var(--seek-success)]">{formatSeekStatus(req.status)}</p>
+              <p className="font-display font-bold text-[var(--seek-primary)]">{req.title}</p>
             </button>
           ))}
         </section>
@@ -1616,7 +1616,7 @@ function HomePage({ setPage, userSession }) {
             ["fundraiser", "Fundraiser"],
             ["offers", "Giveaways"],
           ].map(([id, label]) => (
-            <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
+            <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[var(--seek-primary)]/12 bg-white py-3 text-sm font-semibold text-[var(--seek-primary)]">
               {label}
             </button>
           ))}
@@ -1645,22 +1645,22 @@ function HomeRequestCard({ request, setPage }) {
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
   return (
-    <article className="seek-home-request-card rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
+    <article className="seek-home-request-card rounded-2xl border border-[var(--seek-primary)]/10 bg-white p-4 sm:p-5 shadow-sm transition-shadow hover:shadow-md">
       <div className="flex items-center justify-between gap-3">
-        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[#0D8F83]">{request.category || "Community request"}</span>
-        {request.location && <span className="max-w-[52%] truncate text-xs text-[#0D3B3B]/50">{request.location}</span>}
+        <span className="text-[10px] font-extrabold uppercase tracking-[.14em] text-[var(--seek-success)]">{request.category || "Community request"}</span>
+        {request.location && <span className="max-w-[52%] truncate text-xs text-[var(--seek-primary)]/50">{request.location}</span>}
       </div>
-      <button type="button" onClick={openRequest} className="mt-3 block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[#1BAA9C]">
-        <h3 className="font-display text-lg font-extrabold leading-snug text-[#0D3B3B] line-clamp-2">{request.title || "A neighbour needs support"}</h3>
-        <p className="mt-2 text-sm leading-6 text-[#385653] line-clamp-2">{story.length > 150 ? `${story.slice(0, 147).trimEnd()}…` : story}</p>
+      <button type="button" onClick={openRequest} className="mt-3 block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-[var(--seek-success)]">
+        <h3 className="font-display text-lg font-extrabold leading-snug text-[var(--seek-primary)] line-clamp-2">{request.title || "A neighbour needs support"}</h3>
+        <p className="mt-2 text-sm leading-6 text-[var(--seek-primary)] line-clamp-2">{story.length > 150 ? `${story.slice(0, 147).trimEnd()}…` : story}</p>
       </button>
       {financial && needed > 0 && <div className="mt-4"><ProgressBar raised={raised} needed={needed} /></div>}
-      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[#0D3B3B]/8 pt-3">
-        <button type="button" onClick={openRequest} className="text-sm font-semibold text-[#0D3B3B]/65 hover:text-[#0D8F83]">Read story</button>
+      <div className="mt-4 flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 pt-3">
+        <button type="button" onClick={openRequest} className="text-sm font-semibold text-[var(--seek-primary)]/65 hover:text-[var(--seek-success)]">Read story</button>
         {financial ? (
-          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[#1BAA9C] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[#0D8F83]">Donate</button>
+          <button type="button" onClick={() => setDonateOpen(true)} className="rounded-full bg-[var(--seek-success)] px-5 py-2.5 text-sm font-extrabold text-white transition hover:bg-[var(--seek-success)]">Donate</button>
         ) : (
-          <button type="button" onClick={openRequest} className="rounded-full bg-[#0D3B3B] px-5 py-2.5 text-sm font-bold text-white">View request</button>
+          <button type="button" onClick={openRequest} className="rounded-full bg-[var(--seek-primary)] px-5 py-2.5 text-sm font-bold text-white">View request</button>
         )}
       </div>
       {donateOpen && <SeekDonateModal request={request} onClose={() => setDonateOpen(false)} />}
@@ -1680,8 +1680,8 @@ function HelpSomeoneFeed({ setPage, limit = 6, compact = false }) {
     return () => { cancelled = true; };
   }, [limit]);
 
-  if (loading) return <div className="grid gap-3 sm:grid-cols-2">{[1,2,3].map((i) => <div key={i} className="h-44 animate-pulse rounded-2xl bg-[#E8F0ED]" />)}</div>;
-  if (!requests.length) return <p className="rounded-2xl border border-[#0D3B3B]/10 bg-white p-5 text-sm text-[#385653]">No published requests are available right now. Please check back soon.</p>;
+  if (loading) return <div className="grid gap-3 sm:grid-cols-2">{[1,2,3].map((i) => <div key={i} className="h-44 animate-pulse rounded-2xl bg-[var(--seek-light)]" />)}</div>;
+  if (!requests.length) return <p className="rounded-2xl border border-[var(--seek-primary)]/10 bg-white p-5 text-sm text-[var(--seek-primary)]">No published requests are available right now. Please check back soon.</p>;
 
   return (
     <div className={compact ? "grid gap-3 sm:grid-cols-2" : "grid gap-4 sm:grid-cols-2 lg:grid-cols-3"}>
@@ -1700,16 +1700,16 @@ function SeekStoriesSection({ setPage, limit = 3 }) {
       <div className="flex items-end justify-between gap-4 mb-5">
         <div>
           <SectionLabel>SEEK Stories</SectionLabel>
-          <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">See what happened after people asked.</h2>
-          <p className="mt-2 text-sm text-[#0D3B3B]/55">Real updates from requesters, shared after review.</p>
+          <h2 className="font-display font-bold text-2xl sm:text-3xl text-[var(--seek-primary)]">See what happened after people asked.</h2>
+          <p className="mt-2 text-sm text-[var(--seek-primary)]/55">Real updates from requesters, shared after review.</p>
         </div>
-        <button type="button" className="text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("impact")}>See all stories →</button>
+        <button type="button" className="text-sm font-semibold text-[var(--seek-success)]" onClick={() => setPage("impact")}>See all stories →</button>
       </div>
       <div className="grid sm:grid-cols-3 gap-4">
         {stories.map((story) => (
-          <button key={story.id} type="button" className="text-left rounded-2xl overflow-hidden bg-white border border-[#0D3B3B]/10 shadow-sm" onClick={() => { setPage("impact"); window.scrollTo(0,0); }}>
-            {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-28 bg-[#0D3B3B]/5" />}
-            <div className="p-4"><p className="font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p><p className="mt-2 text-sm text-[#0D3B3B]/55 line-clamp-3">{story.story}</p></div>
+          <button key={story.id} type="button" className="text-left rounded-2xl overflow-hidden bg-white border border-[var(--seek-primary)]/10 shadow-sm" onClick={() => { setPage("impact"); window.scrollTo(0,0); }}>
+            {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-44 w-full object-cover bg-black" /> : story.public_url ? <img loading="lazy" decoding="async" src={story.public_url} alt="" className="h-44 w-full object-cover" /> : <div className="h-28 bg-[var(--seek-primary)]/5" />}
+            <div className="p-4"><p className="font-display font-bold text-[var(--seek-primary)] line-clamp-2">{story.title || "A SEEK story"}</p><p className="mt-2 text-sm text-[var(--seek-primary)]/55 line-clamp-3">{story.story}</p></div>
           </button>
         ))}
       </div>
@@ -1773,32 +1773,32 @@ function OfferCard({ offer, setPage }) {
   }, []);
   const shareText = "Seek offer: " + (offer.description || "") + " https://seekbsn.org/offers";
   return (
-    <article className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-5">
+    <article className="rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-5">
       <div className="flex items-start gap-3">
         <div className="relative shrink-0">
           {postAvatar(offer.avatar_url, offer) ? (
             <img loading="lazy" decoding="async" src={postAvatar(offer.avatar_url, offer)} alt="" className="h-12 w-12 rounded-full object-cover bg-white" fetchpriority="high" />
           ) : (
-            <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />
+            <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />
           )}
           <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
         </div>
         <div className="min-w-0">
           {(offer.category || offer.city) && (
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">
               {[offer.category, offer.city].filter(Boolean).join(" · ")}
             </p>
           )}
-          <p className="mt-1 font-body text-[#0D3B3B] leading-relaxed">{offer.description}</p>
-          <div className="mt-2 flex items-center gap-3 text-xs text-[#0D3B3B]/45">
+          <p className="mt-1 font-body text-[var(--seek-primary)] leading-relaxed">{offer.description}</p>
+          <div className="mt-2 flex items-center gap-3 text-xs text-[var(--seek-primary)]/45">
             <span>{daysPosted(offer.created_at)}</span>
             <span className="inline-flex items-center gap-1"><Eye size={13} /> {viewCount.toLocaleString()} {viewCount === 1 ? "view" : "views"}</span>
           </div>
-          {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[#0D3B3B]">Posted by Admin</p>}
+          {isBsnPost(offer) && <p className="mt-1 text-[10px] font-semibold uppercase tracking-wide text-[var(--seek-primary)]">Posted by Admin</p>}
         </div>
       </div>
       <div className="mt-4 flex flex-wrap items-center gap-x-5 gap-y-2 text-sm font-semibold">
-        <button type="button" className="text-[#1BAA9C]" onClick={async () => {
+        <button type="button" className="text-[var(--seek-success)]" onClick={async () => {
           if (!open && media.length === 0) {
             try {
               const files = await getOfferMedia(offer.id);
@@ -1809,7 +1809,7 @@ function OfferCard({ offer, setPage }) {
         }}>
           {open ? "Hide photos" : (media.length ? "Photos (" + media.length + ")" : "Photos")}
         </button>
-        <button type="button" className="text-[#0D3B3B]" onClick={() => {
+        <button type="button" className="text-[var(--seek-primary)]" onClick={() => {
           const session = getUserSession();
           if (closed || applied) return;
           if (!session?.access_token) {
@@ -1823,7 +1823,7 @@ function OfferCard({ offer, setPage }) {
           {closed ? "Giveaway ended" : applied ? "You already indicated interest" : interestCount === 1 ? "1 person indicated interest" : interestCount > 1 ? interestCount + " people indicated interest" : "I am interested"}
         </button>
         {isOwner && !closed && (
-          <label className="rounded-full border border-[#0D3B3B]/20 px-3 py-1.5 text-xs font-semibold text-[#0D3B3B] cursor-pointer">
+          <label className="rounded-full border border-[var(--seek-primary)]/20 px-3 py-1.5 text-xs font-semibold text-[var(--seek-primary)] cursor-pointer">
             End with proof
             <input type="file" accept="image/jpeg,image/png,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={async (e) => {
               const file = e.target.files?.[0];
@@ -1843,10 +1843,10 @@ function OfferCard({ offer, setPage }) {
             }} />
           </label>
         )}
-        {isOwner && <span className="text-xs text-[#0D3B3B]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
+        {isOwner && <span className="text-xs text-[var(--seek-primary)]/45">{ownerRows.filter((r) => r.status === "completed").length} completed</span>}
         <button
           type="button"
-          className="text-[#0D3B3B]/50"
+          className="text-[var(--seek-primary)]/50"
           onClick={async () => {
             try {
               if (navigator.share) await navigator.share({ title: "Seek offer", text: shareText });
@@ -1863,14 +1863,14 @@ function OfferCard({ offer, setPage }) {
       <CommunityInteractions targetType="offer" targetId={offer.id} compact />
 
       {isOwner && ownerRows.length > 0 && (
-        <div className="mt-4 rounded-xl bg-[#F4F1EA] p-3 space-y-2">
-          <p className="text-xs font-semibold uppercase text-[#0D3B3B]/50">People interested</p>
+        <div className="mt-4 rounded-xl bg-[var(--seek-light)] p-3 space-y-2">
+          <p className="text-xs font-semibold uppercase text-[var(--seek-primary)]/50">People interested</p>
           {ownerRows.map((row) => (
             <div key={row.id} className="flex flex-wrap items-center justify-between gap-2 text-sm">
               <span>{row.name || row.email} · {row.status || "interested"}</span>
               <span className="flex gap-2">
                 {row.status !== "completed" && (
-                  <button type="button" className="text-[#1BAA9C] font-semibold" onClick={async () => {
+                  <button type="button" className="text-[var(--seek-success)] font-semibold" onClick={async () => {
                     await markOfferInterestStatus(row.id, row.status === "contacted" ? "completed" : "contacted");
                     setOwnerRows(await listMyOfferInterests(offer.id));
                   }}>{row.status === "contacted" ? "Mark given" : "Reached out"}</button>
@@ -1908,13 +1908,13 @@ function OfferCard({ offer, setPage }) {
           <input required type="email" value={applyForm.email} onChange={(e) => setApplyForm({ ...applyForm, email: e.target.value })} placeholder="Your email" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <input value={applyForm.phone} onChange={(e) => setApplyForm({ ...applyForm, phone: e.target.value })} placeholder="Phone (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
           <textarea required value={applyForm.message} onChange={(e) => setApplyForm({ ...applyForm, message: e.target.value })} placeholder="Why you are interested / short application" rows={3} className="w-full rounded-xl border px-3 py-2 text-sm" />
-          <button type="submit" disabled={applying} className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold">
+          <button type="submit" disabled={applying} className="rounded-full bg-[var(--seek-primary)] text-white px-4 py-2 text-sm font-semibold">
             {applying ? "Sending…" : "Send interest"}
           </button>
           {applyError && <p className="text-sm text-red-600">{applyError}</p>}
         </form>
       )}
-      {applied && <p className="mt-3 text-sm text-[#1BAA9C]">Your interest was sent. Seek will follow up.</p>}
+      {applied && <p className="mt-3 text-sm text-[var(--seek-success)]">Your interest was sent. Seek will follow up.</p>}
       {open && media.length > 0 && (
         <div className="mt-3 space-y-3">
           {media.map((m) => (
@@ -1924,7 +1924,7 @@ function OfferCard({ offer, setPage }) {
                 <SeekVideoWatermark />
               </div>
             ) : (
-              <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[#0D3B3B]/5" />
+              <img loading="lazy" decoding="async" key={m.public_url} src={m.public_url} alt="" className="w-full max-h-80 rounded-xl object-contain bg-[var(--seek-primary)]/5" />
             )
           ))}
         </div>
@@ -1956,17 +1956,17 @@ function OfferHelpCategoriesPage({ setPage }) {
   return (
     <main className="mx-auto max-w-5xl px-5 sm:px-8 pt-10 pb-24">
       <div className="max-w-2xl mb-8">
-        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Offer Help</p>
-        <h1 className="mt-2 font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">What would you like to offer?</h1>
-        <p className="mt-3 text-sm sm:text-base leading-6 text-[#0D3B3B]/65">Choose a category. We’ll take you to a separate page to complete the details of your offer.</p>
+        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">SEEK · Offer Help</p>
+        <h1 className="mt-2 font-display font-extrabold text-3xl sm:text-4xl text-[var(--seek-primary)]">What would you like to offer?</h1>
+        <p className="mt-3 text-sm sm:text-base leading-6 text-[var(--seek-primary)]/65">Choose a category. We’ll take you to a separate page to complete the details of your offer.</p>
       </div>
       <div className="grid grid-cols-2 sm:grid-cols-3 lg:grid-cols-4 gap-3">
         {OFFER_HELP_TYPES.map(([id, label, Icon, description]) => (
-          <button key={id} type="button" aria-pressed="false" onClick={() => choose(id)} className="seek-offer-category group rounded-2xl border border-[#0D3B3B]/10 bg-white p-4 sm:p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[#1BAA9C] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1BAA9C]">
-            <span className="seek-offer-icon mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[#EAF3F0] text-[#0D3B3B]"><Icon size={20} /></span>
-            <span className="seek-offer-title block text-sm font-bold text-[#0D3B3B]">{label}</span>
-            <span className="seek-offer-description mt-1 block text-xs leading-5 text-[#0D3B3B]/60">{description}</span>
-            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[#168F83]">Choose <ArrowRight size={13} /></span>
+          <button key={id} type="button" aria-pressed="false" onClick={() => choose(id)} className="seek-offer-category group rounded-2xl border border-[var(--seek-primary)]/10 bg-white p-4 sm:p-5 text-left transition-all hover:-translate-y-0.5 hover:border-[var(--seek-success)] hover:shadow-md focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]">
+            <span className="seek-offer-icon mb-4 flex h-11 w-11 items-center justify-center rounded-xl bg-[var(--seek-light)] text-[var(--seek-primary)]"><Icon size={20} /></span>
+            <span className="seek-offer-title block text-sm font-bold text-[var(--seek-primary)]">{label}</span>
+            <span className="seek-offer-description mt-1 block text-xs leading-5 text-[var(--seek-primary)]/60">{description}</span>
+            <span className="mt-4 inline-flex items-center gap-1 text-xs font-bold text-[var(--seek-success)]">Choose <ArrowRight size={13} /></span>
           </button>
         ))}
       </div>
@@ -2021,44 +2021,44 @@ function GiveOfferForm({ setPage, initialCategory = "" }) {
 
   if (submitted) {
     return (
-      <div className="rounded-3xl border border-[#0D3B3B]/8 p-10 text-center bg-white">
-        <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-        <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thank you for offering to help.</h2>
-        <p className="font-body text-[#0D3B3B]/65">Your offer has been sent to SEEK for review. Our team may match it with a relevant published request. We will contact you with the next steps.</p>
+      <div className="rounded-3xl border border-[var(--seek-primary)]/8 p-10 text-center bg-white">
+        <CheckCircle2 size={36} className="mx-auto text-[var(--seek-success)] mb-4" />
+        <h2 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-2">Thank you for offering to help.</h2>
+        <p className="font-body text-[var(--seek-primary)]/65">Your offer has been sent to SEEK for review. Our team may match it with a relevant published request. We will contact you with the next steps.</p>
       </div>
     );
   }
 
   return (
-    <div className="rounded-3xl border border-[#0D3B3B]/8 p-5 sm:p-8 bg-white pb-28">
+    <div className="rounded-3xl border border-[var(--seek-primary)]/8 p-5 sm:p-8 bg-white pb-28">
       <div className="mb-6">
-        <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-[#168F83]"><ArrowLeft size={16} /> All offer categories</button>
-        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK · Offer Help</p>
-        <h2 className="mt-2 font-display font-bold text-2xl text-[#0D3B3B]">{offerTypes.find(([id]) => id === offerCategory)?.[1] || "Complete your offer"}</h2>
-        <p className="mt-2 max-w-xl text-sm leading-6 text-[#0D3B3B]/65">Tell us what you can provide. SEEK will review your offer and help connect it with someone who needs it.</p>
+        <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mb-5 inline-flex items-center gap-2 text-sm font-semibold text-[var(--seek-success)]"><ArrowLeft size={16} /> All offer categories</button>
+        <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">SEEK · Offer Help</p>
+        <h2 className="mt-2 font-display font-bold text-2xl text-[var(--seek-primary)]">{offerTypes.find(([id]) => id === offerCategory)?.[1] || "Complete your offer"}</h2>
+        <p className="mt-2 max-w-xl text-sm leading-6 text-[var(--seek-primary)]/65">Tell us what you can provide. SEEK will review your offer and help connect it with someone who needs it.</p>
       </div>
 
 
       {offerCategory === "money" && (
-        <div className="mb-6 rounded-2xl border border-[#1BAA9C]/25 bg-[#EFF9F6] p-5">
-          <h3 className="font-bold text-[#0D3B3B]">Support a fundraiser directly</h3>
-          <p className="mt-1 text-sm leading-6 text-[#0D3B3B]/65">Choose a published fundraiser or request on SEEK and donate securely through the existing Paystack checkout.</p>
-          <button type="button" onClick={() => { setPage?.("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mt-4 rounded-full bg-[#0D3B3B] px-5 py-3 text-sm font-bold text-white">Browse fundraisers <ArrowRight size={15} className="ml-2 inline" /></button>
+        <div className="mb-6 rounded-2xl border border-[var(--seek-success)]/25 bg-[var(--seek-light)] p-5">
+          <h3 className="font-bold text-[var(--seek-primary)]">Support a fundraiser directly</h3>
+          <p className="mt-1 text-sm leading-6 text-[var(--seek-primary)]/65">Choose a published fundraiser or request on SEEK and donate securely through the existing Paystack checkout.</p>
+          <button type="button" onClick={() => { setPage?.("home"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mt-4 rounded-full bg-[var(--seek-primary)] px-5 py-3 text-sm font-bold text-white">Browse fundraisers <ArrowRight size={15} className="ml-2 inline" /></button>
         </div>
       )}
 
       {offerCategory && offerCategory !== "money" && <>
       <div className="mb-5 flex items-center justify-between">
-        <p className="text-xs font-bold uppercase tracking-wide text-[#0D3B3B]/55">Your {offerTypes.find(([id]) => id === offerCategory)?.[1]} offer</p>
-        <button type="button" onClick={() => setOfferCategory("")} className="text-xs font-semibold text-[#1BAA9C]">Change category</button>
+        <p className="text-xs font-bold uppercase tracking-wide text-[var(--seek-primary)]/55">Your {offerTypes.find(([id]) => id === offerCategory)?.[1]} offer</p>
+        <button type="button" onClick={() => setOfferCategory("")} className="text-xs font-semibold text-[var(--seek-success)]">Change category</button>
       </div>
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">City</p>
-      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-4 font-body text-[#0D3B3B]" />
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">What exactly can you provide?</p>
-      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={3} placeholder={offerCategory === "food" ? "E.g. 20 food packs, groceries or cooked meals…" : offerCategory === "clothing" ? "E.g. 15 clean shirts, children's clothes, shoes…" : offerCategory === "medicine" ? "List the medicine or medical supplies, quantities and expiry details…" : offerCategory === "job" ? "Describe the role, organisation and how to apply…" : offerCategory === "education" ? "E.g. scholarship, school fees, textbooks or tutoring…" : offerCategory === "transport" ? "Describe the transport or delivery support available…" : "Describe what you can offer…"} className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-3" />
-      <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-2">Quantity, availability or other details (optional)</p>
-      <textarea value={offerDetails} onChange={(e) => setOfferDetails(e.target.value)} rows={2} placeholder="How much is available? When can you provide it? Any conditions?" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 font-body text-[#0D3B3B] mb-2" />
-      <button type="button" className="mb-3 text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45 mb-2">City</p>
+      <input value={offerCity} onChange={(e) => setOfferCity(e.target.value)} placeholder="City (optional)" className="w-full rounded-xl border border-[var(--seek-primary)]/15 bg-white p-4 mb-4 font-body text-[var(--seek-primary)]" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45 mb-2">What exactly can you provide?</p>
+      <textarea value={offer} onChange={(e) => setOffer(e.target.value)} rows={3} placeholder={offerCategory === "food" ? "E.g. 20 food packs, groceries or cooked meals…" : offerCategory === "clothing" ? "E.g. 15 clean shirts, children's clothes, shoes…" : offerCategory === "medicine" ? "List the medicine or medical supplies, quantities and expiry details…" : offerCategory === "job" ? "Describe the role, organisation and how to apply…" : offerCategory === "education" ? "E.g. scholarship, school fees, textbooks or tutoring…" : offerCategory === "transport" ? "Describe the transport or delivery support available…" : "Describe what you can offer…"} className="w-full rounded-xl border border-[var(--seek-primary)]/15 bg-white p-4 font-body text-[var(--seek-primary)] mb-3" />
+      <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45 mb-2">Quantity, availability or other details (optional)</p>
+      <textarea value={offerDetails} onChange={(e) => setOfferDetails(e.target.value)} rows={2} placeholder="How much is available? When can you provide it? Any conditions?" className="w-full rounded-xl border border-[var(--seek-primary)]/15 bg-white p-4 font-body text-[var(--seek-primary)] mb-2" />
+      <button type="button" className="mb-3 text-sm font-semibold text-[var(--seek-success)]" onClick={async () => {
         if (!String(offer || "").trim()) {
           setOfferError("Write a short offer first, then tap Help me explain this.");
           return;
@@ -2072,10 +2072,10 @@ function GiveOfferForm({ setPage, initialCategory = "" }) {
           setOfferError(err.message || "Could not draft the offer.");
         }
       }}>Help me explain this</button>
-      <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
-      <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[#0D3B3B]/15 bg-white p-4 mb-3 font-body text-[#0D3B3B]" />
+      <input type="email" required value={offerContactEmail} onChange={(e) => setOfferContactEmail(e.target.value)} placeholder="Your email" className="w-full rounded-xl border border-[var(--seek-primary)]/15 bg-white p-4 mb-3 font-body text-[var(--seek-primary)]" />
+      <input type="tel" value={offerContactPhone} onChange={(e) => setOfferContactPhone(e.target.value)} placeholder="Phone number (optional)" className="w-full rounded-xl border border-[var(--seek-primary)]/15 bg-white p-4 mb-3 font-body text-[var(--seek-primary)]" />
       <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm" className="w-full text-sm mb-4" onChange={(e) => setOfferFiles(Array.from(e.target.files || []).slice(0, 6))} />
-      <p className="text-xs text-[#0D3B3B]/45 mb-4">Add a photo or short video if it helps people understand your offer.</p>
+      <p className="text-xs text-[var(--seek-primary)]/45 mb-4">Add a photo or short video if it helps people understand your offer.</p>
       <Button variant="primary" disabled={!offer.trim() || !offerCategory || (offerTarget === "request" && !offerRequestId) || offerLoading} onClick={async () => {
         setOfferError(""); setOfferLoading(true);
         try {
@@ -2162,10 +2162,10 @@ function SeekAutoVideo({ src, title, onEnded }) {
         {muted ? "🔇" : "🔊"}
       </button>
       {paused && !ended && (
-        <button type="button" onClick={togglePlay} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/90 text-[#0D3B3B] text-2xl">▶</button>
+        <button type="button" onClick={togglePlay} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 h-14 w-14 rounded-full bg-white/90 text-[var(--seek-primary)] text-2xl">▶</button>
       )}
       {ended && (
-        <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); setPaused(false); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[#0D3B3B]">Replay</button>
+        <button type="button" onClick={(e) => { e.stopPropagation(); setEnded(false); const v = ref.current; if (v) { v.currentTime = 0; v.play().catch(() => {}); setPaused(false); } }} className="absolute left-1/2 top-1/2 z-20 -translate-x-1/2 -translate-y-1/2 rounded-full bg-white px-5 py-2.5 text-sm font-bold text-[var(--seek-primary)]">Replay</button>
       )}
     </>
   );
@@ -2282,7 +2282,7 @@ function BsnPage({ setPage }) {
           <div className="seek-campaign-orb seek-campaign-orb-a" /><div className="seek-campaign-orb seek-campaign-orb-b" />
           <div className="relative z-10 mx-auto max-w-3xl">
             <button type="button" onClick={() => setSelected(null)} className="seek-campaign-back">← All campaigns</button>
-            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[#9CEBD4]">BSN Empowerment Foundation</p>
+            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[var(--seek-mint)]">BSN Empowerment Foundation</p>
             <h1 className="mt-3 max-w-2xl font-display text-3xl font-black leading-tight text-white sm:text-5xl">{selected.title}</h1>
             <p className="mt-3 max-w-xl text-sm leading-7 text-white/75 sm:text-base">{selected.blurb}</p>
           </div>
@@ -2296,13 +2296,13 @@ function BsnPage({ setPage }) {
             <div className="seek-campaign-story-card mt-5 rounded-3xl p-5 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-[.18em]">Why it matters</p><p className="mt-3 whitespace-pre-line text-sm leading-7">{selected.story || selected.blurb}</p></div>
           </div>
           <aside className="seek-campaign-support-card h-fit rounded-3xl p-5 sm:p-6">
-            <span className="inline-flex rounded-full bg-[#1BAA9C]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#08776E]">Be part of the impact</span>
-            <h2 className="mt-4 font-display text-2xl font-black text-[#0D3B3B]">Your support moves this forward.</h2>
-            {selected.budget ? <><p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#0D3B3B]/45">Campaign progress</p><p className="mt-1 font-display text-3xl font-black text-[#0D7770]">₦{campaignRaised.toLocaleString()}</p><p className="mt-1 text-xs text-[#385653]">raised of ₦{Number(selected.budget).toLocaleString()}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#DDEBE7]"><div className="seek-campaign-progress h-full rounded-full" style={{ width: `${Math.min(100, Math.round((campaignRaised / Number(selected.budget)) * 100))}%` }} /></div></> : null}
-            <p className="mt-4 text-sm leading-6 text-[#385653]">Every contribution helps the Foundation reach more people with practical support.</p>
+            <span className="inline-flex rounded-full bg-[var(--seek-success)]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[var(--seek-success)]">Be part of the impact</span>
+            <h2 className="mt-4 font-display text-2xl font-black text-[var(--seek-primary)]">Your support moves this forward.</h2>
+            {selected.budget ? <><p className="mt-4 text-xs font-bold uppercase tracking-widest text-[var(--seek-primary)]/45">Campaign progress</p><p className="mt-1 font-display text-3xl font-black text-[var(--seek-success)]">₦{campaignRaised.toLocaleString()}</p><p className="mt-1 text-xs text-[var(--seek-primary)]">raised of ₦{Number(selected.budget).toLocaleString()}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-[var(--seek-light)]"><div className="seek-campaign-progress h-full rounded-full" style={{ width: `${Math.min(100, Math.round((campaignRaised / Number(selected.budget)) * 100))}%` }} /></div></> : null}
+            <p className="mt-4 text-sm leading-6 text-[var(--seek-primary)]">Every contribution helps the Foundation reach more people with practical support.</p>
             <div className="seek-campaign-donor-guide mt-5"><p className="text-xs font-extrabold uppercase tracking-wider">How to support</p><ol><li><b>01</b><span>Choose this campaign and review its story and past work.</span></li><li><b>02</b><span>Tap donate and enter the amount you wish to give.</span></li><li><b>03</b><span>Complete the secure payment to support this programme.</span></li></ol></div>
             <button type="button" onClick={() => setDonating(true)} className="seek-campaign-donate mt-6 w-full">Donate to this campaign <ArrowRight size={17} /></button>
-            <p className="mt-3 text-center text-[11px] text-[#56736D]">You will review your donation details before payment.</p>
+            <p className="mt-3 text-center text-[11px] text-[var(--seek-accent)]">You will review your donation details before payment.</p>
           </aside>
         </section>
       </main>
@@ -2315,26 +2315,26 @@ function BsnPage({ setPage }) {
           <div className="seek-campaign-orb seek-campaign-orb-a" /><div className="seek-campaign-orb seek-campaign-orb-b" />
           <div className="relative z-10 mx-auto max-w-6xl">
             <button type="button" onClick={() => setShowCampaignList(false)} className="seek-campaign-back">← Back to campaigns</button>
-            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[#9CEBD4]">BSN Empowerment Foundation</p>
+            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[var(--seek-mint)]">BSN Empowerment Foundation</p>
             <h1 className="mt-3 max-w-3xl font-display text-3xl font-black leading-tight text-white sm:text-5xl">Explore our campaigns.</h1>
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/75 sm:text-base">Browse the programmes and choose a campaign to learn about the people, the work and how you can contribute.</p>
           </div>
         </section>
         <section className="mx-auto max-w-6xl px-5 py-8 sm:py-12">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
-            <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[#0D8F83]">Available campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[#0D3B3B] sm:text-3xl">Choose where to make a difference.</h2></div>
-            <span className="rounded-full bg-[#E8F5F1] px-4 py-2 text-xs font-bold text-[#08776E]">{OUTREACH_CAMPAIGNS.length} programmes</span>
+            <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Available campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose where to make a difference.</h2></div>
+            <span className="rounded-full bg-[var(--seek-light)] px-4 py-2 text-xs font-bold text-[var(--seek-success)]">{OUTREACH_CAMPAIGNS.length} programmes</span>
           </div>
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OUTREACH_CAMPAIGNS.map((c, i) => {
               const cover = c.photos?.[0];
               return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
                 <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
-                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[#0D3B3B]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[#385653]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#0D8F83]">View campaign <ArrowRight size={15} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
               </button>;
             })}
           </div>
-          {OUTREACH_CAMPAIGNS.length === 0 && <div className="rounded-3xl border border-[#DDEBE7] bg-white p-8 text-center"><h3 className="font-display text-xl font-bold text-[#0D3B3B]">No campaigns available yet</h3><p className="mt-2 text-sm text-[#56736D]">Please check back soon for new community programmes.</p></div>}
+          {OUTREACH_CAMPAIGNS.length === 0 && <div className="rounded-3xl border border-[var(--seek-light)] bg-white p-8 text-center"><h3 className="font-display text-xl font-bold text-[var(--seek-primary)]">No campaigns available yet</h3><p className="mt-2 text-sm text-[var(--seek-accent)]">Please check back soon for new community programmes.</p></div>}
         </section>
       </main>
     );
@@ -2368,33 +2368,33 @@ function WalletPage({ setPage, userSession }) {
   if (!userSession?.access_token) {
     return (
       <div className="mx-auto max-w-lg px-5 py-10 text-center">
-        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Wallet</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/60">Sign in to see your giving history.</p>
-        <button type="button" onClick={() => setPage("account")} className="mt-4 rounded-full bg-[#1BAA9C] text-white px-6 py-2 text-sm font-semibold">Sign in</button>
+        <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Wallet</h1>
+        <p className="mt-2 text-sm text-[var(--seek-primary)]/60">Sign in to see your giving history.</p>
+        <button type="button" onClick={() => setPage("account")} className="mt-4 rounded-full bg-[var(--seek-success)] text-white px-6 py-2 text-sm font-semibold">Sign in</button>
       </div>
     );
   }
   return (
     <div className="mx-auto max-w-lg px-5 py-10">
-      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Wallet</h1>
-      <div className="mt-6 rounded-2xl bg-[#1BAA9C] text-white p-6">
+      <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Wallet</h1>
+      <div className="mt-6 rounded-2xl bg-[var(--seek-success)] text-white p-6">
         <p className="text-xs uppercase tracking-widest opacity-80">Total given</p>
         <p className="mt-1 font-display font-bold text-3xl">₦{total.toLocaleString()}</p>
       </div>
       <div className="mt-6">
-        <p className="text-xs uppercase tracking-widest text-[#1BAA9C] mb-3">Recent gifts</p>
+        <p className="text-xs uppercase tracking-widest text-[var(--seek-success)] mb-3">Recent gifts</p>
         {donations.length === 0 ? (
-          <p className="text-sm text-[#0D3B3B]/50">No donations yet.</p>
+          <p className="text-sm text-[var(--seek-primary)]/50">No donations yet.</p>
         ) : (
           donations.map((d, i) => (
-            <div key={i} className="flex justify-between py-2 border-b border-[#0D3B3B]/8 text-sm">
-              <span className="text-[#0D3B3B]/60">{new Date(d.created_at).toLocaleDateString()}</span>
-              <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount).toLocaleString()}</span>
+            <div key={i} className="flex justify-between py-2 border-b border-[var(--seek-primary)]/8 text-sm">
+              <span className="text-[var(--seek-primary)]/60">{new Date(d.created_at).toLocaleDateString()}</span>
+              <span className="font-semibold text-[var(--seek-primary)]">₦{Number(d.amount).toLocaleString()}</span>
             </div>
           ))
         )}
       </div>
-      <button type="button" onClick={() => setPage("give")} className="mt-6 w-full rounded-full bg-[#1BAA9C] text-white py-3 text-sm font-bold">Give now</button>
+      <button type="button" onClick={() => setPage("give")} className="mt-6 w-full rounded-full bg-[var(--seek-success)] text-white py-3 text-sm font-bold">Give now</button>
     </div>
   );
 }
@@ -2547,71 +2547,71 @@ function DiscoverPage({ setPage }) {
         {query.trim().length < 2 && (
           <div>
             <div className="flex items-center justify-between mb-2">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Recent</p>
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Recent</p>
               {recent.length > 0 && (
-                <button type="button" className="text-xs text-[#0D3B3B]/45" onClick={() => { try { localStorage.removeItem("seek_recent_searches"); } catch (_e) {} setRecent([]); }}>Clear</button>
+                <button type="button" className="text-xs text-[var(--seek-primary)]/45" onClick={() => { try { localStorage.removeItem("seek_recent_searches"); } catch (_e) {} setRecent([]); }}>Clear</button>
               )}
             </div>
-            {!recent.length && <p className="text-sm text-[#0D3B3B]/50">Your recent searches will show here.</p>}
+            {!recent.length && <p className="text-sm text-[var(--seek-primary)]/50">Your recent searches will show here.</p>}
             {recent.map((term) => (
-              <button key={term} type="button" className="block w-full text-left py-2 text-[#0D3B3B]" onClick={() => setQuery(term)}>{term}</button>
+              <button key={term} type="button" className="block w-full text-left py-2 text-[var(--seek-primary)]" onClick={() => setQuery(term)}>{term}</button>
             ))}
           </div>
         )}
-        {searching && <p className="text-sm text-[#0D3B3B]/50">Searching…</p>}
-        {searchError && <p className="text-sm text-[#0D3B3B]/70">{searchError}</p>}
+        {searching && <p className="text-sm text-[var(--seek-primary)]/50">Searching…</p>}
+        {searchError && <p className="text-sm text-[var(--seek-primary)]/70">{searchError}</p>}
         {results && !searching && !(results.people.length || results.requests.length || results.giveaways.length || results.videos.length || results.organizations.length || results.topics.length) && (
-          <p className="text-sm text-[#0D3B3B]/60">No results found for “{query.trim()}”</p>
+          <p className="text-sm text-[var(--seek-primary)]/60">No results found for “{query.trim()}”</p>
         )}
         {results?.people?.length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">People</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)] mb-2">People</p>
             {results.people.map((p) => (
-              <button key={p.id} type="button" onClick={() => go("member:" + p.id, "/member/" + p.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 flex gap-3">
-                {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#0D3B3B]/10" />}
-                <span><span className="block font-display font-bold text-[#0D3B3B]">{p.name} <VerifiedBadge /></span><span className="block text-sm text-[#0D3B3B]/55">{p.username}</span></span>
+              <button key={p.id} type="button" onClick={() => go("member:" + p.id, "/member/" + p.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4 flex gap-3">
+                {p.avatar_url ? <img src={p.avatar_url} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[var(--seek-primary)]/10" />}
+                <span><span className="block font-display font-bold text-[var(--seek-primary)]">{p.name} <VerifiedBadge /></span><span className="block text-sm text-[var(--seek-primary)]/55">{p.username}</span></span>
               </button>
             ))}
           </div>
         )}
         {results?.requests?.length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Requests</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)] mb-2">Requests</p>
             {results.requests.map((r) => (
-              <button key={r.id} type="button" onClick={() => go("request:" + r.id, "/request/" + r.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
-                <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
-                <p className="text-sm text-[#0D3B3B]/55">{[r.category, r.location].filter(Boolean).join(" · ")}</p>
+              <button key={r.id} type="button" onClick={() => go("request:" + r.id, "/request/" + r.id)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4">
+                <p className="font-display font-bold text-[var(--seek-primary)]">{r.title}</p>
+                <p className="text-sm text-[var(--seek-primary)]/55">{[r.category, r.location].filter(Boolean).join(" · ")}</p>
               </button>
             ))}
           </div>
         )}
         {results?.giveaways?.length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Giveaways</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)] mb-2">Giveaways</p>
             {results.giveaways.map((o) => (
-              <button key={o.id} type="button" onClick={() => go("offers", "/offers")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
-                <p className="font-display font-bold text-[#0D3B3B]">{String(o.description || "").slice(0, 90)}</p>
-                <p className="text-sm text-[#0D3B3B]/55">{[o.category, o.city].filter(Boolean).join(" · ")}</p>
+              <button key={o.id} type="button" onClick={() => go("offers", "/offers")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4">
+                <p className="font-display font-bold text-[var(--seek-primary)]">{String(o.description || "").slice(0, 90)}</p>
+                <p className="text-sm text-[var(--seek-primary)]/55">{[o.category, o.city].filter(Boolean).join(" · ")}</p>
               </button>
             ))}
           </div>
         )}
         {results?.videos?.length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Videos / updates</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)] mb-2">Videos / updates</p>
             {results.videos.map((v) => (
-              <button key={v.id} type="button" onClick={() => go(v.request_id ? "request:" + v.request_id : "impact", v.request_id ? "/request/" + v.request_id : "/impact")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
-                <p className="font-display font-bold text-[#0D3B3B]">{v.title}</p>
-                <p className="text-sm text-[#0D3B3B]/55 line-clamp-2">{v.story}</p>
+              <button key={v.id} type="button" onClick={() => go(v.request_id ? "request:" + v.request_id : "impact", v.request_id ? "/request/" + v.request_id : "/impact")} className="mb-2 w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4">
+                <p className="font-display font-bold text-[var(--seek-primary)]">{v.title}</p>
+                <p className="text-sm text-[var(--seek-primary)]/55 line-clamp-2">{v.story}</p>
               </button>
             ))}
           </div>
         )}
         {results?.topics?.length > 0 && (
           <div>
-            <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C] mb-2">Topics</p>
+            <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)] mb-2">Topics</p>
             {results.topics.map((t) => (
-              <button key={t.id} type="button" onClick={() => go(t.page, t.path)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4 font-display font-bold text-[#0D3B3B]">{t.title}</button>
+              <button key={t.id} type="button" onClick={() => go(t.page, t.path)} className="mb-2 w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4 font-display font-bold text-[var(--seek-primary)]">{t.title}</button>
             ))}
           </div>
         )}
@@ -2620,20 +2620,20 @@ function DiscoverPage({ setPage }) {
       <section className="seek-discover-feed mx-auto max-w-2xl px-5 pt-1 pb-28 space-y-3">
         {loading && <div className="seek-discover-loading"><span /><span /><span /></div>}
         {!loading && !shown.length && (
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
-            <p className="font-display font-bold text-[#0D3B3B]">Nothing in this space yet.</p>
-            <button type="button" className="mt-3 text-sm font-bold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>Open giveaways</button>
+          <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/10 p-5">
+            <p className="font-display font-bold text-[var(--seek-primary)]">Nothing in this space yet.</p>
+            <button type="button" className="mt-3 text-sm font-bold text-[var(--seek-success)]" onClick={() => go("offers", "/offers")}>Open giveaways</button>
           </div>
         )}
         {shown.map((item, index) => (
-          <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="seek-discover-card seek-shimmer w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4" style={{ "--seek-discover-index": index }}>
+          <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="seek-discover-card seek-shimmer w-full text-left rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-4" style={{ "--seek-discover-index": index }}>
             <div className="flex items-center justify-between gap-3">
-              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#0D7770]">{item.kind}</p>
-              {item.at ? <span className="text-[10px] font-medium text-[#0D3B3B]/40">{daysPosted(new Date(item.at).toISOString())}</span> : null}
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[var(--seek-success)]">{item.kind}</p>
+              {item.at ? <span className="text-[10px] font-medium text-[var(--seek-primary)]/40">{daysPosted(new Date(item.at).toISOString())}</span> : null}
             </div>
-            <p className="mt-2 font-display font-bold text-[#0D3B3B]">{item.title}</p>
-            {item.body ? <p className="mt-1 text-sm text-[#0D3B3B]/55">{item.body}</p> : null}
-            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#0D7770]">Explore <ArrowRight size={13} /></span>
+            <p className="mt-2 font-display font-bold text-[var(--seek-primary)]">{item.title}</p>
+            {item.body ? <p className="mt-1 text-sm text-[var(--seek-primary)]/55">{item.body}</p> : null}
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[var(--seek-success)]">Explore <ArrowRight size={13} /></span>
           </button>
         ))}
       </section>
@@ -2666,18 +2666,18 @@ function ForYouPage({ setPage }) {
         <div className="seek-orb seek-orb-two" aria-hidden="true" />
         <div className="relative z-10 mx-auto max-w-5xl">
           <div className="mx-auto max-w-2xl text-center">
-            <span className="seek-hero-kicker inline-flex items-center gap-2 rounded-full border border-[#1BAA9C]/20 bg-white/75 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.2em] text-[#0D7770] backdrop-blur">
+            <span className="seek-hero-kicker inline-flex items-center gap-2 rounded-full border border-[var(--seek-success)]/20 bg-white/75 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)] backdrop-blur">
               <span className="seek-pulse-dot" /> A community in motion
             </span>
-            <h1 className="seek-hero-title mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-[#0D3B3B] sm:text-6xl">
+            <h1 className="seek-hero-title mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-[var(--seek-primary)] sm:text-6xl">
               Good things happen<br className="hidden sm:block" /> when we <span className="seek-gradient-text">show up.</span>
             </h1>
-            <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#0D3B3B]/70 sm:text-base">
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-[var(--seek-primary)]/70 sm:text-base">
               Ask for what you need. Offer what you can. Find the people and opportunities that move life forward.
             </p>
             <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" onClick={() => setPage("seek-help-form")} className="seek-hero-primary rounded-full bg-[#0D3B3B] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0D3B3B]/15 transition hover:-translate-y-1 hover:bg-[#145653]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
-              <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
+              <button type="button" onClick={() => setPage("seek-help-form")} className="seek-hero-primary rounded-full bg-[var(--seek-primary)] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[var(--seek-primary)]/15 transition hover:-translate-y-1 hover:bg-[var(--seek-primary)]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
+              <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[var(--seek-primary)]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[var(--seek-primary)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--seek-success)]">I want to help</button>
             </div>
           </div>
           <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
@@ -2696,13 +2696,13 @@ function ForYouPage({ setPage }) {
 
       <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
         <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
-          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">SEEK stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[#0D3B3B]">Watch. Connect. Support.</h2></div>
-          <span className="text-xs font-semibold text-[#0D3B3B]/50">{loading ? "Loading…" : `${liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).length} stories`}</span>
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">SEEK stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[var(--seek-primary)]">Watch. Connect. Support.</h2></div>
+          <span className="text-xs font-semibold text-[var(--seek-primary)]/50">{loading ? "Loading…" : `${liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).length} stories`}</span>
         </div>
         {loading && <div className="seek-feed-skeleton mx-auto h-[62svh] max-w-[420px] rounded-[28px]" />}
         {error && <p className="mx-auto max-w-md rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
         {!loading && !error && liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).length === 0 && (
-          <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Video and photo stories shared by the SEEK community will appear here.</p><button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[#0D7770]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button></div>
+          <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--seek-light)] text-[var(--seek-success)]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[var(--seek-primary)]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[var(--seek-primary)]/60">Video and photo stories shared by the SEEK community will appear here.</p><button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[var(--seek-success)]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button></div>
         )}
         <div className="seek-reels-feed" aria-label="Swipe through SEEK community stories">
           {liveCases.filter((item) => !["impact", "appreciation", "thanks"].includes(String(item.feedKind || item.feed_kind || item.kind || "").toLowerCase()) && Array.isArray(item.media) && item.media.some((m) => m?.public_url)).map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
@@ -2778,37 +2778,37 @@ function OffersPage({ setPage }) {
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5">
+        <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
             <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
               {tabs.map(([value, label]) => {
                 const active = offerFilter === value;
                 return (
-                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[#1BAA9C] text-white" : "bg-[#F2F5F3] text-[#0D3B3B]/70 hover:bg-[#E7EFEC]")}>
+                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[var(--seek-success)] text-white" : "bg-[var(--seek-white)] text-[var(--seek-primary)]/70 hover:bg-[var(--seek-light)]")}>
                     {label}
                   </button>
                 );
               })}
             </div>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[#0D3B3B]/10 bg-[#F8FAF9] px-4 py-2.5 text-sm outline-none focus:border-[#1BAA9C]" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[var(--seek-primary)]/10 bg-[var(--seek-white)] px-4 py-2.5 text-sm outline-none focus:border-[var(--seek-success)]" />
           </div>
         </div>
 
         <div className="mt-6 flex items-center justify-between gap-3">
           <div>
-            <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
-            <p className="mt-1 text-sm text-[#0D3B3B]/50">Published giveaways from the SEEK community.</p>
+            <h2 className="font-display font-bold text-2xl text-[var(--seek-primary)]">{offerFilter === "all" ? "What's being offered" : tabs.find(([v]) => v === offerFilter)?.[1]}</h2>
+            <p className="mt-1 text-sm text-[var(--seek-primary)]/50">Published giveaways from the SEEK community.</p>
           </div>
-          {!loading && <span className="text-sm font-semibold text-[#0D3B3B]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
+          {!loading && <span className="text-sm font-semibold text-[var(--seek-primary)]/45">{filteredOffers.length} {filteredOffers.length === 1 ? "post" : "posts"}</span>}
         </div>
 
         <div className="mt-4 space-y-4">
-          {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-6 text-sm text-[#0D3B3B]/50">Loading giveaways…</div>}
+          {loading && <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-6 text-sm text-[var(--seek-primary)]/50">Loading giveaways…</div>}
           {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-600">{error}</div>}
           {!loading && !error && filteredOffers.length === 0 && (
-            <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-center">
-              <h3 className="font-display font-bold text-xl text-[#0D3B3B]">Nothing here yet</h3>
-              <p className="mt-2 text-sm leading-relaxed text-[#0D3B3B]/55">No published giveaways yet.</p>
+            <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-8 text-center">
+              <h3 className="font-display font-bold text-xl text-[var(--seek-primary)]">Nothing here yet</h3>
+              <p className="mt-2 text-sm leading-relaxed text-[var(--seek-primary)]/55">No published giveaways yet.</p>
             </div>
           )}
           {!loading && !error && filteredOffers.map((offer) => (
@@ -2817,7 +2817,7 @@ function OffersPage({ setPage }) {
         </div>
 
         <div className="pt-10 text-center">
-          <p className="text-sm text-[#0D3B3B]/60">Have something useful to offer?</p>
+          <p className="text-sm text-[var(--seek-primary)]/60">Have something useful to offer?</p>
           <Button variant="primary" onClick={() => { setPage("offer-help"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
         </div>
       </section>
@@ -2957,53 +2957,53 @@ if (!cancelled) {
   return (
     <div style={{ background: C.bg }}>
       {selectedRequest && (
-        <div className="sticky top-0 z-30 border-b border-[#0D3B3B]/10 bg-[#F2F5F3]/95 px-5 py-3 text-center backdrop-blur">
-          <p className="font-display font-semibold text-[#0D3B3B]">Helping: {selectedRequest.title}</p>
-          <button type="button" className="text-xs text-[#1BAA9C]" onClick={() => setSelectedRequest(null)}>Choose a different request</button>
+        <div className="sticky top-0 z-30 border-b border-[var(--seek-primary)]/10 bg-[var(--seek-white)]/95 px-5 py-3 text-center backdrop-blur">
+          <p className="font-display font-semibold text-[var(--seek-primary)]">Helping: {selectedRequest.title}</p>
+          <button type="button" className="text-xs text-[var(--seek-success)]" onClick={() => setSelectedRequest(null)}>Choose a different request</button>
         </div>
       )}
 
       {selectedRequest && <SeekDonateModal request={selectedRequest} onClose={() => setSelectedRequest(null)} />}
       {generalDonation && !selectedRequest && <SeekDonateModal campaign={{ title: "SEEK community" }} onClose={() => setGeneralDonation(false)} />}
       {false && (selectedRequest || generalDonation) && <section className="mx-auto max-w-md px-5 pb-28" id="donate-form">
-        <form onSubmit={startDonation} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm">
-          <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">{selectedRequest ? "Give to this neighbour" : "Give to SEEK"}</p>
-          <h2 className="mt-1 font-display font-extrabold text-xl text-[#0D3B3B]">{selectedRequest ? selectedRequest.title : "A general gift"}</h2>
-          {selectedRequest?.location && <p className="mt-1 text-sm text-[#0D3B3B]/50">{selectedRequest.location}</p>}
+        <form onSubmit={startDonation} className="rounded-3xl bg-white border border-[var(--seek-primary)]/10 p-5 shadow-sm">
+          <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">{selectedRequest ? "Give to this neighbour" : "Give to SEEK"}</p>
+          <h2 className="mt-1 font-display font-extrabold text-xl text-[var(--seek-primary)]">{selectedRequest ? selectedRequest.title : "A general gift"}</h2>
+          {selectedRequest?.location && <p className="mt-1 text-sm text-[var(--seek-primary)]/50">{selectedRequest.location}</p>}
           <div className="mt-4 flex flex-wrap gap-2">
             {[1000, 2000, 5000, 10000].map((n) => (
-              <button key={n} type="button" className={"rounded-full px-3 py-2 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[#0D3B3B] text-white" : "border border-[#0D3B3B]/15 text-[#0D3B3B]")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
+              <button key={n} type="button" className={"rounded-full px-3 py-2 text-sm font-semibold " + (Number(payment.amount) === n ? "bg-[var(--seek-primary)] text-white" : "border border-[var(--seek-primary)]/15 text-[var(--seek-primary)]")} onClick={() => setPayment({ ...payment, amount: String(n) })}>
                 ₦{n.toLocaleString()}
               </button>
             ))}
           </div>
-          <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Or type an amount" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+          <input required min="100" type="number" value={payment.amount} onChange={e=>setPayment({...payment,amount:e.target.value})} placeholder="Or type an amount" className="mt-3 w-full rounded-xl border border-[var(--seek-primary)]/15 px-4 py-3 text-[var(--seek-primary)]" />
           {!payment.anonymous && (
-            <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show (optional)" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+            <input type="text" value={payment.name || ""} onChange={e=>setPayment({...payment,name:e.target.value})} placeholder="Name to show (optional)" className="mt-3 w-full rounded-xl border border-[var(--seek-primary)]/15 px-4 py-3 text-[var(--seek-primary)]" />
           )}
           {getUserSession()?.user?.email ? (
-            <p className="mt-3 text-sm text-[#0D3B3B]/55">Receipt goes to {getUserSession().user.email}</p>
+            <p className="mt-3 text-sm text-[var(--seek-primary)]/55">Receipt goes to {getUserSession().user.email}</p>
           ) : (
-            <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email for receipt" className="mt-3 w-full rounded-xl border border-[#0D3B3B]/15 px-4 py-3 text-[#0D3B3B]" />
+            <input required type="email" value={payment.email} onChange={e=>setPayment({...payment,email:e.target.value})} placeholder="Email for receipt" className="mt-3 w-full rounded-xl border border-[var(--seek-primary)]/15 px-4 py-3 text-[var(--seek-primary)]" />
           )}
-          <label className="mt-3 flex items-center gap-2 text-sm text-[#0D3B3B]/65"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
-          <label className="mt-2 flex items-center gap-2 text-sm text-[#0D3B3B]/65"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Add 5% so SEEK can keep the lights on</label>
-          {payment.amount && <p className="mt-2 text-sm text-[#0D3B3B]/55">You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}</p>}
+          <label className="mt-3 flex items-center gap-2 text-sm text-[var(--seek-primary)]/65"><input type="checkbox" checked={payment.anonymous} onChange={e=>setPayment({...payment,anonymous:e.target.checked})}/> Give anonymously</label>
+          <label className="mt-2 flex items-center gap-2 text-sm text-[var(--seek-primary)]/65"><input type="checkbox" checked={payment.coverFee !== false} onChange={e=>setPayment({...payment,coverFee:e.target.checked})}/> Add 5% so SEEK can keep the lights on</label>
+          {payment.amount && <p className="mt-2 text-sm text-[var(--seek-primary)]/55">You pay ₦{Math.round(Number(payment.amount) * (payment.coverFee !== false ? 1.05 : 1)).toLocaleString()}</p>}
           {paymentError && <p className="mt-2 text-sm text-red-600">{paymentError}</p>}
-          <button disabled={paymentLoading} type="submit" className="mt-4 w-full rounded-full bg-[#0D3B3B] text-white py-3.5 text-sm font-bold">{paymentLoading ? "Opening Paystack…" : "Continue to Paystack"}</button>
-          {selectedRequest && <button type="button" onClick={() => { setSelectedRequest(null); setGeneralDonation(true); }} className="mt-3 w-full text-center text-sm text-[#1BAA9C]">Give a general gift instead</button>}
+          <button disabled={paymentLoading} type="submit" className="mt-4 w-full rounded-full bg-[var(--seek-primary)] text-white py-3.5 text-sm font-bold">{paymentLoading ? "Opening Paystack…" : "Continue to Paystack"}</button>
+          {selectedRequest && <button type="button" onClick={() => { setSelectedRequest(null); setGeneralDonation(true); }} className="mt-3 w-full text-center text-sm text-[var(--seek-success)]">Give a general gift instead</button>}
         </form>
       </section>}
 
       <section id="help-someone" className="mx-auto max-w-6xl px-5 sm:px-8 pt-8 pb-16">
         <div className="mb-4">
-          <h2 className="font-display font-bold text-2xl text-[#0D3B3B]">Open requests</h2>
-          <p className="mt-1 text-sm text-[#0D3B3B]/55">Published requests you can support now.</p>
+          <h2 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Open requests</h2>
+          <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Published requests you can support now.</p>
         </div>
-        <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[#1BAA9C]">
+        <button type="button" onClick={() => setPage("bsn")} className="mb-4 text-sm font-semibold text-[var(--seek-success)]">
           Support BSN Foundation →
         </button>
-        <input type="search" value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} placeholder="Search requests..." className="mb-4 w-full rounded-xl border border-[#0D3B3B]/15 p-3 text-sm" />
+        <input type="search" value={searchFilter} onChange={(e) => setSearchFilter(e.target.value)} placeholder="Search requests..." className="mb-4 w-full rounded-xl border border-[var(--seek-primary)]/15 p-3 text-sm" />
         {requestsLoading ? (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {[1,2,3,4].map((i) => <SkeletonCard key={i} />)}
@@ -3011,7 +3011,7 @@ if (!cancelled) {
         ) : requestsError ? (
           <p className="font-body text-sm text-red-600">{requestsError}</p>
         ) : requests.length === 0 ? (
-          <p className="font-body text-sm text-[#0D3B3B]/50">No published requests yet.</p>
+          <p className="font-body text-sm text-[var(--seek-primary)]/50">No published requests yet.</p>
         ) : (
           <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-5">
             {requests.filter((r) => !CONNECT_CATS.includes(r.category) && (!searchFilter || r.title?.toLowerCase().includes(searchFilter.toLowerCase()) || r.location?.toLowerCase().includes(searchFilter.toLowerCase()))).map((r) => <RequestCard key={r.id} req={r} onHelp={selectRequest} onView={(req) => { setPage(`request:${req.id}`); window.history.pushState({}, "", `/request/${req.id}`); window.scrollTo(0, 0); }} />)}
@@ -3028,7 +3028,7 @@ if (!cancelled) {
 function Field({ label, children }) {
   return (
     <label className="block text-left">
-      <span className="block mb-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[#0D3B3B]/50">{label}</span>
+      <span className="block mb-2 text-[11px] font-semibold tracking-[0.18em] uppercase text-[var(--seek-primary)]/50">{label}</span>
       {children}
     </label>
   );
@@ -3044,7 +3044,7 @@ function ChoiceChips({ value, onChange, options }) {
         const label = typeof opt === "string" ? opt : opt.label;
         const on = value === id || value === label;
         return (
-          <button key={id} type="button" onClick={() => onChange(id)} className={`rounded-full px-4 py-2 text-sm font-semibold border ${on ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B] border-[#0D3B3B]/15"}`}>
+          <button key={id} type="button" onClick={() => onChange(id)} className={`rounded-full px-4 py-2 text-sm font-semibold border ${on ? "bg-[var(--seek-primary)] text-white border-[var(--seek-primary)]" : "bg-white text-[var(--seek-primary)] border-[var(--seek-primary)]/15"}`}>
             {label}
           </button>
         );
@@ -3053,7 +3053,7 @@ function ChoiceChips({ value, onChange, options }) {
   );
 }
 
-const inputCls = "w-full rounded-2xl border border-[#0D3B3B]/12 bg-[#F4F1EA] p-4 font-body text-[#0D3B3B] placeholder:text-[#0D3B3B]/35 focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]";
+const inputCls = "w-full rounded-2xl border border-[var(--seek-primary)]/12 bg-[var(--seek-light)] p-4 font-body text-[var(--seek-primary)] placeholder:text-[var(--seek-primary)]/35 focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]";
 
 function FundraiserPage({ setPage }) {
   const [title, setTitle] = useState("");
@@ -3100,29 +3100,29 @@ function FundraiserPage({ setPage }) {
   if (done) {
     return (
       <div className="mx-auto max-w-lg px-5 py-10 text-center">
-        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Fundraiser submitted</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/60">SEEK will review it before it goes public.</p>
-        <button type="button" onClick={() => setPage("home")} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Back to home</button>
+        <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Fundraiser submitted</h1>
+        <p className="mt-2 text-sm text-[var(--seek-primary)]/60">SEEK will review it before it goes public.</p>
+        <button type="button" onClick={() => setPage("home")} className="mt-6 rounded-full bg-[var(--seek-success)] text-white px-6 py-3 text-sm font-bold">Back to home</button>
       </div>
     );
   }
 
   return (
     <div className="mx-auto max-w-lg px-5 py-8">
-      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">Start a fundraiser</h1>
-      <p className="mt-1 text-sm text-[#0D3B3B]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
+      <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Start a fundraiser</h1>
+      <p className="mt-1 text-sm text-[var(--seek-primary)]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
       <form onSubmit={submit} className="mt-6 space-y-4">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
-        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
-        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm" />
+        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
         <input type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} className="w-full text-sm" />
-        <p className="text-xs text-[#0D3B3B]/50">Add a photo or video (up to 3)</p>
+        <p className="text-xs text-[var(--seek-primary)]/50">Add a photo or video (up to 3)</p>
         {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" disabled={loading} className="w-full rounded-full bg-[#1BAA9C] text-white py-3 text-sm font-bold">
+        <button type="submit" disabled={loading} className="w-full rounded-full bg-[var(--seek-success)] text-white py-3 text-sm font-bold">
           {loading ? "Submitting..." : "Start fundraiser"}
         </button>
       </form>
@@ -3172,10 +3172,10 @@ function SeekHelpPage({ setPage }) {
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-12 sm:pt-16 pb-10">
         <div className="max-w-3xl">
           <SectionLabel>Seek Help</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B] leading-tight">
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)] leading-tight">
             Someone in the SEEK community may be able to help.
           </h1>
-          <p className="mt-4 font-body text-lg leading-relaxed text-[#0D3B3B]/65 max-w-2xl">
+          <p className="mt-4 font-body text-lg leading-relaxed text-[var(--seek-primary)]/65 max-w-2xl">
             Browse requests that have been reviewed and published by SEEK. If you can help, open a request and choose how you would like to show up.
           </p>
           <div className="mt-6 flex flex-wrap gap-3">
@@ -3186,16 +3186,16 @@ function SeekHelpPage({ setPage }) {
       </section>
 
       <section id="open-requests" className="mx-auto max-w-6xl px-5 sm:px-8 pb-20">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-4 sm:p-5 mb-7">
+        <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-4 sm:p-5 mb-7">
           <div className="flex flex-col sm:flex-row gap-3">
             <div className="relative flex-1">
-              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[#0D3B3B]/40" />
-              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requests" className="w-full rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] py-3.5 pl-11 pr-4 text-sm text-[#0D3B3B] focus:outline-none focus:ring-2 focus:ring-[#1BAA9C]" />
+              <Search size={17} className="absolute left-4 top-1/2 -translate-y-1/2 text-[var(--seek-primary)]/40" />
+              <input value={search} onChange={(e) => setSearch(e.target.value)} placeholder="Search requests" className="w-full rounded-2xl border border-[var(--seek-primary)]/10 bg-[var(--seek-white)] py-3.5 pl-11 pr-4 text-sm text-[var(--seek-primary)] focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]" />
             </div>
           </div>
           <div className="mt-4 flex gap-2 overflow-x-auto scrollbar-none pb-1">
             {categories.map((item) => (
-              <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold border ${category === item ? "bg-[#0D3B3B] text-white border-[#0D3B3B]" : "bg-white text-[#0D3B3B]/70 border-[#0D3B3B]/12 hover:border-[#1BAA9C]"}`}>{item}</button>
+              <button key={item} type="button" onClick={() => setCategory(item)} className={`shrink-0 rounded-full px-4 py-2 text-sm font-semibold border ${category === item ? "bg-[var(--seek-primary)] text-white border-[var(--seek-primary)]" : "bg-white text-[var(--seek-primary)]/70 border-[var(--seek-primary)]/12 hover:border-[var(--seek-success)]"}`}>{item}</button>
             ))}
           </div>
         </div>
@@ -3203,12 +3203,12 @@ function SeekHelpPage({ setPage }) {
         <div className="flex items-end justify-between gap-4 mb-5">
           <div>
             <SectionLabel>Open requests</SectionLabel>
-            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">People asking for help</h2>
+            <h2 className="font-display font-bold text-2xl sm:text-3xl text-[var(--seek-primary)]">People asking for help</h2>
           </div>
-          <span className="text-sm text-[#0D3B3B]/45">{loading ? "Loading…" : `${visible.length} ${visible.length === 1 ? "request" : "requests"}`}</span>
+          <span className="text-sm text-[var(--seek-primary)]/45">{loading ? "Loading…" : `${visible.length} ${visible.length === 1 ? "request" : "requests"}`}</span>
         </div>
 
-        {loading && <div className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-8 text-sm text-[#0D3B3B]/55">Loading open requests…</div>}
+        {loading && <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/8 p-8 text-sm text-[var(--seek-primary)]/55">Loading open requests…</div>}
         {error && <div className="rounded-2xl bg-white border border-red-200 p-6 text-sm text-red-700">{error}</div>}
         {!loading && !error && visible.length > 0 && (
           <div className="grid md:grid-cols-2 gap-5">
@@ -3218,19 +3218,19 @@ function SeekHelpPage({ setPage }) {
           </div>
         )}
         {!loading && !error && visible.length === 0 && (
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-10 text-center">
-            <h3 className="font-display font-bold text-xl text-[#0D3B3B]">No open requests match that.</h3>
-            <p className="mt-2 text-sm text-[#0D3B3B]/55">Try another category or search, or check back soon.</p>
-            <button type="button" onClick={() => { setCategory("All"); setSearch(""); }} className="mt-5 text-sm font-semibold text-[#1BAA9C]">Clear filters</button>
+          <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-10 text-center">
+            <h3 className="font-display font-bold text-xl text-[var(--seek-primary)]">No open requests match that.</h3>
+            <p className="mt-2 text-sm text-[var(--seek-primary)]/55">Try another category or search, or check back soon.</p>
+            <button type="button" onClick={() => { setCategory("All"); setSearch(""); }} className="mt-5 text-sm font-semibold text-[var(--seek-success)]">Clear filters</button>
           </div>
         )}
 
-        <div className="mt-10 rounded-3xl bg-[#0D3B3B] p-7 sm:p-9 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
+        <div className="mt-10 rounded-3xl bg-[var(--seek-primary)] p-7 sm:p-9 text-white flex flex-col sm:flex-row sm:items-center justify-between gap-6">
           <div>
             <p className="font-display font-bold text-2xl">Need help yourself?</p>
             <p className="mt-2 text-sm text-white/65 max-w-xl">Tell SEEK what you need. Requests are reviewed before they are published.</p>
           </div>
-          <button type="button" onClick={() => go("seek-help-form")} className="shrink-0 rounded-full bg-[#1BAA9C] px-5 py-3 text-sm font-bold text-white hover:bg-[#159789]">Ask for help</button>
+          <button type="button" onClick={() => go("seek-help-form")} className="shrink-0 rounded-full bg-[var(--seek-success)] px-5 py-3 text-sm font-bold text-white hover:bg-[var(--seek-success)]">Ask for help</button>
         </div>
       </section>
     </div>
@@ -3265,12 +3265,12 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
     return (
       <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
         <div className="mx-auto max-w-lg px-5 text-center py-24">
-          <CheckCircle2 size={40} className="mx-auto text-[#1BAA9C] mb-5" />
-          <h1 className="font-display font-bold text-3xl text-[#0D3B3B] mb-3">Your request has been received.</h1>
-          <p className="font-body text-[#0D3B3B]/65 mb-6">
+          <CheckCircle2 size={40} className="mx-auto text-[var(--seek-success)] mb-5" />
+          <h1 className="font-display font-bold text-3xl text-[var(--seek-primary)] mb-3">Your request has been received.</h1>
+          <p className="font-body text-[var(--seek-primary)]/65 mb-6">
             What happens next:
           </p>
-          <ol className="text-left font-body text-sm text-[#0D3B3B]/70 space-y-2 max-w-sm mx-auto">
+          <ol className="text-left font-body text-sm text-[var(--seek-primary)]/70 space-y-2 max-w-sm mx-auto">
             <li>1. Seek reviews your request.</li>
             <li>2. If it is approved, it appears publicly.</li>
             <li>3. People can give toward your target.</li>
@@ -3285,8 +3285,8 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
         <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask for help.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Ask for help.</h1>
+        <p className="mt-3 font-body text-[var(--seek-primary)]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
@@ -3312,14 +3312,14 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
               setLoading(false);
             }
           }}
-          className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-10 space-y-5"
+          className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-6 sm:p-10 space-y-5"
         >
           <div className="grid sm:grid-cols-2 gap-5">
             <Field label="Full name (admin only)"><input required className={inputCls} value={form.name} onChange={set("name")} placeholder="Your name" /></Field>
             {getUserSession()?.user?.email ? (
               <Field label="Email">
-                <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={getUserSession().user.email} />
-                <p className="mt-1 text-xs text-[#0D3B3B]/50">Uses the email on your SEEK account.</p>
+                <input readOnly className={inputCls + " bg-[var(--seek-white)]"} value={getUserSession().user.email} />
+                <p className="mt-1 text-xs text-[var(--seek-primary)]/50">Uses the email on your SEEK account.</p>
               </Field>
             ) : (
               <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={set("email")} placeholder="you@example.com" /></Field>
@@ -3328,8 +3328,8 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Phone number"><input required className={inputCls} value={form.phone} onChange={set("phone")} placeholder="For verification" /></Field>
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <div>
-            <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45 mb-3">What do you need help with?</p>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+            <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45 mb-3">What do you need help with?</p>
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
               <option value="">Select a category</option>
               {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
                 <option key={c.id} value={c.label}>{c.label}</option>
@@ -3337,7 +3337,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             </select>
           </div>
           {CONNECT_CATS.includes(form.category) && (
-            <p className="text-sm text-[#0D3B3B]/65 rounded-xl bg-[#1BAA9C]/10 p-3">
+            <p className="text-sm text-[var(--seek-primary)]/65 rounded-xl bg-[var(--seek-success)]/10 p-3">
               This is for company, celebration or learning — not dating. Seek reviews every post before it is public. Do not share your home address here.
             </p>
           )}
@@ -3347,9 +3347,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           </Field>
           <Field label="Fundraising target (₦)">
             <input className={inputCls} value={form.amount} onChange={set("amount")} placeholder="How much do you need? e.g. 50000" inputMode="numeric" />
-            <p className="mt-1 text-xs text-[#0D3B3B]/50">This is your goal. Neighbours can give toward it.</p>
+            <p className="mt-1 text-xs text-[var(--seek-primary)]/50">This is your goal. Neighbours can give toward it.</p>
           </Field>
-          <div className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F2F5F3] p-4 space-y-4">
+          <div className="rounded-2xl border border-[var(--seek-primary)]/10 bg-[var(--seek-white)] p-4 space-y-4">
             <Field label="Bank name"><input className={inputCls} value={form.bankName} onChange={set("bankName")} placeholder="e.g. GTBank" /></Field>
             <Field label="Account name"><input className={inputCls} value={form.accountName} onChange={set("accountName")} placeholder="Name on the account" /></Field>
             <Field label="Account number"><input className={inputCls} value={form.accountNumber} onChange={set("accountNumber")} placeholder="10 digits" inputMode="numeric" /></Field>
@@ -3358,14 +3358,14 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
             <input type="email" className={inputCls} value={form.coOrganizerEmail} onChange={set("coOrganizerEmail")} placeholder="Someone who will help share" />
           </Field>
           <Field label="Video or photos">
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-5 text-[#0D3B3B]/50 font-body text-sm">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[var(--seek-primary)]/20 p-5 text-[var(--seek-primary)]/50 font-body text-sm">
               <Upload size={18} />
               <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a video or photos"}</span>
               <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime,.pdf" className="hidden" onChange={(e) => setForm((prev) => ({ ...prev, evidenceFiles: Array.from(e.target.files || []).slice(0, 5) }))} />
             </label>
           </Field>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {uploadProgress && <p className="text-sm text-[#1BAA9C]">{uploadProgress}</p>}
+          {uploadProgress && <p className="text-sm text-[var(--seek-success)]">{uploadProgress}</p>}
           <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? (uploadProgress || "Submitting…") : "Submit request"}</Button>
         </form>
       </section>
@@ -3397,28 +3397,28 @@ function CelebratePage({ setPage }) {
         <div className="seek-celebrate-orb seek-celebrate-orb-a" aria-hidden="true" />
         <div className="seek-celebrate-orb seek-celebrate-orb-b" aria-hidden="true" />
         <SectionLabel>Connect & Celebrate</SectionLabel>
-        <h1 className="seek-celebrate-title font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Celebrate with a neighbour.</h1>
-        <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[#0D3B3B]/65">
+        <h1 className="seek-celebrate-title font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)]">Celebrate with a neighbour.</h1>
+        <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[var(--seek-primary)]/65">
           Birthdays, graduations, a new city. Ask a neighbour to be there. SEEK reads every post. This is not dating, and it is not a fundraiser.
         </p>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-12">
         <div className="seek-celebrate-actions grid gap-4 sm:grid-cols-3">
-          <button type="button" onClick={() => go("celebrate-request")} className="seek-celebrate-action seek-celebrate-action-primary rounded-3xl bg-[#0D3B3B] p-6 text-left text-white hover:shadow-lg transition">
-            <HeartHandshake size={22} className="text-[#63C167]" />
+          <button type="button" onClick={() => go("celebrate-request")} className="seek-celebrate-action seek-celebrate-action-primary rounded-3xl bg-[var(--seek-primary)] p-6 text-left text-white hover:shadow-lg transition">
+            <HeartHandshake size={22} className="text-[var(--seek-success)]" />
             <h2 className="mt-4 font-display font-bold text-xl">I want to connect</h2>
             <p className="mt-2 text-sm leading-6 text-white/65">Share a genuine invitation for company around a meaningful moment.</p>
           </button>
-          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="seek-celebrate-action rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
-            <Users size={22} className="text-[#1BAA9C]" />
-            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">I want to join</h2>
-            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">See published invitations and find a safe community moment to join.</p>
+          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="seek-celebrate-action rounded-3xl bg-white border border-[var(--seek-primary)]/10 p-6 text-left hover:shadow-lg transition">
+            <Users size={22} className="text-[var(--seek-success)]" />
+            <h2 className="mt-4 font-display font-bold text-xl text-[var(--seek-primary)]">I want to join</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--seek-primary)]/60">See published invitations and find a safe community moment to join.</p>
           </button>
-          <button type="button" onClick={() => go("impact")} className="seek-celebrate-action rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
-            <Sparkles size={22} className="text-[#1BAA9C]" />
-            <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">Celebrate what happened</h2>
-            <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Explore real community stories and outcomes shared through SEEK.</p>
+          <button type="button" onClick={() => go("impact")} className="seek-celebrate-action rounded-3xl bg-white border border-[var(--seek-primary)]/10 p-6 text-left hover:shadow-lg transition">
+            <Sparkles size={22} className="text-[var(--seek-success)]" />
+            <h2 className="mt-4 font-display font-bold text-xl text-[var(--seek-primary)]">Celebrate what happened</h2>
+            <p className="mt-2 text-sm leading-6 text-[var(--seek-primary)]/60">Explore real community stories and outcomes shared through SEEK.</p>
           </button>
         </div>
       </section>
@@ -3428,22 +3428,22 @@ function CelebratePage({ setPage }) {
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
             <div>
               <SectionLabel>Community moments</SectionLabel>
-              <h2 className="font-display font-bold text-2xl sm:text-3xl text-[#0D3B3B]">Open invitations</h2>
+              <h2 className="font-display font-bold text-2xl sm:text-3xl text-[var(--seek-primary)]">Open invitations</h2>
             </div>
-            <button type="button" onClick={() => go("celebrate-request")} className="text-sm font-bold text-[#1BAA9C]">Create an invitation →</button>
+            <button type="button" onClick={() => go("celebrate-request")} className="text-sm font-bold text-[var(--seek-success)]">Create an invitation →</button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
             {list.slice(0, 6).map((req, index) => (
               <div className="seek-celebrate-invite" style={{ "--seek-celebrate-index": index }} key={req.id}><RequestCard req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} /></div>
             ))}
           </div>
-          {!list.length && <div className="rounded-3xl border border-white/10 bg-[#152220] p-8 text-center"><p className="font-display font-bold text-white">No published invitations yet.</p><p className="mt-2 text-sm text-white/65">Be the first to share a genuine community moment.</p></div>}
+          {!list.length && <div className="rounded-3xl border border-white/10 bg-[var(--seek-primary)] p-8 text-center"><p className="font-display font-bold text-white">No published invitations yet.</p><p className="mt-2 text-sm text-white/65">Be the first to share a genuine community moment.</p></div>}
         </div>
       </section>
 
       <section className="mx-auto max-w-3xl px-5 sm:px-8 py-14 text-center">
-        <div className="seek-celebrate-boundary rounded-3xl bg-[#0D3B3B] p-8 sm:p-10 text-white">
-          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#63C167]">A simple boundary</p>
+        <div className="seek-celebrate-boundary rounded-3xl bg-[var(--seek-primary)] p-8 sm:p-10 text-white">
+          <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--seek-success)]">A simple boundary</p>
           <h2 className="mt-3 font-display font-bold text-2xl">Connect with care.</h2>
           <p className="mt-3 text-sm leading-6 text-white/65">SEEK is not a dating app. Do not share your home address. Meet in public places and use your judgment when connecting with someone new.</p>
         </div>
@@ -3465,8 +3465,8 @@ function CelebrateRequestPage({ setPage }) {
     return (
       <div className="min-h-[50vh] flex items-center justify-center px-5">
         <div className="max-w-md text-center">
-          <h1 className="font-display font-bold text-3xl text-[#0D3B3B]">Seek will review this.</h1>
-          <p className="mt-3 font-body text-[#0D3B3B]/65">If it is a genuine ask for company, it will appear here. This is not a fundraiser.</p>
+          <h1 className="font-display font-bold text-3xl text-[var(--seek-primary)]">Seek will review this.</h1>
+          <p className="mt-3 font-body text-[var(--seek-primary)]/65">If it is a genuine ask for company, it will appear here. This is not a fundraiser.</p>
         </div>
       </div>
     );
@@ -3475,11 +3475,11 @@ function CelebrateRequestPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 pt-16 pb-8 text-center">
         <SectionLabel>Celebrate & Connect</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Ask a neighbour to be there.</h1>
-        <p className="mt-3 font-body text-[#0D3B3B]/65">Tell neighbours what you are marking and who you hope will come. SEEK reads it before it is public.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Ask a neighbour to be there.</h1>
+        <p className="mt-3 font-body text-[var(--seek-primary)]/65">Tell neighbours what you are marking and who you hope will come. SEEK reads it before it is public.</p>
       </section>
       <section className="mx-auto max-w-2xl px-5 pb-10">
-        <form className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 space-y-4" onSubmit={async (e) => {
+        <form className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-6 space-y-4" onSubmit={async (e) => {
           e.preventDefault(); setError(""); setLoading(true);
           try {
             await submitRequest({ ...form, email: (getUserSession()?.user?.email || form.email || "").trim(), amount: "", description: form.need, evidenceFiles: form.evidenceFiles });
@@ -3489,8 +3489,8 @@ function CelebrateRequestPage({ setPage }) {
           <Field label="Your name"><input required className={inputCls} value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} /></Field>
           {getUserSession()?.user?.email ? (
             <Field label="Email">
-              <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={getUserSession().user.email} />
-              <p className="mt-1 text-xs text-[#0D3B3B]/50">Uses the email on your SEEK account.</p>
+              <input readOnly className={inputCls + " bg-[var(--seek-white)]"} value={getUserSession().user.email} />
+              <p className="mt-1 text-xs text-[var(--seek-primary)]/50">Uses the email on your SEEK account.</p>
             </Field>
           ) : (
             <Field label="Email"><input required type="email" className={inputCls} value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} /></Field>
@@ -3506,24 +3506,24 @@ function CelebrateRequestPage({ setPage }) {
             <textarea required rows={3} className={inputCls} value={form.need} onChange={(e) => setForm({ ...form, need: e.target.value })} placeholder="e.g. Graduation on Saturday in Enugu. I would like two people there." />
           </Field>
           <Field label="Photo or video of the invitation">
-            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[#0D3B3B]/20 p-4 text-sm text-[#0D3B3B]/50">
+            <label className="flex cursor-pointer items-center gap-3 rounded-xl border border-dashed border-[var(--seek-primary)]/20 p-4 text-sm text-[var(--seek-primary)]/50">
               <Upload size={16} />
               <span>{form.evidenceFiles?.length ? form.evidenceFiles.map((f) => f.name).join(", ") : "Add a photo or short video"}</span>
               <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime" className="hidden" onChange={(e) => setForm((prev) => ({ ...prev, evidenceFiles: Array.from(e.target.files || []).slice(0, 5) }))} />
             </label>
           </Field>
-          <p className="text-xs text-[#0D3B3B]/50">Do not post your home address. Meet in a public place. Seek is not a dating app.</p>
+          <p className="text-xs text-[var(--seek-primary)]/50">Do not post your home address. Meet in a public place. Seek is not a dating app.</p>
           {error && <p className="text-sm text-red-600">{error}</p>}
           <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? "Submitting…" : "Share this invitation"}</Button>
         </form>
       </section>
       <section className="mx-auto max-w-3xl px-5 pb-16">
-        <h2 className="font-display font-bold text-xl text-[#0D3B3B] mb-4">Open invitations</h2>
+        <h2 className="font-display font-bold text-xl text-[var(--seek-primary)] mb-4">Open invitations</h2>
         <div className="grid gap-4">
           {list.map((req) => (
             <RequestCard key={req.id} req={req} onView={() => setPage && setPage("request:" + req.id)} onHelp={() => setPage && setPage("request:" + req.id)} />
           ))}
-          {!list.length && <p className="text-sm text-[#0D3B3B]/50">No published invitations yet.</p>}
+          {!list.length && <p className="text-sm text-[var(--seek-primary)]/50">No published invitations yet.</p>}
         </div>
       </section>
     </div>
@@ -3546,14 +3546,14 @@ function VolunteerPage() {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-10 text-center">
         <SectionLabel>Volunteer</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Give your time. Make a difference.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">Tell us how you would like to help, and we will keep you in mind for opportunities.</p>
+        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)]">Give your time. Make a difference.</h1>
+        <p className="mt-4 font-body text-lg text-[var(--seek-primary)]/65">Tell us how you would like to help, and we will keep you in mind for opportunities.</p>
       </section>
 
       <section className="mx-auto max-w-xl px-5 sm:px-8 pb-14">
-        <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-6">
+        <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-6">
           <Field label="Choose a role">
-            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-xl border border-[#0D3B3B]/15 p-4 text-sm">
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
               <option value="">Select a role</option>
               {roles.map((r) => <option key={r.id} value={r.title}>{r.title}</option>)}
             </select>
@@ -3572,7 +3572,7 @@ function VolunteerPage() {
               className="rounded-3xl p-8 sm:p-10 space-y-5 bg-white"
               style={{ background: C.white }}
             >
-              <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-1">Volunteer application</h2>
+              <h2 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-1">Volunteer application</h2>
               <div className="grid sm:grid-cols-2 gap-5">
                 <Field label="Full name"><input required className={inputCls} placeholder="Your name" value={form.name} onChange={e=>setForm({...form,name:e.target.value})} /></Field>
                 <Field label="Email"><input required type="email" className={inputCls} placeholder="you@example.com" value={form.email} onChange={e=>setForm({...form,email:e.target.value})} /></Field>
@@ -3585,15 +3585,15 @@ function VolunteerPage() {
               <Field label="Anything else we should know?">
                 <textarea required rows={3} className={inputCls} placeholder="Availability, language, city..." value={form.interests} onChange={e=>setForm({...form,interests:e.target.value})} />
               </Field>
-              <p className="text-xs text-[#0D3B3B]/45">Your email and phone stay with Seek admins. They are not published.</p>
+              <p className="text-xs text-[var(--seek-primary)]/45">Your email and phone stay with Seek admins. They are not published.</p>
               {error && <p className="text-sm text-red-600">{error}</p>}
               <Button disabled={loading} type="submit" variant="primary" className="w-full">{loading ? "Submitting…" : "Become a volunteer"}</Button>
             </form>
           ) : (
             <div className="rounded-3xl p-10 text-center" style={{ background: C.bg }}>
-              <CheckCircle2 size={36} className="mx-auto text-[#1BAA9C] mb-4" />
-              <h2 className="font-display font-bold text-2xl text-[#0D3B3B] mb-2">Thanks for stepping up.</h2>
-              <p className="font-body text-sm text-[#0D3B3B]/60">The BSN Foundation team will be in touch about next steps.</p>
+              <CheckCircle2 size={36} className="mx-auto text-[var(--seek-success)] mb-4" />
+              <h2 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-2">Thanks for stepping up.</h2>
+              <p className="font-body text-sm text-[var(--seek-primary)]/60">The BSN Foundation team will be in touch about next steps.</p>
             </div>
           )}
         </div>
@@ -3618,15 +3618,15 @@ function OrganisationsPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 pt-16 pb-16">
         <SectionLabel>For organisations</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">Your organisation can be the help too.</h1>
-        <p className="mt-4 font-body text-[#0D3B3B]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. Same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Your organisation can be the help too.</h1>
+        <p className="mt-4 font-body text-[var(--seek-primary)]/65">Support a published request, fund a BSN outreach, or post a job, internship or gift. Same SEEK pages as everyone else. SEEK reads every public post before it goes live.</p>
         <div className="mt-8 grid sm:grid-cols-2 gap-3 pb-16">
           {items.map((item) => (
-            <button key={item.t} type="button" onClick={() => go(item.id)} className="seek-reveal rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">{item.id === "volunteer" ? "Time" : item.id === "offers" ? "Giveaways" : "Give"}</p>
-              <p className="mt-2 font-display font-bold text-lg text-[#0D3B3B]">{item.t}</p>
-              <p className="mt-1 text-sm text-[#0D3B3B]/60">{item.d}</p>
-              <p className="mt-3 text-sm font-semibold text-[#1BAA9C]">Continue →</p>
+            <button key={item.t} type="button" onClick={() => go(item.id)} className="seek-reveal rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-5 text-left hover:-translate-y-0.5 hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">{item.id === "volunteer" ? "Time" : item.id === "offers" ? "Giveaways" : "Give"}</p>
+              <p className="mt-2 font-display font-bold text-lg text-[var(--seek-primary)]">{item.t}</p>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/60">{item.d}</p>
+              <p className="mt-3 text-sm font-semibold text-[var(--seek-success)]">Continue →</p>
             </button>
           ))}
         </div>
@@ -3643,11 +3643,11 @@ function MemberPage({ memberId, setPage }) {
   }, [memberId]);
   return (
     <div className="mx-auto max-w-lg px-5 py-16 text-center">
-      {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[#0D3B3B]/10" />}
-      <h1 className="mt-4 font-display font-extrabold text-2xl text-[#0D3B3B]">{member?.name || "A neighbour"} <VerifiedBadge /></h1>
-      {member?.username ? <p className="mt-1 font-semibold text-[#1BAA9C]">@{member.username}</p> : null}
-      {member?.bio ? <p className="mt-3 text-sm text-[#0D3B3B]/70">{member.bio}</p> : null}
-      <p className="mt-2 text-sm text-[#0D3B3B]/60">Public profile shows a name, photo and username. Email and gifts stay private.</p>
+      {member?.avatar_url ? <img src={member.avatar_url} alt="" className="mx-auto h-20 w-20 rounded-full object-cover" /> : <div className="mx-auto h-20 w-20 rounded-full bg-[var(--seek-primary)]/10" />}
+      <h1 className="mt-4 font-display font-extrabold text-2xl text-[var(--seek-primary)]">{member?.name || "A neighbour"} <VerifiedBadge /></h1>
+      {member?.username ? <p className="mt-1 font-semibold text-[var(--seek-success)]">@{member.username}</p> : null}
+      {member?.bio ? <p className="mt-3 text-sm text-[var(--seek-primary)]/70">{member.bio}</p> : null}
+      <p className="mt-2 text-sm text-[var(--seek-primary)]/60">Public profile shows a name, photo and username. Email and gifts stay private.</p>
       <button type="button" className="mt-6 rounded-full border px-4 py-2 text-sm" onClick={() => setPage("home")}>Back</button>
     </div>
   );
@@ -3660,8 +3660,8 @@ function AboutPage({ setPage }) {
       <section className="py-20 text-center" style={{ background: C.bg }}>
         <div className="mx-auto max-w-3xl px-5 sm:px-8">
           <SectionLabel>About Seek</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Help should be easier to find.</h1>
-          <p className="mt-5 font-body text-lg text-[#0D3B3B]/65">
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)]">Help should be easier to find.</h1>
+          <p className="mt-5 font-body text-lg text-[var(--seek-primary)]/65">
             Seek is a community assistance platform created to connect people who need help with people willing to provide it.
           </p>
         </div>
@@ -3669,22 +3669,22 @@ function AboutPage({ setPage }) {
 
       <section className="bg-white py-16">
         <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <p className="font-display text-xs font-semibold uppercase tracking-widest text-[#1BAA9C] mb-3">Our mission</p>
-          <p className="font-display font-semibold text-2xl sm:text-3xl text-[#0D3B3B] leading-snug">
+          <p className="font-display text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-3">Our mission</p>
+          <p className="font-display font-semibold text-2xl sm:text-3xl text-[var(--seek-primary)] leading-snug">
             To make it easier for people to find help, and easier for people to give it.
           </p>
-          <p className="mt-6 font-body text-[#0D3B3B]/60 max-w-xl mx-auto">
+          <p className="mt-6 font-body text-[var(--seek-primary)]/60 max-w-xl mx-auto">
             We all need help sometimes — and we can all help someone. Seek is built on that simple, shared idea, not on pity or charity theatre.
           </p>
         </div>
       </section>
 
       <section className="py-16" style={{ background: C.bg }}>
-        <div className="mx-auto max-w-5xl px-5 sm:px-8 rounded-3xl bg-white border border-[#0D3B3B]/8 p-10 sm:p-14 grid md:grid-cols-[auto_1fr_auto] items-center gap-8">
-          <Building2 size={44} className="text-[#1BAA9C]" />
+        <div className="mx-auto max-w-5xl px-5 sm:px-8 rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-10 sm:p-14 grid md:grid-cols-[auto_1fr_auto] items-center gap-8">
+          <Building2 size={44} className="text-[var(--seek-success)]" />
           <div>
-            <p className="font-body text-xs font-semibold uppercase tracking-widest text-[#1BAA9C] mb-2">Powered by BSN Foundation</p>
-            <p className="font-display font-semibold text-xl text-[#0D3B3B]">
+            <p className="font-body text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-2">Powered by BSN Foundation</p>
+            <p className="font-display font-semibold text-xl text-[var(--seek-primary)]">
               BSN Foundation is the community and volunteering arm behind Seek — reviewing requests, coordinating volunteers, and building trust across the platform.
             </p>
           </div>
@@ -3713,7 +3713,7 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
   useEffect(() => {
     getCelebrateRsvpCount(request.id).then(setCount).catch(() => {});
   }, [request.id]);
-  if (done) return <p className="font-semibold text-[#1BAA9C]">You have indicated. {count ? count + " people have indicated." : ""}</p>;
+  if (done) return <p className="font-semibold text-[var(--seek-success)]">You have indicated. {count ? count + " people have indicated." : ""}</p>;
   return (
     <div className="w-full">
       <Button variant="primary" className="w-full sm:w-auto" onClick={() => {
@@ -3738,10 +3738,10 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
           } catch (err) { setError(err.message || "Could not send this."); }
           finally { setLoading(false); }
         }}>
-          <p className="text-sm text-[#0D3B3B]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : `Tell ${request.username ? `@${request.username}` : request.full_name || request.name || "the person who posted this request"} how you can help — a role, an introduction, or your time.`}</p>
+          <p className="text-sm text-[var(--seek-primary)]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : `Tell ${request.username ? `@${request.username}` : request.full_name || request.name || "the person who posted this request"} how you can help — a role, an introduction, or your time.`}</p>
           <input required className={inputCls} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           {session?.user?.email ? (
-            <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={session.user.email} />
+            <input readOnly className={inputCls + " bg-[var(--seek-white)]"} value={session.user.email} />
           ) : (
             <input required type="email" className={inputCls} placeholder="Email" value={form.email} onChange={(e) => setForm({ ...form, email: e.target.value })} />
           )}
@@ -3750,7 +3750,7 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
             <input required inputMode="numeric" className={inputCls} placeholder="Age" value={form.age} onChange={(e) => setForm({ ...form, age: e.target.value })} />
           )}
           <textarea required rows={2} className={inputCls} placeholder={CONNECT_CATS.includes(request.category) ? "When you can be there" : "How you can help"} value={form.message} onChange={(e) => setForm({ ...form, message: e.target.value })} />
-          <label className="block text-sm text-[#0D3B3B]/60">Recent photo of you
+          <label className="block text-sm text-[var(--seek-primary)]/60">Recent photo of you
             <input required type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" onChange={(e) => setForm({ ...form, photo: e.target.files?.[0] || null })} />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
@@ -3868,7 +3868,7 @@ function RequestPage({ requestId, setPage }) {
   if (loading) {
     return (
       <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center justify-center">
-        <p className="font-body text-sm text-[#0D3B3B]/50">Loading request…</p>
+        <p className="font-body text-sm text-[var(--seek-primary)]/50">Loading request…</p>
       </div>
     );
   }
@@ -3877,11 +3877,11 @@ function RequestPage({ requestId, setPage }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
         <div className="mx-auto max-w-lg px-5 text-center py-24">
-          <AlertTriangle size={40} className="mx-auto text-[#1BAA9C] mb-5" />
-          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">
+          <AlertTriangle size={40} className="mx-auto text-[var(--seek-success)] mb-5" />
+          <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-3">
             Request not found
           </h1>
-          <p className="font-body text-[#0D3B3B]/65 mb-8">
+          <p className="font-body text-[var(--seek-primary)]/65 mb-8">
             {error || "This request may have been fulfilled or is no longer public."}
           </p>
           <Button variant="primary" onClick={() => setPage("give")}>
@@ -3896,12 +3896,12 @@ function RequestPage({ requestId, setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-8 pb-10">
         <div className="flex flex-wrap items-center gap-2 mb-3">
-          <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">{request.category}</span>
+          <span className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">{request.category}</span>
           <VerificationBadge status={request.status} />
         </div>
         <div className="flex flex-wrap items-start justify-between gap-3 mb-3">
-          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B]">{request.title}</h1>
-          <button type="button" className="rounded-full border border-[#0D3B3B]/15 px-3 py-1.5 text-sm font-semibold text-[#0D3B3B]" onClick={async () => {
+          <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--seek-primary)]">{request.title}</h1>
+          <button type="button" className="rounded-full border border-[var(--seek-primary)]/15 px-3 py-1.5 text-sm font-semibold text-[var(--seek-primary)]" onClick={async () => {
             const url = `${window.location.origin}/request/${request.id}`;
             const text = request.title + " — " + url;
             if (navigator.share) {
@@ -3911,20 +3911,20 @@ function RequestPage({ requestId, setPage }) {
             }
           }}>Share</button>
           <div className="flex gap-2">
-            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#25D366] text-white px-3 py-1.5 text-xs font-bold">WhatsApp</a>
-            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[#1877F2] text-white px-3 py-1.5 text-xs font-bold">Facebook</a>
+            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--seek-success)] text-white px-3 py-1.5 text-xs font-bold">WhatsApp</a>
+            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--seek-accent)] text-white px-3 py-1.5 text-xs font-bold">Facebook</a>
             <a href={"https://twitter.com/intent/tweet?text=" + encodeURIComponent(request.title) + "&url=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-black text-white px-3 py-1.5 text-xs font-bold">X</a>
           </div>
         </div>
-        <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/60 mb-6"><MapPin size={16} /> {request.location}</p>
+        <p className="flex items-center gap-1.5 text-sm text-[var(--seek-primary)]/60 mb-6"><MapPin size={16} /> {request.location}</p>
 
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/8 p-6 sm:p-8 shadow-sm">
-          <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{request.description}</p>
+        <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-6 sm:p-8 shadow-sm">
+          <p className="font-body text-[var(--seek-primary)]/80 leading-relaxed whitespace-pre-wrap">{request.description}</p>
           {(request.publicUpdate || request.appreciationUrl) && (
-            <div className="mt-6 rounded-2xl bg-[#1BAA9C]/8 p-4 space-y-3">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">Update from the requester</p>
+            <div className="mt-6 rounded-2xl bg-[var(--seek-success)]/8 p-4 space-y-3">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">Update from the requester</p>
               {request.publicUpdate && (
-                <p className="font-body text-[#0D3B3B]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
+                <p className="font-body text-[var(--seek-primary)]/80 whitespace-pre-wrap">{request.publicUpdate}</p>
               )}
               {(request.appreciationItems || [{ public_url: request.appreciationUrl, media_kind: request.appreciationKind }].filter((item) => item.public_url)).map((item) => (
                 item.media_kind === "video" || String(item.public_url).match(/\.(mp4|webm|mov)(\?|$)/i) ? (
@@ -3940,7 +3940,7 @@ function RequestPage({ requestId, setPage }) {
           )}
           {evidence.length > 0 && (
   <div className="mt-6 space-y-4">
-    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50">Photos and video</p>
+    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50">Photos and video</p>
 
     {evidence.map((file) => (
       <div key={file.id} className="space-y-2">
@@ -3950,10 +3950,10 @@ function RequestPage({ requestId, setPage }) {
             alt=""
             draggable="false"
             onContextMenu={(e) => e.preventDefault()}
-            className="w-full max-h-96 rounded-xl border border-[#0D3B3B]/8 object-contain select-none"
+            className="w-full max-h-96 rounded-xl border border-[var(--seek-primary)]/8 object-contain select-none"
           />
         ) : file.mime_type?.startsWith("video/") ? (
-          <div className="relative overflow-hidden rounded-xl border border-[#0D3B3B]/8 bg-black">
+          <div className="relative overflow-hidden rounded-xl border border-[var(--seek-primary)]/8 bg-black">
           <video
             src={file.public_url}
             controls
@@ -3970,10 +3970,10 @@ function RequestPage({ requestId, setPage }) {
           <iframe
             src={`${file.public_url}#toolbar=0&navpanes=0`}
             title="Supporting evidence"
-            className="h-96 w-full rounded-xl border border-[#0D3B3B]/8"
+            className="h-96 w-full rounded-xl border border-[var(--seek-primary)]/8"
           />
         ) : (
-          <p className="font-body text-sm text-[#0D3B3B]/60">
+          <p className="font-body text-sm text-[var(--seek-primary)]/60">
             A supporting file was provided for on-page review.
           </p>
         )}
@@ -3983,24 +3983,24 @@ function RequestPage({ requestId, setPage }) {
 )}
 
           <div className="mt-8">
-            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3 inline-flex items-center gap-2">
-              <span style={{width:10,height:10,borderRadius:999,background:"#E11D48",display:"inline-block",animation:"seekLivePulse 1.1s ease-in-out infinite"}} />
+            <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50 mb-3 inline-flex items-center gap-2">
+              <span style={{width:10,height:10,borderRadius:999,background:"var(--seek-danger)",display:"inline-block",animation:"seekLivePulse 1.1s ease-in-out infinite"}} />
               Live support
             </p>
             {donors.length === 0 ? (
-              <p className="text-sm text-[#0D3B3B]/50">No public gifts listed yet.</p>
+              <p className="text-sm text-[var(--seek-primary)]/50">No public gifts listed yet.</p>
             ) : (
               <>
               <ul className="space-y-2">
                 {(showAllDonors ? donors : donors.slice(0, 3)).map((d, i) => (
-                  <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 && !showAllDonors ? "bg-[#1BAA9C]/10" : "")}>
-                    <span className="text-[#0D3B3B]/70 inline-flex items-center gap-1.5">{d.anonymous ? "Anonymous" : String(d.name || d.donor_name || "").split("·")[0].trim() || "Neighbour"} {!d.anonymous && <SeekVerifiedCheck className="h-4 w-4" />}</span>
-                    <span className="font-semibold text-[#0D3B3B]">₦{Number(d.amount || 0).toLocaleString()}</span>
+                  <li key={(d.created_at || "") + "-" + i} className={"flex items-center justify-between text-sm font-body rounded-lg px-2 py-1 " + (i === 0 && !showAllDonors ? "bg-[var(--seek-success)]/10" : "")}>
+                    <span className="text-[var(--seek-primary)]/70 inline-flex items-center gap-1.5">{d.anonymous ? "Anonymous" : String(d.name || d.donor_name || "").split("·")[0].trim() || "Neighbour"} {!d.anonymous && <SeekVerifiedCheck className="h-4 w-4" />}</span>
+                    <span className="font-semibold text-[var(--seek-primary)]">₦{Number(d.amount || 0).toLocaleString()}</span>
                   </li>
                 ))}
               </ul>
               {donors.length > 3 && (
-                <button type="button" className="mt-3 text-sm font-semibold text-[#1BAA9C]" onClick={() => setShowAllDonors(!showAllDonors)}>
+                <button type="button" className="mt-3 text-sm font-semibold text-[var(--seek-success)]" onClick={() => setShowAllDonors(!showAllDonors)}>
                   {showAllDonors ? "Show latest only" : "See more"}
                 </button>
               )}
@@ -4009,13 +4009,13 @@ function RequestPage({ requestId, setPage }) {
           </div>
           {request.amountNeeded ? (
             <div className="mt-8">
-              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">
+              <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50 mb-2">
                 Progress
               </p>
               <ProgressBar raised={donors.length ? donors.reduce((sum, d) => sum + Number(d.amount || 0), 0) : request.amountRaised} needed={request.amountNeeded} />
             </div>
           ) : (
-            <p className="mt-6 text-sm font-semibold font-body text-[#0D3B3B]">
+            <p className="mt-6 text-sm font-semibold font-body text-[var(--seek-primary)]">
               {request.type === "item"
                 ? "In-kind assistance requested"
                 : "Ongoing support requested"}
@@ -4023,20 +4023,20 @@ function RequestPage({ requestId, setPage }) {
           )}
 
           {hostRsvps.length > 0 && (
-            <div className="mt-8 rounded-2xl border border-[#0D3B3B]/10 bg-white p-4">
-              <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-3">People who can be there</p>
+            <div className="mt-8 rounded-2xl border border-[var(--seek-primary)]/10 bg-white p-4">
+              <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50 mb-3">People who can be there</p>
               <ul className="space-y-3">
                 {hostRsvps.map((row) => (
                   <li key={row.id} className="flex gap-3 items-start">
-                    {row.photo_url ? <img src={row.photo_url} alt="" className="h-20 w-20 rounded-xl object-cover" /> : <div className="h-20 w-20 rounded-xl bg-[#0D3B3B]/10" />}
+                    {row.photo_url ? <img src={row.photo_url} alt="" className="h-20 w-20 rounded-xl object-cover" /> : <div className="h-20 w-20 rounded-xl bg-[var(--seek-primary)]/10" />}
                     <div className="min-w-0 flex-1">
-                      <p className="font-semibold text-[#0D3B3B]">{row.name || row.email}{row.age ? " · " + row.age : ""}</p>
-                      <p className="text-sm text-[#0D3B3B]/60">{row.email} {row.phone ? " · " + row.phone : ""}</p>
-                      {row.message && <p className="text-sm text-[#0D3B3B]/70 mt-1">{row.message}</p>}
-                      <p className="text-xs uppercase tracking-wide text-[#0D3B3B]/45 mt-1">{row.status || "pending"}</p>
+                      <p className="font-semibold text-[var(--seek-primary)]">{row.name || row.email}{row.age ? " · " + row.age : ""}</p>
+                      <p className="text-sm text-[var(--seek-primary)]/60">{row.email} {row.phone ? " · " + row.phone : ""}</p>
+                      {row.message && <p className="text-sm text-[var(--seek-primary)]/70 mt-1">{row.message}</p>}
+                      <p className="text-xs uppercase tracking-wide text-[var(--seek-primary)]/45 mt-1">{row.status || "pending"}</p>
                       {(!row.status || row.status === "pending") && (
                         <div className="mt-2 flex gap-2">
-                          <button type="button" className="rounded-full bg-[#0D3B3B] text-white px-3 py-1 text-xs" onClick={async () => {
+                          <button type="button" className="rounded-full bg-[var(--seek-primary)] text-white px-3 py-1 text-xs" onClick={async () => {
                             try {
                               await updateCelebrateRsvpStatus(row.id, "approved");
                               setHostRsvps((prev) => prev.map((x) => x.id === row.id ? { ...x, status: "approved" } : x));
@@ -4068,14 +4068,14 @@ function RequestPage({ requestId, setPage }) {
           <ReportRequestForm requestId={request.id} />
           <CommunityInteractions targetType="request" targetId={request.id} />
 
-          <div className="mt-8 pt-6 border-t border-[#0D3B3B]/08 flex flex-col sm:flex-row sm:items-center gap-4">
+          <div className="mt-8 pt-6 border-t border-[var(--seek-primary)]/08 flex flex-col sm:flex-row sm:items-center gap-4">
             {request.status === "fulfilled" ? (
-              <p className="font-body text-sm font-semibold text-[#1BAA9C]">
+              <p className="font-body text-sm font-semibold text-[var(--seek-success)]">
                 This need has been met. Thank you to everyone who helped.
               </p>
             ) : helped ? (
               <>
-                <p className="font-body text-sm font-semibold text-[#1BAA9C]">
+                <p className="font-body text-sm font-semibold text-[var(--seek-success)]">
                   Help is in progress for this request.
                 </p>
                 <Button
@@ -4098,21 +4098,21 @@ function RequestPage({ requestId, setPage }) {
                 ) : isFinancialNeed(request) ? (
                   <button
                     type="button"
-                    className="seek-fundraiser-donate w-full rounded-full bg-[#1BAA9C] text-white py-4 text-lg font-bold"
+                    className="seek-fundraiser-donate w-full rounded-full bg-[var(--seek-success)] text-white py-4 text-lg font-bold"
                     onClick={() => setCaseDonateOpen(true)}
                   >
                     Donate now
                   </button>
                 ) : (
-                  <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
+                  <p className="text-sm text-[var(--seek-primary)]/60">This is not a fundraising request.</p>
                 )}
                 {isFinancialNeed(request) ? (
-                  <p className="text-sm text-[#0D3B3B]/55">
+                  <p className="text-sm text-[var(--seek-primary)]/55">
                     Can't donate right now? You can still support the SEEK community.{" "}
-                    <button type="button" className="font-bold text-[#1BAA9C]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Shop SEEK merch</button>
+                    <button type="button" className="font-bold text-[var(--seek-success)]" onClick={() => { setPage("shop"); window.scrollTo(0, 0); }}>Shop SEEK merch</button>
                   </p>
                 ) : null}
-                <p className="font-body text-xs text-[#0D3B3B]/45">
+                <p className="font-body text-xs text-[var(--seek-primary)]/45">
                   {CONNECT_CATS.includes(request.category)
                     ? "Your contact goes to the host after Seek records it. Meet in public."
                     : isFinancialNeed(request)
@@ -4124,18 +4124,18 @@ function RequestPage({ requestId, setPage }) {
           </div>
         </div>
 
-        <p className="mt-8 text-center font-body text-xs text-[#0D3B3B]/40">
+        <p className="mt-8 text-center font-body text-xs text-[var(--seek-primary)]/40">
           This is a verified public request on Seek · A project of BSN Foundation
         </p>
       </section>
       {isFinancialNeed(request) && (
-        <div className="fixed bottom-20 inset-x-0 z-[140] p-4 bg-white/95 backdrop-blur border-t border-[#0D3B3B]/10">
+        <div className="fixed bottom-20 inset-x-0 z-[140] p-4 bg-white/95 backdrop-blur border-t border-[var(--seek-primary)]/10">
           <div className="mx-auto max-w-lg flex items-center gap-3">
             <div className="flex-1">
-              <p className="text-sm font-semibold text-[#0D3B3B]">₦{Number(request.amountRaised || 0).toLocaleString()} raised</p>
-              <p className="text-xs text-[#0D3B3B]/50">of ₦{Number(request.amountNeeded || 0).toLocaleString()}</p>
+              <p className="text-sm font-semibold text-[var(--seek-primary)]">₦{Number(request.amountRaised || 0).toLocaleString()} raised</p>
+              <p className="text-xs text-[var(--seek-primary)]/50">of ₦{Number(request.amountNeeded || 0).toLocaleString()}</p>
             </div>
-            <button type="button" onClick={() => setCaseDonateOpen(true)} className="seek-fundraiser-donate rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+            <button type="button" onClick={() => setCaseDonateOpen(true)} className="seek-fundraiser-donate rounded-full bg-[var(--seek-success)] text-white px-6 py-3 text-sm font-bold">Donate</button>
           </div>
         </div>
       )}
@@ -4157,7 +4157,7 @@ function ReportRequestForm({ requestId }) {
 
   if (sent) {
     return (
-      <p className="mt-6 font-body text-sm text-[#1BAA9C]">
+      <p className="mt-6 font-body text-sm text-[var(--seek-success)]">
         Thank you. Seek will review this report.
       </p>
     );
@@ -4169,13 +4169,13 @@ function ReportRequestForm({ requestId }) {
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="text-sm font-semibold text-[#0D3B3B]/45 hover:text-[#0D3B3B]"
+          className="text-sm font-semibold text-[var(--seek-primary)]/45 hover:text-[var(--seek-primary)]"
         >
           Report this request
         </button>
       ) : (
         <form
-          className="rounded-2xl border border-[#0D3B3B]/10 p-4 space-y-3"
+          className="rounded-2xl border border-[var(--seek-primary)]/10 p-4 space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
             try {
@@ -4196,7 +4196,7 @@ function ReportRequestForm({ requestId }) {
             }
           }}
         >
-          <p className="font-display font-semibold text-sm text-[#0D3B3B]">Report this request</p>
+          <p className="font-display font-semibold text-sm text-[var(--seek-primary)]">Report this request</p>
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value)}
@@ -4225,7 +4225,7 @@ function ReportRequestForm({ requestId }) {
           <button
             type="submit"
             disabled={loading}
-            className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold"
+            className="rounded-xl bg-[var(--seek-primary)] text-white px-4 py-2 text-sm font-semibold"
           >
             {loading ? "Sending…" : "Submit report"}
           </button>
@@ -4246,7 +4246,7 @@ function ReportContentForm({ targetType, targetId, label = "Report this content"
   const [loading, setLoading] = useState(false);
 
   if (sent) {
-    return <p className="mt-3 text-xs font-semibold text-[#1BAA9C]">Thanks. SEEK will review this report.</p>;
+    return <p className="mt-3 text-xs font-semibold text-[var(--seek-success)]">Thanks. SEEK will review this report.</p>;
   }
 
   return (
@@ -4255,13 +4255,13 @@ function ReportContentForm({ targetType, targetId, label = "Report this content"
         <button
           type="button"
           onClick={() => setOpen(true)}
-          className="text-xs font-semibold text-[#0D3B3B]/45 hover:text-[#0D3B3B]"
+          className="text-xs font-semibold text-[var(--seek-primary)]/45 hover:text-[var(--seek-primary)]"
         >
           Report
         </button>
       ) : (
         <form
-          className="rounded-2xl border border-[#0D3B3B]/10 bg-[#F7FAF8] p-4 space-y-3"
+          className="rounded-2xl border border-[var(--seek-primary)]/10 bg-[var(--seek-white)] p-4 space-y-3"
           onSubmit={async (e) => {
             e.preventDefault();
             setLoading(true);
@@ -4277,13 +4277,13 @@ function ReportContentForm({ targetType, targetId, label = "Report this content"
           }}
         >
           <div>
-            <p className="font-display font-semibold text-sm text-[#0D3B3B]">{label}</p>
-            <p className="mt-1 text-xs leading-5 text-[#0D3B3B]/55">Report scams, harmful content, exposed private information or other safety concerns. Please do not include passwords, PINs or OTPs.</p>
+            <p className="font-display font-semibold text-sm text-[var(--seek-primary)]">{label}</p>
+            <p className="mt-1 text-xs leading-5 text-[var(--seek-primary)]/55">Report scams, harmful content, exposed private information or other safety concerns. Please do not include passwords, PINs or OTPs.</p>
           </div>
           <select
             value={reason}
             onChange={(e) => setReason(e.target.value)}
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-[var(--seek-primary)]/10 bg-white px-3 py-2 text-sm"
           >
             <option value="inappropriate">Inappropriate or harmful content</option>
             <option value="spam">Spam or scam</option>
@@ -4296,21 +4296,21 @@ function ReportContentForm({ targetType, targetId, label = "Report this content"
             onChange={(e) => setDetails(e.target.value)}
             placeholder="What should SEEK know? (optional)"
             rows={3}
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-[var(--seek-primary)]/10 bg-white px-3 py-2 text-sm"
           />
           <input
             type="email"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
             placeholder="Your email (optional)"
-            className="w-full rounded-xl border border-[#0D3B3B]/10 bg-white px-3 py-2 text-sm"
+            className="w-full rounded-xl border border-[var(--seek-primary)]/10 bg-white px-3 py-2 text-sm"
           />
           {error && <p className="text-sm text-red-600">{error}</p>}
           <div className="flex items-center gap-2">
-            <button type="submit" disabled={loading} className="rounded-full bg-[#0D3B3B] px-4 py-2 text-sm font-semibold text-white">
+            <button type="submit" disabled={loading} className="rounded-full bg-[var(--seek-primary)] px-4 py-2 text-sm font-semibold text-white">
               {loading ? "Sending…" : "Submit report"}
             </button>
-            <button type="button" disabled={loading} onClick={() => { setOpen(false); setError(""); }} className="rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B]">
+            <button type="button" disabled={loading} onClick={() => { setOpen(false); setError(""); }} className="rounded-full border border-[var(--seek-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--seek-primary)]">
               Cancel
             </button>
           </div>
@@ -4370,9 +4370,9 @@ function SupportChat() {
   }
 
   return (
-    <div className="mt-8 rounded-3xl bg-white border border-[#0D3B3B]/8 p-5 space-y-4">
-      <h2 className="font-display font-bold text-xl text-[#0D3B3B]">Live support chat</h2>
-      <p className="font-body text-sm text-[#0D3B3B]/60">
+    <div className="mt-8 rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-5 space-y-4">
+      <h2 className="font-display font-bold text-xl text-[var(--seek-primary)]">Live support chat</h2>
+      <p className="font-body text-sm text-[var(--seek-primary)]/60">
         Use this to report a concern. Do not send bank PINs, OTPs, or other people’s private files.
       </p>
       {!conversationId && (
@@ -4386,8 +4386,8 @@ function SupportChat() {
       )}
       <div className="max-h-72 overflow-y-auto space-y-2">
         {messages.map((m) => (
-          <div key={m.id} className={`rounded-2xl px-3 py-2 text-sm ${m.sender === "admin" ? "bg-[#1BAA9C]/10 text-[#0D3B3B]" : "bg-slate-100 text-[#0D3B3B]"}`}>
-            <p className="text-[10px] uppercase tracking-wide text-[#0D3B3B]/45">{m.sender}</p>
+          <div key={m.id} className={`rounded-2xl px-3 py-2 text-sm ${m.sender === "admin" ? "bg-[var(--seek-success)]/10 text-[var(--seek-primary)]" : "bg-slate-100 text-[var(--seek-primary)]"}`}>
+            <p className="text-[10px] uppercase tracking-wide text-[var(--seek-primary)]/45">{m.sender}</p>
             <p>{m.body}</p>
           </div>
         ))}
@@ -4399,7 +4399,7 @@ function SupportChat() {
           placeholder="Type a message"
           className="flex-1 rounded-xl border px-3 py-2 text-sm"
         />
-        <button disabled={loading} className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm font-semibold">
+        <button disabled={loading} className="rounded-xl bg-[var(--seek-primary)] text-white px-4 py-2 text-sm font-semibold">
           {loading ? "…" : "Send"}
         </button>
       </form>
@@ -4413,13 +4413,13 @@ function ContactPage() {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
         <SectionLabel>Contact</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-4">Talk to Seek</h1>
-        <p className="font-body text-[#0D3B3B]/70 leading-relaxed">
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-4">Talk to Seek</h1>
+        <p className="font-body text-[var(--seek-primary)]/70 leading-relaxed">
           Seek is a project of BSN Foundation. Email us at{" "}
-          <a className="font-semibold text-[#1BAA9C]" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
+          <a className="font-semibold text-[var(--seek-success)]" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
           {" "}or start a chat below. You can also use Report this request on a public request page.
         </p>
-        <p className="mt-3 font-body text-sm text-[#0D3B3B]/55">
+        <p className="mt-3 font-body text-sm text-[var(--seek-primary)]/55">
           Seek is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
         </p>
         <SupportChat />
@@ -4439,11 +4439,11 @@ function LanguagePage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-md px-5 pt-12 pb-28">
         <SectionLabel>{tSeek("language")}</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">Choose a language</h1>
-        <p className="mt-2 text-sm text-[#0D3B3B]/55">SEEK stays in English under the hood. These words cover Home and the main doors first.</p>
-        <div className="mt-6 divide-y divide-[#0D3B3B]/8 rounded-3xl bg-white border border-[#0D3B3B]/10 overflow-hidden">
+        <h1 className="font-display font-extrabold text-3xl text-[var(--seek-primary)]">Choose a language</h1>
+        <p className="mt-2 text-sm text-[var(--seek-primary)]/55">SEEK stays in English under the hood. These words cover Home and the main doors first.</p>
+        <div className="mt-6 divide-y divide-[var(--seek-primary)]/8 rounded-3xl bg-white border border-[var(--seek-primary)]/10 overflow-hidden">
           {SEEK_LANGS.map((item) => (
-            <button key={item.id} type="button" onClick={() => choose(item.id)} className={"w-full text-left px-5 py-4 text-base " + (lang === item.id ? "bg-[#1BAA9C]/10 font-semibold text-[#0D3B3B]" : "text-[#0D3B3B]")}>
+            <button key={item.id} type="button" onClick={() => choose(item.id)} className={"w-full text-left px-5 py-4 text-base " + (lang === item.id ? "bg-[var(--seek-success)]/10 font-semibold text-[var(--seek-primary)]" : "text-[var(--seek-primary)]")}>
               {item.label}
             </button>
           ))}
@@ -4484,10 +4484,10 @@ function LegalPage({ title }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
         <SectionLabel>Trust & Safety</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B] mb-6">{title}</h1>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-6">{title}</h1>
         <div className="space-y-4">
           {(copy[title] || []).map((para) => (
-            <p key={para} className="font-body text-[#0D3B3B]/75 leading-relaxed">{para}</p>
+            <p key={para} className="font-body text-[var(--seek-primary)]/75 leading-relaxed">{para}</p>
           ))}
         </div>
       </section>
@@ -4529,14 +4529,14 @@ function ImpactStoryPage({ impactId, setPage }) {
   }, [impactId]);
 
   if (loading) {
-    return <div style={{ background: C.bg }} className="min-h-[40vh] flex items-center justify-center"><p className="font-body text-sm text-[#0D3B3B]/50">Loading story…</p></div>;
+    return <div style={{ background: C.bg }} className="min-h-[40vh] flex items-center justify-center"><p className="font-body text-sm text-[var(--seek-primary)]/50">Loading story…</p></div>;
   }
   if (error || !post) {
     return (
       <div style={{ background: C.bg }} className="min-h-[40vh] flex items-center">
         <div className="mx-auto max-w-lg px-5 py-24 text-center">
-          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">Story not found</h1>
-          <p className="font-body text-[#0D3B3B]/65 mb-6">{error}</p>
+          <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-3">Story not found</h1>
+          <p className="font-body text-[var(--seek-primary)]/65 mb-6">{error}</p>
           <Button variant="primary" onClick={() => { window.history.pushState({}, "", "/impact"); setPage("impact"); }}>Back to Impact</Button>
         </div>
       </div>
@@ -4548,7 +4548,7 @@ function ImpactStoryPage({ impactId, setPage }) {
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20 space-y-5">
         <SectionLabel>Community Impact</SectionLabel>
         <div className="flex items-start justify-between gap-3">
-          <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">{post.title}</h1>
+          <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">{post.title}</h1>
           <div className="flex shrink-0 gap-2">
             <button
               type="button"
@@ -4570,8 +4570,8 @@ function ImpactStoryPage({ impactId, setPage }) {
             </a>
           </div>
         </div>
-        <p className="font-body text-sm text-[#0D3B3B]/55">{[post.location, post.happened_on].filter(Boolean).join(" · ")}</p>
-        {post.story && <p className="font-body text-[#0D3B3B]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
+        <p className="font-body text-sm text-[var(--seek-primary)]/55">{[post.location, post.happened_on].filter(Boolean).join(" · ")}</p>
+        {post.story && <p className="font-body text-[var(--seek-primary)]/80 leading-relaxed whitespace-pre-wrap">{post.story}</p>}
         {(post.mediaItems || [{ public_url: post.public_url, media_kind: post.media_kind }].filter((m) => m.public_url)).map((m) => (
           m.media_kind === "video" ? (
             <div className="relative overflow-hidden rounded-2xl bg-black">
@@ -4698,29 +4698,29 @@ function ImpactPage({ setPage }) {
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-14 pb-7 text-center">
         <SectionLabel>Community Impact</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[#0D3B3B]">See what your help made possible.</h1>
-        <p className="mt-4 font-body text-lg text-[#0D3B3B]/65">
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">See what your help made possible.</h1>
+        <p className="mt-4 font-body text-lg text-[var(--seek-primary)]/65">
           Real people. Real stories. Real change made possible by a community that shows up.
         </p>
       </section>
       <style>{`@keyframes seekFade { from { opacity: 0; transform: translateY(10px); } to { opacity: 1; transform: none; } } .seek-impact-stat { animation: seekFade .65s ease both; } .seek-impact-stat:nth-child(2) { animation-delay: .08s; } .seek-impact-stat:nth-child(3) { animation-delay: .16s; } .seek-impact-stat:nth-child(4) { animation-delay: .24s; } @media (prefers-reduced-motion: reduce) { .seek-impact-stat { animation: none; } }`}</style>
       <section className="mx-auto max-w-3xl px-5 sm:px-8 pb-9 grid grid-cols-2 gap-3" aria-label="SEEK community impact numbers">
-        {stats.map(([label, value]) => <div key={label} className="seek-impact-stat rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 shadow-sm"><p className="text-xs uppercase tracking-widest text-[#0D3B3B]/55">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[#0D3B3B]"><AnimatedImpactNumber value={value} /></p></div>)}
+        {stats.map(([label, value]) => <div key={label} className="seek-impact-stat rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 shadow-sm"><p className="text-xs uppercase tracking-widest text-[var(--seek-primary)]/55">{label}</p><p className="mt-2 font-display font-extrabold text-2xl text-[var(--seek-primary)]"><AnimatedImpactNumber value={value} /></p></div>)}
       </section>
       <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
         <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
-          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">Community stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[#0D3B3B]">Watch the impact. Feel the difference.</h2></div>
-          <span className="text-xs font-semibold text-[#0D3B3B]/50">{loading ? "Loading…" : `${impactReels.length} stories`}</span>
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">Community stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[var(--seek-primary)]">Watch the impact. Feel the difference.</h2></div>
+          <span className="text-xs font-semibold text-[var(--seek-primary)]/50">{loading ? "Loading…" : `${impactReels.length} stories`}</span>
         </div>
         {loading && <div className="seek-feed-skeleton mx-auto h-[62svh] max-w-[420px] rounded-[28px]" />}
         {error && <p className="mx-auto max-w-md rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
-        {!loading && !error && impactReels.length === 0 && <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Photos and videos from community work will appear here.</p></div>}
+        {!loading && !error && impactReels.length === 0 && <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--seek-light)] text-[var(--seek-success)]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[var(--seek-primary)]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[var(--seek-primary)]/60">Photos and videos from community work will appear here.</p></div>}
         <div className="seek-reels-feed" aria-label="Swipe through SEEK community impact stories">
           {impactReels.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
         </div>
       </section>
       <section className="mx-auto max-w-3xl px-5 pb-20 text-center">
-        <p className="text-sm text-[#0D3B3B]/60">You can be part of the next story.</p>
+        <p className="text-sm text-[var(--seek-primary)]/60">You can be part of the next story.</p>
         <Button variant="primary" onClick={() => { setPage("offer-help"); window.scrollTo(0, 0); }}>Offer Help <ArrowRight size={16} /></Button>
       </section>
     </div>
@@ -4749,7 +4749,7 @@ function AccountAvatar() {
       {photo ? (
         <img loading="lazy" decoding="async" src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
       ) : (
-        <div className="h-24 w-24 rounded-full bg-[#0D3B3B]/10 mb-3" />
+        <div className="h-24 w-24 rounded-full bg-[var(--seek-primary)]/10 mb-3" />
       )}
       <p className="font-display font-semibold text-sm mb-2">Profile photo</p>
       <input
@@ -4774,7 +4774,7 @@ function AccountAvatar() {
           }
         }}
       />
-      <p className="mt-1 text-xs text-[#0D3B3B]/50">{busy ? "Uploading…" : "A simple face photo helps people recognise you."}</p>
+      <p className="mt-1 text-xs text-[var(--seek-primary)]/50">{busy ? "Uploading…" : "A simple face photo helps people recognise you."}</p>
       {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
     </div>
   );
@@ -4812,10 +4812,10 @@ function AccountUsernameForm({ onSaved } = {}) {
       <p className="font-display font-semibold text-sm">Public profile</p>
       <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" className="w-full rounded-xl border px-3 py-2 text-sm" />
       <input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="username" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <p className="text-xs text-[#0D3B3B]/50">3–24 characters. Letters, numbers, underscore. This becomes /member/username</p>
+      <p className="text-xs text-[var(--seek-primary)]/50">3–24 characters. Letters, numbers, underscore. This becomes /member/username</p>
       <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={280} placeholder="A short public line (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <button type="submit" className="rounded-full bg-[#0D3B3B] text-white px-4 py-2 text-sm" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
-      {hint && <p className="text-sm text-[#0D3B3B]/70">{hint}</p>}
+      <button type="submit" className="rounded-full bg-[var(--seek-primary)] text-white px-4 py-2 text-sm" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
+      {hint && <p className="text-sm text-[var(--seek-primary)]/70">{hint}</p>}
     </form>
   );
 }
@@ -4854,48 +4854,48 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
-          <div className="rounded-[2rem] bg-[#0D3B3B] text-white p-6 sm:p-8">
+          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
                 <SectionLabel>Profile</SectionLabel>
                 <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <SeekVerifiedCheck /></h1>
-                <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
+                <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
               </div>
             </div>
             <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
               <strong className="text-white">Your public profile</strong><br />
               Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
             </div>
-            <div className="mt-5 rounded-2xl bg-white p-5 text-[#0D3B3B]">
+            <div className="mt-5 rounded-2xl bg-white p-5 text-[var(--seek-primary)]">
               <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
             </div>
           </div>
 
           <div className="mt-5 grid sm:grid-cols-2 gap-3">
-            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Your space</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My SEEK</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">See your requests, giving, giveaways, interests and activity.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open My SEEK <ArrowRight size={15} /></span>
+            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Your space</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My SEEK</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">See your requests, giving, giveaways, interests and activity.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open My SEEK <ArrowRight size={15} /></span>
             </button>
-            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Requests</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">My requests</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">View and manage requests connected to your account.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">View requests <ArrowRight size={15} /></span>
+            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Requests</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My requests</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">View and manage requests connected to your account.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">View requests <ArrowRight size={15} /></span>
             </button>
-            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Updates</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Notifications</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">Keep up with responses, interests and other SEEK updates.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[#1BAA9C]">Open notifications <ArrowRight size={15} /></span>
+            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Updates</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Notifications</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Keep up with responses, interests and other SEEK updates.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open notifications <ArrowRight size={15} /></span>
             </button>
-            <div className="rounded-2xl bg-white border border-[#0D3B3B]/10 p-5">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[#1BAA9C]">Account</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[#0D3B3B]">Keep your account secure</h2>
-              <p className="mt-1 text-sm text-[#0D3B3B]/55">Your email is used for account activity and private updates.</p>
-              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[#0D3B3B]/15 px-4 py-2 text-sm font-semibold text-[#0D3B3B] hover:bg-[#F2F5F3]">Sign out</button>
+            <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Account</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Keep your account secure</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Your email is used for account activity and private updates.</p>
+              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[var(--seek-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--seek-primary)] hover:bg-[var(--seek-white)]">Sign out</button>
             </div>
           </div>
         </section>
@@ -4945,17 +4945,17 @@ function AccountPage({ setPage, userSession, setUserSession }) {
       <section className="mx-auto max-w-md px-5 py-16">
         <div className="text-center mb-8">
           <SectionLabel>Account</SectionLabel>
-          <h1 className="font-display font-extrabold text-3xl text-[#0D3B3B]">
+          <h1 className="font-display font-extrabold text-3xl text-[var(--seek-primary)]">
             {mode === "recover" ? "Reset password" : mode === "signin" ? "Sign in" : "Create account"}
           </h1>
-          <p className="mt-2 font-body text-sm text-[#0D3B3B]/60">
+          <p className="mt-2 font-body text-sm text-[var(--seek-primary)]/60">
             {mode === "recover" ? "We will email a reset link." : "Stay signed in on this device."}
           </p>
         </div>
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-6 sm:p-8 space-y-4"
+          className="rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-6 sm:p-8 space-y-4"
         >
           <Field label="Email">
             <input
@@ -4982,7 +4982,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
               <button
                 type="button"
                 onClick={() => setShowPassword((v) => !v)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[#1BAA9C]"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-xs font-semibold text-[var(--seek-success)]"
                 aria-label={showPassword ? "Hide password" : "Show password"}
               >
                 {showPassword ? "Hide" : "Show"}
@@ -4992,14 +4992,14 @@ function AccountPage({ setPage, userSession, setUserSession }) {
           )}
 
           {error && <p className="text-sm text-red-600">{error}</p>}
-          {message && <p className="text-sm text-[#1BAA9C]">{message}</p>}
+          {message && <p className="text-sm text-[var(--seek-success)]">{message}</p>}
 
           <Button disabled={loading} type="submit" variant="primary" className="w-full">
             {loading ? "Please wait…" : mode === "recover" ? "Send reset link" : mode === "signin" ? "Sign in" : "Create account"}
           </Button>
           {mode !== "recover" && (
             <>
-              <button type="button" className="w-full text-sm font-semibold text-[#1BAA9C]" onClick={async () => {
+              <button type="button" className="w-full text-sm font-semibold text-[var(--seek-success)]" onClick={async () => {
                 try {
                   setError("");
                   await sendMagicLink(email);
@@ -5013,18 +5013,18 @@ function AccountPage({ setPage, userSession, setUserSession }) {
             </>
           )}
           {mode === "signin" && (
-            <button type="button" className="block w-full text-center text-sm font-semibold text-[#1BAA9C]" onClick={() => { setMode("recover"); setError(""); setMessage(""); }}>
+            <button type="button" className="block w-full text-center text-sm font-semibold text-[var(--seek-success)]" onClick={() => { setMode("recover"); setError(""); setMessage(""); }}>
               Forgot password?
             </button>
           )}
 
-          <p className="text-center text-sm text-[#0D3B3B]/55">
+          <p className="text-center text-sm text-[var(--seek-primary)]/55">
             {mode === "signin" ? (
               <>
                 No account?{" "}
                 <button
                   type="button"
-                  className="font-semibold text-[#1BAA9C]"
+                  className="font-semibold text-[var(--seek-success)]"
                   onClick={() => {
                     setMode("signup");
                     setError("");
@@ -5039,7 +5039,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
                 Already have an account?{" "}
                 <button
                   type="button"
-                  className="font-semibold text-[#1BAA9C]"
+                  className="font-semibold text-[var(--seek-success)]"
                   onClick={() => {
                     setMode("signin");
                     setError("");
@@ -5148,8 +5148,8 @@ function MySeekDashboard({ setPage, userSession }) {
   return (
     <div style={{ background: C.bg }} className="min-h-screen">
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-7">
-        <div className="rounded-[2rem] bg-[#0D3B3B] text-white overflow-hidden relative">
-          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[#1BAA9C]/20" aria-hidden="true" />
+        <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white overflow-hidden relative">
+          <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--seek-success)]/20" aria-hidden="true" />
           <div className="absolute -left-20 -bottom-24 h-56 w-56 rounded-full bg-white/5" aria-hidden="true" />
           <div className="relative p-6 sm:p-8">
             <div className="flex items-center justify-between gap-4">
@@ -5165,10 +5165,10 @@ function MySeekDashboard({ setPage, userSession }) {
                   <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
                 </div>
                 <div className="min-w-0">
-                  <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">My SEEK</p>
+                  <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--seek-mint)]">My SEEK</p>
                   <p className="mt-1 text-xs text-white/70">Good {new Date().getHours() < 12 ? "morning" : new Date().getHours() < 17 ? "afternoon" : "evening"}</p>
                   <h1 className="font-display font-extrabold text-2xl sm:text-3xl truncate">{firstName}</h1>
-                  <p className="mt-1 text-sm text-[#8DE3C5] font-semibold truncate">{username}</p>
+                  <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
                 </div>
               </div>
               <button type="button" onClick={() => go("account", "/account")} className="shrink-0 rounded-full bg-white/10 px-3 py-2 text-xs font-semibold hover:bg-white/15">Edit profile</button>
@@ -5180,12 +5180,12 @@ function MySeekDashboard({ setPage, userSession }) {
             </div>
             <div className="mt-5 grid grid-cols-2 gap-3">
               <div className="rounded-2xl bg-white/10 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5] font-bold">Received</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--seek-mint)] font-bold">Received</p>
                 <p className="mt-1 font-display font-extrabold text-xl">₦{(received.length ? received : requests).reduce((sum, r) => sum + Number(r.amount || r.amountRaised || r.amount_raised || 0), 0).toLocaleString()}</p>
                 <p className="mt-1 text-[11px] text-white/60">Gifts neighbours sent you</p>
               </div>
               <div className="rounded-2xl bg-white/10 p-4">
-                <p className="text-[10px] uppercase tracking-widest text-[#8DE3C5] font-bold">Given</p>
+                <p className="text-[10px] uppercase tracking-widest text-[var(--seek-mint)] font-bold">Given</p>
                 <p className="mt-1 font-display font-extrabold text-xl">₦{gifts.reduce((sum, g) => sum + Number(g.amount || 0), 0).toLocaleString()}</p>
                 <p className="mt-1 text-[11px] text-white/60">What you gave neighbours</p>
               </div>
@@ -5195,7 +5195,7 @@ function MySeekDashboard({ setPage, userSession }) {
       </section>
 
       <section className="mx-auto max-w-xl px-5 sm:px-8 pb-8">
-        <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 divide-y divide-[#0D3B3B]/8">
+        <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/10 divide-y divide-[var(--seek-primary)]/8">
           {[
             ["My requests", () => go("my-requests", "/my-requests"), requests.length],
             ["My giveaways", () => go("offers", "/offers"), offers.length],
@@ -5203,8 +5203,8 @@ function MySeekDashboard({ setPage, userSession }) {
             ["Edit profile", () => go("account", "/account"), ""],
           ].map(([label, action, count]) => (
             <button key={label} type="button" onClick={action} className="w-full flex items-center justify-between px-5 py-4 text-left">
-              <span className="font-semibold text-[#0D3B3B]">{label}</span>
-              <span className="text-sm text-[#0D3B3B]/45">{count === "" ? "→" : count}</span>
+              <span className="font-semibold text-[var(--seek-primary)]">{label}</span>
+              <span className="text-sm text-[var(--seek-primary)]/45">{count === "" ? "→" : count}</span>
             </button>
           ))}
           <button type="button" onClick={() => {
@@ -5248,17 +5248,17 @@ function RequestEvidencePostForm({ requestId, onSaved }) {
   };
 
   return (
-    <form onSubmit={submit} className="mt-5 rounded-2xl border border-[#1BAA9C]/15 bg-[#1BAA9C]/5 p-4 space-y-3">
+    <form onSubmit={submit} className="mt-5 rounded-2xl border border-[var(--seek-success)]/15 bg-[var(--seek-success)]/5 p-4 space-y-3">
       <div>
-        <p className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">Share your evidence</p>
-        <p className="mt-1 text-sm text-[#0D3B3B]/65">Post a photo or short video showing your story or what support looks like. SEEK reviews media before it becomes public.</p>
+        <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">Share your evidence</p>
+        <p className="mt-1 text-sm text-[var(--seek-primary)]/65">Post a photo or short video showing your story or what support looks like. SEEK reviews media before it becomes public.</p>
       </div>
       <textarea value={caption} maxLength={280} rows={3} onChange={(e) => setCaption(e.target.value)} placeholder="Add a short caption or update (optional)" className="w-full rounded-xl border bg-white px-3 py-2 text-sm" />
       <input type="file" multiple accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime" onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 5))} className="block w-full text-sm" />
-      {files.length > 0 && <p className="text-xs text-[#0D3B3B]/50">{files.length} file{files.length === 1 ? "" : "s"} selected.</p>}
-      {message && <p className="text-sm text-[#168F84]">{message}</p>}
+      {files.length > 0 && <p className="text-xs text-[var(--seek-primary)]/50">{files.length} file{files.length === 1 ? "" : "s"} selected.</p>}
+      {message && <p className="text-sm text-[var(--seek-success)]">{message}</p>}
       {error && <p className="text-sm text-red-600">{error}</p>}
-      <button type="submit" disabled={saving} className="rounded-full bg-[#0D3B3B] px-4 py-2.5 text-sm font-bold text-white">{saving ? "Uploading…" : "Submit evidence"}</button>
+      <button type="submit" disabled={saving} className="rounded-full bg-[var(--seek-primary)] px-4 py-2.5 text-sm font-bold text-white">{saving ? "Uploading…" : "Submit evidence"}</button>
     </form>
   );
 }
@@ -5295,7 +5295,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         }
       }}
     >
-      <p className="font-body text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/45">
+      <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45">
         How did Seek go?
       </p>
       <textarea
@@ -5307,7 +5307,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         placeholder="What happened, and how did people show up?"
         className="w-full rounded-xl border px-3 py-2 text-sm"
       />
-      <p className="text-xs text-[#0D3B3B]/50">Share at least 1 video or 3 photos. SEEK reviews this before it is public.</p>
+      <p className="text-xs text-[var(--seek-primary)]/50">Share at least 1 video or 3 photos. SEEK reviews this before it is public.</p>
       <input
         type="file"
         multiple
@@ -5315,18 +5315,18 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 8))}
         className="block w-full text-sm"
       />
-      <p className="text-xs text-[#0D3B3B]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
+      <p className="text-xs text-[var(--seek-primary)]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
       {saved && (existing || existingMedia) && (
-        <div className="rounded-2xl bg-[#1BAA9C]/10 border border-[#1BAA9C]/15 p-4">
-          <p className="font-semibold text-sm text-[#0D3B3B]">Your update has been received.</p>
-          <p className="mt-1 text-xs text-[#0D3B3B]/60 leading-relaxed">SEEK may review the update before publishing it. Once approved, it can appear on the relevant request/story so people can see the outcome.</p>
+        <div className="rounded-2xl bg-[var(--seek-success)]/10 border border-[var(--seek-success)]/15 p-4">
+          <p className="font-semibold text-sm text-[var(--seek-primary)]">Your update has been received.</p>
+          <p className="mt-1 text-xs text-[var(--seek-primary)]/60 leading-relaxed">SEEK may review the update before publishing it. Once approved, it can appear on the relevant request/story so people can see the outcome.</p>
         </div>
       )}
       {error && <p className="text-sm text-red-600">{error}</p>}
       <button
         type="submit"
         disabled={saving}
-        className="rounded-xl bg-[#0D3B3B] text-white px-3 py-2 text-sm font-semibold"
+        className="rounded-xl bg-[var(--seek-primary)] text-white px-3 py-2 text-sm font-semibold"
       >
         {saving ? "Saving…" : saved ? "Update message" : "Submit for review"}
       </button>
@@ -5375,10 +5375,10 @@ function MyRequestsPage({ setPage, userSession }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[60vh] flex items-center">
         <div className="mx-auto max-w-md px-5 py-16 text-center">
-          <h1 className="font-display font-bold text-2xl text-[#0D3B3B] mb-3">
+          <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)] mb-3">
             Sign in to track your requests
           </h1>
-          <p className="font-body text-sm text-[#0D3B3B]/60 mb-6">
+          <p className="font-body text-sm text-[var(--seek-primary)]/60 mb-6">
             Use the same email you used when you submitted a request.
           </p>
           <Button variant="primary" onClick={() => setPage("account")}>
@@ -5394,21 +5394,21 @@ function MyRequestsPage({ setPage, userSession }) {
       <section className="mx-auto max-w-3xl px-5 sm:px-6 pt-9 sm:pt-12 pb-24">
         <div className="seek-my-requests-heading">
           <SectionLabel>Your account</SectionLabel>
-        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[#0D3B3B] mb-2">
+        <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--seek-primary)] mb-2">
           My requests
         </h1>
         <p className="seek-my-requests-intro">Track your requests, follow their progress and share updates with the people supporting you.</p>
         </div>
         <div className="seek-request-account mb-7">
           <div className="relative shrink-0">
-            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[#0D3B3B]/10" />}
+            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
             <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
           </div>
-          <p className="font-body text-sm text-[#0D3B3B]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
+          <p className="font-body text-sm text-[var(--seek-primary)]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
         </div>
 
         {loading && (
-          <p className="font-body text-sm text-[#0D3B3B]/50">Loading your requests…</p>
+          <p className="font-body text-sm text-[var(--seek-primary)]/50">Loading your requests…</p>
         )}
 
         {error && (
@@ -5421,11 +5421,11 @@ function MyRequestsPage({ setPage, userSession }) {
         )}
 
         {!loading && !error && items.length === 0 && (
-          <div className="rounded-3xl bg-white border border-[#0D3B3B]/08 p-8 text-center">
-            <p className="font-body text-[#0D3B3B]/60 mb-4">
+          <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-8 text-center">
+            <p className="font-body text-[var(--seek-primary)]/60 mb-4">
               You have no requests yet.
             </p>
-            <p className="font-body text-xs text-[#0D3B3B]/45 mb-6">
+            <p className="font-body text-xs text-[var(--seek-primary)]/45 mb-6">
               When you need help, you can ask here.
             </p>
             <Button variant="primary" onClick={() => setPage("seek-help")}>
@@ -5437,9 +5437,9 @@ function MyRequestsPage({ setPage, userSession }) {
         {!loading && items.length > 0 && (
           <>
             {items.some((r) => r.status === "published" || r.status === "partially_funded") && (
-              <div className="mb-4 rounded-2xl bg-[#1BAA9C]/10 border border-[#1BAA9C]/20 p-4">
-                <p className="text-sm font-semibold text-[#0D3B3B]">Keep your fundraiser moving</p>
-                <p className="mt-1 text-xs text-[#0D3B3B]/60">Fundraisers that post an update get more gifts. Share your progress or say thank you.</p>
+              <div className="mb-4 rounded-2xl bg-[var(--seek-success)]/10 border border-[var(--seek-success)]/20 p-4">
+                <p className="text-sm font-semibold text-[var(--seek-primary)]">Keep your fundraiser moving</p>
+                <p className="mt-1 text-xs text-[var(--seek-primary)]/60">Fundraisers that post an update get more gifts. Share your progress or say thank you.</p>
               </div>
             )}
             <input className="mb-3 w-full rounded-xl border px-4 py-3 text-sm" placeholder="Search your requests" value={q} onChange={(e) => setQ(e.target.value)} />
@@ -5467,22 +5467,22 @@ function MyRequestsPage({ setPage, userSession }) {
               className="seek-request-card"
             >
               <summary className="seek-request-summary cursor-pointer list-none">
-                <span className="font-display font-bold text-[#0D3B3B]">{req.title}</span>
+                <span className="font-display font-bold text-[var(--seek-primary)]">{req.title}</span>
                 <span className="seek-request-status">{formatSeekStatus(req.status)}</span>
               </summary>
               <div className="seek-request-card-body">
               <div className="flex flex-wrap items-start justify-between gap-2 mb-3">
-                <span className="text-xs font-semibold uppercase tracking-wide text-[#1BAA9C]">
+                <span className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-success)]">
                   {req.category}
                 </span>
-                <span className="text-xs font-semibold text-[#0D3B3B]/50">
+                <span className="text-xs font-semibold text-[var(--seek-primary)]/50">
                   {formatSeekStatus(req.status)}
                 </span>
               </div>
-              <h2 className="font-display font-bold text-lg text-[#0D3B3B] mb-1">
+              <h2 className="font-display font-bold text-lg text-[var(--seek-primary)] mb-1">
                 {req.title}
               </h2>
-              <p className="flex items-center gap-1.5 text-sm text-[#0D3B3B]/55 mb-3">
+              <p className="flex items-center gap-1.5 text-sm text-[var(--seek-primary)]/55 mb-3">
                 <MapPin size={14} /> {req.location}
               </p>
               {req.amountNeeded ? (
@@ -5497,7 +5497,7 @@ function MyRequestsPage({ setPage, userSession }) {
                     const order = {pending_review:0,verification_required:0,published:1,partially_funded:2,matched:2,fulfilled:3,closed:4,rejected:-1};
                     const current = order[req.status] ?? 0;
                     const active = current >= index && req.status !== 'rejected';
-                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[#1BAA9C]' : 'bg-[#0D3B3B]/20'}`}></div><span className={`mt-1 block text-[10px] leading-tight ${active ? 'text-[#0D3B3B] font-bold' : 'text-[#0D3B3B]/70'}`}>{label}</span></div>;
+                    return <div key={id} className="text-center"><div className={`mx-auto h-2 rounded-full ${active ? 'bg-[var(--seek-success)]' : 'bg-[var(--seek-primary)]/20'}`}></div><span className={`mt-1 block text-[10px] leading-tight ${active ? 'text-[var(--seek-primary)] font-bold' : 'text-[var(--seek-primary)]/70'}`}>{label}</span></div>;
                   })}
                 </div>
               </div>
@@ -5505,7 +5505,7 @@ function MyRequestsPage({ setPage, userSession }) {
                 <div className="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4">
                   <p className="text-sm font-semibold text-amber-800">Admin needs more evidence</p>
                   <p className="mt-1 text-xs text-amber-700">Please upload additional photos or documents to support your fundraiser.</p>
-                  <label className="mt-2 inline-block text-sm font-semibold text-[#1BAA9C] cursor-pointer">
+                  <label className="mt-2 inline-block text-sm font-semibold text-[var(--seek-success)] cursor-pointer">
                     Upload evidence
                     <input type="file" accept="image/*,video/*,application/pdf" className="hidden" onChange={async (e) => {
                       const file = e.target.files?.[0];
@@ -5521,9 +5521,9 @@ function MyRequestsPage({ setPage, userSession }) {
                 </div>
               )}
               {["published", "partially_funded"].includes(req.status) && (
-                <div className="mt-4 rounded-xl bg-[#F2F5F3] p-4">
-                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">Post an update</p>
-                  <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[#0D3B3B]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
+                <div className="mt-4 rounded-xl bg-[var(--seek-white)] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50 mb-2">Post an update</p>
+                  <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[var(--seek-primary)]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
                   <button type="button" onClick={async () => {
                     const text = document.getElementById("update-" + req.id)?.value;
                     if (!text?.trim()) return;
@@ -5534,7 +5534,7 @@ function MyRequestsPage({ setPage, userSession }) {
                     } catch (err) {
                       alert(err.message || "Could not post update.");
                     }
-                  }} className="mt-2 rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-xs font-bold">Post update</button>
+                  }} className="mt-2 rounded-full bg-[var(--seek-success)] text-white px-4 py-2 text-xs font-bold">Post update</button>
                 </div>
               )}
                 <div className="seek-request-actions">
@@ -5545,11 +5545,11 @@ function MyRequestsPage({ setPage, userSession }) {
                     window.history.pushState({}, "", `/request/${req.id}`);
                     window.scrollTo(0, 0);
                   }}
-                  className="text-sm font-semibold text-[#1BAA9C] hover:underline"
+                  className="text-sm font-semibold text-[var(--seek-success)] hover:underline"
                 >
                   View public page
                 </button>
-                <label className="text-sm font-semibold text-[#1BAA9C] hover:underline cursor-pointer">
+                <label className="text-sm font-semibold text-[var(--seek-success)] hover:underline cursor-pointer">
                   Add evidence
                   <input type="file" accept="image/*,video/*" className="hidden" onChange={async (e) => {
                     const file = e.target.files?.[0];
@@ -5653,7 +5653,7 @@ function ShopPage({ setPage }) {
               key={row.id}
               type="button"
               onClick={() => { setItem(row); setSize(row.sizes[0]); setError(""); }}
-              className="seek-shop-product rounded-2xl border border-[#0D3B3B]/10 bg-white overflow-hidden text-left"
+              className="seek-shop-product rounded-2xl border border-[var(--seek-primary)]/10 bg-white overflow-hidden text-left"
               style={{ "--seek-shop-index": SEEK_SHOP.findIndex((product) => product.id === row.id) }}
             >
               <div className="seek-shop-image-wrap"><img
@@ -5669,19 +5669,19 @@ function ShopPage({ setPage }) {
                   }}
                 /></div>
               <div className="p-3">
-                <p className="font-display font-bold text-sm text-[#0D3B3B]">{row.title}</p>
-                <p className="font-display font-bold text-sm text-[#1BAA9C]">₦{row.price.toLocaleString()}</p>
+                <p className="font-display font-bold text-sm text-[var(--seek-primary)]">{row.title}</p>
+                <p className="font-display font-bold text-sm text-[var(--seek-success)]">₦{row.price.toLocaleString()}</p>
               </div>
             </button>
           ))}
         </div>
-        <button type="button" className="mt-8 text-sm font-semibold text-[#1BAA9C]" onClick={() => setPage("give")}>Give to a request instead</button>
+        <button type="button" className="mt-8 text-sm font-semibold text-[var(--seek-success)]" onClick={() => setPage("give")}>Give to a request instead</button>
       </section>
 
       {item && (
         <div className="fixed inset-0 z-[180] bg-black/40 flex items-end sm:items-center justify-center p-4" onClick={() => !loading && setItem(null)}>
           <form
-            className="w-full max-w-sm rounded-2xl bg-[#101415] text-white p-4"
+            className="w-full max-w-sm rounded-2xl bg-[var(--seek-dark)] text-white p-4"
             onClick={(e) => e.stopPropagation()}
             onSubmit={async (e) => {
               e.preventDefault();
@@ -5707,20 +5707,20 @@ function ShopPage({ setPage }) {
               }
             }}
           >
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#8DE3C5]">Order</p>
+            <p className="text-[10px] font-bold uppercase tracking-widest text-[var(--seek-mint)]">Order</p>
             <h2 className="font-display font-bold text-lg mt-1">{item.title} · ₦{item.price.toLocaleString()}</h2>
             <div className="mt-3 flex flex-wrap gap-2">
               {item.sizes.map((s) => (
-                <button key={s} type="button" onClick={() => setSize(s)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${size === s ? "bg-[#1BAA9C] text-white" : "bg-white/10"}`}>{s}</button>
+                <button key={s} type="button" onClick={() => setSize(s)} className={`rounded-full px-3 py-1.5 text-xs font-bold ${size === s ? "bg-[var(--seek-success)] text-white" : "bg-white/10"}`}>{s}</button>
               ))}
             </div>
-            <input className="mt-3 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
-            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
-            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
-            <input className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
-            <textarea className="mt-2 w-full rounded-xl bg-white text-[#101415] p-3 text-sm" rows={2} placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
+            <input className="mt-3 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" placeholder="Name" value={name} onChange={(e) => setName(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" placeholder="Email" type="email" value={email} onChange={(e) => setEmail(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" placeholder="Phone" value={phone} onChange={(e) => setPhone(e.target.value)} />
+            <input className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" placeholder="City" value={city} onChange={(e) => setCity(e.target.value)} />
+            <textarea className="mt-2 w-full rounded-xl bg-white text-[var(--seek-dark)] p-3 text-sm" rows={2} placeholder="Delivery address" value={address} onChange={(e) => setAddress(e.target.value)} />
             {error && <p className="mt-2 text-sm text-red-300">{error}</p>}
-            <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[#1BAA9C] py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Pay ₦" + item.price.toLocaleString()}</button>
+            <button type="submit" disabled={loading} className="mt-3 w-full rounded-full bg-[var(--seek-success)] py-3 text-sm font-bold">{loading ? "Opening Paystack…" : "Pay ₦" + item.price.toLocaleString()}</button>
             <button type="button" className="mt-2 w-full text-sm text-white/60" onClick={() => !loading && setItem(null)}>Close</button>
           </form>
         </div>
@@ -5836,16 +5836,16 @@ function LiveTicker() {
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
               <span className="seek-live-ring" />
-              <span className="relative h-1.5 w-1.5 rounded-full bg-[#9BE15D]" />
+              <span className="relative h-1.5 w-1.5 rounded-full bg-[var(--seek-mint)]" />
             </span>
-            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[#D8F18A]">Community pulse</span>
+            <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
             <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
-                  <span className="font-extrabold tracking-[0.09em] text-[#FFC98B]">{item.label}</span>
+                  <span className="font-extrabold tracking-[0.09em] text-[var(--seek-muted)]">{item.label}</span>
                   <span>{item.text}</span>
                   <span className="ml-2 text-white/25" aria-hidden="true">✦</span>
                 </span>
@@ -5975,11 +5975,11 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
     <>
       {composerOpen && (
         <div className="fixed inset-0 z-[140] lg:hidden" role="dialog" aria-modal="true" aria-label="SEEK quick actions">
-          <button type="button" aria-label="Close quick actions" className="absolute inset-0 bg-[#0D3B3B]/35 backdrop-blur-[2px]" onClick={() => setComposerOpen(false)} />
-          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-[#101415] p-4 shadow-2xl border border-white/10 text-white">
+          <button type="button" aria-label="Close quick actions" className="absolute inset-0 bg-[var(--seek-primary)]/35 backdrop-blur-[2px]" onClick={() => setComposerOpen(false)} />
+          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-[var(--seek-dark)] p-4 shadow-2xl border border-white/10 text-white">
             <div className="flex items-center justify-between px-2 pb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#8DE3C5]">SEEK</p>
+                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--seek-mint)]">SEEK</p>
                 <h2 className="font-display font-extrabold text-xl text-white">What would you like to do?</h2>
               </div>
               <button type="button" onClick={() => setComposerOpen(false)} className="h-9 w-9 rounded-full bg-white/15 text-white text-xl leading-none" aria-label="Close">×</button>
@@ -6000,7 +6000,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
         </div>
       )}
 
-      <nav className="fixed inset-x-0 bottom-0 z-[100] lg:hidden border-t border-white/10 bg-[#101415]/[0.97] text-white shadow-[0_-8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} aria-label="SEEK mobile navigation">
+      <nav className="fixed inset-x-0 bottom-0 z-[100] lg:hidden border-t border-white/10 bg-[var(--seek-dark)]/[0.97] text-white shadow-[0_-8px_30px_rgba(0,0,0,0.18)] backdrop-blur-xl" style={{ paddingBottom: "env(safe-area-inset-bottom)" }} aria-label="SEEK mobile navigation">
         <div className="relative mx-auto flex h-[4.35rem] max-w-xl items-center justify-around px-3">
           {items.slice(0, 2).map((item) => {
             const Icon = item.icon;
@@ -6025,7 +6025,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
             );
           })}
 
-          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`seek-mobile-create absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[#101415] bg-[#1BAA9C] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
+          <button type="button" onClick={() => setComposerOpen((v) => !v)} aria-label={composerOpen ? "Close SEEK actions" : "Create or ask on SEEK"} aria-expanded={composerOpen} className={`seek-mobile-create absolute left-1/2 top-[-1.9rem] -translate-x-1/2 flex h-[4.25rem] w-[4.25rem] items-center justify-center rounded-full border-[5px] border-[var(--seek-dark)] bg-[var(--seek-success)] text-white shadow-[0_10px_28px_rgba(0,0,0,0.35)] transition-transform ${composerOpen ? "rotate-45 scale-95" : "hover:scale-105"}`}>
             <Plus size={35} strokeWidth={2.2} />
           </button>
         </div>
@@ -6055,7 +6055,7 @@ function CookieBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[84px] sm:px-4 sm:pb-4">
-      <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[#0D3B3B] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
+      <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[var(--seek-primary)] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
         <button
           type="button"
           aria-label="Close privacy notice"
@@ -6072,7 +6072,7 @@ function CookieBanner() {
         <div className="mt-4 flex flex-wrap gap-2">
           <button
             type="button"
-            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[#0D3B3B]"
+            className="rounded-full bg-white px-4 py-2 text-sm font-semibold text-[var(--seek-primary)]"
             onClick={() => saveConsent("1")}
           >
             Accept all
@@ -6126,7 +6126,7 @@ function InstallSeekPrompt() {
   };
   return (
     <div className="fixed inset-x-0 bottom-20 z-[150] p-4 pointer-events-none">
-      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/10 bg-[#0D3B3B] text-white shadow-2xl p-4">
+      <div className="pointer-events-auto mx-auto max-w-sm rounded-2xl border border-white/10 bg-[var(--seek-primary)] text-white shadow-2xl p-4">
         <div className="flex items-start justify-between gap-3">
           <div>
             <p className="font-display font-bold text-base">Install SEEK</p>
@@ -6134,7 +6134,7 @@ function InstallSeekPrompt() {
           </div>
           <button type="button" onClick={() => setClosed(true)} className="text-white/50 text-lg leading-none">×</button>
         </div>
-        <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Install now</button>
+        <button type="button" onClick={doInstall} className="mt-3 w-full rounded-full bg-[var(--seek-success)] text-white py-2.5 text-sm font-bold">Install now</button>
       </div>
     </div>
   );
@@ -6356,14 +6356,14 @@ useEffect(() => {
       {paymentReturn.status !== "idle" && (
         <div className="fixed inset-0 z-[200] flex items-center justify-center bg-black/40">
           <div className="rounded-2xl bg-white p-6 text-center shadow-xl">
-            <p className="font-body text-sm font-semibold text-[#0D3B3B]">
+            <p className="font-body text-sm font-semibold text-[var(--seek-primary)]">
               {paymentReturn.status === "checking"
                 ? "Confirming your donation"
                 : paymentReturn.status === "success"
                   ? "Donation confirmed"
                   : "Payment received — still updating"}
             </p>
-            <p className="mt-2 font-body text-sm text-[#0D3B3B]/70">
+            <p className="mt-2 font-body text-sm text-[var(--seek-primary)]/70">
               {paymentReturn.message}
             </p>
             {paymentReturn.status === "success" && (
@@ -6374,7 +6374,7 @@ useEffect(() => {
                 {paymentReturn.requestId && (
                   <button
                     type="button"
-                    className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm"
+                    className="rounded-xl bg-[var(--seek-primary)] text-white px-4 py-2 text-sm"
                     onClick={() => {
                       setPaymentReturn({ status: "idle", message: "" });
                       setPage(`request:${paymentReturn.requestId}`);
@@ -6387,7 +6387,7 @@ useEffect(() => {
                 {paymentReturn.outreachId && (
                   <button
                     type="button"
-                    className="rounded-xl bg-[#0D3B3B] text-white px-4 py-2 text-sm"
+                    className="rounded-xl bg-[var(--seek-primary)] text-white px-4 py-2 text-sm"
                     onClick={() => {
                       setPaymentReturn({ status: "idle", message: "" });
                       setPage("give");
