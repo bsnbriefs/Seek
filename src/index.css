@@ -801,3 +801,120 @@ html.seek-dark .seek-community-pulse .text-\[var\(--seek-light\)] { color: #2023
 @media (prefers-reduced-motion: reduce) {
   .seek-community-pulse .seek-live-ring { animation: none !important; }
 }
+
+/* SEEK visual system — GoFundMe-inspired, restrained and welcoming.
+   Keep html.seek-dark as the existing theme-toggle contract. */
+:root {
+  --seek-brand: #274A34;
+  --seek-lime: #CCF88E;
+  --seek-page: #FAF8F3;
+  --seek-surface: #FFFFFF;
+  --seek-copy: #26332B;
+  --seek-copy-muted: #58645C;
+  --seek-border: #E4E8E1;
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-success: #3D7651;
+  --seek-mint: #EAF2E5;
+  --seek-light: #FAF8F3;
+  --seek-dark: #202923;
+  --seek-white: #FFFFFF;
+  --seek-muted: #58645C;
+  --seek-ink: #26332B;
+  --seek-head: #274A34;
+  --seek-bg: #FAF8F3;
+  --seek-card: #FFFFFF;
+}
+html:not(.seek-dark) {
+  color-scheme: light;
+  background: var(--seek-page);
+  color: var(--seek-copy);
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-light: #FAF8F3;
+  --seek-white: #FFFFFF;
+  --seek-mint: #EAF2E5;
+  --seek-muted: #58645C;
+  --seek-ink: #26332B;
+  --seek-head: #274A34;
+  --seek-bg: #FAF8F3;
+  --seek-card: #FFFFFF;
+}
+html.seek-dark {
+  color-scheme: dark;
+  background: #202923;
+  color: #F7F7F1;
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-light: #F7F7F1;
+  --seek-white: #FFFFFF;
+  --seek-mint: #34463A;
+  --seek-muted: #D5DED5;
+  --seek-ink: #F7F7F1;
+  --seek-head: #F7F7F1;
+  --seek-bg: #202923;
+  --seek-card: #2B362E;
+}
+html:not(.seek-dark) body { background: var(--seek-page); color: var(--seek-copy); }
+html.seek-dark body { background: #202923; color: #F7F7F1; }
+
+/* Shared surfaces and readable copy in both themes. */
+html:not(.seek-dark) .bg-white,
+html:not(.seek-dark) .seek-discover-toolbar,
+html:not(.seek-dark) .seek-theme-toggle { background-color: #FFFFFF !important; }
+html:not(.seek-dark) p,
+html:not(.seek-dark) label,
+html:not(.seek-dark) .text-\[var\(--seek-muted\)\] { color: #58645C; }
+html:not(.seek-dark) h1,
+html:not(.seek-dark) h2,
+html:not(.seek-dark) h3 { color: #274A34; }
+html.seek-dark .bg-white,
+html.seek-dark .seek-discover-toolbar,
+html.seek-dark .seek-theme-toggle { background-color: #2B362E !important; color: #F7F7F1 !important; }
+html.seek-dark p,
+html.seek-dark label,
+html.seek-dark .text-\[var\(--seek-muted\)\] { color: #D5DED5; }
+html.seek-dark h1,
+html.seek-dark h2,
+html.seek-dark h3 { color: #F7F7F1; }
+html.seek-dark input,
+html.seek-dark textarea,
+html.seek-dark select { background: #26332B !important; color: #F7F7F1 !important; border-color: #657568 !important; }
+html.seek-dark input::placeholder,
+html.seek-dark textarea::placeholder { color: #C0CCC1 !important; opacity: 1; }
+html:not(.seek-dark) input,
+html:not(.seek-dark) textarea,
+html:not(.seek-dark) select { background: #FFFFFF; color: #26332B; border-color: #C9D2C8; }
+html:not(.seek-dark) input::placeholder,
+html:not(.seek-dark) textarea::placeholder { color: #66736A; opacity: 1; }
+
+/* Lime is reserved for primary actions and selected states. */
+.seek-hero-primary,
+.seek-shop-product button,
+.seek-campaign-page .seek-campaign-donate,
+button.seek-primary-action {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  border-color: #CCF88E !important;
+  font-weight: 800;
+  box-shadow: 0 4px 12px rgba(39,74,52,.13);
+}
+.seek-hero-primary:hover,
+.seek-shop-product button:hover,
+.seek-campaign-page .seek-campaign-donate:hover,
+button.seek-primary-action:hover { background: #B9EB75 !important; }
+.seek-theme-toggle { color: #274A34 !important; border: 1px solid #D5DED3 !important; }
+html.seek-dark .seek-theme-toggle { color: #CCF88E !important; border-color: #66786A !important; }
+.seek-home-hero, .seek-shop-hero { background: #FAF8F3 !important; }
+html.seek-dark .seek-home-hero, html.seek-dark .seek-shop-hero { background: #202923 !important; }
+.seek-community-pulse {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  border-color: rgba(204,248,142,.35) !important;
+}
+.seek-community-pulse * { color: #FFFFFF !important; }
+.seek-community-pulse .seek-live-ring,
+.seek-community-pulse .seek-pulse-dot { background: #CCF88E !important; border-color: #CCF88E !important; }
+.seek-community-pulse b,
+.seek-community-pulse strong { color: #CCF88E !important; }
+html.seek-dark .seek-community-pulse { background: #274A34 !important; color: #FFFFFF !important; }
