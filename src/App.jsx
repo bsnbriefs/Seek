@@ -5269,67 +5269,84 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
   const [files, setFiles] = useState([]);
   const [saving, setSaving] = useState(false);
   const [error, setError] = useState("");
-  const [deletingId, setDeletingId] = useState("");
   const [saved, setSaved] = useState(Boolean(existing || existingMedia));
 
   return (
     <form
-      className="mt-4 space-y-2"
+      className="mt-5 rounded-2xl border border-[var(--seek-primary)]/12 bg-[var(--seek-white)] p-4 sm:p-5 space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
         try {
           setSaving(true);
           setError("");
-          if (text.trim().length < 3) throw new Error("Write a short note about how it went.");
-          const all = files || [];
-          const videos = all.filter((f) => String(f.type || "").startsWith("video")).length + (String(existingMedia || "").match(/\.(mp4|webm|mov)(\?|$)/i) ? 1 : 0);
-          const photos = all.filter((f) => String(f.type || "").startsWith("image")).length + (existingMedia && !String(existingMedia).match(/\.(mp4|webm|mov)(\?|$)/i) ? 1 : 0);
-          if (videos < 1 && photos < 3) throw new Error("Share at least 1 video or 3 photos.");
-          await postRequestPublicUpdate(requestId, text);
-          for (const f of files || []) await uploadAppreciationMedia(requestId, f);
+          if (text.trim().length < 3) throw new Error("Please write a short update before submitting.");
+          await postRequestPublicUpdate(requestId, text.trim());
+          // Photos and videos are optional. A written outcome is enough to close the loop
+          // with supporters; any media selected by the requester is uploaded for review.
+          for (const file of files.slice(0, 5)) await uploadAppreciationMedia(requestId, file);
+          setFiles([]);
           setSaved(true);
           onSaved?.(text.trim());
         } catch (err) {
-          setError(err.message);
+          setError(err?.message || "We couldn't submit your update. Please try again.");
         } finally {
           setSaving(false);
         }
       }}
     >
-      <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45">
-        How did Seek go?
-      </p>
+      <div>
+        <p className="font-body text-sm font-bold text-[var(--seek-primary)]">Share your outcome</p>
+        <p className="mt-1 text-sm leading-relaxed text-[var(--seek-primary)]/75">
+          Let the people who supported you know what happened and how their help made a difference.
+        </p>
+      </div>
+      <label className="block text-sm font-semibold text-[var(--seek-primary)]" htmlFor={`outcome-${requestId}`}>
+        Your update
+      </label>
       <textarea
+        id={`outcome-${requestId}`}
         required
         value={text}
-        maxLength={280}
-        rows={3}
+        maxLength={500}
+        rows={4}
         onChange={(e) => setText(e.target.value)}
-        placeholder="What happened, and how did people show up?"
-        className="w-full rounded-xl border px-3 py-2 text-sm"
+        placeholder="Tell your supporters how things went. You can also thank them."
+        className="w-full rounded-xl border border-[var(--seek-primary)]/25 bg-[var(--seek-white)] px-3 py-3 text-sm text-[var(--seek-primary)] placeholder:text-[var(--seek-primary)]/55 focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]"
       />
-      <p className="text-xs text-[var(--seek-primary)]/50">Share at least 1 video or 3 photos. SEEK reviews this before it is public.</p>
-      <input
-        type="file"
-        multiple
-        accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
-        onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 8))}
-        className="block w-full text-sm"
-      />
-      <p className="text-xs text-[var(--seek-primary)]/45">Optional photo or short video of thanks. Do not include other people’s private documents.</p>
+      <div>
+        <label className="block text-sm font-semibold text-[var(--seek-primary)]" htmlFor={`outcome-media-${requestId}`}>
+          Add a photo or video <span className="font-normal text-[var(--seek-primary)]/60">(optional)</span>
+        </label>
+        <p className="mt-1 text-xs leading-relaxed text-[var(--seek-primary)]/70">
+          A photo or short video can help show the outcome, but it is not required. SEEK reviews any media before it is made public. Please don't upload private documents or images of others without permission.
+        </p>
+        <input
+          id={`outcome-media-${requestId}`}
+          type="file"
+          multiple
+          accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
+          onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 5))}
+          className="mt-2 block w-full text-sm text-[var(--seek-primary)] file:mr-3 file:rounded-full file:border-0 file:bg-[var(--seek-primary)] file:px-4 file:py-2 file:font-semibold file:text-white"
+        />
+        {files.length > 0 && (
+          <p className="mt-1 text-xs text-[var(--seek-primary)]/70">{files.length} file{files.length === 1 ? "" : "s"} selected.</p>
+        )}
+      </div>
       {saved && (existing || existingMedia) && (
-        <div className="rounded-2xl bg-[var(--seek-success)]/10 border border-[var(--seek-success)]/15 p-4">
-          <p className="font-semibold text-sm text-[var(--seek-primary)]">Your update has been received.</p>
-          <p className="mt-1 text-xs text-[var(--seek-primary)]/60 leading-relaxed">SEEK may review the update before publishing it. Once approved, it can appear on the relevant request/story so people can see the outcome.</p>
+        <div className="rounded-xl border border-[var(--seek-success)]/25 bg-[var(--seek-success)]/10 p-3" role="status" aria-live="polite">
+          <p className="text-sm font-semibold text-[var(--seek-primary)]">Your outcome update has been submitted.</p>
+          <p className="mt-1 text-sm leading-relaxed text-[var(--seek-primary)]/75">
+            Thank you for closing the loop with the community. SEEK will review it before it appears publicly.
+          </p>
         </div>
       )}
-      {error && <p className="text-sm text-red-600">{error}</p>}
+      {error && <p className="text-sm font-medium text-red-700" role="alert">{error}</p>}
       <button
         type="submit"
         disabled={saving}
-        className="rounded-xl bg-[var(--seek-primary)] text-white px-3 py-2 text-sm font-semibold"
+        className="rounded-full bg-[var(--seek-primary)] px-5 py-3 text-sm font-bold text-white transition hover:opacity-90 disabled:cursor-not-allowed disabled:opacity-60"
       >
-        {saving ? "Saving…" : saved ? "Update message" : "Submit for review"}
+        {saving ? "Submitting…" : saved ? "Update outcome" : "Share outcome"}
       </button>
     </form>
   );
