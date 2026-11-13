@@ -563,3 +563,80 @@ body { background-color: var(--seek-bg); color: var(--seek-ink); }
 html.seek-dark .seek-home-hero { background: radial-gradient(ellipse at 8% 0%,rgba(217,133,104,.12),transparent 50%),linear-gradient(180deg,#303437 0%,#242729 100%) !important; }
 html.seek-dark .seek-shop-hero { background: radial-gradient(circle at 90% 5%,rgba(217,133,104,.14),transparent 38%),linear-gradient(135deg,#303437,#242729) !important; }
 html.seek-dark .seek-community-pulse { background:#303437 !important; color:#F7F1EA !important; border-color:rgba(217,133,104,.25) !important; }
+
+/* SEEK theme-toggle recovery: keep semantic brand tokens stable in both themes.
+   The previous warm-palette override changed --seek-primary to a light colour in
+   dark mode, while legacy dark components still use it as a dark surface. */
+:root {
+  color-scheme: light;
+  --seek-primary: #294B43;
+  --seek-accent: #D98568;
+  --seek-plum: #806477;
+  --seek-mint: #E9DCCB;
+  --seek-light: #FAF7F2;
+  --seek-dark: #242729;
+  --seek-white: #FFFFFF;
+  --seek-success: #64836B;
+  --seek-warning: #B9823F;
+  --seek-danger: #B85C5C;
+  --seek-muted: #756C68;
+  --seek-bg: #FAF7F2;
+  --seek-card: #FFFFFF;
+  --seek-ink: #343638;
+  --seek-head: #294B43;
+  --seek-wash: rgba(250,247,242,.82);
+}
+html.seek-dark {
+  color-scheme: dark;
+  /* --seek-primary remains the evergreen brand anchor because legacy dark-mode
+     components use it as their dark card/surface colour. */
+  --seek-primary: #294B43;
+  --seek-accent: #E6A087;
+  --seek-plum: #B99AAF;
+  --seek-mint: #E9DCCB;
+  --seek-light: #FAF7F2;
+  --seek-dark: #242729;
+  --seek-white: #FFFFFF;
+  --seek-success: #A6C0A5;
+  --seek-warning: #E0B36F;
+  --seek-danger: #E08A8A;
+  --seek-muted: #C7BBB4;
+  --seek-bg: #242729;
+  --seek-card: #303437;
+  --seek-ink: #F7F1EA;
+  --seek-head: #E9DCCB;
+  --seek-wash: rgba(36,39,41,.92);
+}
+html, body {
+  background-color: var(--seek-bg);
+  color: var(--seek-ink);
+}
+html.seek-dark body {
+  background-color: #242729;
+  color: #F7F1EA;
+}
+/* Keep the theme control visible and legible in both modes. */
+.seek-theme-toggle {
+  color: #294B43 !important;
+  background: #FFFFFF !important;
+  border: 1px solid rgba(41,75,67,.22) !important;
+}
+html.seek-dark .seek-theme-toggle {
+  color: #FAF7F2 !important;
+  background: #294B43 !important;
+  border-color: rgba(250,247,242,.35) !important;
+}
+/* Warm surfaces without changing the existing light/dark toggle mechanism. */
+html:not(.seek-dark) .seek-home-hero,
+html:not(.seek-dark) .seek-shop-hero {
+  color: #343638;
+}
+html.seek-dark .seek-home-hero,
+html.seek-dark .seek-shop-hero {
+  color: #FAF7F2;
+}
+html.seek-dark .seek-community-pulse {
+  background: #303437 !important;
+  color: #FAF7F2 !important;
+  border-color: rgba(217,133,104,.28) !important;
+}
