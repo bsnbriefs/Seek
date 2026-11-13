@@ -1457,7 +1457,7 @@ function Navbar({ page, setPage, userSession }) {
               </button>
             );
           })}
-          <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="mt-2 w-full rounded-xl bg-[var(--seek-primary)] text-white py-3 text-sm tracking-[0.16em] uppercase">
+          <button onClick={() => go(userSession?.access_token ? "my-seek" : "account")} className="seek-mobile-account-link mt-2 w-full rounded-xl bg-[var(--seek-primary)] text-white py-3 text-sm tracking-[0.16em] uppercase">
             {userSession?.access_token ? "My SEEK" : "Sign in"}
           </button>
         </div>
