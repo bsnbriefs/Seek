@@ -2066,3 +2066,49 @@ html .seek-campaign-page button[aria-disabled="true"] {
   background-color: #CCF88E !important;
   border-color: #A6D36B !important;
 }
+
+/* =========================================================
+   SEEK CAMPAIGN CARDS — DARK MODE TEXT CONTRAST FIX
+   The previous broad button rule applied the Donate foreground
+   to every button inside a campaign card, including View details.
+   Keep the card copy light and style the two actions separately.
+   ========================================================= */
+html.seek-dark .seek-campaign-page .seek-campaign-card,
+html.seek-dark .seek-campaign-page .seek-campaign-card > div {
+  color: #F7F7F1 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card :is(h1,h2,h3,h4,p,small,label,span) {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card :is(.text-\[var\(--seek-primary\)],.text-\[var\(--seek-success\)],.text-\[var\(--seek-muted\)]) {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+/* View-details is a secondary action: lime text on the card surface. */
+html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child,
+html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+  background: transparent !important;
+}
+/* Donate is the primary action: evergreen text on a lime button. */
+html .seek-campaign-page .seek-campaign-card button:last-child,
+html .seek-campaign-page .seek-campaign-card a:last-child {
+  background: #CCF88E !important;
+  border: 1px solid #A6D36B !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+}
+html .seek-campaign-page .seek-campaign-card button:last-child :is(span,strong,b,svg),
+html .seek-campaign-page .seek-campaign-card a:last-child :is(span,strong,b,svg) {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child :is(span,strong,b,svg),
+html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child :is(span,strong,b,svg) {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
