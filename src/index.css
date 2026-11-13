@@ -918,3 +918,92 @@ html.seek-dark .seek-home-hero, html.seek-dark .seek-shop-hero { background: #20
 .seek-community-pulse b,
 .seek-community-pulse strong { color: #CCF88E !important; }
 html.seek-dark .seek-community-pulse { background: #274A34 !important; color: #FFFFFF !important; }
+
+/* =========================================================
+   SEEK ACCESSIBILITY PASS — FINAL THEME CONTRAST OVERRIDES
+   Keep this block last: it deliberately wins over older page
+   colour rules without changing the theme-toggle mechanism.
+   ========================================================= */
+:root {
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-light: #26332B;
+  --seek-white: #FFFFFF;
+  --seek-mint: #E5F2D7;
+  --seek-muted: #58645C;
+  --seek-ink: #26332B;
+  --seek-head: #274A34;
+  --seek-bg: #FAF8F3;
+  --seek-page: #FAF8F3;
+  --seek-copy: #26332B;
+  --seek-card: #FFFFFF;
+}
+html.seek-dark {
+  color-scheme: dark;
+  --seek-primary: #202923;
+  --seek-accent: #CCF88E;
+  --seek-light: #F7F7F1;
+  --seek-white: #FFFFFF;
+  --seek-mint: #DCEBCB;
+  --seek-muted: #D5DED5;
+  --seek-ink: #F7F7F1;
+  --seek-head: #F7F7F1;
+  --seek-bg: #202923;
+  --seek-page: #202923;
+  --seek-copy: #F7F7F1;
+  --seek-card: #2B362E;
+  background: #202923;
+  color: #F7F7F1;
+}
+html:not(.seek-dark) body { background: #FAF8F3 !important; color: #26332B !important; }
+html.seek-dark body { background: #202923 !important; color: #F7F7F1 !important; }
+
+/* Consistent readable type, including Tailwind opacity text utilities. */
+html:not(.seek-dark) :is(h1,h2,h3,h4,h5,h6) { color: #274A34; }
+html:not(.seek-dark) :is(p,label,small,li,dt,dd,figcaption) { color: #46534A; }
+html.seek-dark :is(h1,h2,h3,h4,h5,h6) { color: #F7F7F1 !important; }
+html.seek-dark :is(p,label,small,li,dt,dd,figcaption) { color: #D5DED5; }
+html.seek-dark :is(.text-gray-400,.text-gray-500,.text-slate-400,.text-slate-500,.text-zinc-400,.text-zinc-500) { color: #C5D0C7 !important; }
+html:not(.seek-dark) :is(.text-gray-400,.text-gray-500,.text-slate-400,.text-slate-500,.text-zinc-400,.text-zinc-500) { color: #59665D !important; }
+
+/* Surfaces, cards, panels and borders. */
+html:not(.seek-dark) :is(.bg-white,.bg-white\/90,.bg-white\/95) { background-color: #FFFFFF !important; }
+html.seek-dark :is(.bg-white,.bg-white\/90,.bg-white\/95) { background-color: #2B362E !important; color: #F7F7F1 !important; }
+html.seek-dark :is(.rounded-xl,.rounded-2xl,.rounded-3xl)[class*="bg-"] { border-color: rgba(220,235,203,.18); }
+html:not(.seek-dark) :is(input,textarea,select) { background-color: #FFFFFF !important; color: #26332B !important; border-color: #AAB7AA !important; }
+html.seek-dark :is(input,textarea,select) { background-color: #26332B !important; color: #F7F7F1 !important; border-color: #819184 !important; }
+html:not(.seek-dark) :is(input,textarea,select)::placeholder { color: #59665D !important; opacity: 1; }
+html.seek-dark :is(input,textarea,select)::placeholder { color: #C5D0C7 !important; opacity: 1; }
+html.seek-dark :is(input,textarea,select):disabled { color: #B7C2B9 !important; background-color: #303C33 !important; }
+
+/* Links and controls. Lime is always paired with dark text. */
+.seek-theme-toggle { background: #FFFFFF !important; color: #274A34 !important; border: 1px solid #AAB7AA !important; }
+html.seek-dark .seek-theme-toggle { background: #2B362E !important; color: #CCF88E !important; border-color: #819184 !important; }
+html:not(.seek-dark) :is(button,a)[class*="bg-[var(--seek-accent)]"],
+html:not(.seek-dark) :is(button,a)[class*="bg-[#CCF88E]"] { color: #193524 !important; }
+html.seek-dark :is(button,a)[class*="bg-[var(--seek-accent)]"],
+html.seek-dark :is(button,a)[class*="bg-[#CCF88E]"] { color: #193524 !important; }
+html.seek-dark button:disabled, html.seek-dark [aria-disabled="true"] { color: #C5D0C7 !important; opacity: .78; }
+html:not(.seek-dark) button:disabled, html:not(.seek-dark) [aria-disabled="true"] { color: #59665D !important; opacity: .78; }
+
+/* Status chips and semantic feedback retain readable foregrounds. */
+html:not(.seek-dark) :is([class*="bg-green-"],[class*="bg-emerald-"]) { color: #193524; }
+html.seek-dark :is([class*="bg-green-"],[class*="bg-emerald-"]) { color: #F7F7F1; }
+html:not(.seek-dark) :is([class*="bg-yellow-"],[class*="bg-amber-"]) { color: #49340D; }
+html.seek-dark :is([class*="bg-yellow-"],[class*="bg-amber-"]) { color: #FFF2C7; }
+html:not(.seek-dark) :is([class*="bg-red-"]) { color: #651D1D; }
+html.seek-dark :is([class*="bg-red-"]) { color: #FFE2E2; }
+
+/* Preserve the agreed brand treatment for primary actions and live pulse. */
+.seek-hero-primary,
+.seek-shop-product button,
+.seek-campaign-page .seek-campaign-donate,
+button.seek-primary-action { background: #CCF88E !important; color: #193524 !important; border-color: #CCF88E !important; font-weight: 800; }
+.seek-community-pulse { background: #274A34 !important; color: #FFFFFF !important; border-color: rgba(204,248,142,.45) !important; }
+.seek-community-pulse :is(span,p,small,div) { color: #FFFFFF !important; }
+.seek-community-pulse :is(b,strong,.seek-live-label) { color: #CCF88E !important; }
+.seek-community-pulse :is(.seek-live-ring,.seek-pulse-dot) { background: #CCF88E !important; border-color: #CCF88E !important; }
+
+/* Keyboard focus must remain visible in both themes. */
+:where(button,a,input,textarea,select,[tabindex]):focus-visible { outline: 3px solid #8BBE4F !important; outline-offset: 3px !important; }
+html.seek-dark :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline-color: #CCF88E !important; }
