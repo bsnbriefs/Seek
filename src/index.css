@@ -60,3 +60,25 @@ html {
 @keyframes seek-skeleton { to { background-position: -220% 0; } }
 @media (max-width: 640px) { .seek-home-hero { padding-top: 2.25rem; } .seek-motion-ribbon-track { animation-duration: 52s; } }
 @media (prefers-reduced-motion: reduce) { .seek-orb, .seek-pulse-dot, .seek-hero-title, .seek-hero-kicker, .seek-motion-ribbon-track, .seek-video-entry, .seek-feed-skeleton { animation: none !important; } .seek-motion-ribbon-track { transform: none; } }
+
+/* SEEK Discover: living, motion-led community discovery */
+.seek-discover-intro { isolation: isolate; }
+.seek-discover-glow { position: absolute; z-index: -1; width: 15rem; height: 15rem; border-radius: 9999px; filter: blur(34px); pointer-events: none; }
+.seek-discover-glow-a { top: -7rem; right: -5rem; background: rgba(27,170,156,.16); animation: seek-discover-drift 12s ease-in-out infinite alternate; }
+.seek-discover-glow-b { bottom: -9rem; left: -7rem; background: rgba(151,210,78,.13); animation: seek-discover-drift 15s ease-in-out infinite alternate-reverse; }
+.seek-discover-title { animation: seek-title-in .65s cubic-bezier(.2,.8,.2,1) both; }
+.seek-discover-marquee { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 5%, #000 95%, transparent); }
+.seek-discover-marquee-track { display: flex; width: max-content; animation: seek-marquee 48s linear infinite; }
+.seek-discover-marquee:hover .seek-discover-marquee-track { animation-play-state: paused; }
+.seek-discover-marquee-group { display: flex; flex: 0 0 auto; align-items: center; gap: .65rem; padding-right: .65rem; }
+.seek-discover-marquee-item { display: inline-flex; align-items: center; gap: .5rem; max-width: 17rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border: 1px solid rgba(13,59,59,.09); border-radius: 9999px; background: rgba(255,255,255,.78); padding: .55rem .85rem; color: rgba(13,59,59,.7); font-size: 10px; font-weight: 700; }
+.seek-discover-marquee-item i { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #83BF57; }
+.seek-discover-card { position: relative; overflow: hidden; animation: seek-discover-card-in .55s cubic-bezier(.2,.8,.2,1) both; animation-delay: min(calc(var(--seek-discover-index, 0) * 55ms), 440ms); transition: transform .25s ease, box-shadow .25s ease, border-color .25s ease; }
+.seek-discover-card:hover { transform: translateY(-3px); border-color: rgba(27,170,156,.35); box-shadow: 0 14px 32px rgba(13,59,59,.08); }
+.seek-discover-card:active { transform: scale(.99); }
+.seek-discover-search-results > div, .seek-discover-search-results > button { animation: seek-discover-card-in .35s ease both; }
+.seek-discover-loading { display: flex; gap: .65rem; padding: .5rem 0; }
+.seek-discover-loading span { display: block; height: 5.5rem; flex: 1; border-radius: 1rem; background: linear-gradient(100deg, rgba(13,59,59,.04) 20%, rgba(27,170,156,.13) 45%, rgba(13,59,59,.04) 70%); background-size: 220% 100%; animation: seek-skeleton 1.5s ease-in-out infinite; }
+@keyframes seek-discover-drift { from { transform: translate3d(-8px,0,0) scale(.92); } to { transform: translate3d(18px,14px,0) scale(1.1); } }
+@keyframes seek-discover-card-in { from { opacity: 0; transform: translateY(15px); } to { opacity: 1; transform: translateY(0); } }
+@media (prefers-reduced-motion: reduce) { .seek-discover-marquee-track { animation: none; } .seek-discover-card, .seek-discover-title { animation: none; } .seek-discover-glow { animation: none; } }

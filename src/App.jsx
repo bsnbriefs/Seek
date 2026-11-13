@@ -2334,9 +2334,10 @@ function DiscoverPage({ setPage }) {
       searchRef.current.focus();
     }
   }, [searchOpen]);
-  const shown = tab === "trending"
-    ? items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 20)
-    : items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 40);
+  const discoverKinds = ["Impact", "Appreciation", "Request", "Fundraiser", "Giveaway", "Job", "Mentorship", "Counselling", "Celebrate"];
+  const discoverItems = items.filter((item) => discoverKinds.includes(item.kind));
+  const shown = tab === "trending" ? discoverItems.slice(0, 20) : discoverItems.slice(0, 40);
+  const activityLabels = discoverItems.slice(0, 8);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
@@ -2386,8 +2387,31 @@ function DiscoverPage({ setPage }) {
           </div>
         </div>}
       </section>
+      {!searchOpen && (
+        <section className="seek-discover-intro relative isolate overflow-hidden mx-auto max-w-2xl px-5 pt-6 pb-5">
+          <div className="seek-discover-glow seek-discover-glow-a" aria-hidden="true" />
+          <div className="seek-discover-glow seek-discover-glow-b" aria-hidden="true" />
+          <div className="relative z-10">
+            <div className="flex items-center justify-between gap-3">
+              <span className="inline-flex items-center gap-2 rounded-full border border-[#1BAA9C]/20 bg-white/80 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D7770] backdrop-blur"><i className="seek-pulse-dot" /> Community pulse</span>
+              <span className="text-[11px] font-semibold text-[#0D3B3B]/50">{loading ? "Updating…" : `${discoverItems.length} updates`}</span>
+            </div>
+            <h2 className="seek-discover-title mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-[#0D3B3B] sm:text-4xl">Discover what’s <span className="seek-gradient-text">happening.</span></h2>
+            <p className="mt-2 max-w-md text-sm leading-6 text-[#0D3B3B]/65">Real needs, opportunities and moments of community support — all in one place.</p>
+          </div>
+          {activityLabels.length > 0 && (
+            <div className="seek-discover-marquee mt-5" aria-label="Recent community activity">
+              <div className="seek-discover-marquee-track">
+                {[0, 1].map((copy) => <div className="seek-discover-marquee-group" key={copy} aria-hidden={copy === 1}>
+                  {activityLabels.map((item) => <span className="seek-discover-marquee-item" key={`${copy}-${item.key}`}><i />{item.title}</span>)}
+                </div>)}
+              </div>
+            </div>
+          )}
+        </section>
+      )}
       {searchOpen ? (
-      <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
+      <section className="seek-discover-search-results mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
         {query.trim().length < 2 && (
           <div>
             <div className="flex items-center justify-between mb-2">
@@ -2461,19 +2485,23 @@ function DiscoverPage({ setPage }) {
         )}
       </section>
       ) : (
-      <section className="mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-3">
-        {loading && <p className="text-sm text-[#0D3B3B]/50">Loading…</p>}
+      <section className="seek-discover-feed mx-auto max-w-2xl px-5 pt-1 pb-28 space-y-3">
+        {loading && <div className="seek-discover-loading"><span /><span /><span /></div>}
         {!loading && !shown.length && (
           <div className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-5">
             <p className="font-display font-bold text-[#0D3B3B]">Nothing in this space yet.</p>
             <button type="button" className="mt-3 text-sm font-bold text-[#1BAA9C]" onClick={() => go("offers", "/offers")}>Open giveaways</button>
           </div>
         )}
-        {shown.map((item) => (
-          <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4">
-            <p className="text-[10px] font-bold uppercase tracking-widest text-[#1BAA9C]">{item.kind}{item.at ? " · " + daysPosted(new Date(item.at).toISOString()) : ""}</p>
-            <p className="mt-1 font-display font-bold text-[#0D3B3B]">{item.title}</p>
+        {shown.map((item, index) => (
+          <button key={item.key} type="button" onClick={() => go(item.page, item.path)} className="seek-discover-card seek-shimmer w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/10 p-4" style={{ "--seek-discover-index": index }}>
+            <div className="flex items-center justify-between gap-3">
+              <p className="text-[10px] font-extrabold uppercase tracking-widest text-[#0D7770]">{item.kind}</p>
+              {item.at ? <span className="text-[10px] font-medium text-[#0D3B3B]/40">{daysPosted(new Date(item.at).toISOString())}</span> : null}
+            </div>
+            <p className="mt-2 font-display font-bold text-[#0D3B3B]">{item.title}</p>
             {item.body ? <p className="mt-1 text-sm text-[#0D3B3B]/55">{item.body}</p> : null}
+            <span className="mt-3 inline-flex items-center gap-1 text-xs font-bold text-[#0D7770]">Explore <ArrowRight size={13} /></span>
           </button>
         ))}
       </section>
