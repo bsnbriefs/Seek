@@ -596,6 +596,16 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
+  {
+    id: "end-of-year-outreach-2026",
+    title: "2026 End-of-Year Outreach",
+    blurb: "Help BSN Foundation feed 1,500 people and distribute 300 food boxes to persons with disabilities this December.",
+    amount: 5000,
+    budget: 15000000,
+    story: "This December, BSN Foundation is working to feed 1,500 people and distribute 300 food boxes to persons with disabilities through the Nigerian Paralympic Association. Your contribution will help provide practical support with care, dignity and hope. The total working budget for this outreach is ₦15,000,000.",
+    photos: ["/outreach/bsn-outreach-design-1.jpg", "/outreach/bsn-outreach-design-2.jpg", "/outreach/bsn-outreach-design-3.jpg"],
+    videos: [],
+  },
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4", "/outreach/TWMate.com-96cccfdb09d177ca8d521c0d0252d811.mp4"] },
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
@@ -2360,6 +2370,7 @@ function BsnPage({ setPage }) {
       </main>
     );
   }
+  const featuredOutreach = OUTREACH_CAMPAIGNS.find((campaign) => campaign.id === "end-of-year-outreach-2026") || OUTREACH_CAMPAIGNS[0];
   return (
     <main className="seek-campaign-page min-h-screen pb-28">
       <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
@@ -2367,10 +2378,42 @@ function BsnPage({ setPage }) {
         <div className="relative z-10 mx-auto max-w-5xl">
           <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
-          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore our ongoing programmes and help turn compassion into practical action.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate to an outreach <ArrowRight size={17} /></button>
+            <button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-outline">Explore all campaigns</button>
+            <button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button>
+          </div>
           <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-5 sm:pt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Featured outreach</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Help make this December count.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Explore the End-of-Year Outreach and see how your support can reach people with practical help.</p></div>
+          <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate now <ArrowRight size={16} /></button>
+        </div>
+        <HomePromotionCarousel setPage={setPage} onOpen={() => { setSelected(featuredOutreach); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pt-10 sm:pt-14">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Ongoing campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose a cause to support.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Every programme represents people, families and communities who can benefit from collective action.</p></div>
+          <button type="button" onClick={() => setShowCampaignList(true)} className="text-sm font-extrabold text-[var(--seek-success)]">View all campaigns <ArrowRight size={15} className="inline" /></button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {OUTREACH_CAMPAIGNS.slice(0, 6).map((campaign, index) => {
+            const cover = campaign.photos?.[0];
+            return <article key={campaign.id} className="seek-campaign-card overflow-hidden">
+              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="block w-full text-left">
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{String(index + 1).padStart(2, "0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">{campaign.id === "end-of-year-outreach-2026" ? "Featured annual outreach" : "Foundation programme"}</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{campaign.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{campaign.blurb}</p></div>
+              </button>
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
+            </article>;
+          })}
+        </div>
+        <div className="mt-7 flex justify-center"><button type="button" onClick={() => setShowCampaignList(true)} className="seek-campaign-donate">Browse all {OUTREACH_CAMPAIGNS.length} campaigns <ArrowRight size={17} /></button></div>
       </section>
     </main>
   );
@@ -2663,6 +2706,124 @@ function DiscoverPage({ setPage }) {
   );
 }
 
+function HomePromotionCarousel({ setPage, onOpen }) {
+  const slides = [
+    {
+      id: "outreach-design-one",
+      image: "/outreach/bsn-outreach-design-1.jpg",
+      alt: "BSN Foundation End-of-Year Outreach: 1,500 people to be fed and 300 food boxes to be distributed.",
+    },
+    {
+      id: "outreach-design-two",
+      image: "/outreach/bsn-outreach-design-2.jpg",
+      alt: "BSN Foundation End-of-Year Outreach supporting persons with disabilities.",
+    },
+    {
+      id: "outreach-design-three",
+      image: "/outreach/bsn-outreach-design-3.jpg",
+      alt: "Support the BSN Foundation End-of-Year Outreach this December.",
+    },
+  ];
+  const [active, setActive] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const trackRef = useRef(null);
+  const touchStart = useRef(null);
+  const pauseUntil = useRef(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && Date.now() > pauseUntil.current) {
+        setActive((current) => (current + 1) % slides.length);
+      }
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      const item = trackRef.current?.children?.[active];
+      setOffset(item ? item.offsetLeft : 0);
+    };
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [active]);
+
+  const goTo = (index) => {
+    setActive((index + slides.length) % slides.length);
+    pauseUntil.current = Date.now() + 10000;
+  };
+  const openOutreach = () => {
+    if (typeof onOpen === "function") onOpen();
+    else setPage("bsn");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <section
+      className="seek-home-promotions mx-auto mt-8 w-full max-w-5xl"
+      aria-label="Featured BSN Foundation outreach promotions"
+      onMouseEnter={() => { pauseUntil.current = Date.now() + 10000; }}
+      onMouseLeave={() => { pauseUntil.current = Date.now(); }}
+      onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 10000; }}
+      onTouchEnd={(event) => {
+        const end = event.changedTouches?.[0]?.clientX;
+        if (touchStart.current != null && end != null && Math.abs(end - touchStart.current) > 40) {
+          goTo(active + (end < touchStart.current ? 1 : -1));
+        }
+        touchStart.current = null;
+      }}
+    >
+      <div className="seek-promo-viewport relative overflow-hidden">
+        <div
+          ref={trackRef}
+          className="seek-promo-track flex items-stretch gap-4 transition-transform duration-700 ease-[cubic-bezier(.22,.8,.25,1)]"
+          style={{ transform: `translate3d(-${offset}px,0,0)` }}
+        >
+          {slides.map((slide, index) => (
+            <article key={slide.id} className="seek-promo-card relative flex shrink-0 overflow-hidden rounded-[16px] bg-[#073d32] shadow-[0_8px_24px_rgba(10,40,30,.16)]">
+              <button
+                type="button"
+                onClick={openOutreach}
+                aria-label={`Open BSN Foundation outreach promotion ${index + 1}`}
+                className="block h-full w-full overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c9f58a]"
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  className="block h-full w-full object-cover object-center"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable="false"
+                />
+              </button>
+            </article>
+          ))}
+        </div>
+        <button type="button" aria-label="Previous outreach design" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">‹</button>
+        <button type="button" aria-label="Next outreach design" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">›</button>
+      </div>
+      <div className="mt-2.5 flex items-center justify-center gap-2" aria-label="Choose outreach design">
+        {slides.map((slide, index) => (
+          <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show outreach design ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />
+        ))}
+      </div>
+      <style>{`
+        .seek-home-promotions { padding-left: 1rem; padding-right: 1rem; }
+        .seek-promo-viewport { padding: 0; }
+        .seek-promo-track { will-change: transform; }
+        .seek-promo-card { width: 84%; aspect-ratio: 1.88 / 1; }
+        .seek-promo-card button { cursor: pointer; }
+        .seek-promo-card img { transition: transform .45s ease; }
+        .seek-promo-card button:hover img { transform: scale(1.015); }
+        @media (max-width: 640px) {
+          .seek-home-promotions { margin-top: 1.35rem; padding-left: 1rem; padding-right: 1rem; }
+          .seek-promo-card { width: 88%; aspect-ratio: 1.78 / 1; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 function ForYouPage({ setPage }) {
   const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2701,17 +2862,7 @@ function ForYouPage({ setPage }) {
               <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[var(--seek-primary)]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[var(--seek-primary)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--seek-success)]">I want to help</button>
             </div>
           </div>
-          <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
-            <div className="seek-motion-ribbon-track">
-              {[0, 1].map((copy) => (
-                <div className="seek-motion-ribbon-group" key={copy} aria-hidden={copy === 1}>
-                  {(liveCases.length ? liveCases.slice(0, 8) : [{ id: "a", title: "Ask for what you need" }, { id: "b", title: "Offer what you can" }, { id: "c", title: "Find your community" }]).map((item, index) => (
-                    <span className="seek-ribbon-item" key={`${copy}-${item.id || index}`}><i />{item.title || item.description || "A new community story"}</span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <HomePromotionCarousel setPage={setPage} />
         </div>
       </section>
 
@@ -3132,15 +3283,15 @@ function FundraiserPage({ setPage }) {
     <div className="mx-auto max-w-lg px-5 py-8">
       <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Start a fundraiser</h1>
       <p className="mt-1 text-sm text-[var(--seek-primary)]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
-      <form onSubmit={submit} className="seek-fundraiser-form mt-6 space-y-4">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
+      <form onSubmit={submit} className="mt-6 space-y-4">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <input type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} className="seek-form-file w-full text-sm" />
+        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
+        <input type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} className="w-full text-sm" />
         <p className="text-xs text-[var(--seek-primary)]/50">Add a photo or video (up to 3)</p>
         {error && <p className="text-sm text-red-600">{error}</p>}
         <button type="submit" disabled={loading} className="w-full rounded-full bg-[var(--seek-success)] text-white py-3 text-sm font-bold">
@@ -3350,7 +3501,7 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
           <Field label="Location"><input required className={inputCls} value={form.location} onChange={set("location")} placeholder="City, country" /></Field>
           <div>
             <p className="text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/45 mb-3">What do you need help with?</p>
-            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
+            <select value={form.category} onChange={(e) => setForm({ ...form, category: e.target.value })} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
               <option value="">Select a category</option>
               {CATEGORIES.filter((c) => !CONNECT_CATS.includes(c.label)).map((c) => (
                 <option key={c.id} value={c.label}>{c.label}</option>
@@ -3574,7 +3725,7 @@ function VolunteerPage() {
       <section className="mx-auto max-w-xl px-5 sm:px-8 pb-14">
         <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-6">
           <Field label="Choose a role">
-            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
+            <select value={form.role} onChange={(e) => setForm({ ...form, role: e.target.value })} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
               <option value="">Select a role</option>
               {roles.map((r) => <option key={r.id} value={r.title}>{r.title}</option>)}
             </select>
@@ -5596,7 +5747,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
         rows={4}
         onChange={(e) => setText(e.target.value)}
         placeholder="Tell your supporters how things went. You can also thank them."
-        className="seek-form-control w-full rounded-xl border border-[var(--seek-primary)]/25 bg-[var(--seek-white)] px-3 py-3 text-sm text-[var(--seek-primary)] placeholder:text-[var(--seek-primary)]/55 focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]"
+        className="w-full rounded-xl border border-[var(--seek-primary)]/25 bg-[var(--seek-white)] px-3 py-3 text-sm text-[var(--seek-primary)] placeholder:text-[var(--seek-primary)]/55 focus:outline-none focus:ring-2 focus:ring-[var(--seek-success)]"
       />
       <div>
         <label className="block text-sm font-semibold text-[var(--seek-primary)]" htmlFor={`outcome-media-${requestId}`}>
@@ -5611,7 +5762,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
           multiple
           accept="image/jpeg,image/png,image/gif,image/webp,video/mp4,video/webm,video/quicktime"
           onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 5))}
-          className="seek-form-file mt-2 block w-full text-sm text-[var(--seek-primary)] file:mr-3 file:rounded-full file:border-0 file:bg-[var(--seek-primary)] file:px-4 file:py-2 file:font-semibold file:text-white"
+          className="mt-2 block w-full text-sm text-[var(--seek-primary)] file:mr-3 file:rounded-full file:border-0 file:bg-[var(--seek-primary)] file:px-4 file:py-2 file:font-semibold file:text-white"
         />
         {files.length > 0 && (
           <p className="mt-1 text-xs text-[var(--seek-primary)]/70">{files.length} file{files.length === 1 ? "" : "s"} selected.</p>
