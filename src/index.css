@@ -1577,3 +1577,173 @@ html.seek-dark .seek-discover-live-dot {
 .seek-install-instructions { background: rgba(255,255,255,.10) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; border: 1px solid rgba(255,255,255,.22); }
 .seek-install-instructions strong { color: #CCF88E !important; -webkit-text-fill-color: #CCF88E !important; }
 .seek-install-close { background: rgba(255,255,255,.14) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; }
+
+
+/* DONATION MODAL CONTRAST FIX — scoped to the secure donation dialog.
+   The dialog stays dark, but all supporting copy and controls remain readable
+   regardless of the global light/dark theme rules. */
+.seek-donation-modal {
+  background: #202923 !important;
+  color: #F7F7F1 !important;
+  border: 1px solid rgba(247,247,241,.24) !important;
+}
+.seek-donation-modal > div > p,
+.seek-donation-modal > p,
+.seek-donation-modal label,
+.seek-donation-modal label *,
+.seek-donation-modal .text-white\/80,
+.seek-donation-modal .text-white\/50,
+.seek-donation-modal .text-white\/40 {
+  color: #E8EEE8 !important;
+  -webkit-text-fill-color: #E8EEE8 !important;
+  opacity: 1 !important;
+}
+.seek-donation-modal > div > p:first-child {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+.seek-donation-modal > p span {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+.seek-donation-modal input:not([type="checkbox"]) {
+  background: #FFFFFF !important;
+  color: #202923 !important;
+  -webkit-text-fill-color: #202923 !important;
+  border: 1px solid #B8C4BA !important;
+}
+.seek-donation-modal input:not([type="checkbox"])::placeholder {
+  color: #59645D !important;
+  -webkit-text-fill-color: #59645D !important;
+  opacity: 1 !important;
+}
+.seek-donation-modal input[type="checkbox"] {
+  accent-color: #CCF88E !important;
+  width: 18px; height: 18px; flex: 0 0 auto;
+}
+.seek-donation-modal button[type="button"] {
+  background: #3B4940 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border: 1px solid rgba(255,255,255,.18) !important;
+}
+.seek-donation-modal button[type="button"]:has(+ *) { color: #FFFFFF !important; }
+.seek-donation-modal button[type="button"].is-selected,
+.seek-donation-modal button[type="button"][aria-pressed="true"] {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+.seek-donation-modal button[type="submit"] {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  font-weight: 900 !important;
+  opacity: 1 !important;
+}
+.seek-donation-modal button[type="submit"]:disabled { opacity: .72 !important; }
+.seek-donation-modal .text-red-300 { color: #FFB4AB !important; -webkit-text-fill-color: #FFB4AB !important; }
+.seek-donation-modal > div > button {
+  background: #3B4940 !important; color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+
+/* SEEK contrast pass — Community Pulse, authentication and sharing controls. */
+.seek-community-pulse .border-r {
+  border-right: 1px solid rgba(255,255,255,.42) !important;
+}
+.seek-community-pulse .seek-ticker-track,
+.seek-community-pulse .seek-ticker-single,
+.seek-community-pulse .seek-ticker-track > span,
+.seek-community-pulse .seek-ticker-single > span,
+.seek-community-pulse .seek-ticker-track > span > span,
+.seek-community-pulse .seek-ticker-single > span > span {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-community-pulse .seek-ticker-track > span > span:nth-child(2),
+.seek-community-pulse .seek-ticker-single > span > span:nth-child(2),
+.seek-community-pulse .seek-ticker-track > span > span:first-child,
+.seek-community-pulse .seek-ticker-single > span > span:first-child {
+  color: #D8F59A !important;
+  -webkit-text-fill-color: #D8F59A !important;
+}
+.seek-community-pulse [title="Updating"],
+.seek-community-pulse [title^="Updated"] {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-community-pulse .seek-live-ring,
+.seek-community-pulse .seek-live-dot,
+.seek-community-pulse .seek-pulse-dot,
+.seek-community-pulse .seek-community-pulse-dot {
+  border-color: #D8F59A !important;
+  background-color: #D8F59A !important;
+}
+
+/* Sign-in / create-account primary action: dark text on bright lime. */
+.seek-auth-form button[type="submit"] {
+  background: #CCF88E !important;
+  background-image: none !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border: 1px solid #9CCB60 !important;
+  font-weight: 850 !important;
+  opacity: 1 !important;
+  text-shadow: none !important;
+}
+.seek-auth-form button[type="submit"]:disabled {
+  background: #DDE8D2 !important;
+  color: #405746 !important;
+  -webkit-text-fill-color: #405746 !important;
+  opacity: 1 !important;
+}
+.seek-auth-form button:not([type="submit"]) {
+  color: #28563B !important;
+  -webkit-text-fill-color: #28563B !important;
+  opacity: 1 !important;
+}
+
+/* WhatsApp / Facebook / Share actions must remain legible in either theme. */
+a[href^="https://wa.me/"],
+a[href^="https://www.facebook.com/sharer/"] {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border: 1px solid #9CCB60 !important;
+  opacity: 1 !important;
+  font-weight: 800 !important;
+}
+.seek-story-share-button {
+  background: #FFFFFF !important;
+  color: #274A34 !important;
+  -webkit-text-fill-color: #274A34 !important;
+  border: 1px solid #78917D !important;
+}
+.seek-story-whatsapp,
+.seek-request-whatsapp {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border: 1px solid #9CCB60 !important;
+}
+.seek-request-facebook {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border: 1px solid #274A34 !important;
+}
+html.seek-dark .seek-story-share-button {
+  background: #303B34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border-color: rgba(255,255,255,.55) !important;
+}
+html.seek-dark .seek-request-facebook {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border-color: #9CCB60 !important;
+}

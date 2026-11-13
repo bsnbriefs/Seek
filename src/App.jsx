@@ -1045,7 +1045,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
             setLoading(false);
           }
         }}
-        className="w-full max-w-[22rem] rounded-2xl bg-[var(--seek-dark)] text-white p-4 shadow-2xl border border-white/10"
+        className="seek-donation-modal w-full max-w-[22rem] rounded-2xl bg-[var(--seek-dark)] text-white p-4 shadow-2xl border border-white/10"
       >
         <div className="flex items-center justify-between gap-2">
           <p className="text-[10px] font-bold uppercase tracking-[0.14em] text-[var(--seek-mint)]">Secure donation</p>
@@ -3912,8 +3912,8 @@ function RequestPage({ requestId, setPage }) {
             }
           }}>Share</button>
           <div className="flex gap-2">
-            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--seek-success)] text-white px-3 py-1.5 text-xs font-bold">WhatsApp</a>
-            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-[var(--seek-accent)] text-white px-3 py-1.5 text-xs font-bold">Facebook</a>
+            <a href={"https://wa.me/?text=" + encodeURIComponent(request.title + " — " + window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="seek-request-whatsapp rounded-full px-3 py-1.5 text-xs font-bold">WhatsApp</a>
+            <a href={"https://www.facebook.com/sharer/sharer.php?u=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="seek-request-facebook rounded-full px-3 py-1.5 text-xs font-bold">Facebook</a>
             <a href={"https://twitter.com/intent/tweet?text=" + encodeURIComponent(request.title) + "&url=" + encodeURIComponent(window.location.origin + "/request/" + request.id)} target="_blank" rel="noreferrer" className="rounded-full bg-black text-white px-3 py-1.5 text-xs font-bold">X</a>
           </div>
         </div>
@@ -4553,7 +4553,7 @@ function ImpactStoryPage({ impactId, setPage }) {
           <div className="flex shrink-0 gap-2">
             <button
               type="button"
-              className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+              className="seek-story-share-button rounded-full border px-3 py-1.5 text-sm font-semibold"
               onClick={async () => {
                 const path = post.request_id ? `/request/${post.request_id}` : `/impact/${post.id}`;
                 await shareSeekStory({ title: post.title, path });
@@ -4562,7 +4562,7 @@ function ImpactStoryPage({ impactId, setPage }) {
               Share
             </button>
             <a
-              className="rounded-full border px-3 py-1.5 text-sm font-semibold"
+              className="seek-story-whatsapp rounded-full border px-3 py-1.5 text-sm font-semibold"
               href={`https://wa.me/?text=${encodeURIComponent((post.title || "SEEK story") + " " + (typeof window !== "undefined" ? window.location.origin : "https://seekbsn.org") + (post.request_id ? "/request/" + post.request_id : "/impact/" + post.id))}`}
               target="_blank"
               rel="noreferrer"
@@ -4956,7 +4956,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
 
         <form
           onSubmit={handleSubmit}
-          className="rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-6 sm:p-8 space-y-4"
+          className="seek-auth-form rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-6 sm:p-8 space-y-4"
         >
           <Field label="Email">
             <input
