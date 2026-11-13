@@ -1973,7 +1973,7 @@ html:not(.seek-dark) .fixed.bottom-20 {
 .seek-evidence-track { display: flex; width: 100%; overflow-x: auto; overscroll-behavior-x: contain; scroll-snap-type: x mandatory; scrollbar-width: none; -webkit-overflow-scrolling: touch; touch-action: pan-x pan-y; }
 .seek-evidence-track::-webkit-scrollbar { display: none; }
 .seek-evidence-slide { position: relative; display: grid; flex: 0 0 100%; width: 100%; min-width: 100%; min-height: 190px; max-height: 390px; place-items: center; overflow: hidden; scroll-snap-align: center; scroll-snap-stop: always; background: #15251f; }
-.seek-evidence-slide > img { display: block; width: 100%; height: min(68vw, 390px); min-height: 190px; object-fit: contain; user-select: none; -webkit-user-drag: none; }
+.seek-evidence-slide > img { display: block; width: 100%; height: min(68vw, 390px); min-height: 190px; object-fit: cover; object-position: center; user-select: none; -webkit-user-drag: none; }
 .seek-evidence-video-wrap { position: relative; display: grid; width: 100%; min-height: 190px; max-height: 390px; place-items: center; }
 .seek-evidence-video-wrap video { display: block; width: 100%; max-height: 390px; background: #000; }
 .seek-evidence-slide iframe { width: 100%; height: 340px; border: 0; background: #fff; }
@@ -2002,19 +2002,36 @@ html:not(.seek-dark) .fixed.bottom-20 {
     height: 100%;
     min-height: 0;
     max-height: none;
-    object-fit: contain;
+    object-fit: cover;
+    object-position: center;
   }
   .seek-evidence-video-wrap {
+    display: block;
     width: 100%;
     height: 100%;
     min-height: 0;
     max-height: none;
   }
   .seek-evidence-video-wrap video {
+    display: block;
     width: 100%;
-    max-height: 100%;
+    height: 100%;
+    max-height: none;
+    object-fit: cover;
+    object-position: center;
   }
   .seek-evidence-slide iframe { height: min(74svh, 720px); }
   .seek-evidence-arrow { width: 40px; height: 40px; }
 }
 @media (prefers-reduced-motion: reduce) { .seek-evidence-track { scroll-behavior: auto; } }
+
+
+/* Evidence media fills the complete gallery frame; no empty green letterboxing. */
+.seek-evidence-slide > img { object-fit: cover; object-position: center; }
+.seek-evidence-video-wrap { width: 100%; height: 100%; }
+.seek-evidence-video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+.seek-evidence-slide iframe { display: block; width: 100%; height: 100%; min-height: 480px; }
+@media (max-width: 640px) {
+  .seek-evidence-slide > img, .seek-evidence-video-wrap video { width: 100%; height: 100%; object-fit: cover; object-position: center; }
+  .seek-evidence-slide iframe { height: 100%; min-height: 0; }
+}
