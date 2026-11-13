@@ -2565,18 +2565,7 @@ function ForYouPage({ setPage }) {
         </div>
       </section>
 
-      <section id="home-open-requests" className="scroll-mt-28 px-5 pb-16 sm:pb-20">
-        <div className="mx-auto max-w-6xl">
-          <div className="mb-5 flex items-end justify-between gap-3">
-            <div>
-              <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Make a difference</p>
-              <h2 className="mt-1 font-display text-2xl font-extrabold text-[#0D3B3B]">People who need support</h2>
-              <p className="mt-1 text-sm text-[#385653]">Read their stories and support a request that matters to you.</p>
-            </div>
-          </div>
-          <HelpSomeoneFeed setPage={setPage} limit={6} compact />
-        </div>
-      </section>
+
     </div>
   );
 }
