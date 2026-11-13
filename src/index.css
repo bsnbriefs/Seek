@@ -1077,3 +1077,122 @@ html :is(.seek-home-hero,.seek-home-motion) :is(button,a)[class*="bg-[#CCF88E]"]
   color: #193524 !important;
   font-weight: 900 !important;
 }
+
+/* =========================================================
+   SEEK FULL-PAGE THEME CONTRAST PATCH
+   Last-in-file override. Keeps the existing .seek-dark toggle
+   contract and makes text/surfaces theme-aware across pages.
+   ========================================================= */
+:root {
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-bg: #FAF8F3;
+  --seek-page: #FAF8F3;
+  --seek-card: #FFFFFF;
+  --seek-ink: #26332B;
+  --seek-copy: #26332B;
+  --seek-head: #274A34;
+  --seek-muted: #58645C;
+  --seek-success: #356747;
+  --seek-border: #D7DED5;
+  color-scheme: light;
+}
+html:not(.seek-dark) {
+  color-scheme: light;
+  background: #FAF8F3;
+  color: #26332B;
+}
+html.seek-dark {
+  color-scheme: dark;
+  --seek-primary: #202923;
+  --seek-accent: #CCF88E;
+  --seek-bg: #202923;
+  --seek-page: #202923;
+  --seek-card: #2B362E;
+  --seek-ink: #F7F7F1;
+  --seek-copy: #F7F7F1;
+  --seek-head: #F7F7F1;
+  --seek-muted: #D5DED5;
+  --seek-success: #CCF88E;
+  --seek-border: #526457;
+  color-scheme: dark;
+  background: #202923;
+  color: #F7F7F1;
+}
+html:not(.seek-dark), html:not(.seek-dark) body {
+  background-color: #FAF8F3 !important;
+  color: #26332B !important;
+}
+html.seek-dark, html.seek-dark body {
+  background-color: #202923 !important;
+  color: #F7F7F1 !important;
+}
+
+/* Main content typography: dark enough on ivory, light enough on dark. */
+html:not(.seek-dark) :is(h1,h2,h3,h4,h5,h6) { color: #274A34; }
+html:not(.seek-dark) :is(p,li,dt,dd,label,legend,figcaption,small) { color: #46534A; }
+html.seek-dark :is(h1,h2,h3,h4,h5,h6) { color: #F7F7F1 !important; }
+html.seek-dark :is(p,li,dt,dd,label,legend,figcaption,small) { color: #DCE5DC; }
+html:not(.seek-dark) :is(.text-gray-400,.text-gray-500,.text-slate-400,.text-slate-500,.text-zinc-400,.text-zinc-500,.text-stone-400,.text-stone-500) { color: #58645C !important; }
+html.seek-dark :is(.text-gray-400,.text-gray-500,.text-slate-400,.text-slate-500,.text-zinc-400,.text-zinc-500,.text-stone-400,.text-stone-500) { color: #C6D2C8 !important; }
+html:not(.seek-dark) :is(.text-\[var\(--seek-muted\)\],.text-\[var\(--seek-success\)\]) { color: #356747 !important; }
+html.seek-dark :is(.text-\[var\(--seek-muted\)\],.text-\[var\(--seek-success\)\]) { color: #CCF88E !important; }
+
+/* White cards become proper dark surfaces when dark mode is active. */
+html.seek-dark :is(.bg-white,.bg-white\/90,.bg-white\/95,.bg-\[\#FFFFFF\],.bg-\[\#fff\]) {
+  background-color: #2B362E !important;
+  color: #F7F7F1 !important;
+  border-color: #526457 !important;
+}
+html.seek-dark :is(.bg-white,.bg-white\/90,.bg-white\/95,.bg-\[\#FFFFFF\],.bg-\[\#fff\]) :is(h1,h2,h3,h4,h5,h6,p,span,div,label,small,li,strong,b) {
+  color: inherit;
+}
+html:not(.seek-dark) :is(.bg-white,.bg-white\/90,.bg-white\/95,.bg-\[\#FFFFFF\],.bg-\[\#fff\]) { color: #26332B; }
+html:not(.seek-dark) :is(.bg-white,.bg-white\/90,.bg-white\/95,.bg-\[\#FFFFFF\],.bg-\[\#fff\]) :is(h1,h2,h3,h4,h5,h6,p,label,small,li) { color: #46534A; }
+html.seek-dark :is(.border-gray-100,.border-gray-200,.border-slate-100,.border-slate-200,.border-zinc-100,.border-zinc-200) { border-color: #526457 !important; }
+
+/* Inputs, selects, textareas, search fields and upload controls. */
+html:not(.seek-dark) :is(input,textarea,select) { background: #FFFFFF !important; color: #26332B !important; border-color: #AAB7AA !important; }
+html:not(.seek-dark) :is(input,textarea,select)::placeholder { color: #66736A !important; opacity: 1 !important; }
+html.seek-dark :is(input,textarea,select) { background: #26332B !important; color: #F7F7F1 !important; border-color: #718477 !important; }
+html.seek-dark :is(input,textarea,select)::placeholder { color: #C5D0C7 !important; opacity: 1 !important; }
+html.seek-dark :is(input,textarea,select):disabled { background: #303C33 !important; color: #BFCBBF !important; }
+html.seek-dark input:-webkit-autofill,
+html.seek-dark textarea:-webkit-autofill,
+html.seek-dark select:-webkit-autofill { -webkit-text-fill-color: #F7F7F1 !important; box-shadow: 0 0 0 1000px #26332B inset !important; }
+
+/* Lime-filled actions must always use dark lettering in BOTH themes. */
+html :is(button,a,[role="button"],[type="submit"])[class*="bg-[var(--seek-accent)]"],
+html :is(button,a,[role="button"],[type="submit"])[class*="bg-[#CCF88E]"],
+html :is(button,a,[role="button"],[type="submit"]).seek-primary-action,
+html :is(button,a,[role="button"],[type="submit"]).seek-hero-primary {
+  background-color: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border-color: #B4DE78 !important;
+  font-weight: 800;
+}
+html :is(button,a,[role="button"],[type="submit"])[class*="bg-[var(--seek-accent)]"] *,
+html :is(button,a,[role="button"],[type="submit"])[class*="bg-[#CCF88E]"] * { color: #193524 !important; -webkit-text-fill-color: #193524 !important; }
+
+/* Semantic badges: readable foregrounds against their coloured backgrounds. */
+html:not(.seek-dark) :is([class*="bg-green-"],[class*="bg-emerald-"]) { color: #193524 !important; }
+html.seek-dark :is([class*="bg-green-"],[class*="bg-emerald-"]) { color: #F7F7F1 !important; }
+html:not(.seek-dark) :is([class*="bg-yellow-"],[class*="bg-amber-"]) { color: #49340D !important; }
+html.seek-dark :is([class*="bg-yellow-"],[class*="bg-amber-"]) { color: #FFF2C7 !important; }
+html:not(.seek-dark) :is([class*="bg-red-"]) { color: #651D1D !important; }
+html.seek-dark :is([class*="bg-red-"]) { color: #FFE2E2 !important; }
+
+/* Preserve intentional high-contrast live/community ticker treatment. */
+.seek-community-pulse { background: #274A34 !important; color: #FFFFFF !important; border-color: rgba(204,248,142,.55) !important; }
+.seek-community-pulse :is(p,span,small,div,li) { color: #FFFFFF !important; }
+.seek-community-pulse :is(b,strong,.seek-live-label) { color: #CCF88E !important; }
+.seek-community-pulse :is(.seek-live-ring,.seek-live-dot,.seek-pulse-dot,.seek-community-pulse-dot) { background: #CCF88E !important; border-color: #CCF88E !important; }
+
+/* Theme toggle, links, disabled controls and keyboard focus. */
+.seek-theme-toggle { background: #FFFFFF !important; color: #274A34 !important; border: 1px solid #AAB7AA !important; }
+html.seek-dark .seek-theme-toggle { background: #2B362E !important; color: #CCF88E !important; border-color: #718477 !important; }
+html:not(.seek-dark) button:disabled, html:not(.seek-dark) [aria-disabled="true"] { color: #59665D !important; opacity: .78; }
+html.seek-dark button:disabled, html.seek-dark [aria-disabled="true"] { color: #C5D0C7 !important; opacity: .78; }
+:where(button,a,input,textarea,select,[tabindex]):focus-visible { outline: 3px solid #477A36 !important; outline-offset: 3px !important; }
+html.seek-dark :where(button,a,input,textarea,select,[tabindex]):focus-visible { outline-color: #CCF88E !important; }
