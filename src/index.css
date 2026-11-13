@@ -1464,3 +1464,54 @@ html.seek-dark .seek-site-header {
 .seek-profile-hero .text-white\/70,
 .seek-profile-hero .text-white\/75,
 .seek-profile-hero .text-white\/60 { color: #E5EEE7 !important; }
+
+
+/* FINAL PATCH: cookie consent and actionable PWA install CTA. */
+.seek-cookie-banner {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-cookie-banner,
+.seek-cookie-banner p,
+.seek-cookie-banner span,
+.seek-cookie-banner strong,
+.seek-cookie-banner small {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-cookie-banner button[aria-label="Close privacy notice"] {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+.seek-cookie-banner button.bg-white {
+  background: #FFFFFF !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+.seek-cookie-banner button:not(.bg-white) {
+  background: rgba(255,255,255,.08) !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border-color: rgba(255,255,255,.7) !important;
+}
+.seek-install-action {
+  display: block !important;
+  min-height: 48px;
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  opacity: 1 !important;
+  cursor: pointer !important;
+}
+.seek-install-instructions {
+  background: rgba(255,255,255,.12) !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  opacity: 1 !important;
+}
+.seek-install-instructions strong {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}

@@ -6056,7 +6056,7 @@ function CookieBanner() {
 
   return (
     <div className="fixed inset-x-0 bottom-0 z-[90] px-3 pb-[84px] sm:px-4 sm:pb-4">
-      <div className="relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[var(--seek-primary)] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
+      <div className="seek-cookie-banner relative mx-auto w-full max-w-2xl rounded-2xl border border-white/10 bg-[var(--seek-primary)] p-4 pr-12 text-white shadow-2xl sm:p-5 sm:pr-14">
         <button
           type="button"
           aria-label="Close privacy notice"
@@ -6113,6 +6113,7 @@ function InstallSeekPrompt() {
     typeof window !== "undefined" ? window.__seekDeferredInstallPrompt || null : null
   );
   const [closed, setClosed] = useState(false);
+  const [showInstallHelp, setShowInstallHelp] = useState(false);
   const [installed, setInstalled] = useState(() => {
     try { return localStorage.getItem("seek_pwa_installed") === "1"; } catch { return false; }
   });
@@ -6163,7 +6164,12 @@ function InstallSeekPrompt() {
 
   const doInstall = async () => {
     const promptEvent = installEvent || window.__seekDeferredInstallPrompt;
-    if (!promptEvent) return;
+    if (!promptEvent) {
+      // Browsers do not expose a programmatic install prompt unless they fire
+      // beforeinstallprompt. Give the user actionable browser-specific steps.
+      setShowInstallHelp(true);
+      return;
+    }
     try {
       await promptEvent.prompt();
       const choice = await promptEvent.userChoice;
@@ -6178,6 +6184,7 @@ function InstallSeekPrompt() {
       // is unavailable or the browser rejects the deferred event.
       window.__seekDeferredInstallPrompt = null;
       setInstallEvent(null);
+      setShowInstallHelp(true);
     }
   };
 
@@ -6197,17 +6204,16 @@ function InstallSeekPrompt() {
           </div>
           <button type="button" onClick={() => setClosed(true)} aria-label="Close install prompt" className="seek-install-close flex h-9 w-9 shrink-0 items-center justify-center rounded-full text-xl leading-none">×</button>
         </div>
-        {installEvent ? (
-          <button type="button" onClick={doInstall} className="seek-install-action mt-3 w-full rounded-full px-4 py-3 text-sm font-extrabold">
-            Install SEEK now
-          </button>
-        ) : isIOS ? (
-          <div className="seek-install-instructions mt-3 rounded-xl p-3 text-sm leading-5">
-            In Safari, tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong>.
-          </div>
-        ) : (
-          <div className="seek-install-instructions mt-3 rounded-xl p-3 text-sm leading-5">
-            <strong>On Android:</strong> tap the <strong>⋮ menu</strong> at the top-right of your browser, choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm <strong>Install</strong>.
+        <button type="button" onClick={doInstall} className="seek-install-action mt-3 w-full rounded-full px-4 py-3 text-sm font-extrabold">
+          {installEvent ? "Install SEEK now" : "Add SEEK to Home Screen"}
+        </button>
+        {showInstallHelp && (
+          <div className="seek-install-instructions mt-3 rounded-xl p-3 text-sm leading-5" role="status">
+            {isIOS ? (
+              <>In Safari, tap <strong>Share</strong>, then choose <strong>Add to Home Screen</strong> and tap <strong>Add</strong>.</>
+            ) : (
+              <><strong>On Android (Chrome):</strong> tap the <strong>⋮ menu</strong> at the top-right, choose <strong>Install app</strong> or <strong>Add to Home screen</strong>, then confirm. If that option is missing, Chrome has not yet recognised this site as installable.</>
+            )}
           </div>
         )}
       </div>
