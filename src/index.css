@@ -2036,69 +2036,33 @@ html:not(.seek-dark) .fixed.bottom-20 {
   .seek-evidence-slide iframe { height: 100%; min-height: 0; }
 }
 
-
 /* =========================================================
-   SEEK DONATION / ACTION BUTTON CONTRAST — LIGHT + DARK
-   Keep bright lime actions paired with deep evergreen text.
-   Keep evergreen secondary actions paired with white text.
+   FIX: CAMPAIGN-CARD DONATE LABEL CONTRAST
+   The previous global disabled-control rule was painting the
+   Donate label pale grey on the lime action background. Keep
+   campaign donation labels dark and fully opaque in both themes.
    ========================================================= */
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-donate,
-html.seek-dark .seek-campaign-page .seek-campaign-donate,
-html:not(.seek-dark) .seek-fundraiser-card button.rounded-full,
-html.seek-dark .seek-fundraiser-card button.rounded-full,
-html:not(.seek-dark) .seek-fundraiser-donate,
-html.seek-dark .seek-fundraiser-donate {
-  background: #CCF88E !important;
-  background-color: #CCF88E !important;
+html .seek-campaign-page button:disabled,
+html .seek-campaign-page button[aria-disabled="true"],
+html .seek-campaign-page button[class*="bg-[var(--seek-success)]"],
+html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"],
+html .seek-campaign-page button[class*="bg-[#CCF88E]"],
+html .seek-campaign-page .seek-campaign-card button {
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
-  border: 1px solid #A6D36B !important;
-  font-weight: 800 !important;
   opacity: 1 !important;
-  text-shadow: none !important;
 }
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-donate :is(span,svg,strong,b),
-html.seek-dark .seek-campaign-page .seek-campaign-donate :is(span,svg,strong,b),
-html:not(.seek-dark) .seek-fundraiser-card button.rounded-full :is(span,svg,strong,b),
-html.seek-dark .seek-fundraiser-card button.rounded-full :is(span,svg,strong,b),
-html:not(.seek-dark) .seek-fundraiser-donate :is(span,svg,strong,b),
-html.seek-dark .seek-fundraiser-donate :is(span,svg,strong,b) {
+html .seek-campaign-page button:disabled *,
+html .seek-campaign-page button[aria-disabled="true"] *,
+html .seek-campaign-page button[class*="bg-[var(--seek-success)]"] *,
+html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"] *,
+html .seek-campaign-page button[class*="bg-[#CCF88E]"] *,
+html .seek-campaign-page .seek-campaign-card button * {
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
 }
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-donate:hover,
-html.seek-dark .seek-campaign-page .seek-campaign-donate:hover,
-html:not(.seek-dark) .seek-fundraiser-card button.rounded-full:hover,
-html.seek-dark .seek-fundraiser-card button.rounded-full:hover,
-html:not(.seek-dark) .seek-fundraiser-donate:hover,
-html.seek-dark .seek-fundraiser-donate:hover {
-  background: #B9EB75 !important;
-  background-color: #B9EB75 !important;
-  color: #193524 !important;
-  -webkit-text-fill-color: #193524 !important;
-}
-/* Outlined campaign actions remain readable against either page surface. */
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-outline {
-  background: #FFFFFF !important;
-  color: #274A34 !important;
-  -webkit-text-fill-color: #274A34 !important;
-  border: 1px solid #AAB7AA !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-outline {
-  background: #2B362E !important;
-  color: #F7F7F1 !important;
-  -webkit-text-fill-color: #F7F7F1 !important;
-  border: 1px solid #819184 !important;
-}
-/* Explicit focus ring and pressed feedback for keyboard/touch accessibility. */
-.seek-campaign-page .seek-campaign-donate:focus-visible,
-.seek-fundraiser-card button.rounded-full:focus-visible,
-.seek-fundraiser-donate:focus-visible {
-  outline: 3px solid #477A5A !important;
-  outline-offset: 3px !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-donate:focus-visible,
-html.seek-dark .seek-fundraiser-card button.rounded-full:focus-visible,
-html.seek-dark .seek-fundraiser-donate:focus-visible {
-  outline-color: #CCF88E !important;
+html .seek-campaign-page button:disabled,
+html .seek-campaign-page button[aria-disabled="true"] {
+  background-color: #CCF88E !important;
+  border-color: #A6D36B !important;
 }
