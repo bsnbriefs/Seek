@@ -1362,3 +1362,105 @@ html.seek-dark :is(.border-gray-100,.border-gray-200,.border-slate-100,.border-s
 .seek-install-card .seek-install-action { background: #CCF88E !important; color: #193524 !important; -webkit-text-fill-color: #193524 !important; }
 .seek-install-card .seek-install-instructions { background: rgba(255,255,255,.12) !important; color: #FFFFFF !important; -webkit-text-fill-color: #FFFFFF !important; border: 1px solid rgba(255,255,255,.18); }
 .seek-install-card .seek-install-instructions strong { color: #CCF88E !important; -webkit-text-fill-color: #CCF88E !important; }
+
+
+/* =========================================================
+   SEEK FINAL THEME LAYER — scoped, predictable contrast.
+   This layer intentionally overrides older duplicated global
+   heading/paragraph rules without changing page structure.
+   ========================================================= */
+
+/* Quick-action sheet is a dark surface in BOTH themes. */
+.seek-quick-actions-panel {
+  background: #202923 !important;
+  color: #F7F7F1 !important;
+  border-color: rgba(247,247,241,.16) !important;
+}
+.seek-quick-actions-panel :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,label,small,div) {
+  color: inherit !important;
+  opacity: 1 !important;
+}
+.seek-quick-actions-panel .seek-quick-actions-eyebrow {
+  color: #CCF88E !important;
+}
+.seek-quick-actions-panel .seek-quick-actions-title {
+  color: #FFFFFF !important;
+}
+.seek-quick-actions-panel .seek-quick-actions-close {
+  color: #FFFFFF !important;
+  background: rgba(255,255,255,.14) !important;
+}
+.seek-quick-actions-item {
+  background: rgba(255,255,255,.07) !important;
+  border-color: rgba(255,255,255,.13) !important;
+  color: #FFFFFF !important;
+}
+.seek-quick-actions-item :is(span,svg) { color: #FFFFFF !important; }
+.seek-quick-actions-icon {
+  background: rgba(255,255,255,.12) !important;
+}
+.seek-quick-actions-label { color: #FFFFFF !important; }
+.seek-quick-actions-note { color: #D0D8D1 !important; }
+
+/* Keep the install card readable regardless of selected page theme. */
+.seek-install-card {
+  background: #202923 !important;
+  color: #F7F7F1 !important;
+  border: 1px solid rgba(247,247,241,.18) !important;
+}
+.seek-install-card :is(p,strong,span,div) { color: inherit; }
+.seek-install-card .seek-install-title { color: #FFFFFF !important; }
+.seek-install-card .seek-install-copy,
+.seek-install-card .seek-install-instructions { color: #D0D8D1 !important; }
+.seek-install-card .seek-install-close {
+  color: #FFFFFF !important;
+  background: rgba(255,255,255,.14) !important;
+}
+.seek-install-card .seek-install-action {
+  color: #193524 !important;
+  background: #CCF88E !important;
+}
+
+/* Theme is driven by one root class; make shared chrome follow it. */
+html:not(.seek-dark) {
+  color-scheme: light;
+  --seek-bg: #FAF8F3;
+  --seek-card: #FFFFFF;
+  --seek-ink: #26332B;
+  --seek-head: #274A34;
+  --seek-primary: #274A34;
+  --seek-light: #FAF8F3;
+  --seek-muted: #58645C;
+}
+html.seek-dark {
+  color-scheme: dark;
+  --seek-bg: #202923;
+  --seek-card: #2B362E;
+  --seek-ink: #F7F7F1;
+  --seek-head: #F7F7F1;
+  --seek-primary: #274A34;
+  --seek-light: #F7F7F1;
+  --seek-muted: #D5DED5;
+}
+html:not(.seek-dark) body { background: #FAF8F3 !important; color: #26332B !important; }
+html.seek-dark body { background: #202923 !important; color: #F7F7F1 !important; }
+html:not(.seek-dark) .seek-site-header {
+  background-color: #FFFFFF !important;
+  color: #274A34 !important;
+}
+html.seek-dark .seek-site-header {
+  background-color: #202923 !important;
+  color: #F7F7F1 !important;
+}
+
+/* Profile summary is an evergreen panel, so its text must remain light in light mode too. */
+.seek-profile-hero { background: #274A34 !important; color: #FFFFFF !important; }
+.seek-profile-hero :is(h1,h2,h3,h4,h5,h6,p,span,strong,b,label,small,div) {
+  color: inherit;
+}
+.seek-profile-hero :is(h1,h2,h3,h4,h5,h6,strong,b) { color: #FFFFFF !important; }
+.seek-profile-hero :is(p,span,label,small) { color: #E5EEE7 !important; }
+.seek-profile-hero .text-white,
+.seek-profile-hero .text-white\/70,
+.seek-profile-hero .text-white\/75,
+.seek-profile-hero .text-white\/60 { color: #E5EEE7 !important; }

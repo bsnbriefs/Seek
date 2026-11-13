@@ -1380,7 +1380,7 @@ function Navbar({ page, setPage, userSession }) {
   ];
   const go = (id) => { setPage(id); setOpen(false); window.scrollTo(0, 0); };
   return (
-    <header className="sticky top-0 z-[110] relative bg-white border-b border-[var(--seek-primary)]/8">
+    <header className="seek-site-header sticky top-0 z-[110] relative bg-white border-b border-[var(--seek-primary)]/8">
       <div className="mx-auto max-w-6xl px-5 sm:px-8 flex items-center justify-between h-16">
         <button onClick={() => go("home")} className="shrink-0"><Logo className="h-7" /></button>
 
@@ -5149,7 +5149,7 @@ function MySeekDashboard({ setPage, userSession }) {
   return (
     <div style={{ background: C.bg }} className="min-h-screen">
       <section className="mx-auto max-w-6xl px-5 sm:px-8 pt-10 sm:pt-14 pb-7">
-        <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white overflow-hidden relative">
+        <div className="seek-profile-hero rounded-[2rem] bg-[var(--seek-primary)] text-white overflow-hidden relative">
           <div className="absolute -right-16 -top-20 h-48 w-48 rounded-full bg-[var(--seek-success)]/20" aria-hidden="true" />
           <div className="absolute -left-20 -bottom-24 h-56 w-56 rounded-full bg-white/5" aria-hidden="true" />
           <div className="relative p-6 sm:p-8">
@@ -5975,24 +5975,24 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   return (
     <>
       {composerOpen && (
-        <div className="fixed inset-0 z-[140] lg:hidden" role="dialog" aria-modal="true" aria-label="SEEK quick actions">
+        <div className="seek-quick-actions-layer fixed inset-0 z-[140] lg:hidden" role="dialog" aria-modal="true" aria-label="SEEK quick actions">
           <button type="button" aria-label="Close quick actions" className="absolute inset-0 bg-[var(--seek-primary)]/35 backdrop-blur-[2px]" onClick={() => setComposerOpen(false)} />
-          <div className="absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl bg-[var(--seek-dark)] p-4 shadow-2xl border border-white/10 text-white">
-            <div className="flex items-center justify-between px-2 pb-3">
+          <div className="seek-quick-actions-panel absolute inset-x-3 bottom-[calc(4.75rem+env(safe-area-inset-bottom))] rounded-3xl p-4 shadow-2xl border">
+            <div className="seek-quick-actions-heading flex items-center justify-between px-2 pb-3">
               <div>
-                <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[var(--seek-mint)]">SEEK</p>
-                <h2 className="font-display font-extrabold text-xl text-white">What would you like to do?</h2>
+                <p className="seek-quick-actions-eyebrow text-[10px] uppercase tracking-[0.18em] font-bold">SEEK</p>
+                <h2 className="seek-quick-actions-title font-display font-extrabold text-xl">What would you like to do?</h2>
               </div>
-              <button type="button" onClick={() => setComposerOpen(false)} className="h-9 w-9 rounded-full bg-white/15 text-white text-xl leading-none" aria-label="Close">×</button>
+              <button type="button" onClick={() => setComposerOpen(false)} className="seek-quick-actions-close h-9 w-9 rounded-full text-xl leading-none" aria-label="Close">×</button>
             </div>
-            <div className="grid grid-cols-2 gap-2">
+            <div className="seek-quick-actions-grid grid grid-cols-2 gap-2">
               {actions.map((item) => {
                 const Icon = item.icon;
                 return (
-                  <button key={item.id} type="button" onClick={() => openAction(item)} className="rounded-2xl border border-white/10 bg-white/5 p-3 text-left hover:bg-white/10 active:scale-[0.98] transition">
-                    <span className="inline-flex h-9 w-9 items-center justify-center rounded-xl bg-white/10 text-white"><Icon size={18} /></span>
-                    <span className="mt-2 block text-sm font-bold text-white">{item.label}</span>
-                    <span className="mt-0.5 block text-[11px] leading-4 text-white/60">{item.note}</span>
+                  <button key={item.id} type="button" onClick={() => openAction(item)} className="seek-quick-actions-item rounded-2xl border p-3 text-left active:scale-[0.98] transition">
+                    <span className="seek-quick-actions-icon inline-flex h-9 w-9 items-center justify-center rounded-xl"><Icon size={18} /></span>
+                    <span className="seek-quick-actions-label mt-2 block text-sm font-bold">{item.label}</span>
+                    <span className="seek-quick-actions-note mt-0.5 block text-[11px] leading-4">{item.note}</span>
                   </button>
                 );
               })}
