@@ -2666,33 +2666,24 @@ function DiscoverPage({ setPage }) {
 function HomePromotionCarousel({ setPage }) {
   const slides = [
     {
-      id: "feature",
-      eyebrow: "BSN FOUNDATION · DECEMBER 2026",
-      title: "End-of-Year Outreach",
-      body: "Help us reach families and persons with disabilities with food and practical support.",
-      action: "Support this outreach",
-      image: "/outreach/bsn-end-of-year-2026.jpg",
-      imageAlt: "BSN Foundation End-of-Year Outreach flyer",
-      theme: "feature",
+      id: "outreach-design-one",
+      image: "/outreach/bsn-outreach-design-1.jpg",
+      alt: "BSN Foundation End-of-Year Outreach: 1,500 people to be fed and 300 food boxes to be distributed.",
     },
     {
-      id: "impact",
-      eyebrow: "1,800 PEOPLE · ONE COMMUNITY EFFORT",
-      title: "1,500 people to feed. 300 food boxes to deliver.",
-      body: "Help us reach people with care, dignity and hope this December.",
-      action: "See the outreach",
-      theme: "impact",
+      id: "outreach-design-two",
+      image: "/outreach/bsn-outreach-design-2.jpg",
+      alt: "BSN Foundation End-of-Year Outreach supporting persons with disabilities.",
     },
     {
-      id: "join",
-      eyebrow: "YOUR SUPPORT MAKES IT POSSIBLE",
-      title: "Help make this December count.",
-      body: "Stand with BSN Foundation and help make this outreach happen.",
-      action: "Contribute now",
-      theme: "join",
+      id: "outreach-design-three",
+      image: "/outreach/bsn-outreach-design-3.jpg",
+      alt: "Support the BSN Foundation End-of-Year Outreach this December.",
     },
   ];
   const [active, setActive] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const trackRef = useRef(null);
   const touchStart = useRef(null);
   const pauseUntil = useRef(0);
 
@@ -2704,6 +2695,16 @@ function HomePromotionCarousel({ setPage }) {
     }, 5000);
     return () => window.clearInterval(timer);
   }, [slides.length]);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      const item = trackRef.current?.children?.[active];
+      setOffset(item ? item.offsetLeft : 0);
+    };
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [active]);
 
   const goTo = (index) => {
     setActive((index + slides.length) % slides.length);
@@ -2717,7 +2718,7 @@ function HomePromotionCarousel({ setPage }) {
   return (
     <section
       className="seek-home-promotions mx-auto mt-8 w-full max-w-5xl"
-      aria-label="Featured SEEK and BSN Foundation announcements"
+      aria-label="Featured BSN Foundation outreach promotions"
       onMouseEnter={() => { pauseUntil.current = Date.now() + 10000; }}
       onMouseLeave={() => { pauseUntil.current = Date.now(); }}
       onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 10000; }}
@@ -2729,67 +2730,50 @@ function HomePromotionCarousel({ setPage }) {
         touchStart.current = null;
       }}
     >
-      <div className="mb-3 flex items-center justify-between px-5 sm:px-0">
-        <div>
-          <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">Featured on SEEK</p>
-          <p className="mt-1 text-xs text-[var(--seek-primary)]/55">Outreaches, opportunities and ways to take part.</p>
-        </div>
-        <span className="shrink-0 text-[10px] font-bold tracking-wider text-[var(--seek-primary)]/45">{active + 1} / {slides.length}</span>
-      </div>
-
       <div className="seek-promo-viewport relative overflow-hidden">
         <div
+          ref={trackRef}
           className="seek-promo-track flex items-stretch gap-4 transition-transform duration-700 ease-[cubic-bezier(.22,.8,.25,1)]"
-          style={{ transform: `translateX(calc(-${active * 82}% - ${active * 16}px))` }}
+          style={{ transform: `translate3d(-${offset}px,0,0)` }}
         >
-          {slides.map((slide) => (
-            <article key={slide.id} className={`seek-promo-card ${slide.theme} relative flex shrink-0 overflow-hidden rounded-[20px] text-white shadow-[0_10px_28px_rgba(10,40,30,.16)]`}>
-              <div className="pointer-events-none absolute inset-0" aria-hidden="true" />
-              <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center p-4 sm:p-6">
-                <p className="text-[8px] font-extrabold uppercase tracking-[.16em] text-[#d4ff91] sm:text-[10px]">{slide.eyebrow}</p>
-                <h2 className="mt-2 max-w-[34rem] font-display text-base font-black leading-tight sm:mt-3 sm:text-2xl">{slide.title}</h2>
-                <p className="mt-1.5 max-w-[32rem] text-[10px] leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-5">{slide.body}</p>
-                <button type="button" onClick={openOutreach} className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-[#c9f58a] px-3.5 py-2 text-[10px] font-extrabold text-[#123b2d] transition hover:-translate-y-0.5 sm:mt-4 sm:px-4 sm:py-2.5 sm:text-xs">
-                  {slide.action} <ArrowRight size={14} />
-                </button>
-              </div>
-              {slide.image ? (
-                <div className="relative z-10 flex w-[30%] shrink-0 items-center justify-center overflow-hidden p-2 sm:w-[27%] sm:p-3">
-                  <img src={slide.image} alt={slide.imageAlt} className="h-full max-h-[190px] w-full rounded-xl object-cover object-center shadow-lg sm:max-h-[230px]" loading="lazy" />
-                </div>
-              ) : slide.theme === "impact" ? (
-                <div className="relative z-10 flex w-[30%] shrink-0 flex-col items-center justify-center gap-2 border-l border-white/15 px-2 text-center sm:w-[27%] sm:gap-3">
-                  <div><strong className="block font-display text-2xl font-black leading-none text-[#d4ff91] sm:text-4xl">1,500</strong><span className="mt-1 block text-[8px] font-bold uppercase tracking-wider text-white/80 sm:text-[10px]">People to feed</span></div>
-                  <div className="h-px w-2/3 bg-white/25" />
-                  <div><strong className="block font-display text-2xl font-black leading-none text-[#d4ff91] sm:text-4xl">300</strong><span className="mt-1 block text-[8px] font-bold uppercase tracking-wider text-white/80 sm:text-[10px]">Food boxes</span></div>
-                </div>
-              ) : (
-                <div className="relative z-10 flex w-[30%] shrink-0 items-center justify-center border-l border-white/15 px-2 sm:w-[27%]">
-                  <div className="text-center"><span className="block text-4xl text-[#d4ff91] sm:text-6xl" aria-hidden="true">♥</span><span className="mt-1 block text-[8px] font-extrabold uppercase tracking-[.14em] text-white/80 sm:text-[10px]">Community · Dignity · Hope</span></div>
-                </div>
-              )}
+          {slides.map((slide, index) => (
+            <article key={slide.id} className="seek-promo-card relative flex shrink-0 overflow-hidden rounded-[16px] bg-[#073d32] shadow-[0_8px_24px_rgba(10,40,30,.16)]">
+              <button
+                type="button"
+                onClick={openOutreach}
+                aria-label={`Open BSN Foundation outreach promotion ${index + 1}`}
+                className="block h-full w-full overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c9f58a]"
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  className="block h-full w-full object-cover object-center"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable="false"
+                />
+              </button>
             </article>
           ))}
         </div>
-        <button type="button" aria-label="Previous featured announcement" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/55">‹</button>
-        <button type="button" aria-label="Next featured announcement" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/55">›</button>
+        <button type="button" aria-label="Previous outreach design" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">‹</button>
+        <button type="button" aria-label="Next outreach design" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">›</button>
       </div>
-      <div className="mt-3 flex items-center justify-center gap-2" aria-label="Choose featured announcement">
-        {slides.map((slide, index) => <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show announcement ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />)}
+      <div className="mt-2.5 flex items-center justify-center gap-2" aria-label="Choose outreach design">
+        {slides.map((slide, index) => (
+          <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show outreach design ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />
+        ))}
       </div>
       <style>{`
-        .seek-promo-viewport { padding-left: 0; padding-right: 0; }
-        .seek-promo-track { padding-right: 18%; }
-        .seek-promo-card { width: 82%; height: clamp(150px, 25vw, 270px); }
-        .seek-promo-card.feature { background: linear-gradient(110deg,#061f1c 0%,#073d32 58%,#0b5140 100%); }
-        .seek-promo-card.feature > div:first-child { background: radial-gradient(circle at 82% 45%,rgba(190,244,105,.25),transparent 38%),linear-gradient(120deg,transparent 45%,rgba(0,0,0,.28)); }
-        .seek-promo-card.impact { background: linear-gradient(110deg,#073d32,#12634b); }
-        .seek-promo-card.impact > div:first-child { background: radial-gradient(circle at 85% 45%,rgba(190,244,105,.2),transparent 38%); }
-        .seek-promo-card.join { background: linear-gradient(110deg,#102d27,#244c38); }
-        .seek-promo-card.join > div:first-child { background: radial-gradient(circle at 85% 45%,rgba(190,244,105,.24),transparent 40%); }
+        .seek-home-promotions { padding-left: 1rem; padding-right: 1rem; }
+        .seek-promo-viewport { padding: 0; }
+        .seek-promo-track { will-change: transform; }
+        .seek-promo-card { width: 84%; aspect-ratio: 1.88 / 1; }
+        .seek-promo-card button { cursor: pointer; }
+        .seek-promo-card img { transition: transform .45s ease; }
+        .seek-promo-card button:hover img { transform: scale(1.015); }
         @media (max-width: 640px) {
-          .seek-home-promotions { margin-top: 1.5rem; }
-          .seek-promo-card { height: 158px; }
+          .seek-home-promotions { margin-top: 1.35rem; padding-left: 1rem; padding-right: 1rem; }
+          .seek-promo-card { width: 88%; aspect-ratio: 1.78 / 1; }
         }
       `}</style>
     </section>
