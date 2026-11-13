@@ -239,3 +239,36 @@ html.seek-dark .seek-discover-card .text-\[\#0D3B3B\] { color: #EAF5F1 !importan
 @keyframes seekCampaignCardIn { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
 @keyframes seekCampaignProgress { from { width:0; } }
 @media (prefers-reduced-motion:reduce) { .seek-campaign-orb,.seek-campaign-kicker span,.seek-campaign-card,.seek-campaign-progress { animation:none!important; opacity:1; } .seek-campaign-card,.seek-campaign-card-media img,.seek-campaign-donate,.seek-campaign-outline { transition:none!important; } }
+
+/* BSN campaign media controls, donor guidance and theme-aware contrast */
+.seek-campaign-media-frame { touch-action: pan-y; }
+.seek-campaign-media-progress { position:absolute; z-index:3; top:10px; left:12px; right:12px; display:flex; gap:4px; }
+.seek-campaign-media-progress span { height:3px; flex:1; border-radius:99px; background:rgba(255,255,255,.42); }
+.seek-campaign-media-progress span.is-active,.seek-campaign-media-progress span.is-seen { background:#fff; }
+.seek-campaign-media-count { position:absolute; z-index:3; top:22px; right:14px; padding:5px 9px; border-radius:99px; background:rgba(0,0,0,.48); color:#fff; font-size:10px; font-weight:800; backdrop-filter:blur(8px); }
+.seek-campaign-story-card { border:1px solid rgba(13,59,59,.10); background:#fff; color:#294744; }
+.seek-campaign-story-card > p:first-child { color:#087c70; }
+.seek-campaign-donor-guide { padding:15px; border:1px solid rgba(8,124,112,.18); border-radius:18px; background:#f0f8f4; color:#173d38; }
+.seek-campaign-donor-guide > p { color:#08776e; }
+.seek-campaign-donor-guide ol { display:grid; gap:11px; margin-top:12px; }
+.seek-campaign-donor-guide li { display:flex; align-items:flex-start; gap:10px; font-size:12px; line-height:1.5; color:#365b56; }
+.seek-campaign-donor-guide li b { display:grid; width:25px; height:25px; flex:0 0 25px; place-items:center; border-radius:50%; background:#d8f0e7; color:#075e59; font-size:10px; }
+.seek-theme-toggle { border:1px solid rgba(13,59,59,.16); background:rgba(255,255,255,.82); color:#075e59; box-shadow:0 2px 9px rgba(13,59,59,.08); }
+.seek-theme-toggle:hover { background:#e4f4ee; }
+.seek-dark .seek-theme-toggle { border-color:rgba(180,230,218,.25); background:#20312e; color:#b8f0df; }
+.seek-dark .seek-campaign-page { background:#101a18; color:#e4f1ed; }
+.seek-dark .seek-campaign-card { border-color:rgba(190,230,218,.12); background:#1b2926; box-shadow:0 8px 24px rgba(0,0,0,.22); }
+.seek-dark .seek-campaign-card h3 { color:#e8f5f0 !important; }
+.seek-dark .seek-campaign-card p { color:#b5cbc3 !important; }
+.seek-dark .seek-campaign-support-card { border-color:rgba(190,230,218,.14); background:linear-gradient(145deg,#1d302b,#17231f); }
+.seek-dark .seek-campaign-support-card h2 { color:#e6f5ef !important; }
+.seek-dark .seek-campaign-support-card p { color:#bdd0c8 !important; }
+.seek-dark .seek-campaign-story-card { border-color:rgba(190,230,218,.14); background:#1b2926; color:#d5e5de; }
+.seek-dark .seek-campaign-story-card > p:first-child { color:#75d8c3; }
+.seek-dark .seek-campaign-donor-guide { border-color:rgba(110,220,190,.2); background:#20342e; color:#e0f2eb; }
+.seek-dark .seek-campaign-donor-guide > p { color:#8cebd7; }
+.seek-dark .seek-campaign-donor-guide li { color:#c4d9d0; }
+.seek-dark .seek-campaign-donor-guide li b { background:#31574a; color:#b9f1dc; }
+.seek-dark .seek-campaign-back { color:#fff; }
+.seek-dark .seek-campaign-page .text-\[\#0D3B3B\], .seek-dark .seek-campaign-page .text-\[\#385653\] { color:#d5e5de !important; }
+@media (prefers-reduced-motion:reduce) { .seek-campaign-media-progress span { transition:none!important; } }

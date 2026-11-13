@@ -2137,7 +2137,17 @@ function BsnPage({ setPage }) {
   const [donating, setDonating] = useState(false);
   const [activeMedia, setActiveMedia] = useState(0);
   const [campaignRaised, setCampaignRaised] = useState(0);
+  const touchStartX = useRef(null);
   useEffect(() => { setActiveMedia(0); setCampaignRaised(0); }, [selected?.id]);
+  useEffect(() => {
+    if (!selected) return;
+    const mediaCount = (selected.photos || []).length + (selected.videos || []).length;
+    if (mediaCount < 2) return;
+    const currentItem = [...(selected.photos || []).map((src) => ({ src, type: "image" })), ...(selected.videos || []).map((src) => ({ src, type: "video" }))][activeMedia % mediaCount];
+    if (!currentItem || currentItem.type !== "image") return;
+    const timer = window.setTimeout(() => setActiveMedia((index) => (index + 1) % mediaCount), 5000);
+    return () => window.clearTimeout(timer);
+  }, [selected?.id, selected?.photos?.length, selected?.videos?.length, activeMedia]);
   useEffect(() => {
     if (!selected) return;
     let alive = true;
@@ -2161,18 +2171,20 @@ function BsnPage({ setPage }) {
         </section>
         <section className="mx-auto grid max-w-5xl gap-6 px-5 pt-6 md:grid-cols-[1.2fr_.8fr]">
           <div>
-            {current ? <div className="seek-campaign-media-frame">
-              {current.type === "video" ? <video key={current.src} src={encodeURI(current.src)} controls playsInline preload="metadata" className="h-full w-full object-cover" /> : <img key={current.src} src={encodeURI(current.src)} alt={selected.title} className="h-full w-full object-cover" />}
-              {media.length > 1 && <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">{media.map((m, i) => <button key={m.src} type="button" aria-label={`Show campaign media ${i+1}`} onClick={() => setActiveMedia(i)} className={`h-2.5 w-2.5 rounded-full border border-white ${i === activeMedia ? "bg-white" : "bg-white/30"}`} />)}</div>}
+            {current ? <div className="seek-campaign-media-frame" onTouchStart={(e) => { touchStartX.current = e.touches?.[0]?.clientX ?? null; }} onTouchEnd={(e) => { const endX = e.changedTouches?.[0]?.clientX; if (touchStartX.current != null && endX != null && Math.abs(endX - touchStartX.current) > 45 && media.length > 1) setActiveMedia((index) => (index + (endX < touchStartX.current ? 1 : -1) + media.length) % media.length); touchStartX.current = null; }}>
+              {current.type === "video" ? <video key={current.src} src={encodeURI(current.src)} controls autoPlay muted playsInline preload="metadata" className="h-full w-full object-cover" onEnded={() => media.length > 1 && setActiveMedia((index) => (index + 1) % media.length)} /> : <img key={current.src} src={encodeURI(current.src)} alt={selected.title} className="h-full w-full object-cover" />}
+              {media.length > 1 && <><div className="seek-campaign-media-progress">{media.map((m, i) => <span key={m.src} className={i === activeMedia ? "is-active" : i < activeMedia ? "is-seen" : ""} />)}</div><div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">{media.map((m, i) => <button key={m.src} type="button" aria-label={`Show campaign media ${i+1}`} onClick={() => setActiveMedia(i)} className={`h-2.5 w-2.5 rounded-full border border-white ${i === activeMedia ? "bg-white" : "bg-white/30"}`} />)}</div><span className="seek-campaign-media-count">{activeMedia + 1} / {media.length}</span></>}
             </div> : <div className="seek-campaign-media-empty"><span>BSN</span><p>Community. Dignity. Opportunity.</p></div>}
-            <div className="mt-5 rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Why it matters</p><p className="mt-3 whitespace-pre-line text-sm leading-7 text-[#294744]">{selected.story || selected.blurb}</p></div>
+            <div className="seek-campaign-story-card mt-5 rounded-3xl p-5 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-[.18em]">Why it matters</p><p className="mt-3 whitespace-pre-line text-sm leading-7">{selected.story || selected.blurb}</p></div>
           </div>
           <aside className="seek-campaign-support-card h-fit rounded-3xl p-5 sm:p-6">
             <span className="inline-flex rounded-full bg-[#1BAA9C]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#08776E]">Be part of the impact</span>
             <h2 className="mt-4 font-display text-2xl font-black text-[#0D3B3B]">Your support moves this forward.</h2>
             {selected.budget ? <><p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#0D3B3B]/45">Campaign progress</p><p className="mt-1 font-display text-3xl font-black text-[#0D7770]">₦{campaignRaised.toLocaleString()}</p><p className="mt-1 text-xs text-[#385653]">raised of ₦{Number(selected.budget).toLocaleString()}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#DDEBE7]"><div className="seek-campaign-progress h-full rounded-full" style={{ width: `${Math.min(100, Math.round((campaignRaised / Number(selected.budget)) * 100))}%` }} /></div></> : null}
             <p className="mt-4 text-sm leading-6 text-[#385653]">Every contribution helps the Foundation reach more people with practical support.</p>
+            <div className="seek-campaign-donor-guide mt-5"><p className="text-xs font-extrabold uppercase tracking-wider">How to support</p><ol><li><b>01</b><span>Choose this campaign and review its story and past work.</span></li><li><b>02</b><span>Tap donate and enter the amount you wish to give.</span></li><li><b>03</b><span>Complete the secure payment to support this programme.</span></li></ol></div>
             <button type="button" onClick={() => setDonating(true)} className="seek-campaign-donate mt-6 w-full">Donate to this campaign <ArrowRight size={17} /></button>
+            <p className="mt-3 text-center text-[11px] text-[#56736D]">You will review your donation details before payment.</p>
           </aside>
         </section>
       </main>
@@ -2565,7 +2577,18 @@ function ForYouPage({ setPage }) {
         </div>
       </section>
 
-
+      <section id="home-open-requests" className="scroll-mt-28 px-5 pb-16 sm:pb-20">
+        <div className="mx-auto max-w-6xl">
+          <div className="mb-5 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Make a difference</p>
+              <h2 className="mt-1 font-display text-2xl font-extrabold text-[#0D3B3B]">People who need support</h2>
+              <p className="mt-1 text-sm text-[#385653]">Read their stories and support a request that matters to you.</p>
+            </div>
+          </div>
+          <HelpSomeoneFeed setPage={setPage} limit={6} compact />
+        </div>
+      </section>
     </div>
   );
 }
