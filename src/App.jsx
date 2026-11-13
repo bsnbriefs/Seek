@@ -3305,9 +3305,9 @@ const set = (k) => (e) => setForm({ ...form, [k]: e.target.value });
   return (
     <div style={{ background: C.bg }}>
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pt-16 pb-6 text-center">
-        <SectionLabel>Seek Help</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Ask for help.</h1>
-        <p className="mt-3 font-body text-[var(--seek-primary)]/60">Tell us what you need. SEEK reviews it before it goes public.</p>
+        <SectionLabel>REQUEST SUPPORT</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)]">Let’s find a way forward.</h1>
+        <p className="mt-3 font-body text-[var(--seek-primary)]/60">Tell us what’s happening and what would make a difference. Our team reviews every request before sharing it with the SEEK community.</p>
       </section>
 
       <section className="mx-auto max-w-2xl px-5 sm:px-8 pb-20">
