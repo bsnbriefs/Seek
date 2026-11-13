@@ -143,6 +143,8 @@ const CURRENCIES = [
   { code: "USD", symbol: "$", rate: 0.00065 },
   { code: "GBP", symbol: "£", rate: 0.00051 },
   { code: "EUR", symbol: "€", rate: 0.00060 },
+  { code: "CAD", symbol: "C$", rate: 0.00088 },
+  { code: "AUD", symbol: "A$", rate: 0.00098 },
 ];
 
 function getCurrency() {
@@ -154,6 +156,21 @@ function formatMoney(naira) {
   const c = CURRENCIES.find((x) => x.code === code) || CURRENCIES[0];
   const value = Math.round(naira * c.rate);
   return c.symbol + value.toLocaleString();
+}
+
+function LanguagePicker() {
+  const [lang, setLang] = useState(readSeekLang);
+  const change = (e) => {
+    const v = e.target.value;
+    setLang(v);
+    try { localStorage.setItem("seek_lang", v); } catch {}
+    window.location.reload();
+  };
+  return (
+    <select value={lang} onChange={change} className="text-xs bg-transparent border border-[#0D3B3B]/20 rounded px-1 py-0.5">
+      {SEEK_LANGS.map((l) => <option key={l.id} value={l.id}>{l.label}</option>)}
+    </select>
+  );
 }
 
 function CurrencyPicker() {
@@ -173,12 +190,16 @@ function CurrencyPicker() {
 
 const SEEK_LANGS = [
   { id: "en", label: "English" },
+  { id: "fr", label: "Français" },
+  { id: "es", label: "Español" },
+  { id: "pt", label: "Português" },
+  { id: "ar", label: "العربية" },
+  { id: "zh", label: "中文" },
+  { id: "hi", label: "हिन्दी" },
   { id: "pcm", label: "Nigerian Pidgin" },
   { id: "ha", label: "Hausa" },
   { id: "yo", label: "Yoruba" },
   { id: "ig", label: "Igbo" },
-  { id: "fr", label: "Francais" },
-  { id: "es", label: "Espanol" },
 ];
 const SEEK_I18N = {
   en: {
@@ -236,6 +257,38 @@ const SEEK_I18N = {
     wantHelp: "Quiero ayudar",
     seeStories: "Ver historias",
     language: "Idioma",
+  },
+  pt: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "Peça o que precisa. Ofereça o que puder.",
+    needHelp: "Preciso de ajuda",
+    wantHelp: "Quero ajudar",
+    seeStories: "Ver histórias",
+    language: "Idioma",
+  },
+  ar: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "اطلب ما تحتاجه. قدم ما تستطيع.",
+    needHelp: "أحتاج مساعدة",
+    wantHelp: "أريد المساعدة",
+    seeStories: "شاهد القصص",
+    language: "اللغة",
+  },
+  zh: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "请求你需要的。提供你能给的。",
+    needHelp: "我需要帮助",
+    wantHelp: "我想帮助",
+    seeStories: "查看故事",
+    language: "语言",
+  },
+  hi: {
+    hero: "ASK. SEEK. FIND.",
+    askOffer: "जो चाहिए वो मांगो। जो दे सको वो दो।",
+    needHelp: "मुझे मदद चाहिए",
+    wantHelp: "मैं मदद करना चाहता हूं",
+    seeStories: "कहानियां देखें",
+    language: "भाषा",
   },
 };
 function readSeekLang() {
@@ -412,30 +465,14 @@ const CATEGORIES = [
 ];
 const SWIPE_SEQ = ["home", "seek-help", "give", "offers", "impact"];
 const CONNECT_CATS = ["Company / Friends", "Celebrate & Connect", "Accompaniment", "Study companion"];
-function requestAmountNeeded(req) {
-  return Number(
-    req?.amountNeeded ?? req?.amount_needed ?? req?.targetAmount ??
-    req?.target_amount ?? req?.fundraising_goal ?? req?.goal_amount ?? 0
-  ) || 0;
-}
-
 function isFinancialNeed(req) {
   if (!req) return false;
-  const category = String(req.category || "").trim().toLowerCase();
-  const assistance = String(req.assistance_type || req.assistanceType || req.need_type || "").trim().toLowerCase();
-  const kind = String(req.type || req.need_type || "").trim().toLowerCase();
-
-  // Connection, opportunity and in-kind requests must never open the donation flow.
-  if (CONNECT_CATS.some((value) => value.toLowerCase() === category)) return false;
-  if (/job|employ|mentor|counsel|compan|friend|celebrat|connect|volunteer/.test(category)) return false;
-  if (["item", "items", "goods", "in-kind", "inkind", "time", "company", "connect", "job", "service"].includes(kind)) return false;
-  if (/^(item|items|goods|in-kind|inkind|time|company|connect|job|service|volunteer)/.test(assistance)) return false;
-
-  // Explicit financial assistance is a fundraiser even if an older row has no goal amount.
-  if (/financial|money|cash|fundrais|medical|education|school fees|rent|housing|emergency/.test(assistance)) return true;
-  if (/financial|medical|education|housing|emergency/.test(category)) return true;
-  if (kind === "money" || kind === "financial") return true;
-  return requestAmountNeeded(req) > 0;
+  if (CONNECT_CATS.includes(req.category)) return false;
+  const cat = String(req.category || "").toLowerCase();
+  if (/job|employ|mentor|counsel|compan|friend|celebrat/.test(cat)) return false;
+  const kind = String(req.type || req.need_type || "").toLowerCase();
+  if (["item", "goods", "time", "company", "connect", "job"].includes(kind)) return false;
+  return Number(req.amountNeeded || req.amount_needed || 0) > 0;
 }
 
 function videoKindLabel(req) {
@@ -878,6 +915,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
   const kind = request ? "neighbour" : "outreach";
   if (!request && !campaign) return null;
   const chips = [5000, 10000, 25000, 50000];
+  const currency = CURRENCIES.find((c) => c.code === getCurrency()) || CURRENCIES[0];
   return (
     <div className="fixed inset-0 z-[180] bg-black/40 flex items-center justify-center p-5" onClick={onClose}>
       <form
@@ -926,11 +964,11 @@ function SeekDonateModal({ request, campaign, onClose }) {
         <input required type="email" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={email} onChange={(e) => setEmail(e.target.value)} placeholder="Email for receipt" />
         <div className="mt-3 flex flex-wrap gap-1.5">
           {chips.map((n) => (
-            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>₦{n.toLocaleString()}</button>
+            <button key={n} type="button" onClick={() => setAmount(String(n))} className={"rounded-full px-2.5 py-1.5 text-xs font-bold " + (Number(amount) === n ? "bg-[#1BAA9C] text-[#0D3B3B]" : "bg-white/10 text-white")}>{currency.symbol}{Math.round(n * currency.rate).toLocaleString()}</button>
           ))}
         </div>
-        <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder="Amount ₦" />
-        <p className="mt-1 text-xs text-white/40">Amounts are in Naira. International cards are accepted.</p>
+        <input required inputMode="numeric" className="mt-2 w-full rounded-xl bg-white/5 border border-white/15 px-3 py-2.5 text-sm text-white" value={amount} onChange={(e) => setAmount(e.target.value)} placeholder={"Amount " + currency.symbol} />
+        <p className="mt-1 text-xs text-white/40">Showing in {currency.code}. Charged in Naira. International cards accepted.</p>
         <label className="mt-3 flex items-center gap-2 text-sm text-white/80">
           <input type="checkbox" checked={monthly} onChange={(e) => setMonthly(e.target.checked)} />
           Give this amount every month
@@ -947,25 +985,38 @@ function SeekDonateModal({ request, campaign, onClose }) {
 
 function RequestCard({ req, onHelp, onView }) {
   const [donateOpen, setDonateOpen] = useState(false);
-  const needed = requestAmountNeeded(req);
+  const needed = Number(req.amountNeeded || req.amount_needed || 0);
   const raised = Number(req.amountRaised || req.amount_raised || 0);
   const face = postAvatar(req.avatarUrl || req.avatar_url, req);
+  const pct = needed > 0 ? Math.min(100, Math.round((raised / needed) * 100)) : 0;
   return (
     <div className="flex flex-col rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden transition-transform hover:scale-[1.02] hover:shadow-lg">
       <div className="p-4">
-        <div className="flex items-center gap-3">
+        <div className="flex items-center gap-3 mb-3">
           {face ? <img loading="lazy" decoding="async" src={face} alt="" className="h-10 w-10 rounded-full object-cover" /> : <div className="h-10 w-10 rounded-full bg-[#1BAA9C]/20" />}
           <div className="min-w-0 flex-1">
-            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight">{req.title}</h3>
-            <p className="text-xs text-[#0D3B3B]/50">{req.location || req.category}</p>
+            <h3 className="font-display font-bold text-base text-[#0D3B3B] leading-tight line-clamp-1">{req.title}</h3>
+            <p className="text-xs text-[#0D3B3B]/50">{req.location}</p>
           </div>
+          <span className="text-[10px] font-semibold uppercase tracking-wide text-[#1BAA9C]">{req.category}</span>
         </div>
-        {needed > 0 && <div className="mt-3"><ProgressBar raised={raised} needed={needed} /></div>}
+        {req.description && <p className="text-sm text-[#0D3B3B]/70 line-clamp-2 mb-3">{req.description}</p>}
+        {needed > 0 && (
+          <div className="mb-2">
+            <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
+              <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: pct + "%" }} />
+            </div>
+            <div className="mt-1 flex justify-between text-xs">
+              <span className="font-semibold text-[#0D3B3B]">₦{raised.toLocaleString()} raised</span>
+              <span className="text-[#0D3B3B]/50">{pct}%</span>
+            </div>
+          </div>
+        )}
       </div>
       <div className="flex border-t border-[#0D3B3B]/8">
         {onView && <button type="button" onClick={() => onView(req)} className="flex-1 py-3 text-sm font-semibold text-[#0D3B3B]/70 hover:bg-[#F2F5F3]">View</button>}
-        <button type="button" onClick={() => isFinancialNeed(req) ? setDonateOpen(true) : (onHelp && onHelp(req))} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
-          {isFinancialNeed(req) ? "Donate" : "Join"}
+        <button type="button" onClick={() => CONNECT_CATS.includes(req.category) ? (onHelp && onHelp(req)) : setDonateOpen(true)} className="flex-1 py-3 text-sm font-bold text-white bg-[#1BAA9C]">
+          {CONNECT_CATS.includes(req.category) ? "Join" : "Give"}
         </button>
       </div>
       {donateOpen && <SeekDonateModal request={req} onClose={() => setDonateOpen(false)} />}
@@ -1170,6 +1221,7 @@ function FeatureStrip({ page, setPage }) {
     { id: "home", label: "Home" },
     { id: "seek-help-form", label: "Seek Help" },
     { id: "fundraiser", label: "Fundraiser" },
+    { id: "give", label: "Give" },
     { id: "bsn", label: "Campaign" },
     { id: "shop", label: "Shop" },
   ];
@@ -1275,13 +1327,12 @@ function Navbar({ page, setPage, userSession }) {
             {avatar ? <img loading="lazy" decoding="async" src={avatar} alt="" className="h-9 w-9 rounded-full object-cover border border-[#0D3B3B]/10" /> : <span className="h-9 w-9 rounded-full bg-[#0D3B3B]/10 inline-flex items-center justify-center"><User size={16} /></span>}
             <span>{userSession?.access_token ? "My SEEK" : "Sign in"}</span>
           </button>
-          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>I need help</Button>
-          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>I want to help</Button>
+          <Button variant="secondary" className="!px-5 !py-2.5" onClick={() => go("seek-help-form")}>{tSeek("needHelp")}</Button>
+          <Button variant="primary" className="!px-5 !py-2.5" onClick={() => go("seek-help")}>{tSeek("wantHelp")}</Button>
         </div>
 
         <div className="lg:hidden flex items-center gap-1">
         <ThemeToggle />
-        <CurrencyPicker />
         <NavInboxButton userSession={userSession} setPage={setPage} />
         <button className="p-2 text-[#0D3B3B]" onClick={() => setOpen(!open)} aria-label="Menu">
           {open ? <X size={24} /> : <Menu size={24} />}
@@ -1341,6 +1392,7 @@ function Connector() {
 function HomePage({ setPage, userSession }) {
   const [outreach, setOutreach] = useState(null);
   const [mine, setMine] = useState([]);
+  const [donateReq, setDonateReq] = useState(null);
   useEffect(() => {
     if (!userSession?.access_token) { setMine([]); return; }
     listMyRequests().then((rows) => setMine((rows || []).map(mapRequestRow).slice(0, 3))).catch(() => setMine([]));
@@ -1416,18 +1468,44 @@ function HomePage({ setPage, userSession }) {
       <section className="px-5 pt-10 pb-20 text-center">
         <img src={LOGO_SRC} alt="SEEK" className="mx-auto h-16 w-auto object-contain mix-blend-screen" />
         <h1 className="mt-6 font-display font-extrabold text-[#0D3B3B] dark:text-white text-4xl leading-[1.08] max-w-md mx-auto tracking-tight">
-          ASK. SEEK. FIND.
+          {tSeek("hero")}
         </h1>
         <p className="mt-4 text-[11px] font-semibold uppercase tracking-[0.18em] text-[#1BAA9C]">What SEEK is all about</p>
         <p className="mt-3 font-body text-sm leading-relaxed text-[#0D3B3B]/70 max-w-md mx-auto">
-          SEEK is a community assistance platform built to connect people who need help with people who can offer it. Ask for what you need. Offer what you can — whether it is financial support, goods, opportunities, mentorship, counselling, or simply showing up for someone.
+          {tSeek("askOffer")}
         </p>
         <div className="mt-6">
           <Button variant="primary" onClick={() => go("for-you")}>Explore SEEK</Button>
         </div>
       </section>
 
-      {userSession?.access_token && mine.length > 0 && (
+      {requests.filter((r) => String(r.category || "").includes("Fundraiser")).length > 0 && (
+        <section className="px-5 pb-10">
+          <div className="mx-auto max-w-lg">
+            <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-3">Fundraisers</p>
+            <div className="space-y-3">
+              {requests.filter((r) => String(r.category || "").includes("Fundraiser")).slice(0, 3).map((r) => (
+                <div key={r.id} className="rounded-2xl bg-white border border-[#0D3B3B]/8 p-4">
+                  <button type="button" onClick={() => { setPage("request:" + r.id); window.history.pushState({}, "", "/request/" + r.id); }} className="w-full text-left">
+                    <p className="font-display font-bold text-[#0D3B3B]">{r.title}</p>
+                    <p className="text-xs text-[#0D3B3B]/50 mt-1">{r.location}</p>
+                    {r.amountNeeded > 0 && (
+                      <div className="mt-2">
+                        <div className="h-2 w-full rounded-full bg-[#0D3B3B]/10 overflow-hidden">
+                          <div className="h-full rounded-full bg-[#1BAA9C]" style={{ width: Math.min(100, Math.round((Number(r.amountRaised || 0) / Number(r.amountNeeded)) * 100)) + "%" }} />
+                        </div>
+                        <p className="text-sm text-[#1BAA9C] mt-1">₦{Number(r.amountRaised || 0).toLocaleString()} of ₦{Number(r.amountNeeded).toLocaleString()}</p>
+                      </div>
+                    )}
+                  </button>
+                  <button type="button" onClick={() => setDonateReq(r)} className="mt-3 w-full rounded-full bg-[#1BAA9C] text-white py-2.5 text-sm font-bold">Donate</button>
+                </div>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+      {donateReq && <SeekDonateModal request={donateReq} onClose={() => setDonateReq(null)} />}
         <section className="mx-auto max-w-lg px-5 pb-6">
           <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
           {mine.slice(0, 2).map((req) => (
@@ -1443,9 +1521,9 @@ function HomePage({ setPage, userSession }) {
         <div className="mx-auto max-w-[440px] grid grid-cols-2 gap-2">
           {[
             ["seek-help-form", "Seek Help"],
+            ["fundraiser", "Fundraiser"],
             ["give", "Give"],
             ["offers", "Giveaways"],
-            ["celebrate", "Connect"],
           ].map(([id, label]) => (
             <button key={id} type="button" onClick={() => go(id)} className="rounded-full border border-[#0D3B3B]/12 bg-white py-3 text-sm font-semibold text-[#0D3B3B]">
               {label}
@@ -1456,22 +1534,6 @@ function HomePage({ setPage, userSession }) {
           <ShopSupportStrip setPage={setPage} />
         </div>
       </section>
-
-      {stories.length > 0 && (
-        <section className="px-5 pb-12">
-          <div className="mx-auto max-w-[440px]">
-            <SectionLabel>Outcomes</SectionLabel>
-            <div className="mt-3 space-y-3">
-              {stories.slice(0, 3).map((story) => (
-                <button key={story.id} type="button" onClick={() => { window.history.pushState({}, "", `/impact/${story.id}`); setPage(`impact:${story.id}`); window.scrollTo(0, 0); }} className="w-full text-left rounded-2xl bg-white border border-[#0D3B3B]/8 overflow-hidden">
-                  {story.public_url && story.media_kind === "video" ? <video src={story.public_url} muted playsInline preload="none" className="h-36 w-full object-cover bg-black" /> : story.public_url ? <img src={story.public_url} alt="" className="h-36 w-full object-cover" /> : null}
-                  <p className="p-3 font-display font-bold text-[#0D3B3B] line-clamp-2">{story.title || "A SEEK story"}</p>
-                </button>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
     </>
   );
@@ -1939,7 +2001,7 @@ function SeekAutoVideo({ src, title }) {
     <>
       <video ref={ref} src={src} muted playsInline preload="none" controlsList="nodownload noremoteplayback" disablePictureInPicture onContextMenu={(e) => e.preventDefault()} className="absolute inset-0 h-full w-full object-cover" aria-label={title} onClick={togglePlay} onEnded={() => setEnded(true)} />
       <SeekVideoWatermark />
-      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-20 z-20 h-8 w-8 rounded-full bg-black/40 text-white flex items-center justify-center text-xs" aria-label={muted ? "Unmute" : "Mute"}>
+      <button type="button" onClick={toggleMute} className="absolute right-3 bottom-32 z-20 h-6 w-6 rounded-full bg-black/30 text-white/70 flex items-center justify-center text-[10px]" aria-label={muted ? "Unmute" : "Mute"}>
         {muted ? "🔇" : "🔊"}
       </button>
       {paused && !ended && (
@@ -1958,8 +2020,8 @@ function LiveSupportCard({ request, setPage }) {
   const [donateOpen, setDonateOpen] = useState(false);
   const media = Array.isArray(request.media) ? request.media : [];
   const current = media[mediaIndex] || null;
-  const amountNeeded = requestAmountNeeded(request);
-  const amountRaised = Number(request.amountRaised ?? request.amount_raised ?? 0) || 0;
+  const amountNeeded = Number(request.amountNeeded) || 0;
+  const amountRaised = Number(request.amountRaised) || 0;
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
   const rawName = member.name || request.full_name || request.name || member.username || request.username || "";
@@ -2202,7 +2264,7 @@ function DiscoverPage({ setPage }) {
           const connect = CONNECT_CATS.includes(r.category);
           return {
             key: "req-" + r.id,
-            kind: connect ? "Celebrate" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
+            kind: connect ? "Celebrate" : String(r.category || "").includes("Fundraiser") ? "Fundraiser" : /job|mentor|counsel/i.test(String(r.category || "")) ? r.category : "Request",
             title: r.title || "Open request",
             body: r.location || r.category || "",
             at: stamp(r),
@@ -2270,8 +2332,8 @@ function DiscoverPage({ setPage }) {
     }
   }, [searchOpen]);
   const shown = tab === "trending"
-    ? items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 20)
-    : items.filter((item) => ["Impact", "Appreciation"].includes(item.kind)).slice(0, 40);
+    ? items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 20)
+    : items.filter((item) => ["Impact", "Appreciation", "Request", "Fundraiser"].includes(item.kind)).slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
       <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
@@ -2435,19 +2497,66 @@ function ForYouPage({ setPage }) {
   }, []);
 
   return (
-    <div style={{ background: C.bg }}>
-      <section className="px-5 pt-4 pb-16">
-        {loading && <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/50">Loading videos…</p>}
-        {error && <p className="mx-auto max-w-[440px] text-center text-sm text-red-700">{error}</p>}
-        {!loading && !error && liveCases.length === 0 && (
-          <p className="mx-auto max-w-[440px] text-center text-sm text-[#0D3B3B]/55">No public videos yet. Approved fundraisers with video will appear here.</p>
-        )}
-        <div className="mx-auto max-w-[440px] h-[calc(100dvh-16rem)] overflow-y-auto snap-y snap-mandatory scroll-smooth pb-12">
-          {liveCases.map((request) => (
-            <div key={request.id} className="mb-3 snap-start">
-              <LiveSupportCard request={request} setPage={setPage} />
+    <div className="seek-home-motion" style={{ background: C.bg }}>
+      <section className="seek-home-hero relative isolate overflow-hidden px-5 pt-10 pb-9 sm:pt-14 sm:pb-12">
+        <div className="seek-orb seek-orb-one" aria-hidden="true" />
+        <div className="seek-orb seek-orb-two" aria-hidden="true" />
+        <div className="relative z-10 mx-auto max-w-5xl">
+          <div className="mx-auto max-w-2xl text-center">
+            <span className="seek-hero-kicker inline-flex items-center gap-2 rounded-full border border-[#1BAA9C]/20 bg-white/75 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.2em] text-[#0D7770] backdrop-blur">
+              <span className="seek-pulse-dot" /> A community in motion
+            </span>
+            <h1 className="seek-hero-title mt-5 font-display text-4xl font-extrabold leading-[1.02] tracking-tight text-[#0D3B3B] sm:text-6xl">
+              Good things happen<br className="hidden sm:block" /> when we <span className="seek-gradient-text">show up.</span>
+            </h1>
+            <p className="mx-auto mt-4 max-w-lg text-sm leading-7 text-[#0D3B3B]/70 sm:text-base">
+              Ask for what you need. Offer what you can. Find the people and opportunities that move life forward.
+            </p>
+            <div className="mt-7 flex flex-wrap items-center justify-center gap-3">
+              <button type="button" onClick={() => setPage("seek-help")} className="seek-hero-primary rounded-full bg-[#0D3B3B] px-6 py-3 text-sm font-bold text-white shadow-lg shadow-[#0D3B3B]/15 transition hover:-translate-y-1 hover:bg-[#145653]">I need support <ArrowRight size={16} className="ml-2 inline" /></button>
+              <button type="button" onClick={() => setPage("give")} className="rounded-full border border-[#0D3B3B]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[#0D3B3B] backdrop-blur transition hover:-translate-y-1 hover:border-[#1BAA9C]">I want to help</button>
             </div>
-          ))}
+          </div>
+          <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
+            <div className="seek-motion-ribbon-track">
+              {[0, 1].map((copy) => (
+                <div className="seek-motion-ribbon-group" key={copy} aria-hidden={copy === 1}>
+                  {(liveCases.length ? liveCases.slice(0, 8) : [{ id: "a", title: "Ask for what you need" }, { id: "b", title: "Offer what you can" }, { id: "c", title: "Find your community" }]).map((item, index) => (
+                    <span className="seek-ribbon-item" key={`${copy}-${item.id || index}`}><i />{item.title || item.description || "A new community story"}</span>
+                  ))}
+                </div>
+              ))}
+            </div>
+          </div>
+        </div>
+      </section>
+
+      <section className="px-5 pb-16 pt-3 sm:pt-6">
+        <div className="mx-auto max-w-[440px]">
+          <div className="mb-4 flex items-end justify-between gap-3">
+            <div>
+              <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[#1BAA9C]">Real people. Real needs.</p>
+              <h2 className="mt-1 font-display text-2xl font-extrabold tracking-tight text-[#0D3B3B]">Stories from SEEK</h2>
+            </div>
+            <span className="rounded-full bg-white px-3 py-1.5 text-[11px] font-bold text-[#0D3B3B]/55 shadow-sm">{loading ? "Loading" : `${liveCases.length} stories`}</span>
+          </div>
+          {loading && <div className="seek-feed-skeleton h-40 rounded-3xl" />}
+          {error && <p className="rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
+          {!loading && !error && liveCases.length === 0 && (
+            <div className="rounded-3xl border border-[#0D3B3B]/10 bg-white p-7 text-center shadow-sm">
+              <div className="mx-auto flex h-12 w-12 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={22} /></div>
+              <h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Your next connection starts here.</h3>
+              <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Approved community videos will appear here as people share their stories.</p>
+              <button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[#0D7770]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button>
+            </div>
+          )}
+          <div className="seek-video-stack">
+            {liveCases.map((request, index) => (
+              <div key={request.id} className="seek-video-entry" style={{ "--seek-entry-index": index }}>
+                <LiveSupportCard request={request} setPage={setPage} />
+              </div>
+            ))}
+          </div>
         </div>
       </section>
     </div>
@@ -3833,13 +3942,13 @@ function RequestPage({ requestId, setPage }) {
                 {CONNECT_CATS.includes(request.category) || /job|employ|mentor|counsel/i.test(String(request.category || "")) ? (
                   <CelebrateRsvp request={request} setPage={setPage} helpLabel={/job|employ|mentor|counsel/i.test(String(request.category || "")) ? "I can help" : "I can be there"} />
                 ) : isFinancialNeed(request) ? (
-                  <Button
-                    variant="primary"
-                    className="w-full sm:w-auto"
+                  <button
+                    type="button"
+                    className="w-full rounded-full bg-[#1BAA9C] text-white py-4 text-lg font-bold"
                     onClick={() => setCaseDonateOpen(true)}
                   >
-                    Support this case <HandHeart size={16} />
-                  </Button>
+                    Donate now
+                  </button>
                 ) : (
                   <p className="text-sm text-[#0D3B3B]/60">This is not a fundraising request.</p>
                 )}
@@ -3865,6 +3974,17 @@ function RequestPage({ requestId, setPage }) {
           This is a verified public request on Seek · A project of BSN Foundation
         </p>
       </section>
+      {isFinancialNeed(request) && (
+        <div className="fixed bottom-20 inset-x-0 z-[140] p-4 bg-white/95 backdrop-blur border-t border-[#0D3B3B]/10">
+          <div className="mx-auto max-w-lg flex items-center gap-3">
+            <div className="flex-1">
+              <p className="text-sm font-semibold text-[#0D3B3B]">₦{Number(request.amountRaised || 0).toLocaleString()} raised</p>
+              <p className="text-xs text-[#0D3B3B]/50">of ₦{Number(request.amountNeeded || 0).toLocaleString()}</p>
+            </div>
+            <button type="button" onClick={() => setCaseDonateOpen(true)} className="rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
+          </div>
+        </div>
+      )}
     </div>
   );
 }
@@ -5221,7 +5341,42 @@ function MyRequestsPage({ setPage, userSession }) {
                   })}
                 </div>
               </div>
-              <div className="flex flex-wrap gap-3">
+              {req.status === "verification_required" && (
+                <div className="mt-4 rounded-xl bg-amber-50 border border-amber-200 p-4">
+                  <p className="text-sm font-semibold text-amber-800">Admin needs more evidence</p>
+                  <p className="mt-1 text-xs text-amber-700">Please upload additional photos or documents to support your fundraiser.</p>
+                  <label className="mt-2 inline-block text-sm font-semibold text-[#1BAA9C] cursor-pointer">
+                    Upload evidence
+                    <input type="file" accept="image/*,video/*,application/pdf" className="hidden" onChange={async (e) => {
+                      const file = e.target.files?.[0];
+                      if (!file) return;
+                      try {
+                        await uploadRequestEvidence(req.id, file);
+                        alert("Evidence uploaded. Admin will review it.");
+                      } catch (err) {
+                        alert(err.message || "Could not upload.");
+                      }
+                    }} />
+                  </label>
+                </div>
+              )}
+              {["published", "partially_funded"].includes(req.status) && (
+                <div className="mt-4 rounded-xl bg-[#F2F5F3] p-4">
+                  <p className="text-xs font-semibold uppercase tracking-wide text-[#0D3B3B]/50 mb-2">Post an update</p>
+                  <textarea id={"update-" + req.id} rows={2} className="w-full rounded-lg border border-[#0D3B3B]/15 p-2 text-sm" placeholder="Share progress with your supporters..." />
+                  <button type="button" onClick={async () => {
+                    const text = document.getElementById("update-" + req.id)?.value;
+                    if (!text?.trim()) return;
+                    try {
+                      await postRequestPublicUpdate(req.id, text);
+                      alert("Update posted.");
+                      document.getElementById("update-" + req.id).value = "";
+                    } catch (err) {
+                      alert(err.message || "Could not post update.");
+                    }
+                  }} className="mt-2 rounded-full bg-[#1BAA9C] text-white px-4 py-2 text-xs font-bold">Post update</button>
+                </div>
+              )}
                 <button
                   type="button"
                   onClick={() => {
@@ -5233,6 +5388,19 @@ function MyRequestsPage({ setPage, userSession }) {
                 >
                   View public page
                 </button>
+                <label className="text-sm font-semibold text-[#1BAA9C] hover:underline cursor-pointer">
+                  Add evidence
+                  <input type="file" accept="image/*,video/*" className="hidden" onChange={async (e) => {
+                    const file = e.target.files?.[0];
+                    if (!file) return;
+                    try {
+                      await uploadRequestEvidence(req.id, file);
+                      alert("Evidence uploaded. Admin will review it.");
+                    } catch (err) {
+                      alert(err.message || "Could not upload evidence.");
+                    }
+                  }} />
+                </label>
                 {req.status === "rejected" && (
                   <button
                     type="button"
@@ -5268,7 +5436,6 @@ function MyRequestsPage({ setPage, userSession }) {
                   }}
                 />
               )}
-              </div>
             </details>
           ))}
         </div>
@@ -5548,7 +5715,7 @@ function SeekMobileBottomNav({ page, setPage, userSession }) {
   const actions = [
     { id: "fundraiser", label: "Start a Fundraiser", note: "Raise money for a target", icon: Wallet },
     { id: "seek-help-form", label: "Ask for Help", note: "Tell SEEK what you need", icon: HeartHandshake },
-    { id: "home", label: "Help Someone", note: "See open requests", icon: HandHeart },
+    { id: "give", label: "Help Someone", note: "See open requests", icon: HandHeart },
     { id: "volunteer", label: "Volunteer", note: "Give your time", icon: Users },
     { id: "bsn", label: "Campaign", note: "Support a programme", icon: BadgeCheck },
     { id: "shop", label: "Shop", note: "Official SEEK items", icon: Package },

@@ -32,3 +32,31 @@ html {
   *, *::before, *::after { scroll-behavior: auto !important; animation-duration: .001ms !important; animation-iteration-count: 1 !important; transition-duration: .001ms !important; }
   .seek-reveal, .seek-reveal-stagger > * { opacity: 1 !important; transform: none !important; }
 }
+
+
+/* SEEK motion-led home experience */
+.seek-home-motion { overflow: hidden; }
+.seek-home-hero { background: radial-gradient(ellipse at 50% 0%, rgba(27,170,156,.13), transparent 52%), linear-gradient(180deg, #F7FBF9 0%, #F0F7F4 100%); }
+.seek-orb { position: absolute; z-index: 0; border-radius: 9999px; filter: blur(2px); pointer-events: none; }
+.seek-orb-one { width: 22rem; height: 22rem; top: -12rem; left: -7rem; background: radial-gradient(circle, rgba(27,170,156,.22), rgba(27,170,156,0)); animation: seek-orb-drift 13s ease-in-out infinite alternate; }
+.seek-orb-two { width: 26rem; height: 26rem; right: -11rem; bottom: -16rem; background: radial-gradient(circle, rgba(151,210,78,.18), rgba(151,210,78,0)); animation: seek-orb-drift 16s ease-in-out infinite alternate-reverse; }
+.seek-pulse-dot { width: 7px; height: 7px; display: inline-block; border-radius: 50%; background: #1BAA9C; box-shadow: 0 0 0 0 rgba(27,170,156,.45); animation: seek-dot-pulse 2s infinite; }
+.seek-hero-title { animation: seek-title-in .8s cubic-bezier(.2,.8,.2,1) both; }
+.seek-hero-kicker { animation: seek-title-in .6s .08s both; }
+.seek-gradient-text { background: linear-gradient(100deg, #079D9A 5%, #57B66A 55%, #9BCB45 100%); -webkit-background-clip: text; background-clip: text; color: transparent; }
+.seek-hero-primary { box-shadow: 0 10px 28px rgba(13,59,59,.16); }
+.seek-motion-ribbon { overflow: hidden; mask-image: linear-gradient(90deg, transparent, #000 7%, #000 93%, transparent); }
+.seek-motion-ribbon-track { display: flex; width: max-content; animation: seek-marquee 42s linear infinite; }
+.seek-motion-ribbon:hover .seek-motion-ribbon-track { animation-play-state: paused; }
+.seek-motion-ribbon-group { display: flex; align-items: center; flex-shrink: 0; gap: 1rem; padding-right: 1rem; }
+.seek-ribbon-item { display: inline-flex; align-items: center; gap: .65rem; max-width: 18rem; overflow: hidden; white-space: nowrap; text-overflow: ellipsis; border: 1px solid rgba(13,59,59,.09); border-radius: 9999px; background: rgba(255,255,255,.76); padding: .7rem 1rem; color: rgba(13,59,59,.72); font-size: 11px; font-weight: 700; backdrop-filter: blur(10px); }
+.seek-ribbon-item i { width: 6px; height: 6px; flex: 0 0 6px; border-radius: 50%; background: #83BF57; }
+.seek-video-entry { animation: seek-title-in .65s both; animation-delay: calc(var(--seek-entry-index, 0) * 90ms); }
+.seek-feed-skeleton { background: linear-gradient(100deg, rgba(13,59,59,.05) 20%, rgba(27,170,156,.13) 38%, rgba(13,59,59,.05) 56%); background-size: 220% 100%; animation: seek-skeleton 1.6s ease-in-out infinite; }
+@keyframes seek-title-in { from { opacity: 0; transform: translateY(18px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes seek-orb-drift { from { transform: translate3d(0,0,0) scale(.95); } to { transform: translate3d(24px,18px,0) scale(1.08); } }
+@keyframes seek-dot-pulse { 0% { box-shadow: 0 0 0 0 rgba(27,170,156,.4); } 70% { box-shadow: 0 0 0 8px rgba(27,170,156,0); } 100% { box-shadow: 0 0 0 0 rgba(27,170,156,0); } }
+@keyframes seek-marquee { from { transform: translateX(0); } to { transform: translateX(-50%); } }
+@keyframes seek-skeleton { to { background-position: -220% 0; } }
+@media (max-width: 640px) { .seek-home-hero { padding-top: 2.25rem; } .seek-motion-ribbon-track { animation-duration: 52s; } }
+@media (prefers-reduced-motion: reduce) { .seek-orb, .seek-pulse-dot, .seek-hero-title, .seek-hero-kicker, .seek-motion-ribbon-track, .seek-video-entry, .seek-feed-skeleton { animation: none !important; } .seek-motion-ribbon-track { transform: none; } }
