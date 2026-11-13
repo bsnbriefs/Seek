@@ -1,5 +1,6 @@
 import NotificationBell from "./NotificationBell";
 import React, { useEffect, useRef, useState, lazy, Suspense } from "react";
+import { createPortal } from "react-dom";
 const AdminPage = lazy(() => import("./AdminPage"));
 const NotificationsPage = lazy(() => import("./NotificationsPage"));
 
@@ -494,7 +495,7 @@ function isFinancialNeed(req) {
 
   // Explicit financial assistance is a fundraiser even if an older row has no goal amount.
   if (/financial|money|cash|fundrais|medical|education|school fees|rent|housing|emergency/.test(assistance)) return true;
-  if (/financial|medical|education|housing|emergency/.test(category)) return true;
+  if (/fundrais|financial|medical|education|housing|emergency/.test(category)) return true;
   if (kind === "money" || kind === "financial") return true;
   return requestAmountNeeded(req) > 0;
 }
@@ -940,8 +941,8 @@ function SeekDonateModal({ request, campaign, onClose }) {
   if (!request && !campaign) return null;
   const chips = [5000, 10000, 25000, 50000];
   const currency = CURRENCIES.find((c) => c.code === getCurrency()) || CURRENCIES[0];
-  return (
-    <div className="fixed inset-0 z-[180] bg-black/40 flex items-center justify-center p-5" onClick={onClose}>
+  return createPortal((
+    <div className="fixed inset-0 z-[9999] bg-black/65 backdrop-blur-sm flex items-center justify-center p-5" onClick={onClose} role="presentation">
       <form
         onClick={(e) => e.stopPropagation()}
         onSubmit={async (e) => {
@@ -963,7 +964,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
                 ? String(name).trim() + (monthly ? " (monthly)" : "")
                 : String(name).trim() + " · " + title + (campaign?.id ? " [" + campaign.id + "]" : "") + (monthly ? " (monthly)" : ""),
               coverFee: true,
-              monthly,
+              interval: monthly ? "monthly" : "once",
               callbackUrl: request
                 ? window.location.origin + "/request/" + request.id
                 : `${window.location.origin}/give${campaign?.id ? "?outreach=" + encodeURIComponent(campaign.id) : ""}`,
@@ -1004,7 +1005,7 @@ function SeekDonateModal({ request, campaign, onClose }) {
         </button>
       </form>
     </div>
-  );
+  ), document.body);
 }
 
 function RequestCard({ req, onHelp, onView }) {
@@ -2116,7 +2117,7 @@ function LiveSupportCard({ request, setPage }) {
             </div>
           ) : null}
           <div className="seek-reel-cta-row">
-            {isFundraiser ? <button type="button" onClick={() => setDonateOpen(true)} className="seek-reel-donate">Donate <ArrowRight size={16} /></button> : <button type="button" onClick={goToCase} className="seek-reel-donate">Support this story <ArrowRight size={16} /></button>}
+            {isFundraiser ? <button type="button" aria-label={`Donate to ${title}`} onClick={(event) => { event.preventDefault(); event.stopPropagation(); setDonateOpen(true); }} className="seek-reel-donate">Donate <ArrowRight size={16} /></button> : <button type="button" onClick={goToCase} className="seek-reel-donate">Support this story <ArrowRight size={16} /></button>}
             <button type="button" onClick={goToCase} className="seek-reel-open">View story</button>
           </div>
         </div>
@@ -2134,39 +2135,74 @@ function LiveSupportCard({ request, setPage }) {
 function BsnPage({ setPage }) {
   const [selected, setSelected] = useState(null);
   const [donating, setDonating] = useState(false);
-  if (donating && selected) {
-    return <SeekDonateModal campaign={selected} onClose={() => setDonating(false)} />;
-  }
+  const [activeMedia, setActiveMedia] = useState(0);
+  const [campaignRaised, setCampaignRaised] = useState(0);
+  useEffect(() => { setActiveMedia(0); setCampaignRaised(0); }, [selected?.id]);
+  useEffect(() => {
+    if (!selected) return;
+    let alive = true;
+    getOutreachRaised(selected.title, selected.id).then((value) => { if (alive) setCampaignRaised(Number(value) || 0); }).catch(() => { if (alive) setCampaignRaised(0); });
+    return () => { alive = false; };
+  }, [selected?.id, selected?.title]);
+  if (donating && selected) return <SeekDonateModal campaign={selected} onClose={() => setDonating(false)} />;
   if (selected) {
+    const media = [...(selected.photos || []).map((src) => ({ src, type: "image" })), ...(selected.videos || []).map((src) => ({ src, type: "video" }))];
+    const current = media[activeMedia % Math.max(media.length, 1)];
     return (
-      <div className="mx-auto max-w-lg px-5 py-8 animate-[seekFade_0.3s_ease-out]">
-        <button type="button" onClick={() => setSelected(null)} className="text-sm text-[#1BAA9C] mb-4">← Back</button>
-        <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">{selected.title}</h1>
-        {selected.photos?.[0] && <img src={selected.photos[0]} alt="" className="mt-4 w-full rounded-xl object-cover" />}
-        <p className="mt-4 text-sm text-[#0D3B3B]/70">{selected.story}</p>
-        {selected.videos?.[0] && <video src={selected.videos[0]} controls className="mt-4 w-full rounded-xl" />}
-        <button type="button" onClick={() => setDonating(true)} className="mt-6 rounded-full bg-[#1BAA9C] text-white px-6 py-3 text-sm font-bold">Donate</button>
-      </div>
+      <main className="seek-campaign-page min-h-screen pb-28">
+        <section className="seek-campaign-detail-hero relative overflow-hidden px-5 pt-7 pb-8 sm:pt-10">
+          <div className="seek-campaign-orb seek-campaign-orb-a" /><div className="seek-campaign-orb seek-campaign-orb-b" />
+          <div className="relative z-10 mx-auto max-w-3xl">
+            <button type="button" onClick={() => setSelected(null)} className="seek-campaign-back">← All campaigns</button>
+            <p className="mt-8 text-xs font-extrabold uppercase tracking-[.22em] text-[#9CEBD4]">BSN Empowerment Foundation</p>
+            <h1 className="mt-3 max-w-2xl font-display text-3xl font-black leading-tight text-white sm:text-5xl">{selected.title}</h1>
+            <p className="mt-3 max-w-xl text-sm leading-7 text-white/75 sm:text-base">{selected.blurb}</p>
+          </div>
+        </section>
+        <section className="mx-auto grid max-w-5xl gap-6 px-5 pt-6 md:grid-cols-[1.2fr_.8fr]">
+          <div>
+            {current ? <div className="seek-campaign-media-frame">
+              {current.type === "video" ? <video key={current.src} src={encodeURI(current.src)} controls playsInline preload="metadata" className="h-full w-full object-cover" /> : <img key={current.src} src={encodeURI(current.src)} alt={selected.title} className="h-full w-full object-cover" />}
+              {media.length > 1 && <div className="absolute bottom-3 left-0 right-0 flex justify-center gap-2">{media.map((m, i) => <button key={m.src} type="button" aria-label={`Show campaign media ${i+1}`} onClick={() => setActiveMedia(i)} className={`h-2.5 w-2.5 rounded-full border border-white ${i === activeMedia ? "bg-white" : "bg-white/30"}`} />)}</div>}
+            </div> : <div className="seek-campaign-media-empty"><span>BSN</span><p>Community. Dignity. Opportunity.</p></div>}
+            <div className="mt-5 rounded-3xl border border-[#0D3B3B]/10 bg-white p-5 shadow-sm"><p className="text-xs font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Why it matters</p><p className="mt-3 whitespace-pre-line text-sm leading-7 text-[#294744]">{selected.story || selected.blurb}</p></div>
+          </div>
+          <aside className="seek-campaign-support-card h-fit rounded-3xl p-5 sm:p-6">
+            <span className="inline-flex rounded-full bg-[#1BAA9C]/15 px-3 py-1 text-[10px] font-extrabold uppercase tracking-widest text-[#08776E]">Be part of the impact</span>
+            <h2 className="mt-4 font-display text-2xl font-black text-[#0D3B3B]">Your support moves this forward.</h2>
+            {selected.budget ? <><p className="mt-4 text-xs font-bold uppercase tracking-widest text-[#0D3B3B]/45">Campaign progress</p><p className="mt-1 font-display text-3xl font-black text-[#0D7770]">₦{campaignRaised.toLocaleString()}</p><p className="mt-1 text-xs text-[#385653]">raised of ₦{Number(selected.budget).toLocaleString()}</p><div className="mt-3 h-2 overflow-hidden rounded-full bg-[#DDEBE7]"><div className="seek-campaign-progress h-full rounded-full" style={{ width: `${Math.min(100, Math.round((campaignRaised / Number(selected.budget)) * 100))}%` }} /></div></> : null}
+            <p className="mt-4 text-sm leading-6 text-[#385653]">Every contribution helps the Foundation reach more people with practical support.</p>
+            <button type="button" onClick={() => setDonating(true)} className="seek-campaign-donate mt-6 w-full">Donate to this campaign <ArrowRight size={17} /></button>
+          </aside>
+        </section>
+      </main>
     );
   }
   return (
-    <div className="mx-auto max-w-lg px-5 py-8">
-      <h1 className="font-display font-bold text-2xl text-[#0D3B3B]">BSN Foundation</h1>
-      <p className="mt-2 text-sm text-[#0D3B3B]/60">Support our yearly outreach programmes.</p>
-      <div className="mt-6 grid gap-3">
-        {OUTREACH_CAMPAIGNS.map((c, i) => (
-          <button key={c.id} type="button" onClick={() => setSelected(c)} className="rounded-2xl bg-[#0D3B3B] text-white p-4 text-left flex items-center gap-4 hover:bg-[#1BAA9C] transition-colors">
-            <div className="w-12 h-12 rounded-xl bg-[#1BAA9C] flex items-center justify-center shrink-0">
-              <span className="text-xl">{c.id === "pad-a-girl" ? "🎀" : c.id === "back-to-school" ? "🎒" : c.id === "skills" ? "🔧" : c.id === "hospital" ? "🏥" : c.id === "food-drive" ? "🍲" : c.id === "widows" ? "👩" : c.id === "orphans" ? "👶" : c.id === "elderly" ? "👴" : c.id === "clean-water" ? "💧" : c.id === "disability" ? "♿" : "💚"}</span>
-            </div>
-            <div>
-              <p className="font-semibold">{c.title}</p>
-              <p className="text-sm opacity-70 mt-0.5">{c.blurb}</p>
-            </div>
-          </button>
-        ))}
-      </div>
-    </div>
+    <main className="seek-campaign-page min-h-screen pb-28">
+      <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
+        <div className="seek-campaign-orb seek-campaign-orb-a" /><div className="seek-campaign-orb seek-campaign-orb-b" /><div className="seek-campaign-grid" />
+        <div className="relative z-10 mx-auto max-w-5xl">
+          <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
+          <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
+          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => document.getElementById("bsn-campaign-list")?.scrollIntoView({ behavior: "smooth" })} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
+        </div>
+      </section>
+      <section id="bsn-campaign-list" className="mx-auto max-w-6xl px-5 py-10 sm:py-14">
+        <div className="mb-7 max-w-2xl"><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[#0D8F83]">Choose where to help</p><h2 className="mt-2 font-display text-3xl font-black text-[#0D3B3B] sm:text-4xl">Campaigns that turn care into action.</h2><p className="mt-3 text-sm leading-6 text-[#385653]">Explore a programme to see its story, the work behind it and how your support can help.</p></div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {OUTREACH_CAMPAIGNS.map((c, i) => {
+            const cover = c.photos?.[0];
+            return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+              <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+              <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D8F83]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[#0D3B3B]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[#385653]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[#0D8F83]">Explore campaign <ArrowRight size={15} /></span></div>
+            </button>;
+          })}
+        </div>
+      </section>
+    </main>
   );
 }
 
@@ -2472,7 +2508,7 @@ function ForYouPage({ setPage }) {
     getForYouFeed(16)
       .then((rows) => {
         if (cancelled) return;
-        setLiveCases(Array.isArray(rows) ? rows : []);
+        setLiveCases((Array.isArray(rows) ? rows : []).filter((row) => !["impact", "appreciation", "thanks"].includes(String(row.feedKind || row.feed_kind || row.kind || "").toLowerCase())));
       })
       .catch((err) => { if (!cancelled) setError(err?.message || "Could not load neighbour stories."); })
       .finally(() => { if (!cancelled) setLoading(false); });
@@ -2525,7 +2561,7 @@ function ForYouPage({ setPage }) {
           <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[#E6F6F2] text-[#0D7770]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[#0D3B3B]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Video and photo stories shared by the SEEK community will appear here.</p><button type="button" onClick={() => setPage("discover")} className="mt-4 text-sm font-bold text-[#0D7770]">Explore Discover <ArrowRight className="ml-1 inline" size={15} /></button></div>
         )}
         <div className="seek-reels-feed" aria-label="Swipe through SEEK community stories">
-          {liveCases.filter((item) => Array.isArray(item.media) && item.media.some((m) => m?.public_url)).map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
+          {liveCases.filter((item) => !["impact", "appreciation", "thanks"].includes(String(item.feedKind || item.feed_kind || item.kind || "").toLowerCase()) && Array.isArray(item.media) && item.media.some((m) => m?.public_url)).map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
         </div>
       </section>
 

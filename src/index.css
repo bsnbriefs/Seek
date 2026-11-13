@@ -199,3 +199,43 @@ html.seek-dark .seek-discover-card .text-\[\#0D3B3B\] { color: #EAF5F1 !importan
 .seek-reel-progress-dots button.is-active { background: #fff; }
 @media (max-width: 520px) { .seek-reel-card { width: 100%; height: min(70svh, 680px); min-height: 450px; border-radius: 22px; } .seek-reels-feed { padding-inline: 10px; gap: 14px; } .seek-reel-caption { left: 15px; right: 58px; bottom: 15px; } .seek-reel-side-actions { right: 10px; bottom: 190px; } }
 @media (prefers-reduced-motion: reduce) { .seek-reel-card { scroll-behavior: auto; } }
+
+/* BSN Foundation campaign motion experience */
+.seek-campaign-page { background: #f3f7f5; color: #0d3b3b; overflow: hidden; }
+.seek-campaign-hero,.seek-campaign-detail-hero { background: radial-gradient(circle at 78% 20%, rgba(101,216,75,.24), transparent 28%), radial-gradient(circle at 12% 85%, rgba(24,182,194,.24), transparent 32%), linear-gradient(135deg,#062f2e 0%,#0b514b 54%,#073b36 100%); }
+.seek-campaign-grid { position:absolute; inset:0; opacity:.14; pointer-events:none; background-image:linear-gradient(rgba(255,255,255,.18) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.18) 1px,transparent 1px); background-size:46px 46px; mask-image:linear-gradient(90deg,transparent,#000 40%,transparent); }
+.seek-campaign-orb { position:absolute; width:260px; height:260px; border-radius:50%; filter:blur(2px); opacity:.22; pointer-events:none; animation:seekCampaignFloat 11s ease-in-out infinite alternate; }
+.seek-campaign-orb-a { top:-130px; right:-50px; background:radial-gradient(circle,#9af3d0,transparent 68%); }
+.seek-campaign-orb-b { bottom:-170px; left:18%; width:340px; height:340px; background:radial-gradient(circle,#20b6c2,transparent 68%); animation-delay:-4s; }
+.seek-campaign-kicker { display:inline-flex; align-items:center; gap:10px; padding:9px 14px; border:1px solid rgba(255,255,255,.22); border-radius:999px; background:rgba(255,255,255,.08); color:#c7f4df; font-size:10px; font-weight:900; letter-spacing:.18em; text-transform:uppercase; backdrop-filter:blur(12px); }
+.seek-campaign-kicker span { width:8px; height:8px; border-radius:50%; background:#7fe34d; box-shadow:0 0 0 6px rgba(127,227,77,.13); animation:seekCampaignPulse 2s infinite; }
+.seek-campaign-hero h1 span { background:linear-gradient(90deg,#8cebd7,#91eb53); -webkit-background-clip:text; background-clip:text; color:transparent; }
+.seek-campaign-donate { display:inline-flex; min-height:48px; align-items:center; justify-content:center; gap:9px; border-radius:999px; padding:0 22px; background:linear-gradient(100deg,#20b6a7,#75d84e); color:#063b35; font-size:13px; font-weight:900; box-shadow:0 12px 28px rgba(0,0,0,.15); transition:transform .22s ease,box-shadow .22s ease; }
+.seek-campaign-donate:hover { transform:translateY(-3px); box-shadow:0 16px 32px rgba(0,0,0,.22); }
+.seek-campaign-outline { min-height:48px; border:1px solid rgba(255,255,255,.35); border-radius:999px; padding:0 20px; color:#fff; font-size:13px; font-weight:800; background:rgba(255,255,255,.07); transition:background .2s ease,transform .2s ease; }
+.seek-campaign-outline:hover { background:rgba(255,255,255,.16); transform:translateY(-2px); }
+.seek-campaign-stats > div { display:flex; flex-direction:column; gap:3px; padding:13px 15px; border:1px solid rgba(255,255,255,.14); border-radius:17px; background:rgba(255,255,255,.07); backdrop-filter:blur(10px); }
+.seek-campaign-stats strong { color:#fff; font-size:14px; font-weight:900; }
+.seek-campaign-stats span { color:rgba(255,255,255,.58); font-size:10px; }
+.seek-campaign-card { overflow:hidden; border:1px solid rgba(13,59,59,.09); border-radius:25px; background:#fff; box-shadow:0 7px 24px rgba(4,43,39,.055); opacity:0; animation:seekCampaignCardIn .65s cubic-bezier(.2,.75,.25,1) forwards; animation-delay:var(--campaign-delay,0ms); transition:transform .25s ease,box-shadow .25s ease; }
+.seek-campaign-card:hover { transform:translateY(-6px); box-shadow:0 18px 42px rgba(4,43,39,.13); }
+.seek-campaign-card-media { position:relative; height:190px; overflow:hidden; background:linear-gradient(135deg,#0a4b45,#0b2524); }
+.seek-campaign-card-media img { width:100%; height:100%; object-fit:cover; transition:transform .65s cubic-bezier(.2,.75,.25,1); }
+.seek-campaign-card:hover .seek-campaign-card-media img { transform:scale(1.06); }
+.seek-campaign-card-media::after { content:""; position:absolute; inset:35% 0 0; background:linear-gradient(transparent,rgba(3,28,26,.45)); pointer-events:none; }
+.seek-campaign-card-placeholder { display:grid; width:100%; height:100%; place-items:center; background:radial-gradient(circle at 25% 25%,rgba(24,182,194,.45),transparent 34%),radial-gradient(circle at 80% 80%,rgba(101,216,75,.34),transparent 36%),linear-gradient(140deg,#0b504a,#082c2b); }
+.seek-campaign-card-placeholder span { color:rgba(255,255,255,.18); font-size:86px; font-weight:950; letter-spacing:-.09em; }
+.seek-campaign-card-arrow { position:absolute; z-index:2; right:14px; bottom:14px; display:grid; width:38px; height:38px; place-items:center; border:1px solid rgba(255,255,255,.35); border-radius:50%; background:rgba(0,0,0,.22); color:#fff; backdrop-filter:blur(10px); transition:transform .2s ease,background .2s ease; }
+.seek-campaign-card:hover .seek-campaign-card-arrow { transform:rotate(45deg); background:#1baaa0; }
+.seek-campaign-back { border:1px solid rgba(255,255,255,.25); border-radius:999px; padding:9px 14px; color:#fff; background:rgba(255,255,255,.08); font-size:12px; font-weight:800; }
+.seek-campaign-media-frame { position:relative; height:clamp(250px,48vw,480px); overflow:hidden; border-radius:25px; background:#061d1b; box-shadow:0 18px 45px rgba(3,25,23,.15); }
+.seek-campaign-media-empty { display:grid; min-height:260px; place-content:center; border-radius:25px; background:linear-gradient(135deg,#0b504a,#082c2b); text-align:center; color:#fff; }
+.seek-campaign-media-empty span { font-size:72px; font-weight:950; letter-spacing:-.1em; opacity:.28; }
+.seek-campaign-media-empty p { color:#a5e7d1; font-size:12px; letter-spacing:.12em; text-transform:uppercase; }
+.seek-campaign-support-card { border:1px solid rgba(13,59,59,.1); background:linear-gradient(145deg,#fff,#eaf7f1); box-shadow:0 12px 36px rgba(4,43,39,.07); }
+.seek-campaign-progress { background:linear-gradient(90deg,#18b6c2,#65d84b); animation:seekCampaignProgress 1.4s ease-out both; }
+@keyframes seekCampaignFloat { from { transform:translate3d(-12px,0,0) scale(.94); } to { transform:translate3d(24px,30px,0) scale(1.08); } }
+@keyframes seekCampaignPulse { 50% { box-shadow:0 0 0 10px rgba(127,227,77,0); } }
+@keyframes seekCampaignCardIn { from { opacity:0; transform:translateY(22px); } to { opacity:1; transform:translateY(0); } }
+@keyframes seekCampaignProgress { from { width:0; } }
+@media (prefers-reduced-motion:reduce) { .seek-campaign-orb,.seek-campaign-kicker span,.seek-campaign-card,.seek-campaign-progress { animation:none!important; opacity:1; } .seek-campaign-card,.seek-campaign-card-media img,.seek-campaign-donate,.seek-campaign-outline { transition:none!important; } }
