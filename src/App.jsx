@@ -3767,6 +3767,170 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
   );
 }
 
+function RequestEvidenceCarousel({ evidence = [] }) {
+  const trackRef = useRef(null);
+  const resumeTimerRef = useRef(null);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [paused, setPaused] = useState(false);
+  const [videoPlaying, setVideoPlaying] = useState(false);
+
+  const items = Array.isArray(evidence) ? evidence.filter((item) => item?.public_url) : [];
+
+  const goTo = (nextIndex, manual = false) => {
+    if (!items.length || !trackRef.current) return;
+    const bounded = (nextIndex + items.length) % items.length;
+    setActiveIndex(bounded);
+    trackRef.current.scrollTo({ left: bounded * trackRef.current.clientWidth, behavior: "smooth" });
+    if (manual) {
+      setPaused(true);
+      if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+      resumeTimerRef.current = setTimeout(() => setPaused(false), 6500);
+    }
+  };
+
+  useEffect(() => {
+    if (items.length < 2 || paused || videoPlaying) return undefined;
+    const timer = setInterval(() => {
+      if (!document.hidden) goTo(activeIndex + 1);
+    }, 6000);
+    return () => clearInterval(timer);
+  }, [activeIndex, items.length, paused, videoPlaying]);
+
+  useEffect(() => () => {
+    if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+  }, []);
+
+  useEffect(() => {
+    const track = trackRef.current;
+    if (!track) return undefined;
+    let frame;
+    const updateIndex = () => {
+      cancelAnimationFrame(frame);
+      frame = requestAnimationFrame(() => {
+        const width = track.clientWidth || 1;
+        const nextIndex = Math.max(0, Math.min(items.length - 1, Math.round(track.scrollLeft / width)));
+        track.querySelectorAll("video").forEach((video) => {
+          const slideIndex = Number(video.closest(".seek-evidence-slide")?.dataset.evidenceIndex);
+          if (slideIndex !== nextIndex) video.pause();
+        });
+        const activeVideo = track.querySelector(`.seek-evidence-slide[data-evidence-index="${nextIndex}"] video`);
+        setVideoPlaying(Boolean(activeVideo && !activeVideo.paused));
+        setActiveIndex(nextIndex);
+      });
+    };
+    track.addEventListener("scroll", updateIndex, { passive: true });
+    return () => {
+      track.removeEventListener("scroll", updateIndex);
+      cancelAnimationFrame(frame);
+    };
+  }, [items.length]);
+
+  if (!items.length) return null;
+
+  return (
+    <section className="seek-evidence-gallery mt-6" aria-label="Request evidence gallery">
+      <div className="mb-2 flex items-center justify-between gap-3">
+        <div>
+          <p className="font-body text-xs font-bold uppercase tracking-[.12em] text-[var(--seek-primary)]">Request evidence</p>
+          <p className="mt-0.5 text-xs text-[var(--seek-primary)]/60">Swipe to view photos and videos</p>
+        </div>
+        <span className="seek-evidence-count" aria-live="polite">{activeIndex + 1} / {items.length}</span>
+      </div>
+
+      <div className="seek-evidence-stage">
+        <div
+          ref={trackRef}
+          className="seek-evidence-track"
+          onTouchStart={() => {
+            setPaused(true);
+            if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+            resumeTimerRef.current = setTimeout(() => setPaused(false), 6500);
+          }}
+          onMouseEnter={() => setPaused(true)}
+          onMouseLeave={() => setPaused(false)}
+          onWheel={() => {
+            setPaused(true);
+            if (resumeTimerRef.current) clearTimeout(resumeTimerRef.current);
+            resumeTimerRef.current = setTimeout(() => setPaused(false), 6500);
+          }}
+        >
+          {items.map((file, index) => {
+            const isImage = file.mime_type?.startsWith("image/");
+            const isVideo = file.mime_type?.startsWith("video/");
+            const isPdf = file.mime_type === "application/pdf" || String(file.public_url).toLowerCase().includes(".pdf");
+            return (
+              <div className="seek-evidence-slide" data-evidence-index={index} key={file.id || file.public_url || index} aria-label={`Evidence ${index + 1} of ${items.length}`}>
+                {isImage ? (
+                  <img
+                    src={file.public_url}
+                    alt={`Supporting evidence ${index + 1}`}
+                    loading={index === 0 ? "eager" : "lazy"}
+                    decoding="async"
+                    draggable="false"
+                    onContextMenu={(e) => e.preventDefault()}
+                  />
+                ) : isVideo ? (
+                  <div className="seek-evidence-video-wrap">
+                    <video
+                      src={file.public_url}
+                      controls
+                      controlsList="nodownload noplaybackrate"
+                      disablePictureInPicture
+                      playsInline
+                      preload="metadata"
+                      onPlay={() => setVideoPlaying(true)}
+                      onPause={() => setVideoPlaying(false)}
+                      onEnded={() => setVideoPlaying(false)}
+                      onContextMenu={(e) => e.preventDefault()}
+                    />
+                    <SeekVideoWatermark />
+                  </div>
+                ) : isPdf ? (
+                  <iframe src={`${file.public_url}#toolbar=0&navpanes=0`} title={`Supporting evidence ${index + 1}`} />
+                ) : (
+                  <div className="seek-evidence-file-fallback">Supporting file {index + 1}</div>
+                )}
+              </div>
+            );
+          })}
+        </div>
+
+        {items.length > 1 && (
+          <>
+            <button type="button" className="seek-evidence-arrow seek-evidence-prev" aria-label="Previous evidence" onClick={() => goTo(activeIndex - 1, true)}>
+              <ArrowLeft size={18} />
+            </button>
+            <button type="button" className="seek-evidence-arrow seek-evidence-next" aria-label="Next evidence" onClick={() => goTo(activeIndex + 1, true)}>
+              <ArrowRight size={18} />
+            </button>
+          </>
+        )}
+      </div>
+
+      {items.length > 1 && (
+        <div className="seek-evidence-controls">
+          <div className="seek-evidence-dots" role="tablist" aria-label="Choose evidence">
+            {items.map((file, index) => (
+              <button
+                key={file.id || file.public_url || index}
+                type="button"
+                role="tab"
+                aria-label={`Show evidence ${index + 1}`}
+                aria-selected={activeIndex === index}
+                className={activeIndex === index ? "is-active" : ""}
+                onClick={() => goTo(index, true)}
+              />
+            ))}
+          </div>
+          <button type="button" className="seek-evidence-autoplay" onClick={() => setPaused((value) => !value)}>
+            {paused ? "Resume auto-play" : "Pause auto-play"}
+          </button>
+        </div>
+      )}
+    </section>
+  );
+}
+
 function RequestPage({ requestId, setPage }) {
   const [request, setRequest] = useState(null);
   const [loading, setLoading] = useState(true);
@@ -3944,49 +4108,7 @@ function RequestPage({ requestId, setPage }) {
               ))}
             </div>
           )}
-          {evidence.length > 0 && (
-  <div className="mt-6 space-y-4">
-    <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50">Photos and video</p>
-
-    {evidence.map((file) => (
-      <div key={file.id} className="space-y-2">
-        {file.mime_type?.startsWith("image/") ? (
-          <img
-            src={file.public_url}
-            alt=""
-            draggable="false"
-            onContextMenu={(e) => e.preventDefault()}
-            className="w-full max-h-96 rounded-xl border border-[var(--seek-primary)]/8 object-contain select-none"
-          />
-        ) : file.mime_type?.startsWith("video/") ? (
-          <div className="relative overflow-hidden rounded-xl border border-[var(--seek-primary)]/8 bg-black">
-          <video
-            src={file.public_url}
-            controls
-            controlsList="nodownload noplaybackrate"
-            disablePictureInPicture
-            playsInline
-            preload="none"
-            onContextMenu={(e) => e.preventDefault()}
-            className="w-full max-h-96"
-          />
-          <SeekVideoWatermark />
-          </div>
-        ) : file.mime_type === "application/pdf" ? (
-          <iframe
-            src={`${file.public_url}#toolbar=0&navpanes=0`}
-            title="Supporting evidence"
-            className="h-96 w-full rounded-xl border border-[var(--seek-primary)]/8"
-          />
-        ) : (
-          <p className="font-body text-sm text-[var(--seek-primary)]/60">
-            A supporting file was provided for on-page review.
-          </p>
-        )}
-      </div>
-    ))}
-  </div>
-)}
+          {evidence.length > 0 && <RequestEvidenceCarousel evidence={evidence} />}
 
           <div className="mt-8">
             <p className="font-body text-xs font-semibold uppercase tracking-wide text-[var(--seek-primary)]/50 mb-3 inline-flex items-center gap-2">
