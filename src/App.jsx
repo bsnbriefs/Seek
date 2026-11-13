@@ -2673,23 +2673,23 @@ function HomePromotionCarousel({ setPage }) {
       action: "Support this outreach",
       image: "/outreach/bsn-end-of-year-2026.jpg",
       imageAlt: "BSN Foundation End-of-Year Outreach flyer",
-      layout: "feature",
+      theme: "feature",
     },
     {
       id: "impact",
-      eyebrow: "THE PEOPLE WE HOPE TO REACH",
-      title: "1,500 people. 300 food boxes. One community effort.",
-      body: "We plan to feed 1,500 people and distribute 300 food boxes to persons with disabilities through the Nigerian Paralympic Association.",
+      eyebrow: "1,800 PEOPLE · ONE COMMUNITY EFFORT",
+      title: "1,500 people to feed. 300 food boxes to deliver.",
+      body: "Help us reach people with care, dignity and hope this December.",
       action: "See the outreach",
-      layout: "impact",
+      theme: "impact",
     },
     {
       id: "join",
       eyebrow: "YOUR SUPPORT MAKES IT POSSIBLE",
       title: "Help make this December count.",
-      body: "Every contribution brings the Foundation closer to reaching people with care, dignity and hope.",
+      body: "Stand with BSN Foundation and help make this outreach happen.",
       action: "Contribute now",
-      layout: "join",
+      theme: "join",
     },
   ];
   const [active, setActive] = useState(0);
@@ -2701,13 +2701,13 @@ function HomePromotionCarousel({ setPage }) {
       if (document.visibilityState === "visible" && Date.now() > pauseUntil.current) {
         setActive((current) => (current + 1) % slides.length);
       }
-    }, 6500);
+    }, 5000);
     return () => window.clearInterval(timer);
   }, [slides.length]);
 
   const goTo = (index) => {
     setActive((index + slides.length) % slides.length);
-    pauseUntil.current = Date.now() + 12000;
+    pauseUntil.current = Date.now() + 10000;
   };
   const openOutreach = () => {
     setPage("bsn");
@@ -2716,19 +2716,20 @@ function HomePromotionCarousel({ setPage }) {
 
   return (
     <section
-      className="mx-auto mt-8 w-full max-w-5xl px-5"
+      className="seek-home-promotions mx-auto mt-8 w-full max-w-5xl"
       aria-label="Featured SEEK and BSN Foundation announcements"
-      onMouseEnter={() => { pauseUntil.current = Date.now() + 12000; }}
-      onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 12000; }}
+      onMouseEnter={() => { pauseUntil.current = Date.now() + 10000; }}
+      onMouseLeave={() => { pauseUntil.current = Date.now(); }}
+      onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 10000; }}
       onTouchEnd={(event) => {
         const end = event.changedTouches?.[0]?.clientX;
-        if (touchStart.current != null && end != null && Math.abs(end - touchStart.current) > 45) {
+        if (touchStart.current != null && end != null && Math.abs(end - touchStart.current) > 40) {
           goTo(active + (end < touchStart.current ? 1 : -1));
         }
         touchStart.current = null;
       }}
     >
-      <div className="mb-3 flex items-center justify-between gap-3">
+      <div className="mb-3 flex items-center justify-between px-5 sm:px-0">
         <div>
           <p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">Featured on SEEK</p>
           <p className="mt-1 text-xs text-[var(--seek-primary)]/55">Outreaches, opportunities and ways to take part.</p>
@@ -2736,37 +2737,61 @@ function HomePromotionCarousel({ setPage }) {
         <span className="shrink-0 text-[10px] font-bold tracking-wider text-[var(--seek-primary)]/45">{active + 1} / {slides.length}</span>
       </div>
 
-      <div className="relative overflow-hidden rounded-[26px] shadow-[0_14px_36px_rgba(10,40,30,.13)]">
-        <div className="flex transition-transform duration-500 ease-out" style={{ transform: `translateX(-${active * 100}%)` }}>
+      <div className="seek-promo-viewport relative overflow-hidden">
+        <div
+          className="seek-promo-track flex items-stretch gap-4 transition-transform duration-700 ease-[cubic-bezier(.22,.8,.25,1)]"
+          style={{ transform: `translateX(calc(-${active * 82}% - ${active * 16}px))` }}
+        >
           {slides.map((slide) => (
-            <article key={slide.id} className="relative flex min-h-[238px] w-full shrink-0 items-stretch overflow-hidden bg-[#073d32] text-white sm:min-h-[260px]">
-              <div className="pointer-events-none absolute inset-0 opacity-30" style={{ background: "radial-gradient(circle at 85% 20%, rgba(190,244,105,.35), transparent 35%), linear-gradient(120deg, transparent 35%, rgba(0,0,0,.3))" }} />
-              <div className={`relative z-10 flex min-w-0 flex-1 flex-col justify-center p-5 sm:p-8 ${slide.image ? "pr-2 sm:pr-4" : ""}`}>
-                <p className="text-[9px] font-extrabold uppercase tracking-[.18em] text-[#c9f58a] sm:text-[10px]">{slide.eyebrow}</p>
-                <h2 className="mt-3 max-w-xl font-display text-xl font-black leading-tight sm:text-3xl">{slide.title}</h2>
-                <p className="mt-2 max-w-xl text-xs leading-5 text-white/80 sm:mt-3 sm:text-sm sm:leading-6">{slide.body}</p>
-                <button type="button" onClick={openOutreach} className="mt-4 inline-flex w-fit items-center gap-2 rounded-full bg-[#c9f58a] px-4 py-2.5 text-xs font-extrabold text-[#123b2d] transition hover:-translate-y-0.5 sm:mt-5 sm:px-5 sm:py-3 sm:text-sm">
-                  {slide.action} <ArrowRight size={15} />
+            <article key={slide.id} className={`seek-promo-card ${slide.theme} relative flex shrink-0 overflow-hidden rounded-[20px] text-white shadow-[0_10px_28px_rgba(10,40,30,.16)]`}>
+              <div className="pointer-events-none absolute inset-0" aria-hidden="true" />
+              <div className="relative z-10 flex min-w-0 flex-1 flex-col justify-center p-4 sm:p-6">
+                <p className="text-[8px] font-extrabold uppercase tracking-[.16em] text-[#d4ff91] sm:text-[10px]">{slide.eyebrow}</p>
+                <h2 className="mt-2 max-w-[34rem] font-display text-base font-black leading-tight sm:mt-3 sm:text-2xl">{slide.title}</h2>
+                <p className="mt-1.5 max-w-[32rem] text-[10px] leading-4 text-white/85 sm:mt-2 sm:text-sm sm:leading-5">{slide.body}</p>
+                <button type="button" onClick={openOutreach} className="mt-3 inline-flex w-fit items-center gap-2 rounded-full bg-[#c9f58a] px-3.5 py-2 text-[10px] font-extrabold text-[#123b2d] transition hover:-translate-y-0.5 sm:mt-4 sm:px-4 sm:py-2.5 sm:text-xs">
+                  {slide.action} <ArrowRight size={14} />
                 </button>
               </div>
               {slide.image ? (
-                <div className="relative z-10 flex w-[37%] shrink-0 items-center justify-center py-3 pr-3 sm:w-[31%] sm:py-4 sm:pr-5">
-                  <img src={slide.image} alt={slide.imageAlt} className="max-h-[214px] w-full rounded-xl object-contain shadow-xl sm:max-h-[230px]" loading="lazy" />
+                <div className="relative z-10 flex w-[30%] shrink-0 items-center justify-center overflow-hidden p-2 sm:w-[27%] sm:p-3">
+                  <img src={slide.image} alt={slide.imageAlt} className="h-full max-h-[190px] w-full rounded-xl object-cover object-center shadow-lg sm:max-h-[230px]" loading="lazy" />
+                </div>
+              ) : slide.theme === "impact" ? (
+                <div className="relative z-10 flex w-[30%] shrink-0 flex-col items-center justify-center gap-2 border-l border-white/15 px-2 text-center sm:w-[27%] sm:gap-3">
+                  <div><strong className="block font-display text-2xl font-black leading-none text-[#d4ff91] sm:text-4xl">1,500</strong><span className="mt-1 block text-[8px] font-bold uppercase tracking-wider text-white/80 sm:text-[10px]">People to feed</span></div>
+                  <div className="h-px w-2/3 bg-white/25" />
+                  <div><strong className="block font-display text-2xl font-black leading-none text-[#d4ff91] sm:text-4xl">300</strong><span className="mt-1 block text-[8px] font-bold uppercase tracking-wider text-white/80 sm:text-[10px]">Food boxes</span></div>
                 </div>
               ) : (
-                <div className="relative z-10 flex w-[34%] shrink-0 flex-col items-center justify-center gap-2 border-l border-white/15 px-2 text-center sm:w-[30%] sm:gap-3">
-                  {slide.layout === "impact" ? <><div><strong className="block font-display text-3xl font-black leading-none text-[#c9f58a] sm:text-5xl">1,500</strong><span className="mt-1 block text-[9px] font-bold uppercase tracking-wider text-white/75 sm:text-[10px]">People to feed</span></div><div className="h-px w-2/3 bg-white/20" /><div><strong className="block font-display text-3xl font-black leading-none text-[#c9f58a] sm:text-5xl">300</strong><span className="mt-1 block text-[9px] font-bold uppercase tracking-wider text-white/75 sm:text-[10px]">Food boxes</span></div></> : <><span className="text-4xl sm:text-6xl" aria-hidden="true">♥</span><span className="max-w-[110px] text-[9px] font-extrabold uppercase tracking-[.15em] text-[#c9f58a] sm:text-[10px]">Community. Dignity. Hope.</span></>}
+                <div className="relative z-10 flex w-[30%] shrink-0 items-center justify-center border-l border-white/15 px-2 sm:w-[27%]">
+                  <div className="text-center"><span className="block text-4xl text-[#d4ff91] sm:text-6xl" aria-hidden="true">♥</span><span className="mt-1 block text-[8px] font-extrabold uppercase tracking-[.14em] text-white/80 sm:text-[10px]">Community · Dignity · Hope</span></div>
                 </div>
               )}
             </article>
           ))}
         </div>
-        <button type="button" aria-label="Previous featured announcement" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur hover:bg-black/50">‹</button>
-        <button type="button" aria-label="Next featured announcement" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/30 text-white backdrop-blur hover:bg-black/50">›</button>
+        <button type="button" aria-label="Previous featured announcement" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/55">‹</button>
+        <button type="button" aria-label="Next featured announcement" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/35 text-white backdrop-blur hover:bg-black/55">›</button>
       </div>
       <div className="mt-3 flex items-center justify-center gap-2" aria-label="Choose featured announcement">
-        {slides.map((slide, index) => <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show announcement ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-1.5 rounded-full transition-all ${active === index ? "w-7 bg-[var(--seek-success)]" : "w-1.5 bg-[var(--seek-primary)]/20"}`} />)}
+        {slides.map((slide, index) => <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show announcement ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />)}
       </div>
+      <style>{`
+        .seek-promo-viewport { padding-left: 0; padding-right: 0; }
+        .seek-promo-track { padding-right: 18%; }
+        .seek-promo-card { width: 82%; height: clamp(150px, 25vw, 270px); }
+        .seek-promo-card.feature { background: linear-gradient(110deg,#061f1c 0%,#073d32 58%,#0b5140 100%); }
+        .seek-promo-card.feature > div:first-child { background: radial-gradient(circle at 82% 45%,rgba(190,244,105,.25),transparent 38%),linear-gradient(120deg,transparent 45%,rgba(0,0,0,.28)); }
+        .seek-promo-card.impact { background: linear-gradient(110deg,#073d32,#12634b); }
+        .seek-promo-card.impact > div:first-child { background: radial-gradient(circle at 85% 45%,rgba(190,244,105,.2),transparent 38%); }
+        .seek-promo-card.join { background: linear-gradient(110deg,#102d27,#244c38); }
+        .seek-promo-card.join > div:first-child { background: radial-gradient(circle at 85% 45%,rgba(190,244,105,.24),transparent 40%); }
+        @media (max-width: 640px) {
+          .seek-home-promotions { margin-top: 1.5rem; }
+          .seek-promo-card { height: 158px; }
+        }
+      `}</style>
     </section>
   );
 }
