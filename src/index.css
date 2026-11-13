@@ -640,3 +640,116 @@ html.seek-dark .seek-community-pulse {
   color: #FAF7F2 !important;
   border-color: rgba(217,133,104,.28) !important;
 }
+
+/* SEEK vibrant-warm visual pass — keeps the existing .seek-dark toggle contract intact. */
+:root {
+  --seek-primary: #294B43;
+  --seek-accent: #F08069;
+  --seek-plum: #8064A0;
+  --seek-mint: #A8DCC5;
+  --seek-light: #FFF9F1;
+  --seek-dark: #292B30;
+  --seek-white: #FFFFFF;
+  --seek-success: #43866B;
+  --seek-warning: #C47A2C;
+  --seek-danger: #C6535B;
+  --seek-muted: #746C68;
+  --seek-bg: #FFF9F1;
+  --seek-card: #FFFFFF;
+  --seek-ink: #343638;
+  --seek-head: #294B43;
+  --seek-wash: rgba(255,249,241,.9);
+  --seek-coral: #F08069;
+  --seek-orange: #F2A65A;
+  --seek-lavender: #B7A4D8;
+  --seek-pink: #F4C6C6;
+  --seek-fresh-mint: #A8DCC5;
+}
+html.seek-dark {
+  color-scheme: dark;
+  --seek-primary: #294B43;
+  --seek-accent: #FF987F;
+  --seek-plum: #C3AFE4;
+  --seek-mint: #A8DCC5;
+  --seek-light: #FFF9F1;
+  --seek-dark: #202329;
+  --seek-white: #FFFFFF;
+  --seek-success: #9BD8B8;
+  --seek-warning: #F2BD78;
+  --seek-danger: #F18B91;
+  --seek-muted: #C8BDB7;
+  --seek-bg: #202329;
+  --seek-card: #2B3037;
+  --seek-ink: #FFF9F1;
+  --seek-head: #FFF1E6;
+  --seek-wash: rgba(32,35,41,.94);
+  --seek-coral: #FF987F;
+  --seek-orange: #F5B66F;
+  --seek-lavender: #C3AFE4;
+  --seek-pink: #E9B8C2;
+  --seek-fresh-mint: #A8DCC5;
+}
+
+html, body { background: var(--seek-bg); color: var(--seek-ink); }
+
+/* Warm, colourful atmosphere without painting every surface the same colour. */
+.seek-home-hero {
+  background:
+    radial-gradient(ellipse at 8% 5%, rgba(240,128,105,.22), transparent 36%),
+    radial-gradient(ellipse at 92% 90%, rgba(183,164,216,.20), transparent 34%),
+    linear-gradient(145deg, #FFF9F1 0%, #FFFFFF 58%, #FFF1E8 100%);
+}
+.seek-shop-hero {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(242,166,90,.25), transparent 32%),
+    radial-gradient(circle at 4% 100%, rgba(183,164,216,.20), transparent 35%),
+    linear-gradient(135deg, #FFFFFF 0%, #FFF4EB 100%);
+}
+.seek-gradient-text {
+  background-image: linear-gradient(100deg, #F08069 0%, #8064A0 55%, #D88955 100%);
+}
+.seek-community-pulse {
+  background: linear-gradient(120deg, #294B43 0%, #3D6256 100%) !important;
+  color: #FFFFFF !important;
+  border-color: rgba(242,166,90,.45) !important;
+}
+.seek-hero-primary,
+.seek-shop-product button,
+.seek-campaign-page .seek-campaign-donate {
+  box-shadow: 0 8px 22px rgba(240,128,105,.22);
+}
+
+/* Accent small interactive details; avoid changing layout or component behaviour. */
+.seek-pulse-dot,
+.seek-discover-live-dot { background: #F08069; }
+.seek-shop-pulse span { background: #F2A65A; }
+.seek-ribbon-item i,
+.seek-discover-marquee-item i { background: #F08069; }
+.seek-discover-card:hover { border-color: rgba(240,128,105,.48); }
+
+html.seek-dark .seek-home-hero {
+  background:
+    radial-gradient(ellipse at 8% 5%, rgba(240,128,105,.16), transparent 38%),
+    radial-gradient(ellipse at 92% 90%, rgba(183,164,216,.13), transparent 34%),
+    linear-gradient(145deg, #292E34 0%, #202329 100%) !important;
+}
+html.seek-dark .seek-shop-hero {
+  background:
+    radial-gradient(circle at 92% 8%, rgba(242,166,90,.16), transparent 34%),
+    radial-gradient(circle at 4% 100%, rgba(183,164,216,.13), transparent 36%),
+    linear-gradient(135deg, #2B3037 0%, #202329 100%) !important;
+}
+html.seek-dark .seek-community-pulse {
+  background: linear-gradient(120deg, #303840 0%, #3B3542 100%) !important;
+  color: #FFF9F1 !important;
+  border-color: rgba(255,152,127,.35) !important;
+}
+html.seek-dark .seek-theme-toggle {
+  color: #292B30 !important;
+  background: #FFF9F1 !important;
+  border-color: rgba(255,249,241,.45) !important;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .seek-home-hero, .seek-shop-hero { scroll-behavior: auto; }
+}
