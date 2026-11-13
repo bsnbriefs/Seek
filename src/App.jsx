@@ -5273,7 +5273,7 @@ function RequesterUpdateForm({ requestId, existing, existingMedia, onSaved }) {
 
   return (
     <form
-      className="mt-5 rounded-2xl border border-[var(--seek-primary)]/12 bg-[var(--seek-white)] p-4 sm:p-5 space-y-3"
+      className="seek-outcome-form mt-5 rounded-2xl border p-4 sm:p-5 space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
         try {

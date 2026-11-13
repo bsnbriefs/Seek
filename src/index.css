@@ -1747,3 +1747,59 @@ html.seek-dark .seek-request-facebook {
   -webkit-text-fill-color: #193524 !important;
   border-color: #9CCB60 !important;
 }
+
+
+/* Outcome update form: explicit theme-aware contrast. Avoid inherited white-on-white text. */
+.seek-outcome-form {
+  background: #FFFFFF !important;
+  color: #263B2E !important;
+  border-color: #D8E0D8 !important;
+}
+.seek-outcome-form :is(p,label,span,strong,b) {
+  color: #314C3A !important;
+  -webkit-text-fill-color: #314C3A !important;
+  opacity: 1 !important;
+}
+.seek-outcome-form textarea {
+  background: #FFFFFF !important;
+  color: #263B2E !important;
+  -webkit-text-fill-color: #263B2E !important;
+  border: 1px solid #AAB9AC !important;
+}
+.seek-outcome-form textarea::placeholder { color: #68766B !important; opacity: 1 !important; }
+.seek-outcome-form input[type="file"] {
+  display: block; width: 100%; padding: .7rem; border: 1px solid #AAB9AC !important;
+  border-radius: .9rem; background: #F5F7F3 !important; color: #263B2E !important;
+  -webkit-text-fill-color: #263B2E !important;
+}
+.seek-outcome-form input[type="file"]::file-selector-button {
+  margin-right: .75rem; border: 0; border-radius: .65rem; padding: .65rem 1rem;
+  background: #274A34 !important; color: #FFFFFF !important; font-weight: 700;
+}
+.seek-outcome-form button[type="submit"] {
+  background: #274A34 !important; color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important; border: 1px solid #274A34 !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-outcome-form {
+  background: #263B30 !important; color: #F7F8F3 !important; border-color: #64796A !important;
+}
+html.seek-dark .seek-outcome-form :is(p,label,span,strong,b) {
+  color: #F0F4EC !important; -webkit-text-fill-color: #F0F4EC !important; opacity: 1 !important;
+}
+html.seek-dark .seek-outcome-form textarea {
+  background: #182820 !important; color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important; border-color: #829687 !important;
+}
+html.seek-dark .seek-outcome-form textarea::placeholder { color: #C7D3C9 !important; opacity: 1 !important; }
+html.seek-dark .seek-outcome-form input[type="file"] {
+  background: #182820 !important; color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important; border-color: #829687 !important;
+}
+html.seek-dark .seek-outcome-form input[type="file"]::file-selector-button {
+  background: #CCF88E !important; color: #193524 !important;
+}
+html.seek-dark .seek-outcome-form button[type="submit"] {
+  background: #CCF88E !important; color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important; border-color: #A6D36B !important;
+}
