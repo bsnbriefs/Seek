@@ -1211,9 +1211,11 @@ function ThemeToggle() {
   return (
     <button
       type="button"
-      aria-label={dark ? "Use light theme" : "Use dark theme"}
+      aria-label={dark ? "Switch to light appearance" : "Switch to dark appearance"}
+      aria-pressed={dark}
+      title={dark ? "Switch to light appearance" : "Switch to dark appearance"}
       onClick={() => setTheme(dark ? "light" : "dark")}
-      className="p-2 text-current"
+      className="seek-theme-toggle p-2 text-current rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[#1BAA9C]"
     >
       {dark ? <Sun size={20} className="seek-theme-icon" /> : <Moon size={20} className="seek-theme-icon" />}
     </button>
@@ -1519,6 +1521,7 @@ function HomePage({ setPage, userSession }) {
         </section>
       )}
       {donateReq && <SeekDonateModal request={donateReq} onClose={() => setDonateReq(null)} />}
+      {mine.length > 0 && (
         <section className="mx-auto max-w-lg px-5 pb-6">
           <p className="text-[11px] uppercase tracking-widest text-[#1BAA9C] mb-2">Your requests</p>
           {mine.slice(0, 2).map((req) => (
@@ -2038,8 +2041,9 @@ function LiveSupportCard({ request, setPage }) {
   const progress = amountNeeded > 0 ? Math.min(100, Math.round((amountRaised / amountNeeded) * 100)) : 0;
   const member = request.member || {};
   const rawName = member.name || request.full_name || request.name || member.username || request.username || "";
-  const displayName = member.username || request.username || member.name || request.full_name || request.name || "Seeker";
-  const username = (member.username || request.username) ? `@${member.username || request.username}` : "";
+  const publicUsername = member.username || request.username || "";
+  const displayName = publicUsername ? `@${publicUsername}` : (member.name || request.full_name || request.name || "SEEK member");
+  const username = publicUsername ? `@${publicUsername}` : "";
 
   const goToCase = () => {
     recordFeedSignal("view", { id: request.id });
@@ -2244,7 +2248,7 @@ function WalletPage({ setPage, userSession }) {
 }
 
 function DiscoverPage({ setPage }) {
-  const [tab, setTab] = useState("latest");
+  const [tab, setTab] = useState("all");
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [query, setQuery] = useState("");
@@ -2345,81 +2349,52 @@ function DiscoverPage({ setPage }) {
     }
   }, [searchOpen]);
   const discoverKinds = ["Impact", "Appreciation", "Request", "Fundraiser", "Giveaway", "Job", "Mentorship", "Counselling", "Celebrate"];
-  const discoverItems = items.filter((item) => discoverKinds.includes(item.kind));
-  const shown = tab === "trending" ? discoverItems.slice(0, 20) : discoverItems.slice(0, 40);
-  const activityLabels = discoverItems.slice(0, 8);
+  const allDiscoverItems = items.filter((item) => discoverKinds.includes(item.kind));
+  const discoverItems = tab === "requests"
+    ? allDiscoverItems.filter((item) => ["Request", "Fundraiser", "Celebrate"].includes(item.kind))
+    : tab === "opportunities"
+      ? allDiscoverItems.filter((item) => ["Giveaway", "Job", "Mentorship", "Counselling"].includes(item.kind))
+      : tab === "impact"
+        ? allDiscoverItems.filter((item) => ["Impact", "Appreciation"].includes(item.kind))
+        : allDiscoverItems;
+  const shown = discoverItems.slice(0, 40);
   return (
     <div className="min-h-[70vh]" style={{ background: C.bg }}>
-      <section className="sticky top-24 z-[90] bg-[#F2F5F3]/95 backdrop-blur border-b border-[#0D3B3B]/10">
-        <div className="mx-auto max-w-2xl px-5 pt-3">
+      <section className="seek-discover-toolbar sticky top-24 z-[90] border-b backdrop-blur">
+        <div className="mx-auto max-w-2xl px-5 pt-4 pb-3">
           {searchOpen ? (
             <div className="flex items-center gap-2">
-              <button type="button" aria-label="Back to Discover" className="p-2" onClick={() => { setSearchOpen(false); setQuery(""); setResults(null); }}>
+              <button type="button" aria-label="Back to Discover" className="seek-discover-back p-2" onClick={() => { setSearchOpen(false); setQuery(""); setResults(null); }}>
                 <ArrowLeft size={20} />
               </button>
-              <label className="flex-1 flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3">
-                <Search size={18} className="text-white/80 shrink-0" />
-                <input
-                  ref={searchRef}
-                  value={query}
-                  onChange={(e) => setQuery(e.target.value)}
-                  placeholder="Search SEEK"
-                  className="w-full bg-transparent text-base text-white placeholder:text-white/50 outline-none"
-                />
+              <label className="seek-discover-searchbox flex-1 flex items-center gap-2 rounded-full px-4 py-3">
+                <Search size={18} className="shrink-0" />
+                <input ref={searchRef} value={query} onChange={(e) => setQuery(e.target.value)} placeholder="Search people, requests and opportunities" className="w-full bg-transparent text-base outline-none" />
               </label>
             </div>
           ) : (
             <>
-              <button type="button" onClick={() => setSearchOpen(true)} className="w-full flex items-center gap-2 rounded-full bg-[#0D3B3B] px-4 py-3 text-left">
-                <Search size={18} className="text-white/80 shrink-0" />
-                <span className="text-white/50 text-base">Search SEEK</span>
+              <button type="button" onClick={() => setSearchOpen(true)} className="seek-discover-searchbox w-full flex items-center gap-3 rounded-full px-4 py-3 text-left">
+                <Search size={19} className="shrink-0" />
+                <span className="text-base">Search SEEK</span>
               </button>
-              <p className="mt-3 text-[10px] uppercase tracking-[0.2em] font-bold text-[#1BAA9C]"><span className="inline-block h-1.5 w-1.5 rounded-full bg-[#22c55e] mr-1 align-middle" /> Now on SEEK</p>
-              <h1 className="font-display font-extrabold text-2xl text-[#0D3B3B]">What's trending</h1>
+              <div className="mt-4 flex items-end justify-between gap-3">
+                <div>
+                  <p className="seek-discover-eyebrow text-[10px] uppercase tracking-[.18em] font-extrabold">Explore the community</p>
+                  <h1 className="seek-discover-heading mt-1 font-display font-extrabold text-2xl">Discover</h1>
+                  <p className="seek-discover-subtitle mt-1 text-sm">People, support and opportunities in one place.</p>
+                </div>
+                <span className="seek-discover-count shrink-0 rounded-full px-3 py-1.5 text-[11px] font-bold">{loading ? "Updating…" : `${allDiscoverItems.length} updates`}</span>
+              </div>
+              <div className="seek-discover-filters mt-4 flex gap-2 overflow-x-auto pb-1 scrollbar-none" aria-label="Filter Discover content">
+                {[["all", "All"], ["requests", "Requests"], ["opportunities", "Opportunities"], ["impact", "Impact"]].map(([id, label]) => (
+                  <button key={id} type="button" onClick={() => setTab(id)} aria-pressed={tab === id} className={`seek-discover-filter shrink-0 rounded-full px-4 py-2 text-xs font-bold ${tab === id ? "is-active" : ""}`}>{label}</button>
+                ))}
+              </div>
             </>
           )}
         </div>
-        {!searchOpen && <div className="mt-3 overflow-x-auto scrollbar-none">
-          <div className="mx-auto max-w-2xl px-5 flex gap-1 min-w-max">
-            {[
-              ["latest", "Latest"],
-              ["trending", "Trending"],
-            ].map(([id, label]) => (
-              <button
-                key={id}
-                type="button"
-                onClick={() => setTab(id)}
-                className={"seek-discover-tab shrink-0 px-3 py-3 text-sm font-semibold border-b-2 " + (tab === id ? "seek-discover-tab-on text-[#1BAA9C] border-[#1BAA9C]" : "text-[#0D3B3B] border-transparent")}
-              >
-                {label}
-              </button>
-            ))}
-          </div>
-        </div>}
       </section>
-      {!searchOpen && (
-        <section className="seek-discover-intro relative isolate overflow-hidden mx-auto max-w-2xl px-5 pt-6 pb-5">
-          <div className="seek-discover-glow seek-discover-glow-a" aria-hidden="true" />
-          <div className="seek-discover-glow seek-discover-glow-b" aria-hidden="true" />
-          <div className="relative z-10">
-            <div className="flex items-center justify-between gap-3">
-              <span className="inline-flex items-center gap-2 rounded-full border border-[#1BAA9C]/20 bg-white/80 px-3 py-1.5 text-[10px] font-extrabold uppercase tracking-[.18em] text-[#0D7770] backdrop-blur"><i className="seek-pulse-dot" /> Community pulse</span>
-              <span className="text-[11px] font-semibold text-[#0D3B3B]/50">{loading ? "Updating…" : `${discoverItems.length} updates`}</span>
-            </div>
-            <h2 className="seek-discover-title mt-4 font-display text-3xl font-extrabold leading-tight tracking-tight text-[#0D3B3B] sm:text-4xl">Discover what’s <span className="seek-gradient-text">happening.</span></h2>
-            <p className="mt-2 max-w-md text-sm leading-6 text-[#0D3B3B]/65">Real needs, opportunities and moments of community support — all in one place.</p>
-          </div>
-          {activityLabels.length > 0 && (
-            <div className="seek-discover-marquee mt-5" aria-label="Recent community activity">
-              <div className="seek-discover-marquee-track">
-                {[0, 1].map((copy) => <div className="seek-discover-marquee-group" key={copy} aria-hidden={copy === 1}>
-                  {activityLabels.map((item) => <span className="seek-discover-marquee-item" key={`${copy}-${item.key}`}><i />{item.title}</span>)}
-                </div>)}
-              </div>
-            </div>
-          )}
-        </section>
-      )}
       {searchOpen ? (
       <section className="seek-discover-search-results mx-auto max-w-2xl px-5 pt-5 pb-28 space-y-5">
         {query.trim().length < 2 && (
@@ -3281,28 +3256,30 @@ function CelebratePage({ setPage }) {
   const go = (id) => { setPage && setPage(id); window.scrollTo(0, 0); };
 
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-14 sm:pt-20 pb-10 text-center">
+    <div className="seek-celebrate-page" style={{ background: C.bg }}>
+      <section className="seek-celebrate-hero mx-auto max-w-4xl px-5 sm:px-8 pt-14 sm:pt-20 pb-10 text-center">
+        <div className="seek-celebrate-orb seek-celebrate-orb-a" aria-hidden="true" />
+        <div className="seek-celebrate-orb seek-celebrate-orb-b" aria-hidden="true" />
         <SectionLabel>Connect & Celebrate</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Celebrate with a neighbour.</h1>
+        <h1 className="seek-celebrate-title font-display font-extrabold text-4xl sm:text-5xl text-[#0D3B3B]">Celebrate with a neighbour.</h1>
         <p className="mx-auto mt-4 max-w-2xl font-body text-lg leading-relaxed text-[#0D3B3B]/65">
           Birthdays, graduations, a new city. Ask a neighbour to be there. SEEK reads every post. This is not dating, and it is not a fundraiser.
         </p>
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-12">
-        <div className="grid gap-4 sm:grid-cols-3">
-          <button type="button" onClick={() => go("celebrate-request")} className="rounded-3xl bg-[#0D3B3B] p-6 text-left text-white hover:shadow-lg transition">
+        <div className="seek-celebrate-actions grid gap-4 sm:grid-cols-3">
+          <button type="button" onClick={() => go("celebrate-request")} className="seek-celebrate-action seek-celebrate-action-primary rounded-3xl bg-[#0D3B3B] p-6 text-left text-white hover:shadow-lg transition">
             <HeartHandshake size={22} className="text-[#63C167]" />
             <h2 className="mt-4 font-display font-bold text-xl">I want to connect</h2>
             <p className="mt-2 text-sm leading-6 text-white/65">Share a genuine invitation for company around a meaningful moment.</p>
           </button>
-          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
+          <button type="button" onClick={() => document.getElementById("celebrate-invitations")?.scrollIntoView({ behavior: "smooth" })} className="seek-celebrate-action rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
             <Users size={22} className="text-[#1BAA9C]" />
             <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">I want to join</h2>
             <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">See published invitations and find a safe community moment to join.</p>
           </button>
-          <button type="button" onClick={() => go("impact")} className="rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
+          <button type="button" onClick={() => go("impact")} className="seek-celebrate-action rounded-3xl bg-white border border-[#0D3B3B]/10 p-6 text-left hover:shadow-lg transition">
             <Sparkles size={22} className="text-[#1BAA9C]" />
             <h2 className="mt-4 font-display font-bold text-xl text-[#0D3B3B]">Celebrate what happened</h2>
             <p className="mt-2 text-sm leading-6 text-[#0D3B3B]/60">Explore real community stories and outcomes shared through SEEK.</p>
@@ -3310,7 +3287,7 @@ function CelebratePage({ setPage }) {
         </div>
       </section>
 
-      <section id="celebrate-invitations" className="py-14 pb-32">
+      <section id="celebrate-invitations" className="seek-celebrate-invitations py-14 pb-32">
         <div className="mx-auto max-w-5xl px-5 sm:px-8">
           <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between mb-6">
             <div>
@@ -3320,8 +3297,8 @@ function CelebratePage({ setPage }) {
             <button type="button" onClick={() => go("celebrate-request")} className="text-sm font-bold text-[#1BAA9C]">Create an invitation →</button>
           </div>
           <div className="grid gap-4 md:grid-cols-2">
-            {list.slice(0, 6).map((req) => (
-              <RequestCard key={req.id} req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} />
+            {list.slice(0, 6).map((req, index) => (
+              <div className="seek-celebrate-invite" style={{ "--seek-celebrate-index": index }} key={req.id}><RequestCard req={req} onView={() => go("request:" + req.id)} onHelp={() => go("request:" + req.id)} /></div>
             ))}
           </div>
           {!list.length && <div className="rounded-3xl border border-white/10 bg-[#152220] p-8 text-center"><p className="font-display font-bold text-white">No published invitations yet.</p><p className="mt-2 text-sm text-white/65">Be the first to share a genuine community moment.</p></div>}
@@ -3329,7 +3306,7 @@ function CelebratePage({ setPage }) {
       </section>
 
       <section className="mx-auto max-w-3xl px-5 sm:px-8 py-14 text-center">
-        <div className="rounded-3xl bg-[#0D3B3B] p-8 sm:p-10 text-white">
+        <div className="seek-celebrate-boundary rounded-3xl bg-[#0D3B3B] p-8 sm:p-10 text-white">
           <p className="text-[10px] uppercase tracking-[0.18em] font-bold text-[#63C167]">A simple boundary</p>
           <h2 className="mt-3 font-display font-bold text-2xl">Connect with care.</h2>
           <p className="mt-3 text-sm leading-6 text-white/65">SEEK is not a dating app. Do not share your home address. Meet in public places and use your judgment when connecting with someone new.</p>
@@ -3526,7 +3503,7 @@ function OrganisationsPage({ setPage }) {
 function MemberPage({ memberId, setPage }) {
   const [member, setMember] = useState(null);
   useEffect(() => {
-    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "Seeker" }));
+    getPublicMember(memberId).then(setMember).catch(() => setMember({ name: "SEEK member" }));
   }, [memberId]);
   return (
     <div className="mx-auto max-w-lg px-5 py-16 text-center">
@@ -3625,7 +3602,7 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
           } catch (err) { setError(err.message || "Could not send this."); }
           finally { setLoading(false); }
         }}>
-          <p className="text-sm text-[#0D3B3B]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : "Tell this Seeker how you can help — a role, an introduction, or your time."}</p>
+          <p className="text-sm text-[#0D3B3B]/60">{CONNECT_CATS.includes(request.category) ? "Tell the host you can be there." : `Tell ${request.username ? `@${request.username}` : request.full_name || request.name || "the person who posted this request"} how you can help — a role, an introduction, or your time.`}</p>
           <input required className={inputCls} placeholder="Your name" value={form.name} onChange={(e) => setForm({ ...form, name: e.target.value })} />
           {session?.user?.email ? (
             <input readOnly className={inputCls + " bg-[#F2F5F3]"} value={session.user.email} />
@@ -3641,7 +3618,7 @@ function CelebrateRsvp({ request, setPage, helpLabel }) {
             <input required type="file" accept="image/jpeg,image/png,image/webp" className="mt-1 block w-full text-sm" onChange={(e) => setForm({ ...form, photo: e.target.files?.[0] || null })} />
           </label>
           {error && <p className="text-sm text-red-600">{error}</p>}
-          <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : CONNECT_CATS.includes(request.category) ? "Send to host" : "Send to the Seeker"}</Button>
+          <Button disabled={loading} type="submit" variant="primary">{loading ? "Sending…" : CONNECT_CATS.includes(request.category) ? "Send to host" : `Send to ${request.username ? `@${request.username}` : request.full_name || request.name || "the requester"}`}</Button>
         </form>
       )}
     </div>
