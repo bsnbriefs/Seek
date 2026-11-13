@@ -4914,40 +4914,183 @@ function AccountUsernameForm({ onSaved } = {}) {
   const [bio, setBio] = useState("");
   const [hint, setHint] = useState("");
   const [saving, setSaving] = useState(false);
+  const [loading, setLoading] = useState(true);
+  const [loadedUsername, setLoadedUsername] = useState("");
+  const [usernameTouched, setUsernameTouched] = useState(false);
+
   useEffect(() => {
-    getMyProfile().then((p) => {
-      if (!p) return;
-      setUsername(p.username || "");
-      setName(p.full_name || "");
-      setBio(p.bio || "");
-    }).catch(() => {});
+    let active = true;
+    getMyProfile()
+      .then((profile) => {
+        if (!active) return;
+        const currentUsername = profile?.username || "";
+        setUsername(currentUsername);
+        setLoadedUsername(currentUsername);
+        setName(profile?.full_name || "");
+        setBio(profile?.bio || "");
+      })
+      .catch(() => {
+        if (active) setHint("We couldn't load your profile. Please refresh and try again.");
+      })
+      .finally(() => {
+        if (active) setLoading(false);
+      });
+    return () => { active = false; };
   }, []);
+
+  const usernameChanged = username.trim().toLowerCase() !== loadedUsername;
+
   return (
-    <form className="mt-6 text-left space-y-3" onSubmit={async (e) => {
-      e.preventDefault();
-      setSaving(true); setHint("");
-      try {
-        const saved = await updateMyUsername({ username, full_name: name, bio });
-        setUsername(saved?.username || username);
-        setName(saved?.full_name || name);
-        setBio(saved?.bio ?? bio);
-        setHint("Profile saved.");
-        if (typeof onSaved === "function") onSaved({ ...(saved || {}), username: saved?.username || username, full_name: saved?.full_name || name, bio: saved?.bio ?? bio });
-      } catch (err) {
-        setHint(err.message || "Could not save.");
-      } finally { setSaving(false); }
-    }}>
-      <p className="font-display font-semibold text-sm">Public profile</p>
-      <input value={name} onChange={(e) => setName(e.target.value)} placeholder="Display name" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <input value={username} onChange={(e) => setUsername(e.target.value.toLowerCase().replace(/[^a-z0-9_]/g, ""))} placeholder="username" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <p className="text-xs text-[var(--seek-primary)]/50">3–24 characters. Letters, numbers, underscore. This becomes /member/username</p>
-      <textarea value={bio} onChange={(e) => setBio(e.target.value)} rows={3} maxLength={280} placeholder="A short public line (optional)" className="w-full rounded-xl border px-3 py-2 text-sm" />
-      <button type="submit" className="rounded-full bg-[var(--seek-primary)] text-white px-4 py-2 text-sm" disabled={saving}>{saving ? "Saving…" : "Save profile"}</button>
-      {hint && <p className="text-sm text-[var(--seek-primary)]/70">{hint}</p>}
+    <form
+      className="mt-6 text-left space-y-3"
+      onSubmit={async (e) => {
+        e.preventDefault();
+        if (loading || saving) return;
+
+        const cleanName = name.trim();
+        const cleanUsername = username.trim().toLowerCase();
+
+        if (!cleanName) {
+          setHint("Enter the name you want people to see on your public profile.");
+          return;
+        }
+
+        setSaving(true);
+        setHint("");
+
+        try {
+          // Check the current username too: the secure RPC permits its owner
+          // to keep it, while preventing a duplicate username from being saved.
+          const availability = await checkUsernameAvailable(cleanUsername);
+          if (!availability?.ok) {
+            throw new Error(availability?.error || "That username is unavailable.");
+          }
+
+          const saved = await updateMyUsername({
+            username: cleanUsername,
+            full_name: cleanName,
+            bio,
+          });
+
+          const nextUsername = saved?.username || cleanUsername;
+          const nextName = saved?.full_name ?? cleanName;
+          const nextBio = saved?.bio ?? bio.trim();
+
+          setUsername(nextUsername);
+          setLoadedUsername(nextUsername);
+          setName(nextName);
+          setBio(nextBio);
+          setUsernameTouched(false);
+          setHint("Your public profile has been saved.");
+          if (typeof onSaved === "function") {
+            onSaved({ ...(saved || {}), username: nextUsername, full_name: nextName, bio: nextBio });
+          }
+        } catch (err) {
+          setHint(err?.message || "Your profile could not be saved. Please try again.");
+        } finally {
+          setSaving(false);
+        }
+      }}
+    >
+      <div className="flex items-center justify-between gap-3">
+        <p className="font-display font-semibold text-sm">Public profile</p>
+        <span className="text-xs font-medium" style={{ color: "#d7f99b" }}>Visible to everyone</span>
+      </div>
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Display name</span>
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          maxLength={80}
+          autoComplete="name"
+          placeholder="Your public name"
+          className="w-full rounded-xl border px-3 py-3 text-base"
+          style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
+          disabled={loading || saving}
+        />
+      </label>
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Username</span>
+        <div className="flex items-center rounded-xl border bg-white px-3" style={{ borderColor: "#cbd5ce" }}>
+          <span className="text-base" style={{ color: "#587064" }}>@</span>
+          <input
+            value={username}
+            onChange={(e) => {
+              setUsername(e.target.value.toLowerCase());
+              setUsernameTouched(true);
+              setHint("");
+            }}
+            maxLength={24}
+            minLength={3}
+            autoCapitalize="none"
+            autoCorrect="off"
+            spellCheck={false}
+            autoComplete="username"
+            placeholder="choose_username"
+            className="w-full border-0 bg-transparent px-2 py-3 text-base outline-none focus:ring-0"
+            style={{ color: "#20392d" }}
+            disabled={loading || saving}
+          />
+        </div>
+      </label>
+
+      <p className="text-xs leading-relaxed" style={{ color: "#d0ddd3" }}>
+        3–24 characters. Use lowercase letters, numbers and underscores. No spaces; username cannot start or end with an underscore.
+      </p>
+      {usernameTouched && usernameChanged && (
+        <p className="text-xs" style={{ color: "#d7f99b" }}>
+          Your new public address will be /member/{username.trim().toLowerCase() || "username"}.
+        </p>
+      )}
+
+      <label className="block space-y-1">
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>About you <span className="font-normal opacity-75">(optional)</span></span>
+        <textarea
+          value={bio}
+          onChange={(e) => setBio(e.target.value)}
+          rows={3}
+          maxLength={280}
+          placeholder="A short introduction people can see on your profile."
+          className="w-full rounded-xl border px-3 py-3 text-base"
+          style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
+          disabled={loading || saving}
+        />
+        <span className="block text-right text-xs" style={{ color: "#d0ddd3" }}>{bio.length}/280</span>
+      </label>
+
+      <button
+        type="submit"
+        className="w-full rounded-full px-5 py-3 text-base font-semibold transition disabled:cursor-not-allowed disabled:opacity-60"
+        style={{ background: "#cafa86", color: "#173d2d", border: "1px solid #b8e875" }}
+        disabled={loading || saving || !name.trim() || !username.trim()}
+      >
+        {loading ? "Loading profile…" : saving ? "Saving profile…" : "Save public profile"}
+      </button>
+
+      {hint && (
+        <p
+          className="rounded-xl px-3 py-2 text-sm leading-relaxed"
+          role="status"
+          aria-live="polite"
+          style={{
+            color: hint.toLowerCase().includes("saved") ? "#d7f99b" : "#ffe0dc",
+            background: "rgba(0,0,0,.18)",
+          }}
+        >
+          {hint}
+        </p>
+      )}
+
+      {!loading && loadedUsername && (
+        <p className="text-xs" style={{ color: "#d0ddd3" }}>
+          Your public profile: <span className="font-semibold" style={{ color: "#d7f99b" }}>/member/{loadedUsername}</span>
+        </p>
+      )}
     </form>
   );
 }
-
 function AccountPage({ setPage, userSession, setUserSession }) {
   const [mode, setMode] = useState("signin"); // signin | signup
   const [email, setEmail] = useState("");
