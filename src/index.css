@@ -2113,62 +2113,114 @@ html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child :is(span,st
   -webkit-text-fill-color: #CCF88E !important;
 }
 
-
 /* =========================================================
-   SEEK STORY PAGES — About, Contact and Trust & Safety
-   Motion is restrained, responsive and respects reduced-motion.
+   SEEK ACCESSIBILITY PASS — GLOBAL LIGHT/DARK TEXT CONTRAST
+   Keep the existing palette and layouts. These rules only
+   strengthen text, controls, placeholders, borders and icons.
    ========================================================= */
-.seek-story-page { overflow: clip; }
-.seek-story-hero { position: relative; isolation: isolate; min-height: 430px; display: grid; place-items: center; padding: 5.5rem 0 4.5rem; }
-.seek-story-orb { position: absolute; z-index: -1; width: 20rem; height: 20rem; border-radius: 50%; filter: blur(42px); pointer-events: none; opacity: .65; }
-.seek-story-orb-a { top: -9rem; left: -5rem; background: rgba(151,210,78,.20); animation: seek-story-drift 13s ease-in-out infinite alternate; }
-.seek-story-orb-b { right: -7rem; bottom: -10rem; background: rgba(27,170,156,.14); animation: seek-story-drift 16s ease-in-out infinite alternate-reverse; }
-.seek-story-kicker { display: inline-flex; align-items: center; gap: .65rem; color: var(--seek-success); font-size: .72rem; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; animation: seek-story-enter .65s both; }
-.seek-story-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--seek-success); box-shadow: 0 0 0 0 rgba(151,210,78,.5); animation: seek-story-pulse 2.2s infinite; }
-.seek-story-title { margin-top: 1.25rem; line-height: 1.06; letter-spacing: -.045em; animation: seek-story-enter .75s .08s both; }
-.seek-story-title span { display: inline-block; color: var(--seek-success); }
-.seek-story-lead { animation: seek-story-enter .8s .18s both; }
-.seek-story-scroll { display: inline-flex; align-items: center; gap: .65rem; margin-top: 3rem; color: var(--seek-primary); opacity: .55; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; animation: seek-story-enter .8s .3s both; }
-.seek-story-scroll span { width: 1.2rem; height: 1.9rem; border: 1px solid currentColor; border-radius: 1rem; position: relative; }
-.seek-story-scroll span::after { content: ''; position: absolute; width: 3px; height: 5px; left: 50%; top: 5px; border-radius: 4px; background: currentColor; transform: translateX(-50%); animation: seek-story-scroll 1.5s ease-in-out infinite; }
-.seek-story-mission { background: var(--seek-white, #fff); }
-.seek-story-icon { display: grid; place-items: center; width: 4.25rem; height: 4.25rem; margin: 0 auto 1.4rem; border-radius: 1.4rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 11%, transparent); animation: seek-story-float 4s ease-in-out infinite; }
-.seek-story-mission-line { max-width: 52rem; margin-inline: auto; }
-.seek-story-values { display: inline-flex; align-items: center; gap: 1rem; margin-top: 2.2rem; padding: .75rem 1.2rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 12%, transparent); border-radius: 999px; color: var(--seek-primary); font-size: .72rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
-.seek-story-values i { width: 5px; height: 5px; border-radius: 50%; background: var(--seek-success); }
-.seek-foundation-card { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 2rem; padding: clamp(1.5rem,4vw,3.5rem); border: 1px solid color-mix(in srgb, var(--seek-primary) 10%, transparent); border-radius: 2rem; background: var(--seek-white, #fff); box-shadow: 0 18px 55px rgba(20,50,35,.06); transition: transform .35s ease, box-shadow .35s ease; }
-.seek-foundation-card:hover { transform: translateY(-5px); box-shadow: 0 25px 65px rgba(20,50,35,.10); }
-.seek-foundation-mark { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 1.4rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 10%, transparent); }
-.seek-story-closing { background: color-mix(in srgb, var(--seek-success) 7%, var(--seek-white, #fff)); }
-.seek-contact-hero { position: relative; }
-.seek-contact-email { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--seek-success) 40%, transparent); text-underline-offset: 4px; }
-.seek-contact-points { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; max-width: 38rem; }
-.seek-contact-points > div { display: flex; align-items: center; gap: .8rem; padding: 1rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 12%, transparent); border-radius: 1.2rem; background: var(--seek-white, #fff); color: var(--seek-primary); }
-.seek-contact-point-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; flex: 0 0 2.6rem; border-radius: .9rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 12%, transparent); }
-.seek-contact-points b,.seek-contact-points small { display: block; }
-.seek-contact-points b { font-size: .82rem; }
-.seek-contact-points small { margin-top: .15rem; color: color-mix(in srgb, var(--seek-primary) 62%, transparent); font-size: .68rem; line-height: 1.35; }
-.seek-contact-chat-wrap { margin-top: 2rem; }
-.seek-contact-chat-wrap > * { border-radius: 1.7rem; }
-.seek-legal-intro { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; border-radius: 1.3rem; color: var(--seek-primary); background: color-mix(in srgb, var(--seek-success) 9%, var(--seek-white, #fff)); }
-.seek-legal-intro svg { flex: 0 0 auto; color: var(--seek-success); }
-.seek-legal-intro p { font-size: .9rem; line-height: 1.5; }
-.seek-legal-copy { display: grid; gap: .85rem; }
-.seek-legal-item { display: grid; grid-template-columns: 2.5rem minmax(0,1fr); gap: 1rem; align-items: start; padding: 1.35rem 1.4rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 10%, transparent); border-radius: 1.25rem; background: var(--seek-white, #fff); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
-.seek-legal-item:hover { transform: translateX(4px); border-color: color-mix(in srgb, var(--seek-success) 40%, transparent); box-shadow: 0 10px 25px rgba(20,50,35,.05); }
-.seek-legal-index { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: .75rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 12%, transparent); font-size: .7rem; font-weight: 900; }
-.seek-legal-item p { font-size: .95rem; }
-.seek-legal-help { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; padding: 1.4rem; border-radius: 1.4rem; background: var(--seek-primary); color: #fff; }
-.seek-legal-help b { display: block; font-size: .95rem; }
-.seek-legal-help p { margin-top: .25rem; color: rgba(255,255,255,.72); font-size: .8rem; }
-.seek-legal-help a { display: inline-flex; align-items: center; gap: .4rem; flex: 0 0 auto; color: #CCF88E; font-size: .8rem; font-weight: 800; }
-@keyframes seek-story-enter { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
-@keyframes seek-story-drift { from { transform: translate3d(-8px,0,0) scale(.94); } to { transform: translate3d(20px,18px,0) scale(1.08); } }
-@keyframes seek-story-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
-@keyframes seek-story-pulse { 0% { box-shadow: 0 0 0 0 rgba(151,210,78,.45); } 70% { box-shadow: 0 0 0 9px rgba(151,210,78,0); } 100% { box-shadow: 0 0 0 0 rgba(151,210,78,0); } }
-@keyframes seek-story-scroll { 0%,100% { opacity: .35; transform: translate(-50%,0); } 50% { opacity: 1; transform: translate(-50%,6px); } }
-html.seek-dark .seek-story-mission, html.seek-dark .seek-story-closing { background: var(--seek-white, #17251e); }
-html.seek-dark .seek-foundation-card, html.seek-dark .seek-contact-points > div, html.seek-dark .seek-legal-item { background: color-mix(in srgb, var(--seek-primary) 88%, #000); border-color: rgba(255,255,255,.12); }
-html.seek-dark .seek-legal-help { background: #13251c; }
-@media (max-width: 700px) { .seek-story-hero { min-height: 390px; padding: 4.5rem 0 3.5rem; } .seek-foundation-card { grid-template-columns: 1fr; gap: 1.2rem; border-radius: 1.5rem; } .seek-foundation-card button { justify-self: start; } .seek-contact-points { grid-template-columns: 1fr; } .seek-legal-help { align-items: flex-start; flex-direction: column; } .seek-legal-item { grid-template-columns: 2.1rem minmax(0,1fr); gap: .7rem; padding: 1rem; } }
-@media (prefers-reduced-motion: reduce) { .seek-story-orb, .seek-story-kicker, .seek-story-title, .seek-story-lead, .seek-story-scroll, .seek-story-icon, .seek-story-pulse, .seek-story-scroll span::after { animation: none !important; } .seek-foundation-card:hover, .seek-legal-item:hover { transform: none; } }
+:root {
+  --seek-a11y-ink: #26332B;
+  --seek-a11y-copy: #35463A;
+  --seek-a11y-muted: #58645C;
+  --seek-a11y-border: #AAB7AC;
+  --seek-a11y-dark-ink: #F7F7F1;
+  --seek-a11y-dark-copy: #E2E9E1;
+  --seek-a11y-dark-muted: #C6D2C8;
+  --seek-a11y-dark-border: #718477;
+}
+
+/* Light theme: normal copy must not inherit pale/low-opacity greens. */
+html:not(.seek-dark) body { color: var(--seek-a11y-ink) !important; }
+html:not(.seek-dark) :is(p, li, label, small, figcaption, blockquote) {
+  color: var(--seek-a11y-copy);
+}
+html:not(.seek-dark) :is(
+  .text-\[var\(--seek-primary\)\]\/20,
+  .text-\[var\(--seek-primary\)\]\/25,
+  .text-\[var\(--seek-primary\)\]\/30,
+  .text-\[var\(--seek-primary\)\]\/35,
+  .text-\[var\(--seek-primary\)\]\/40,
+  .text-\[var\(--seek-primary\)\]\/45,
+  .text-\[var\(--seek-primary\)\]\/50,
+  .text-\[var\(--seek-primary\)\]\/55,
+  .text-\[var\(--seek-primary\)\]\/60,
+  .text-\[var\(--seek-primary\)\]\/65,
+  .text-\[var\(--seek-primary\)\]\/70,
+  .text-\[var\(--seek-primary\)\]\/75,
+  .text-\[var\(--seek-primary\)\]\/80,
+  .text-\[var\(--seek-primary\)\]\/90,
+  .text-gray-400, .text-gray-500, .text-slate-400, .text-slate-500,
+  .text-stone-400, .text-stone-500
+) { color: var(--seek-a11y-muted) !important; opacity: 1 !important; }
+html:not(.seek-dark) :is(input, textarea, select) {
+  color: var(--seek-a11y-ink) !important;
+  border-color: var(--seek-a11y-border) !important;
+}
+html:not(.seek-dark) :is(input, textarea, select)::placeholder {
+  color: #68766C !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) :is(button, a, [role="button"]):focus-visible,
+html:not(.seek-dark) :is(input, textarea, select):focus-visible {
+  outline: 3px solid #477A56 !important;
+  outline-offset: 3px !important;
+}
+
+/* Dark theme: prevent evergreen text from disappearing on evergreen cards. */
+html.seek-dark body { color: var(--seek-a11y-dark-ink) !important; }
+html.seek-dark :is(p, li, label, small, figcaption, blockquote) {
+  color: var(--seek-a11y-dark-copy);
+}
+html.seek-dark :is(
+  .text-\[var\(--seek-primary\)\]\/20,
+  .text-\[var\(--seek-primary\)\]\/25,
+  .text-\[var\(--seek-primary\)\]\/30,
+  .text-\[var\(--seek-primary\)\]\/35,
+  .text-\[var\(--seek-primary\)\]\/40,
+  .text-\[var\(--seek-primary\)\]\/45,
+  .text-\[var\(--seek-primary\)\]\/50,
+  .text-\[var\(--seek-primary\)\]\/55,
+  .text-\[var\(--seek-primary\)\]\/60,
+  .text-\[var\(--seek-primary\)\]\/65,
+  .text-\[var\(--seek-primary\)\]\/70,
+  .text-\[var\(--seek-primary\)\]\/75,
+  .text-\[var\(--seek-primary\)\]\/80,
+  .text-\[var\(--seek-primary\)\]\/90,
+  .text-gray-400, .text-gray-500, .text-slate-400, .text-slate-500,
+  .text-stone-400, .text-stone-500
+) { color: var(--seek-a11y-dark-muted) !important; opacity: 1 !important; }
+html.seek-dark :is(h1, h2, h3, h4, h5, h6, strong, b) {
+  color: var(--seek-a11y-dark-ink);
+}
+html.seek-dark :is(input, textarea, select) {
+  color: var(--seek-a11y-dark-ink) !important;
+  background-color: #26332B !important;
+  border-color: var(--seek-a11y-dark-border) !important;
+}
+html.seek-dark :is(input, textarea, select)::placeholder {
+  color: #C6D2C8 !important;
+  opacity: 1 !important;
+}
+html.seek-dark :is(button, a, [role="button"]):focus-visible,
+html.seek-dark :is(input, textarea, select):focus-visible {
+  outline: 3px solid #CCF88E !important;
+  outline-offset: 3px !important;
+}
+
+/* Keep lime action buttons legible in both themes. */
+html :is(.seek-hero-primary, .seek-campaign-donate, .seek-reel-donate,
+  .seek-reel-donate-primary, .seek-sticky-donate, button.seek-primary-action) {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  opacity: 1 !important;
+}
+html :is(.seek-hero-primary, .seek-campaign-donate, .seek-reel-donate,
+  .seek-reel-donate-primary, .seek-sticky-donate, button.seek-primary-action) * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+
+/* Borders and non-decorative icons remain visible against either surface. */
+html:not(.seek-dark) :is(.border-gray-100, .border-gray-200, .border-slate-100, .border-slate-200) { border-color: #D0D8D0 !important; }
+html.seek-dark :is(.border-gray-100, .border-gray-200, .border-slate-100, .border-slate-200) { border-color: #526457 !important; }
+html.seek-dark :is(.seek-site-header svg, nav svg, .seek-tabs svg) { opacity: 1 !important; }
