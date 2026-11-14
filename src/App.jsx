@@ -636,6 +636,46 @@ const FONTS = (
     html.seek-dark :where(.bg-\[var\(--seek-success\)],.bg-\[var\(--seek-accent\)]) :where(span,strong,small) {
       color: #202923 !important;
     }
+    /* Compact, understated appearance switch; avoid the oversized ring treatment. */
+    .seek-theme-toggle {
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      border: 1px solid rgba(255,255,255,.28) !important;
+      border-radius: 9999px !important;
+      padding: 0 !important;
+      box-shadow: none !important;
+      background: transparent !important;
+      color: inherit !important;
+    }
+    .seek-theme-toggle svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    html:not(.seek-dark) .seek-theme-toggle {
+      color: #FFFFFF !important;
+      border-color: rgba(255,255,255,.38) !important;
+    }
+    html.seek-dark .seek-theme-toggle {
+      color: #F7F7F1 !important;
+      border-color: rgba(247,247,241,.42) !important;
+    }
+    .seek-theme-toggle:hover { background: rgba(255,255,255,.10) !important; }
+
+    /* Auth actions must remain readable on the green sign-in card in both themes. */
+    .seek-auth-form button:not([type="submit"]) {
+      font-weight: 650 !important;
+      text-decoration: none !important;
+    }
+    html:not(.seek-dark) .seek-auth-form button:not([type="submit"]) {
+      color: #24563B !important;
+    }
+    html:not(.seek-dark) .seek-auth-form > p { color: #43564A !important; }
+    html.seek-dark .seek-auth-form button:not([type="submit"]) {
+      color: #D7F7A0 !important;
+    }
+    html.seek-dark .seek-auth-form > p { color: #E2E9E1 !important; }
+    html.seek-dark .seek-auth-form input::placeholder { color: #66736A !important; opacity: 1 !important; }
+    html.seek-dark .seek-auth-form label { color: #E2E9E1 !important; }
+
     :where(button,a,input,textarea,select):focus-visible {
       outline: 3px solid #CCF88E !important;
       outline-offset: 2px;
@@ -1432,7 +1472,7 @@ function ThemeToggle() {
       aria-pressed={dark}
       title={dark ? "Switch to light appearance" : "Switch to dark appearance"}
       onClick={toggleTheme}
-      className="seek-theme-toggle p-2 text-current rounded-full focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
+      className="seek-theme-toggle inline-flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-current/20 bg-transparent p-0 text-current shadow-none transition-colors hover:bg-white/10 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]"
     >
       {dark ? <Sun size={20} className="seek-theme-icon" /> : <Moon size={20} className="seek-theme-icon" />}
     </button>
