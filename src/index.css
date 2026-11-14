@@ -2172,3 +2172,215 @@ html.seek-dark .seek-foundation-card, html.seek-dark .seek-contact-points > div,
 html.seek-dark .seek-legal-help { background: #13251c; }
 @media (max-width: 700px) { .seek-story-hero { min-height: 390px; padding: 4.5rem 0 3.5rem; } .seek-foundation-card { grid-template-columns: 1fr; gap: 1.2rem; border-radius: 1.5rem; } .seek-foundation-card button { justify-self: start; } .seek-contact-points { grid-template-columns: 1fr; } .seek-legal-help { align-items: flex-start; flex-direction: column; } .seek-legal-item { grid-template-columns: 2.1rem minmax(0,1fr); gap: .7rem; padding: 1rem; } }
 @media (prefers-reduced-motion: reduce) { .seek-story-orb, .seek-story-kicker, .seek-story-title, .seek-story-lead, .seek-story-scroll, .seek-story-icon, .seek-story-pulse, .seek-story-scroll span::after { animation: none !important; } .seek-foundation-card:hover, .seek-legal-item:hover { transform: none; } }
+
+
+
+/* =========================================================
+   SEEK THEME CONTRAST — DEFINITIVE STORY / SUPPORT PAGE LAYER
+   The theme toggle changes html.seek-dark. These scoped rules
+   override legacy Tailwind opacity utilities (text-*/60, /70)
+   without changing layout, navigation, ads, or application logic.
+   ========================================================= */
+
+/* LIGHT MODE: dark ink on ivory/white surfaces. */
+html:not(.seek-dark) .seek-story-page {
+  color: #26332B !important;
+}
+html:not(.seek-dark) .seek-story-page :is(h1,h2,h3,h4,h5,h6) {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html:not(.seek-dark) .seek-story-page :is(p,li,label,small,b,strong,span:not(.seek-story-pulse)) {
+  color: #46534A;
+  -webkit-text-fill-color: currentColor;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-hero {
+  color: #26332B !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-title,
+html:not(.seek-dark) .seek-story-page .seek-story-mission-line,
+html:not(.seek-dark) .seek-story-page .seek-story-closing > p,
+html:not(.seek-dark) .seek-story-page .seek-contact-chat-wrap h2 {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-lead,
+html:not(.seek-dark) .seek-story-page .seek-contact-hero > p,
+html:not(.seek-dark) .seek-story-page .seek-story-mission > div > p:not(.text-xs) {
+  color: #46534A !important;
+  -webkit-text-fill-color: #46534A !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-kicker,
+html:not(.seek-dark) .seek-story-page .seek-story-icon,
+html:not(.seek-dark) .seek-story-page .seek-foundation-mark,
+html:not(.seek-dark) .seek-story-page .seek-contact-point-icon {
+  color: #356747 !important;
+  -webkit-text-fill-color: #356747 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-scroll {
+  color: #46534A !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-story-mission,
+html:not(.seek-dark) .seek-story-page .seek-story-closing {
+  background: #FFFFFF !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-foundation-card,
+html:not(.seek-dark) .seek-story-page .seek-contact-points > div,
+html:not(.seek-dark) .seek-story-page .seek-legal-item,
+html:not(.seek-dark) .seek-story-page .seek-contact-chat-wrap > div {
+  background: #FFFFFF !important;
+  color: #26332B !important;
+  border-color: #D5DED5 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-foundation-card :is(p,b,strong,span),
+html:not(.seek-dark) .seek-story-page .seek-contact-points b,
+html:not(.seek-dark) .seek-story-page .seek-contact-points small,
+html:not(.seek-dark) .seek-story-page .seek-legal-item p {
+  color: #35463A !important;
+  -webkit-text-fill-color: #35463A !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-contact-points small {
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-legal-index {
+  color: #274A34 !important;
+  -webkit-text-fill-color: #274A34 !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-legal-help {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-legal-help :is(b,p) {
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+html:not(.seek-dark) .seek-story-page .seek-legal-help a {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+
+/* DARK MODE: light ink on evergreen surfaces; no white sections
+   with near-white text, and no dark text on dark green cards. */
+html.seek-dark .seek-story-page {
+  color: #F7F7F1 !important;
+}
+html.seek-dark .seek-story-page :is(h1,h2,h3,h4,h5,h6) {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+html.seek-dark .seek-story-page :is(p,li,label,small,b,strong,span:not(.seek-story-pulse)) {
+  color: #DCE5DC;
+  -webkit-text-fill-color: currentColor;
+}
+html.seek-dark .seek-story-page .seek-story-title,
+html.seek-dark .seek-story-page .seek-story-mission-line,
+html.seek-dark .seek-story-page .seek-story-closing > p,
+html.seek-dark .seek-story-page .seek-contact-chat-wrap h2 {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+html.seek-dark .seek-story-page .seek-story-lead,
+html.seek-dark .seek-story-page .seek-contact-hero > p,
+html.seek-dark .seek-story-page .seek-story-mission > div > p:not(.text-xs) {
+  color: #DCE5DC !important;
+  -webkit-text-fill-color: #DCE5DC !important;
+}
+html.seek-dark .seek-story-page .seek-story-kicker,
+html.seek-dark .seek-story-page .seek-story-title span,
+html.seek-dark .seek-story-page .seek-story-icon,
+html.seek-dark .seek-story-page .seek-foundation-mark,
+html.seek-dark .seek-story-page .seek-contact-point-icon,
+html.seek-dark .seek-story-page .seek-legal-index {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+html.seek-dark .seek-story-page .seek-story-scroll {
+  color: #DCE5DC !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-story-page .seek-story-mission,
+html.seek-dark .seek-story-page .seek-story-closing {
+  background: #202923 !important;
+}
+html.seek-dark .seek-story-page .seek-foundation-card,
+html.seek-dark .seek-story-page .seek-contact-points > div,
+html.seek-dark .seek-story-page .seek-legal-item,
+html.seek-dark .seek-story-page .seek-contact-chat-wrap > div {
+  background: #274A34 !important;
+  color: #F7F7F1 !important;
+  border-color: #526B59 !important;
+}
+html.seek-dark .seek-story-page .seek-foundation-card :is(p,b,strong,span),
+html.seek-dark .seek-story-page .seek-contact-points b,
+html.seek-dark .seek-story-page .seek-contact-points small,
+html.seek-dark .seek-story-page .seek-legal-item p {
+  color: #E5EDE5 !important;
+  -webkit-text-fill-color: #E5EDE5 !important;
+}
+html.seek-dark .seek-story-page .seek-contact-points small {
+  opacity: 1 !important;
+}
+html.seek-dark .seek-story-page .seek-legal-help {
+  background: #13251C !important;
+  color: #F7F7F1 !important;
+}
+html.seek-dark .seek-story-page .seek-legal-help :is(b,p) {
+  color: #E5EDE5 !important;
+  -webkit-text-fill-color: #E5EDE5 !important;
+}
+html.seek-dark .seek-story-page .seek-legal-help a,
+html.seek-dark .seek-story-page .seek-contact-email {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
+}
+
+/* Support chat: explicit foreground/background pairs in both modes. */
+html:not(.seek-dark) .seek-contact-chat-wrap :is(input,textarea) {
+  background: #FFFFFF !important;
+  color: #26332B !important;
+  border: 1px solid #AAB7AA !important;
+  caret-color: #274A34 !important;
+}
+html:not(.seek-dark) .seek-contact-chat-wrap :is(input,textarea)::placeholder {
+  color: #66736A !important;
+  opacity: 1 !important;
+}
+html:not(.seek-dark) .seek-contact-chat-wrap button[type="submit"],
+html:not(.seek-dark) .seek-contact-chat-wrap form button {
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+}
+html.seek-dark .seek-contact-chat-wrap :is(input,textarea) {
+  background: #F7F7F1 !important;
+  color: #193524 !important;
+  border: 1px solid #91A294 !important;
+  caret-color: #193524 !important;
+}
+html.seek-dark .seek-contact-chat-wrap :is(input,textarea)::placeholder {
+  color: #59665D !important;
+  opacity: 1 !important;
+}
+html.seek-dark .seek-contact-chat-wrap button[type="submit"],
+html.seek-dark .seek-contact-chat-wrap form button {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html.seek-dark .seek-contact-chat-wrap .bg-slate-100,
+html.seek-dark .seek-contact-chat-wrap [class*="bg-[var(--seek-success)]"] {
+  background: #35533D !important;
+  color: #F7F7F1 !important;
+}
+html.seek-dark .seek-contact-chat-wrap :is(.bg-slate-100,[class*="bg-[var(--seek-success)]"]) p {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+
+/* Ensure muted Tailwind opacity utilities cannot wash out copy on
+   the dedicated story pages. Decorative animation opacity is retained. */
+html:not(.seek-dark) .seek-story-page :is(.seek-story-lead,.seek-story-mission-line,.seek-contact-hero > p,.seek-contact-points small,.seek-foundation-copy p,.seek-legal-item p),
+html.seek-dark .seek-story-page :is(.seek-story-lead,.seek-story-mission-line,.seek-contact-hero > p,.seek-contact-points small,.seek-foundation-copy p,.seek-legal-item p) {
+  opacity: 1 !important;
+}
