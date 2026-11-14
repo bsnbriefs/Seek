@@ -2270,9 +2270,9 @@ function LiveSupportCard({ request, setPage }) {
   );
 }
 
-function BsnPage({ setPage }) {
+function BsnPage({ setPage, openCampaigns = false }) {
   const [selected, setSelected] = useState(null);
-  const [showCampaignList, setShowCampaignList] = useState(false);
+  const [showCampaignList, setShowCampaignList] = useState(Boolean(openCampaigns));
   const [donating, setDonating] = useState(false);
   const [activeMedia, setActiveMedia] = useState(0);
   const [campaignRaised, setCampaignRaised] = useState(0);
@@ -2341,7 +2341,18 @@ function BsnPage({ setPage }) {
             <p className="mt-3 max-w-2xl text-sm leading-7 text-white/75 sm:text-base">Browse the programmes and choose a campaign to learn about the people, the work and how you can contribute.</p>
           </div>
         </section>
-        <section className="mx-auto max-w-6xl px-5 py-8 sm:py-12">
+        <section className="mx-auto max-w-6xl px-5 pt-7 sm:pt-10">
+          <div className="mb-4 text-center sm:text-left">
+            <p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Support what matters</p>
+            <h2 className="mt-2 font-display text-xl font-black text-[var(--seek-primary)] sm:text-2xl">Ongoing outreach and ways to give.</h2>
+            <p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]">See what the Foundation is working on and help us reach more people. Select a campaign below to learn more and make a donation.</p>
+          </div>
+          <HomePromotionCarousel
+            setPage={setPage}
+            onOpen={() => document.getElementById("seek-outreach-campaign-list")?.scrollIntoView({ behavior: "smooth", block: "start" })}
+          />
+        </section>
+        <section id="seek-outreach-campaign-list" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-8 sm:py-12">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
             <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Available campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose where to make a difference.</h2></div>
             <span className="rounded-full bg-[var(--seek-light)] px-4 py-2 text-xs font-bold text-[var(--seek-success)]">{OUTREACH_CAMPAIGNS.length} programmes</span>
@@ -2712,7 +2723,7 @@ function HomePromotionCarousel({ setPage, onOpen }) {
   };
   const openOutreach = () => {
     if (typeof onOpen === "function") onOpen();
-    else setPage("bsn");
+    else setPage("outreach");
     window.scrollTo({ top: 0, behavior: "smooth" });
   };
 
@@ -6774,6 +6785,7 @@ useEffect(() => {
   const pages = {
     home: <ForYouPage setPage={setPage} />,
     bsn: <BsnPage setPage={setPage} />,
+    outreach: <BsnPage setPage={setPage} openCampaigns />
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,

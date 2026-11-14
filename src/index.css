@@ -2203,3 +2203,38 @@ html.seek-dark .seek-legal-intro svg { color: #D7F99B !important; }
 html.seek-dark .seek-legal-item p { color: #E5EEE7 !important; }
 html.seek-dark .seek-legal-index { color: #D7F99B !important; }
 @media (max-width: 520px) { .seek-profile-photo { align-items: flex-start; } .seek-profile-photo-preview { width: 4.25rem; height: 4.25rem; flex-basis: 4.25rem; } }
+
+
+/* About SEEK page contrast correction.
+   Keep the mission and closing copy readable on their light surfaces in both themes. */
+.seek-story-mission,
+.seek-story-closing {
+  background: #FFFFFF !important;
+}
+.seek-story-mission .seek-story-icon + p,
+.seek-story-mission .seek-story-mission-line,
+.seek-story-mission > div > p:not(.seek-story-mission-line),
+.seek-story-closing > p {
+  color: #294B43 !important;
+  opacity: 1 !important;
+}
+.seek-story-mission .seek-story-mission-line {
+  color: #294B43 !important;
+}
+.seek-story-mission .seek-story-values {
+  color: #294B43 !important;
+  border-color: rgba(41, 75, 67, .22) !important;
+  background: #FFFFFF !important;
+}
+html.seek-dark .seek-story-mission,
+html.seek-dark .seek-story-closing {
+  background: #F7F7F1 !important;
+}
+html.seek-dark .seek-story-mission .seek-story-icon + p,
+html.seek-dark .seek-story-mission .seek-story-mission-line,
+html.seek-dark .seek-story-mission > div > p:not(.seek-story-mission-line),
+html.seek-dark .seek-story-closing > p,
+html.seek-dark .seek-story-mission .seek-story-values {
+  color: #294B43 !important;
+  opacity: 1 !important;
+}
