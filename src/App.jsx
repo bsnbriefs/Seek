@@ -3407,6 +3407,7 @@ function SeekHelpPage({ setPage }) {
 function SeekHelpRequestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
   const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -5583,7 +5584,7 @@ function MySeekDashboard({ setPage, userSession }) {
       listReceivedForMe().then((rows) => { if (!cancelled) setReceived(Array.isArray(rows) ? rows : []); }).catch(() => {});
     }, 12000);
     return () => { cancelled = true; clearInterval(tick); };
-  }, [userSession]);
+  }, [userSession, retryCount]);
 
   if (!userSession?.access_token) {
     return <AccountPage setPage={setPage} userSession={userSession} setUserSession={() => {}} />;
@@ -5828,6 +5829,7 @@ function MyRequestsPage({ setPage, userSession }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
+  const [retryCount, setRetryCount] = useState(0);
   const [deletingId, setDeletingId] = useState("");
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -5853,7 +5855,7 @@ function MyRequestsPage({ setPage, userSession }) {
     return () => {
       cancelled = true;
     };
-  }, [userSession]);
+  }, [userSession, retryCount]);
 
   if (!userSession?.access_token) {
     return (
@@ -5885,7 +5887,7 @@ function MyRequestsPage({ setPage, userSession }) {
         </div>
         <div className="seek-request-account mb-7">
           <div className="relative shrink-0">
-            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
+            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" onError={() => setMyAvatar("")} className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
             <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
           </div>
           <p className="font-body text-sm text-[var(--seek-primary)]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
@@ -5895,14 +5897,34 @@ function MyRequestsPage({ setPage, userSession }) {
           <p className="font-body text-sm text-[var(--seek-primary)]/50">Loading your requests…</p>
         )}
 
-        {error && (
-          <div className="rounded-2xl bg-red-50 border border-red-100 p-5 mb-6">
-            <p className="text-sm text-red-700">{error}</p>
-            <p className="mt-2 text-xs text-red-600/80">
-              If this is your first time using tracking, the database function may still need to be created (see setup notes).
-            </p>
-          </div>
-        )}
+        {error && (() => {
+          const quotaBlocked = /exceed_cached_egress_quota|restricted due to the following violations|egress.?quota/i.test(String(error));
+          return (
+            <div
+              className="seek-request-load-error mb-6 rounded-2xl p-5 sm:p-6"
+              role="alert"
+              aria-live="polite"
+              style={{ background: "#FFF4F1", border: "1px solid #E9B8AA", color: "#713B31" }}
+            >
+              <p className="text-sm font-bold" style={{ color: "#713B31" }}>
+                {quotaBlocked ? "Request tracking is temporarily unavailable." : "We could not load your requests."}
+              </p>
+              <p className="mt-2 text-sm leading-6" style={{ color: "#713B31" }}>
+                {quotaBlocked
+                  ? "Your requests are safe. The service that loads them is temporarily restricted. Please try again later, or contact SEEK support if the problem continues."
+                  : "Please check your connection and try again. If the problem continues, contact SEEK support."}
+              </p>
+              <button
+                type="button"
+                onClick={() => setRetryCount((count) => count + 1)}
+                className="mt-4 inline-flex min-h-10 items-center justify-center rounded-full px-5 py-2 text-sm font-bold"
+                style={{ background: "#274A34", color: "#FFFFFF" }}
+              >
+                Try again
+              </button>
+            </div>
+          );
+        })()}
 
         {!loading && !error && items.length === 0 && (
           <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-8 text-center">
@@ -6229,11 +6251,13 @@ function LiveTicker() {
       if (inFlight || document.visibilityState === "hidden") return;
       inFlight = true;
       try {
-        const [reqRows, offerRows, stats, gifts] = await Promise.all([
-          listPublishedRequests(8).catch(() => []),
+        // Keep the live rail lightweight: avoid downloading aggregate donation
+        // history (up to 2,000 rows) on every refresh. These compact feeds are
+        // sufficient to show recent public activity without unnecessary egress.
+        const [reqRows, offerRows, gifts] = await Promise.all([
+          listPublishedRequests(5).catch(() => []),
           listPublicOffers().catch(() => []),
-          getSeekLiveStats().catch(() => null),
-          listRecentGifts(10).catch(() => []),
+          listRecentGifts(5).catch(() => []),
         ]);
 
         const giftBits = (Array.isArray(gifts) ? gifts : [])
@@ -6267,7 +6291,6 @@ function LiveTicker() {
         });
 
         const activity = [
-          ...(stats?.raised > 0 ? [{ key: "stats-" + Math.round(stats.raised) + "-" + (stats.donationCount || 0), label: "COMMUNITY IMPACT", text: "₦" + Math.round(stats.raised).toLocaleString() + " raised through " + (stats.donationCount || 0) + " gifts", icon: "💚" }] : []),
           ...giftBits,
           ...requestBits,
           ...offerBits,
@@ -6295,12 +6318,19 @@ function LiveTicker() {
     const start = () => {
       if (intervalId) window.clearInterval(intervalId);
       load();
-      intervalId = window.setInterval(load, 45000);
+      intervalId = window.setInterval(load, 180000);
     };
-    const onVisibility = () => {
-      if (document.visibilityState === "visible") load();
+    let lastRefreshAt = 0;
+    const refreshIfDue = () => {
+      const now = Date.now();
+      if (document.visibilityState === "visible" && now - lastRefreshAt >= 120000) {
+        lastRefreshAt = now;
+        load();
+      }
     };
-    const onFocus = () => load();
+    const onVisibility = refreshIfDue;
+    const onFocus = refreshIfDue;
+    lastRefreshAt = Date.now();
     start();
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("focus", onFocus);
@@ -6312,12 +6342,17 @@ function LiveTicker() {
     };
   }, []);
 
-  if (!items.length) return loading ? <div className="h-0" aria-hidden="true" /> : <div className="h-0" aria-hidden="true" />;
-  const motionItems = items.length > 1 ? [...items, ...items] : items;
+  const displayItems = items.length ? items : [{
+    key: "community-awaiting-activity",
+    label: "SEEK COMMUNITY",
+    text: "New requests, offers and community support will appear here.",
+    icon: "💚",
+  }];
+  const motionItems = displayItems.length > 1 ? [...displayItems, ...displayItems] : displayItems;
 
   return (
     <>
-      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" aria-label="SEEK community activity">
+      <section className="seek-community-pulse relative z-[80] w-full overflow-hidden text-white" aria-label="SEEK community activity">
         <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
@@ -6327,7 +6362,7 @@ function LiveTicker() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
+            <div className={(displayItems.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
@@ -6341,7 +6376,6 @@ function LiveTicker() {
           <span className="hidden shrink-0 text-[9px] text-white/45 sm:block" title={updatedAt ? "Updated " + updatedAt.toLocaleTimeString() : "Updating"}>UPDATING</span>
         </div>
       </section>
-      <div className="h-9" aria-hidden="true" />
     </>
   );
 }
