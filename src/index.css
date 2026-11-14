@@ -2290,3 +2290,99 @@ html.seek-dark .seek-about-page .seek-story-closing p {
     transition: none !important;
   }
 }
+
+
+/* Simplified animated account profile editor */
+.seek-profile-editor {
+  position: relative;
+  overflow: hidden;
+  padding: clamp(1.15rem, 4vw, 2rem);
+  border: 1px solid rgba(35, 72, 51, .12);
+  border-radius: 1.8rem;
+  background: #fff;
+  color: #20392d;
+  box-shadow: 0 18px 55px rgba(20, 45, 32, .08);
+  animation: seek-profile-enter .55s cubic-bezier(.2,.8,.2,1) both;
+}
+.seek-profile-editor::before {
+  content: "";
+  position: absolute;
+  width: 14rem;
+  height: 14rem;
+  top: -9rem;
+  right: -5rem;
+  border-radius: 50%;
+  background: rgba(202,250,134,.28);
+  filter: blur(2px);
+  pointer-events: none;
+  animation: seek-profile-glow 8s ease-in-out infinite alternate;
+}
+.seek-profile-topline { position: relative; display:flex; align-items:flex-start; justify-content:space-between; gap:1rem; }
+.seek-profile-topline h1 { margin-top:.25rem; color:#20392d; font-size:clamp(1.45rem,4vw,2rem); line-height:1.2; font-weight:850; letter-spacing:-.035em; }
+.seek-profile-eyebrow { color:#62816c; font-size:.67rem; font-weight:850; letter-spacing:.16em; text-transform:uppercase; }
+.seek-profile-handle { margin-top:.35rem; color:#64806d; font-size:.9rem; font-weight:650; }
+.seek-profile-spark { display:grid; place-items:center; width:2.6rem; height:2.6rem; flex:0 0 auto; border-radius:1rem; background:#eff8e8; color:#477a48; animation:seek-profile-float 4s ease-in-out infinite; }
+.seek-profile-avatar-panel { position:relative; margin-top:1.35rem; padding:1rem 1.1rem; border:1px solid #e6eee7; border-radius:1.25rem; background:#f8fbf7; }
+.seek-profile-avatar-wrap { display:flex; align-items:center; gap:1rem; min-width:0; }
+.seek-profile-avatar { display:grid; place-items:center; width:4.6rem; height:4.6rem; flex:0 0 4.6rem; overflow:hidden; border:2px solid #d7e8d4; border-radius:50%; background:#eaf4e7; color:#477a48; box-shadow:0 5px 18px rgba(30,70,43,.08); }
+.seek-profile-avatar img { width:100%; height:100%; object-fit:cover; }
+.seek-profile-avatar-actions { min-width:0; }
+.seek-profile-file-input { position:absolute; width:1px; height:1px; overflow:hidden; clip:rect(0,0,0,0); white-space:nowrap; clip-path:inset(50%); }
+.seek-profile-upload-button { display:inline-flex; align-items:center; justify-content:center; gap:.45rem; min-height:2.5rem; padding:.55rem .9rem; border:1px solid #cfe1cb; border-radius:999px; background:#eaf5e8; color:#244c32 !important; font-size:.82rem; font-weight:750; cursor:pointer; transition:transform .2s ease, background .2s ease, box-shadow .2s ease; }
+.seek-profile-upload-button:hover { transform:translateY(-2px); background:#dff0d8; box-shadow:0 7px 18px rgba(40,80,45,.1); }
+.seek-profile-upload-button:disabled { opacity:.6; cursor:wait; }
+.seek-profile-helper { margin-top:.35rem; color:#65756a; font-size:.72rem; line-height:1.45; }
+.seek-profile-error { margin-top:.35rem; color:#b42318; font-size:.78rem; }
+.seek-profile-privacy { display:flex; align-items:flex-start; gap:.7rem; margin-top:1rem; padding:.85rem 1rem; border-radius:1rem; background:#f0f6ee; color:#405b48; }
+.seek-profile-privacy svg { flex:0 0 auto; margin-top:.1rem; color:#477a48; }
+.seek-profile-privacy p { font-size:.77rem; line-height:1.55; }
+.seek-profile-privacy strong { color:#294b34; }
+.seek-profile-form { position:relative; display:grid; gap:1rem; margin-top:1.4rem; }
+.seek-profile-form-motion { animation:seek-profile-enter .65s .08s both; }
+.seek-profile-form-heading { display:flex; align-items:center; justify-content:space-between; gap:.8rem; padding-bottom:.75rem; border-bottom:1px solid #edf1ed; }
+.seek-profile-form-heading h2 { margin-top:.15rem; color:#20392d; font-size:1.15rem; font-weight:800; }
+.seek-profile-visibility { display:inline-flex; align-items:center; gap:.35rem; padding:.4rem .65rem; border-radius:999px; background:#eff8e8; color:#416c42; font-size:.72rem; font-weight:750; }
+.seek-profile-field { display:grid; gap:.4rem; color:#2b4433; font-size:.86rem; font-weight:700; }
+.seek-profile-field input, .seek-profile-field textarea, .seek-profile-username { width:100%; min-width:0; border:1px solid #cbd8cd; border-radius:.9rem; background:#fff; color:#20392d; font:inherit; font-weight:450; transition:border-color .2s ease, box-shadow .2s ease; }
+.seek-profile-field input, .seek-profile-field textarea { padding:.8rem .9rem; }
+.seek-profile-field textarea { resize:vertical; line-height:1.5; }
+.seek-profile-field input::placeholder, .seek-profile-field textarea::placeholder { color:#87948a; opacity:1; }
+.seek-profile-field input:focus, .seek-profile-field textarea:focus, .seek-profile-username:focus-within { outline:none; border-color:#6e9d56; box-shadow:0 0 0 3px rgba(139,190,91,.18); }
+.seek-profile-username { display:flex; align-items:center; padding-left:.9rem; }
+.seek-profile-username > span { color:#64806d; font-weight:750; }
+.seek-profile-username input { border:0; background:transparent; box-shadow:none; }
+.seek-profile-username input:focus { outline:none; box-shadow:none; }
+.seek-profile-field small { color:#6b796f; font-size:.72rem; font-weight:450; line-height:1.5; }
+.seek-profile-field em { color:#7a887d; font-style:normal; font-weight:450; }
+.seek-profile-count { text-align:right; }
+.seek-profile-url-preview, .seek-profile-current-link { color:#526e59; font-size:.76rem; overflow-wrap:anywhere; }
+.seek-profile-url-preview strong, .seek-profile-current-link strong { color:#376b3d; }
+.seek-profile-save { display:flex; align-items:center; justify-content:center; gap:.55rem; width:100%; min-height:3.35rem; padding:.8rem 1rem; border:1px solid #b8e875; border-radius:999px; background:#cafa86; color:#173d2d; font-weight:800; transition:transform .2s ease, box-shadow .2s ease; }
+.seek-profile-save:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 10px 24px rgba(100,150,60,.2); }
+.seek-profile-save:disabled { opacity:.55; cursor:not-allowed; }
+.seek-profile-status { padding:.8rem .9rem; border-radius:.9rem; font-size:.82rem; line-height:1.5; }
+.seek-profile-status.is-success { background:#edf8e9; color:#285d35; }
+.seek-profile-status.is-error { background:#fff0ed; color:#a12a20; }
+@keyframes seek-profile-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+@keyframes seek-profile-float { 0%,100% { transform:translateY(0); } 50% { transform:translateY(-4px); } }
+@keyframes seek-profile-glow { from { transform:translate3d(0,0,0) scale(.9); opacity:.65; } to { transform:translate3d(-12px,12px,0) scale(1.12); opacity:1; } }
+html.seek-dark .seek-profile-editor { background:#1e3328; color:#f4f7f2; border-color:rgba(255,255,255,.13); }
+html.seek-dark .seek-profile-topline h1, html.seek-dark .seek-profile-form-heading h2 { color:#f4f7f2; }
+html.seek-dark .seek-profile-eyebrow, html.seek-dark .seek-profile-handle { color:#c0d7c2; }
+html.seek-dark .seek-profile-avatar-panel { background:#263f31; border-color:rgba(255,255,255,.12); }
+html.seek-dark .seek-profile-privacy { background:#2b4937; color:#e0ece1; }
+html.seek-dark .seek-profile-privacy strong { color:#fff; }
+html.seek-dark .seek-profile-form-heading { border-color:rgba(255,255,255,.12); }
+html.seek-dark .seek-profile-field { color:#f0f5ef; }
+html.seek-dark .seek-profile-field small, html.seek-dark .seek-profile-helper { color:#c6d5c8; }
+html.seek-dark .seek-profile-current-link, html.seek-dark .seek-profile-url-preview { color:#c9ddca; }
+@media (max-width:520px) {
+  .seek-profile-editor { padding:1rem; border-radius:1.35rem; }
+  .seek-profile-avatar { width:4rem; height:4rem; flex-basis:4rem; }
+  .seek-profile-avatar-panel { padding:.85rem; }
+}
+@media (prefers-reduced-motion:reduce) {
+  .seek-profile-editor, .seek-profile-form-motion, .seek-profile-spark { animation:none !important; }
+  .seek-profile-upload-button, .seek-profile-save { transition:none !important; }
+  .seek-profile-upload-button:hover, .seek-profile-save:hover { transform:none !important; }
+}
