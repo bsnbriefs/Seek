@@ -6304,12 +6304,17 @@ function LiveTicker() {
     };
   }, []);
 
-  if (!items.length) return loading ? <div className="h-0" aria-hidden="true" /> : <div className="h-0" aria-hidden="true" />;
-  const motionItems = items.length > 1 ? [...items, ...items] : items;
+  // Keep Community Pulse visible even when the activity feeds are temporarily empty
+  // or unavailable. The live items replace this fallback as soon as data loads.
+  const displayItems = items.length
+    ? items
+    : [{ key: "community-pulse-welcome", label: "SEEK COMMUNITY", text: "Ask for what you need. Offer what you can.", icon: "💚" }];
+  const motionItems = displayItems.length > 1 ? [...displayItems, ...displayItems] : displayItems;
 
   return (
     <>
-      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" aria-label="SEEK community activity">
+      {typeof document !== "undefined" && createPortal(
+      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" style={{ position: "fixed", top: "4rem", left: 0, right: 0, zIndex: 105 }} aria-label="SEEK community activity">
         <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
@@ -6319,7 +6324,7 @@ function LiveTicker() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
+            <div className={(displayItems.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
@@ -6332,7 +6337,9 @@ function LiveTicker() {
           </div>
           <span className="hidden shrink-0 text-[9px] text-white/45 sm:block" title={updatedAt ? "Updated " + updatedAt.toLocaleTimeString() : "Updating"}>UPDATING</span>
         </div>
-      </section>
+      </section>,
+      document.body
+      )}
       <div className="h-9" aria-hidden="true" />
     </>
   );
@@ -6783,7 +6790,7 @@ export default function App() {
 useEffect(() => {
     const reduceMotion = window.matchMedia("(prefers-reduced-motion: reduce)").matches;
     if (reduceMotion) return;
-    const nodes = document.querySelectorAll("section, footer > div, .rounded-3xl");
+    const nodes = document.querySelectorAll("section:not(.seek-community-pulse), footer > div, .rounded-3xl");
     nodes.forEach((node) => node.classList.add("seek-reveal"));
     const observer = new IntersectionObserver((entries) => {
       entries.forEach((entry) => {
