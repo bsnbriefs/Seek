@@ -12,14 +12,21 @@ class ErrorBoundary extends React.Component {
   static getDerivedStateFromError(err) {
     return { err };
   }
+  componentDidCatch(err, info) {
+    // Keep technical details in the developer console, never in the public UI.
+    console.error("SEEK page rendering error:", err, info);
+  }
   render() {
     if (this.state.err) {
       return (
-        <div className="min-h-[50vh] flex items-center justify-center px-5">
+        <div className="min-h-[50vh] flex items-center justify-center px-5 py-16" role="alert">
           <div className="max-w-md text-center">
-            <p className="font-display font-bold text-xl text-[var(--seek-primary)]">Something went wrong</p>
-            <p className="mt-2 font-body text-sm text-[var(--seek-primary)]/60">{String(this.state.err.message || this.state.err)}</p>
-            <button type="button" className="mt-4 rounded-full bg-[var(--seek-primary)] text-white px-5 py-2 text-sm font-semibold" onClick={() => { this.setState({ err: null }); window.location.href = "/"; }}>Go home</button>
+            <p className="font-display font-bold text-xl text-[var(--seek-primary)]">We could not load this page</p>
+            <p className="mt-2 font-body text-sm leading-relaxed text-[var(--seek-muted)]">Something interrupted this page. Your account and saved information have not been changed. Please try again.</p>
+            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
+              <button type="button" className="rounded-full bg-[var(--seek-primary)] text-white px-5 py-2.5 text-sm font-semibold" onClick={() => window.location.reload()}>Try again</button>
+              <button type="button" className="rounded-full border border-[var(--seek-border)] px-5 py-2.5 text-sm font-semibold text-[var(--seek-primary)]" onClick={() => { window.location.href = "/"; }}>Go home</button>
+            </div>
           </div>
         </div>
       );
@@ -5584,7 +5591,7 @@ function MySeekDashboard({ setPage, userSession }) {
       listReceivedForMe().then((rows) => { if (!cancelled) setReceived(Array.isArray(rows) ? rows : []); }).catch(() => {});
     }, 12000);
     return () => { cancelled = true; clearInterval(tick); };
-  }, [userSession, retryCount]);
+  }, [userSession]);
 
   if (!userSession?.access_token) {
     return <AccountPage setPage={setPage} userSession={userSession} setUserSession={() => {}} />;
@@ -6342,13 +6349,12 @@ function LiveTicker() {
     };
   }, []);
 
-  const displayItems = items.length ? items : [{
-    key: "community-awaiting-activity",
-    label: "SEEK COMMUNITY",
-    text: "New requests, offers and community support will appear here.",
-    icon: "💚",
-  }];
-  const motionItems = displayItems.length > 1 ? [...displayItems, ...displayItems] : displayItems;
+  const displayItems = items.length ? items : [
+    { key: "community-awaiting-activity", label: "SEEK COMMUNITY", text: "New requests, offers and community support will appear here.", icon: "💚" },
+    { key: "community-share-support", label: "GET INVOLVED", text: "Ask for what you need. Offer what you can.", icon: "🤝" },
+  ];
+  // Duplicate the feed for a seamless continuous ticker, including fallback mode.
+  const motionItems = [...displayItems, ...displayItems];
 
   return (
     <>
@@ -6362,7 +6368,7 @@ function LiveTicker() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className={(displayItems.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
+            <div className="seek-ticker-track seek-ticker-interactive">
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
@@ -6901,10 +6907,10 @@ useEffect(() => {
     <div className="font-body min-h-screen pb-36 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
+      <LiveTicker />
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
