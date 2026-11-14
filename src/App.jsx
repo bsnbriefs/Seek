@@ -638,18 +638,18 @@ const FONTS = (
     }
     /* Compact, understated appearance switch; avoid the oversized ring treatment. */
     .seek-theme-toggle {
-      width: 40px !important;
-      height: 40px !important;
-      min-width: 40px !important;
-      min-height: 40px !important;
-      border: 1px solid rgba(255,255,255,.28) !important;
-      border-radius: 9999px !important;
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      min-height: 34px !important;
+      border: 0 !important;
+      border-radius: 10px !important;
       padding: 0 !important;
       box-shadow: none !important;
       background: transparent !important;
       color: inherit !important;
     }
-    .seek-theme-toggle svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    .seek-theme-toggle svg { width: 18px; height: 18px; stroke-width: 1.8; }
     html:not(.seek-dark) .seek-theme-toggle {
       color: #FFFFFF !important;
       border-color: rgba(255,255,255,.38) !important;
@@ -1611,7 +1611,7 @@ function Navbar({ page, setPage, userSession }) {
       </div>
 
       {open && (
-        <div className="lg:hidden absolute left-0 right-0 top-full z-[120] bg-white border-b border-[var(--seek-primary)]/10 shadow-xl px-4 py-3">
+        <div className="lg:hidden absolute left-0 right-0 top-full z-[140] bg-white border-b border-[var(--seek-primary)]/10 shadow-xl px-4 py-3">
           {[
             { id: "home", label: "Home", icon: HomeIcon },
             { id: "fundraiser", label: "Fundraiser", icon: Search },
@@ -6472,7 +6472,7 @@ function LiveTicker() {
   return (
     <>
       {typeof document !== "undefined" && createPortal(
-      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" style={{ position: "fixed", top: "4rem", left: 0, right: 0, zIndex: 105 }} aria-label="SEEK community activity">
+      <section className="seek-community-pulse fixed inset-x-0 overflow-hidden text-white" style={{ position: "fixed", top: "4rem", left: 0, right: 0, zIndex: 130 }} aria-label="SEEK community activity">
         <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
@@ -7024,10 +7024,10 @@ useEffect(() => {
     <div className="font-body min-h-screen pb-36 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
+      <LiveTicker />
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
-      <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />

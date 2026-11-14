@@ -2492,3 +2492,153 @@ html.seek-dark .seek-theme-toggle {
   border: 2px solid #CCF88E !important; background: #193524 !important;
   color: #CCF88E !important; box-shadow: 0 2px 12px rgba(0,0,0,.35) !important;
 }
+
+
+
+/* =========================================================
+   SEEK FINAL CONSISTENCY PASS — Nov 2026
+   This block intentionally comes last to neutralise legacy
+   duplicate overrides and keep both themes predictable.
+   ========================================================= */
+:root {
+  --seek-bg: #F7F8F5;
+  --seek-card: #FFFFFF;
+  --seek-ink: #26332B;
+  --seek-head: #244B37;
+  --seek-muted: #526157;
+  --seek-primary: #274A34;
+  --seek-accent: #CCF88E;
+  --seek-success: #CCF88E;
+  --seek-border: #D8E1D8;
+}
+html:not(.seek-dark) {
+  color-scheme: light;
+  --seek-bg: #F7F8F5;
+  --seek-card: #FFFFFF;
+  --seek-ink: #26332B;
+  --seek-head: #244B37;
+  --seek-muted: #526157;
+  --seek-border: #D8E1D8;
+}
+html.seek-dark {
+  color-scheme: dark;
+  --seek-bg: #202923;
+  --seek-card: #2B362E;
+  --seek-ink: #F4F7F1;
+  --seek-head: #F4F7F1;
+  --seek-muted: #CBD6CC;
+  --seek-border: #536357;
+}
+html, body { background-color: var(--seek-bg); color: var(--seek-ink); }
+html.seek-dark body { background-color: var(--seek-bg) !important; color: var(--seek-ink) !important; }
+
+/* Header controls: classic compact icon, not an oversized outlined badge. */
+.seek-theme-toggle {
+  box-sizing: border-box !important;
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border: 0 !important;
+  border-radius: 10px !important;
+  background: transparent !important;
+  color: var(--seek-ink) !important;
+  box-shadow: none !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+}
+.seek-theme-toggle svg {
+  width: 18px !important;
+  height: 18px !important;
+  stroke: currentColor !important;
+  color: currentColor !important;
+}
+.seek-theme-toggle:hover { background: rgba(127,150,128,.16) !important; }
+html.seek-dark .seek-theme-toggle { color: #E6F5D6 !important; }
+.seek-theme-toggle:focus-visible {
+  outline: 2px solid #77A84B !important;
+  outline-offset: 2px !important;
+}
+
+/* Fixed Community Pulse: sits immediately below the 64px sticky header.
+   The matching spacer is rendered before FeatureStrip in the app tree. */
+.seek-community-pulse {
+  position: fixed !important;
+  top: 64px !important;
+  left: 0 !important;
+  right: 0 !important;
+  z-index: 130 !important;
+  min-height: 36px !important;
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  border: 0 !important;
+  border-bottom: 1px solid rgba(204,248,142,.45) !important;
+  box-shadow: 0 3px 10px rgba(12,28,18,.16) !important;
+}
+.seek-community-pulse > div { min-height: 36px !important; }
+.seek-community-pulse,
+.seek-community-pulse * { text-shadow: none !important; }
+.seek-community-pulse :is(span,div,p,small) { color: #FFFFFF !important; }
+.seek-community-pulse :is(b,strong,.seek-live-label) { color: #D8FFA4 !important; }
+.seek-community-pulse .seek-live-ring,
+.seek-community-pulse .seek-pulse-dot,
+.seek-community-pulse .bg-\[var\(--seek-mint\)\] {
+  background: #D8FFA4 !important;
+  border-color: #D8FFA4 !important;
+}
+.seek-community-pulse .border-r { border-color: rgba(255,255,255,.28) !important; }
+
+/* Surface and typography contrast — both themes. */
+html:not(.seek-dark) :is(.bg-white,.rounded-2xl.bg-white,.rounded-3xl.bg-white) {
+  background-color: #FFFFFF !important;
+  color: #26332B;
+}
+html.seek-dark :is(.bg-white,.rounded-2xl.bg-white,.rounded-3xl.bg-white) {
+  background-color: #2B362E !important;
+  color: #F4F7F1 !important;
+  border-color: rgba(220,235,220,.16);
+}
+html:not(.seek-dark) :is(h1,h2,h3,h4) { color: #244B37; }
+html.seek-dark :is(h1,h2,h3,h4) { color: #F4F7F1; }
+html:not(.seek-dark) :is(p,label,.text-gray-500,.text-gray-600,.text-slate-500,.text-slate-600) { color: #526157; }
+html.seek-dark :is(p,label,.text-gray-500,.text-gray-600,.text-slate-500,.text-slate-600) { color: #CBD6CC; }
+html.seek-dark input,
+html.seek-dark textarea,
+html.seek-dark select {
+  background-color: #202B24 !important;
+  color: #F4F7F1 !important;
+  border-color: #657669 !important;
+}
+html:not(.seek-dark) input,
+html:not(.seek-dark) textarea,
+html:not(.seek-dark) select {
+  color: #26332B;
+  border-color: #AAB9AC;
+}
+:is(input,textarea,select)::placeholder { color: #68766B !important; opacity: 1 !important; }
+html.seek-dark :is(input,textarea,select)::placeholder { color: #B9C8BC !important; opacity: 1 !important; }
+
+/* Sign-in links and secondary actions must remain legible on the green auth card. */
+html:not(.seek-dark) .seek-auth-form button:not([type="submit"]),
+html:not(.seek-dark) .seek-auth-form a { color: #24563B !important; opacity: 1 !important; }
+html.seek-dark .seek-auth-form button:not([type="submit"]),
+html.seek-dark .seek-auth-form a { color: #D8FFA4 !important; opacity: 1 !important; }
+html:not(.seek-dark) .seek-auth-form > p { color: #43564A !important; }
+html.seek-dark .seek-auth-form > p { color: #E2EAE1 !important; }
+html.seek-dark .seek-auth-form label { color: #E2EAE1 !important; }
+html.seek-dark .seek-auth-form input { background: #F8FAF7 !important; color: #26332B !important; }
+html.seek-dark .seek-auth-form input::placeholder { color: #657267 !important; }
+
+/* Lime action surfaces always use dark foreground text. */
+html :is(button,a)[class*="bg-[var(--seek-success)]"],
+html :is(button,a)[class*="bg-[var(--seek-accent)]"],
+html :is(button,a)[class*="bg-[#CCF88E]"] { color: #193524 !important; }
+html.seek-dark :is(button,a)[class*="bg-[var(--seek-success)]"],
+html.seek-dark :is(button,a)[class*="bg-[var(--seek-accent)]"],
+html.seek-dark :is(button,a)[class*="bg-[#CCF88E]"] { color: #193524 !important; }
+:where(button,a,input,textarea,select,[tabindex]):focus-visible {
+  outline: 2px solid #79A94D !important;
+  outline-offset: 2px !important;
+}
