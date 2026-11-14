@@ -2037,196 +2037,138 @@ html:not(.seek-dark) .fixed.bottom-20 {
 }
 
 /* =========================================================
-   CAMPAIGN CARD CONTRAST — scoped by actual action role.
-   Never apply Donate colours to the card's content button.
+   FIX: CAMPAIGN-CARD DONATE LABEL CONTRAST
+   The previous global disabled-control rule was painting the
+   Donate label pale grey on the lime action background. Keep
+   campaign donation labels dark and fully opaque in both themes.
    ========================================================= */
-html .seek-campaign-page .seek-campaign-card-donate,
-html .seek-campaign-page .seek-campaign-card-donate * {
+html .seek-campaign-page button:disabled,
+html .seek-campaign-page button[aria-disabled="true"],
+html .seek-campaign-page button[class*="bg-[var(--seek-success)]"],
+html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"],
+html .seek-campaign-page button[class*="bg-[#CCF88E]"],
+html .seek-campaign-page .seek-campaign-card button {
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
   opacity: 1 !important;
+}
+html .seek-campaign-page button:disabled *,
+html .seek-campaign-page button[aria-disabled="true"] *,
+html .seek-campaign-page button[class*="bg-[var(--seek-success)]"] *,
+html .seek-campaign-page button[class*="bg-[var(--seek-accent)]"] *,
+html .seek-campaign-page button[class*="bg-[#CCF88E]"] *,
+html .seek-campaign-page .seek-campaign-card button * {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html .seek-campaign-page button:disabled,
+html .seek-campaign-page button[aria-disabled="true"] {
   background-color: #CCF88E !important;
+  border-color: #A6D36B !important;
 }
-html .seek-campaign-page .seek-campaign-view-details {
-  color: var(--seek-success) !important;
-  -webkit-text-fill-color: var(--seek-success) !important;
-  opacity: 1 !important;
+
+/* =========================================================
+   SEEK CAMPAIGN CARDS — DARK MODE TEXT CONTRAST FIX
+   The previous broad button rule applied the Donate foreground
+   to every button inside a campaign card, including View details.
+   Keep the card copy light and style the two actions separately.
+   ========================================================= */
+html.seek-dark .seek-campaign-page .seek-campaign-card,
+html.seek-dark .seek-campaign-page .seek-campaign-card > div {
+  color: #F7F7F1 !important;
 }
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-card {
-  background: #FFFFFF !important;
-  color: #263B2E !important;
+html.seek-dark .seek-campaign-page .seek-campaign-card :is(h1,h2,h3,h4,p,small,label,span) {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
 }
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content,
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content h3,
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content p {
-  color: #263B2E !important;
-  -webkit-text-fill-color: #263B2E !important;
+html.seek-dark .seek-campaign-page .seek-campaign-card :is(.text-\[var\(--seek-primary\)],.text-\[var\(--seek-success\)],.text-\[var\(--seek-muted\)]) {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
 }
-html:not(.seek-dark) .seek-campaign-page .seek-campaign-card-content p:first-child {
-  color: #315C45 !important;
-  -webkit-text-fill-color: #315C45 !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-card {
-  background: #214735 !important;
-  color: #F5F7F2 !important;
-  border-color: rgba(220,245,228,.22) !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-card-content,
-html.seek-dark .seek-campaign-page .seek-campaign-card-content h3,
-html.seek-dark .seek-campaign-page .seek-campaign-card-content p {
-  color: #F5F7F2 !important;
-  -webkit-text-fill-color: #F5F7F2 !important;
-  opacity: 1 !important;
-}
-html.seek-dark .seek-campaign-page .seek-campaign-card-content p:first-child,
-html.seek-dark .seek-campaign-page .seek-campaign-view-details {
+/* View-details is a secondary action: lime text on the card surface. */
+html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child,
+html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child {
   color: #CCF88E !important;
   -webkit-text-fill-color: #CCF88E !important;
+  background: transparent !important;
 }
-html.seek-dark .seek-campaign-page .seek-campaign-card-donate {
+/* Donate is the primary action: evergreen text on a lime button. */
+html .seek-campaign-page .seek-campaign-card button:last-child,
+html .seek-campaign-page .seek-campaign-card a:last-child {
   background: #CCF88E !important;
+  border: 1px solid #A6D36B !important;
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
-  border-color: #A6D36B !important;
   opacity: 1 !important;
+  font-weight: 800 !important;
 }
-html.seek-dark .seek-campaign-page .seek-campaign-card-donate * {
+html .seek-campaign-page .seek-campaign-card button:last-child :is(span,strong,b,svg),
+html .seek-campaign-page .seek-campaign-card a:last-child :is(span,strong,b,svg) {
   color: #193524 !important;
   -webkit-text-fill-color: #193524 !important;
+}
+html.seek-dark .seek-campaign-page .seek-campaign-card button:first-child :is(span,strong,b,svg),
+html.seek-dark .seek-campaign-page .seek-campaign-card a:first-child :is(span,strong,b,svg) {
+  color: #CCF88E !important;
+  -webkit-text-fill-color: #CCF88E !important;
 }
 
 
 /* =========================================================
-   FORM CONTROL CONTRAST FIX — Fundraiser + Share Outcome
-   Explicit component classes prevent global theme rules and
-   browser-native form styles from overriding readable colours.
+   SEEK STORY PAGES — About, Contact and Trust & Safety
+   Motion is restrained, responsive and respects reduced-motion.
    ========================================================= */
-html:not(.seek-dark) .seek-form-control,
-html:not(.seek-dark) .seek-fundraiser-form :is(input:not([type="file"]),select,textarea),
-html:not(.seek-dark) .seek-outcome-form textarea {
-  background-color: #FFFFFF !important;
-  color: #263B2E !important;
-  -webkit-text-fill-color: #263B2E !important;
-  border-color: #AAB9AC !important;
-  opacity: 1 !important;
-}
-html:not(.seek-dark) .seek-form-control::placeholder,
-html:not(.seek-dark) .seek-fundraiser-form :is(input,textarea)::placeholder,
-html:not(.seek-dark) .seek-outcome-form textarea::placeholder {
-  color: #65756A !important;
-  -webkit-text-fill-color: #65756A !important;
-  opacity: 1 !important;
-}
-html.seek-dark .seek-form-control,
-html.seek-dark .seek-fundraiser-form :is(input:not([type="file"]),select,textarea),
-html.seek-dark .seek-outcome-form textarea {
-  background-color: #182820 !important;
-  color: #F7F8F3 !important;
-  -webkit-text-fill-color: #F7F8F3 !important;
-  border-color: #829687 !important;
-  opacity: 1 !important;
-  color-scheme: dark;
-}
-html.seek-dark .seek-form-control::placeholder,
-html.seek-dark .seek-fundraiser-form :is(input,textarea)::placeholder,
-html.seek-dark .seek-outcome-form textarea::placeholder {
-  color: #C7D3C9 !important;
-  -webkit-text-fill-color: #C7D3C9 !important;
-  opacity: 1 !important;
-}
-html .seek-form-file,
-html .seek-fundraiser-form input[type="file"],
-html .seek-outcome-form input[type="file"] {
-  display: block !important;
-  width: 100% !important;
-  max-width: 100% !important;
-  padding: 10px !important;
-  border: 1px solid #AAB9AC !important;
-  border-radius: 14px !important;
-  background: #F5F7F3 !important;
-  color: #263B2E !important;
-  -webkit-text-fill-color: #263B2E !important;
-  opacity: 1 !important;
-}
-html .seek-form-file::file-selector-button,
-html .seek-fundraiser-form input[type="file"]::file-selector-button,
-html .seek-outcome-form input[type="file"]::file-selector-button {
-  margin-right: 12px !important;
-  padding: 10px 16px !important;
-  border: 0 !important;
-  border-radius: 10px !important;
-  background: #274A34 !important;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  font-weight: 800 !important;
-}
-html.seek-dark .seek-form-file,
-html.seek-dark .seek-fundraiser-form input[type="file"],
-html.seek-dark .seek-outcome-form input[type="file"] {
-  background: #182820 !important;
-  color: #F7F8F3 !important;
-  -webkit-text-fill-color: #F7F8F3 !important;
-  border-color: #829687 !important;
-}
-html.seek-dark .seek-form-file::file-selector-button,
-html.seek-dark .seek-fundraiser-form input[type="file"]::file-selector-button,
-html.seek-dark .seek-outcome-form input[type="file"]::file-selector-button {
-  background: #CCF88E !important;
-  color: #193524 !important;
-  -webkit-text-fill-color: #193524 !important;
-}
-html.seek-dark .seek-outcome-form button[type="submit"] {
-  background: #CCF88E !important;
-  color: #193524 !important;
-  -webkit-text-fill-color: #193524 !important;
-  border-color: #A6D36B !important;
-  opacity: 1 !important;
-}
-html:not(.seek-dark) .seek-outcome-form button[type="submit"] {
-  background: #274A34 !important;
-  color: #FFFFFF !important;
-  -webkit-text-fill-color: #FFFFFF !important;
-  opacity: 1 !important;
-}
-
-/* Live SEEK inbox: theme-aware contrast and restrained notification motion. */
-.seek-messages-page { color: var(--seek-primary); }
-.seek-messages-count { color: var(--seek-accent); }
-.seek-messages-live { display:inline-flex; align-items:center; gap:6px; padding:7px 10px; border-radius:999px; border:1px solid rgba(41,75,67,.14); background:rgba(255,255,255,.72); color:#294B43; font-size:10px; font-weight:900; letter-spacing:.12em; }
-.seek-messages-live.is-connected svg { color:#2D9B67; animation:seekLiveRadio 2s ease-in-out infinite; }
-.seek-messages-live.is-checking svg { color:#A5A5A5; }
-.seek-messages-live-track { height:2px; overflow:hidden; border-radius:999px; background:rgba(41,75,67,.10); }
-.seek-messages-live-track span { display:block; width:28%; height:100%; border-radius:inherit; background:linear-gradient(90deg,#8BCB55,#D5FF85); animation:seekLiveTrack 3.2s ease-in-out infinite; }
-.seek-message-section-label { color:#39785B; }
-.seek-message-count-pill { display:inline-flex; min-width:21px; height:21px; align-items:center; justify-content:center; border-radius:999px; background:#D9FF9B; color:#193524; font-size:10px; font-weight:900; }
-.seek-message-card { display:block; background:#FFFFFF; border-color:rgba(41,75,67,.14); box-shadow:0 5px 18px rgba(20,48,37,.045); }
-.seek-message-card:hover { transform:translateY(-2px); box-shadow:0 12px 28px rgba(20,48,37,.09); }
-.seek-message-card.is-unread { border-color:rgba(57,120,91,.38); background:#F5FAF4; }
-.seek-message-title { color:#193D2D; font-size:16px; line-height:1.35; }
-.seek-message-body { color:#53665B; }
-.seek-message-meta { color:#718078; }
-.seek-message-unread-dot { width:8px; height:8px; border-radius:50%; background:#79C94B; box-shadow:0 0 0 0 rgba(121,201,75,.5); animation:seekMessagePulse 2s infinite; }
-.seek-message-new-tag { color:#39785B; font-size:9px; font-weight:900; letter-spacing:.14em; }
-.seek-message-empty { background:#FFFFFF; border-color:rgba(41,75,67,.13); color:#294B43; }
-.seek-message-empty > span { background:#EAF5E8; color:#294B43; }
-.seek-message-enter { animation:seekMessageEnter .55s cubic-bezier(.2,.8,.2,1) both; animation-delay:calc(min(var(--message-index,0),5) * 65ms); }
-@keyframes seekMessageEnter { from { opacity:0; transform:translateY(14px) scale(.985); } to { opacity:1; transform:translateY(0) scale(1); } }
-@keyframes seekMessagePulse { 0% { box-shadow:0 0 0 0 rgba(121,201,75,.48); } 70% { box-shadow:0 0 0 7px rgba(121,201,75,0); } 100% { box-shadow:0 0 0 0 rgba(121,201,75,0); } }
-@keyframes seekLiveRadio { 0%,100% { opacity:1; } 50% { opacity:.45; } }
-@keyframes seekLiveTrack { 0% { transform:translateX(-110%); } 100% { transform:translateX(430%); } }
-html.seek-dark .seek-messages-page { color:#F2F6F0; }
-html.seek-dark .seek-messages-page h1 { color:#DDF4C9 !important; }
-html.seek-dark .seek-messages-count { color:#D2DDD4 !important; }
-html.seek-dark .seek-messages-live { background:#294B3B; border-color:rgba(214,255,181,.22); color:#F4F8F1; }
-html.seek-dark .seek-messages-live-track { background:rgba(255,255,255,.12); }
-html.seek-dark .seek-message-section-label { color:#CFF69B; }
-html.seek-dark .seek-message-card,
-html.seek-dark .seek-message-card.is-unread { background:#294B3B; border-color:rgba(214,255,181,.24); }
-html.seek-dark .seek-message-card.is-read { background:#243C32; border-color:rgba(255,255,255,.13); }
-html.seek-dark .seek-message-title { color:#F7FAF4 !important; }
-html.seek-dark .seek-message-body { color:#DCE7DE !important; }
-html.seek-dark .seek-message-meta { color:#B8C9BD !important; }
-html.seek-dark .seek-message-new-tag { color:#D7FF9A !important; }
-html.seek-dark .seek-message-empty { background:#294B3B; border-color:rgba(255,255,255,.15); color:#F7FAF4; }
-html.seek-dark .seek-message-empty > span { background:#D7FF9A; color:#193524; }
-@media (prefers-reduced-motion:reduce) { .seek-messages-live-track span,.seek-messages-live.is-connected svg,.seek-message-unread-dot,.seek-message-enter,.seek-inbox-button .seek-notification-badge.is-live { animation:none !important; } }
+.seek-story-page { overflow: clip; }
+.seek-story-hero { position: relative; isolation: isolate; min-height: 430px; display: grid; place-items: center; padding: 5.5rem 0 4.5rem; }
+.seek-story-orb { position: absolute; z-index: -1; width: 20rem; height: 20rem; border-radius: 50%; filter: blur(42px); pointer-events: none; opacity: .65; }
+.seek-story-orb-a { top: -9rem; left: -5rem; background: rgba(151,210,78,.20); animation: seek-story-drift 13s ease-in-out infinite alternate; }
+.seek-story-orb-b { right: -7rem; bottom: -10rem; background: rgba(27,170,156,.14); animation: seek-story-drift 16s ease-in-out infinite alternate-reverse; }
+.seek-story-kicker { display: inline-flex; align-items: center; gap: .65rem; color: var(--seek-success); font-size: .72rem; font-weight: 800; letter-spacing: .19em; text-transform: uppercase; animation: seek-story-enter .65s both; }
+.seek-story-pulse { width: 8px; height: 8px; border-radius: 50%; background: var(--seek-success); box-shadow: 0 0 0 0 rgba(151,210,78,.5); animation: seek-story-pulse 2.2s infinite; }
+.seek-story-title { margin-top: 1.25rem; line-height: 1.06; letter-spacing: -.045em; animation: seek-story-enter .75s .08s both; }
+.seek-story-title span { display: inline-block; color: var(--seek-success); }
+.seek-story-lead { animation: seek-story-enter .8s .18s both; }
+.seek-story-scroll { display: inline-flex; align-items: center; gap: .65rem; margin-top: 3rem; color: var(--seek-primary); opacity: .55; font-size: .68rem; letter-spacing: .12em; text-transform: uppercase; animation: seek-story-enter .8s .3s both; }
+.seek-story-scroll span { width: 1.2rem; height: 1.9rem; border: 1px solid currentColor; border-radius: 1rem; position: relative; }
+.seek-story-scroll span::after { content: ''; position: absolute; width: 3px; height: 5px; left: 50%; top: 5px; border-radius: 4px; background: currentColor; transform: translateX(-50%); animation: seek-story-scroll 1.5s ease-in-out infinite; }
+.seek-story-mission { background: var(--seek-white, #fff); }
+.seek-story-icon { display: grid; place-items: center; width: 4.25rem; height: 4.25rem; margin: 0 auto 1.4rem; border-radius: 1.4rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 11%, transparent); animation: seek-story-float 4s ease-in-out infinite; }
+.seek-story-mission-line { max-width: 52rem; margin-inline: auto; }
+.seek-story-values { display: inline-flex; align-items: center; gap: 1rem; margin-top: 2.2rem; padding: .75rem 1.2rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 12%, transparent); border-radius: 999px; color: var(--seek-primary); font-size: .72rem; font-weight: 800; letter-spacing: .17em; text-transform: uppercase; }
+.seek-story-values i { width: 5px; height: 5px; border-radius: 50%; background: var(--seek-success); }
+.seek-foundation-card { display: grid; grid-template-columns: auto minmax(0,1fr) auto; align-items: center; gap: 2rem; padding: clamp(1.5rem,4vw,3.5rem); border: 1px solid color-mix(in srgb, var(--seek-primary) 10%, transparent); border-radius: 2rem; background: var(--seek-white, #fff); box-shadow: 0 18px 55px rgba(20,50,35,.06); transition: transform .35s ease, box-shadow .35s ease; }
+.seek-foundation-card:hover { transform: translateY(-5px); box-shadow: 0 25px 65px rgba(20,50,35,.10); }
+.seek-foundation-mark { display: grid; place-items: center; width: 4.5rem; height: 4.5rem; border-radius: 1.4rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 10%, transparent); }
+.seek-story-closing { background: color-mix(in srgb, var(--seek-success) 7%, var(--seek-white, #fff)); }
+.seek-contact-hero { position: relative; }
+.seek-contact-email { text-decoration: underline; text-decoration-color: color-mix(in srgb, var(--seek-success) 40%, transparent); text-underline-offset: 4px; }
+.seek-contact-points { display: grid; grid-template-columns: repeat(2,minmax(0,1fr)); gap: .8rem; max-width: 38rem; }
+.seek-contact-points > div { display: flex; align-items: center; gap: .8rem; padding: 1rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 12%, transparent); border-radius: 1.2rem; background: var(--seek-white, #fff); color: var(--seek-primary); }
+.seek-contact-point-icon { display: grid; place-items: center; width: 2.6rem; height: 2.6rem; flex: 0 0 2.6rem; border-radius: .9rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 12%, transparent); }
+.seek-contact-points b,.seek-contact-points small { display: block; }
+.seek-contact-points b { font-size: .82rem; }
+.seek-contact-points small { margin-top: .15rem; color: color-mix(in srgb, var(--seek-primary) 62%, transparent); font-size: .68rem; line-height: 1.35; }
+.seek-contact-chat-wrap { margin-top: 2rem; }
+.seek-contact-chat-wrap > * { border-radius: 1.7rem; }
+.seek-legal-intro { display: flex; align-items: center; gap: 1rem; padding: 1.2rem 1.4rem; margin-bottom: 1.5rem; border-radius: 1.3rem; color: var(--seek-primary); background: color-mix(in srgb, var(--seek-success) 9%, var(--seek-white, #fff)); }
+.seek-legal-intro svg { flex: 0 0 auto; color: var(--seek-success); }
+.seek-legal-intro p { font-size: .9rem; line-height: 1.5; }
+.seek-legal-copy { display: grid; gap: .85rem; }
+.seek-legal-item { display: grid; grid-template-columns: 2.5rem minmax(0,1fr); gap: 1rem; align-items: start; padding: 1.35rem 1.4rem; border: 1px solid color-mix(in srgb, var(--seek-primary) 10%, transparent); border-radius: 1.25rem; background: var(--seek-white, #fff); transition: transform .25s ease, border-color .25s ease, box-shadow .25s ease; }
+.seek-legal-item:hover { transform: translateX(4px); border-color: color-mix(in srgb, var(--seek-success) 40%, transparent); box-shadow: 0 10px 25px rgba(20,50,35,.05); }
+.seek-legal-index { display: grid; place-items: center; width: 2.2rem; height: 2.2rem; border-radius: .75rem; color: var(--seek-success); background: color-mix(in srgb, var(--seek-success) 12%, transparent); font-size: .7rem; font-weight: 900; }
+.seek-legal-item p { font-size: .95rem; }
+.seek-legal-help { display: flex; align-items: center; justify-content: space-between; gap: 1rem; margin-top: 1.5rem; padding: 1.4rem; border-radius: 1.4rem; background: var(--seek-primary); color: #fff; }
+.seek-legal-help b { display: block; font-size: .95rem; }
+.seek-legal-help p { margin-top: .25rem; color: rgba(255,255,255,.72); font-size: .8rem; }
+.seek-legal-help a { display: inline-flex; align-items: center; gap: .4rem; flex: 0 0 auto; color: #CCF88E; font-size: .8rem; font-weight: 800; }
+@keyframes seek-story-enter { from { opacity: 0; transform: translateY(22px); } to { opacity: 1; transform: translateY(0); } }
+@keyframes seek-story-drift { from { transform: translate3d(-8px,0,0) scale(.94); } to { transform: translate3d(20px,18px,0) scale(1.08); } }
+@keyframes seek-story-float { 0%,100% { transform: translateY(0); } 50% { transform: translateY(-7px); } }
+@keyframes seek-story-pulse { 0% { box-shadow: 0 0 0 0 rgba(151,210,78,.45); } 70% { box-shadow: 0 0 0 9px rgba(151,210,78,0); } 100% { box-shadow: 0 0 0 0 rgba(151,210,78,0); } }
+@keyframes seek-story-scroll { 0%,100% { opacity: .35; transform: translate(-50%,0); } 50% { opacity: 1; transform: translate(-50%,6px); } }
+html.seek-dark .seek-story-mission, html.seek-dark .seek-story-closing { background: var(--seek-white, #17251e); }
+html.seek-dark .seek-foundation-card, html.seek-dark .seek-contact-points > div, html.seek-dark .seek-legal-item { background: color-mix(in srgb, var(--seek-primary) 88%, #000); border-color: rgba(255,255,255,.12); }
+html.seek-dark .seek-legal-help { background: #13251c; }
+@media (max-width: 700px) { .seek-story-hero { min-height: 390px; padding: 4.5rem 0 3.5rem; } .seek-foundation-card { grid-template-columns: 1fr; gap: 1.2rem; border-radius: 1.5rem; } .seek-foundation-card button { justify-self: start; } .seek-contact-points { grid-template-columns: 1fr; } .seek-legal-help { align-items: flex-start; flex-direction: column; } .seek-legal-item { grid-template-columns: 2.1rem minmax(0,1fr); gap: .7rem; padding: 1rem; } }
+@media (prefers-reduced-motion: reduce) { .seek-story-orb, .seek-story-kicker, .seek-story-title, .seek-story-lead, .seek-story-scroll, .seek-story-icon, .seek-story-pulse, .seek-story-scroll span::after { animation: none !important; } .seek-foundation-card:hover, .seek-legal-item:hover { transform: none; } }
