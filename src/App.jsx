@@ -488,12 +488,18 @@ const FONTS = (
       100% { transform: translateX(-50%); }
     }
     .seek-ticker-track {
-      display: inline-flex;
+      display: flex;
+      width: max-content;
+      min-width: 0;
+      flex: 0 0 auto;
       gap: 2.5rem;
-      animation: seekTicker 80s linear infinite;
+      animation: seekTicker 34s linear infinite !important;
+      animation-play-state: running !important;
       white-space: nowrap;
+      will-change: transform;
+      transform: translate3d(0,0,0);
     }
-    .seek-ticker-interactive { width: max-content; min-width: 100%; }
+    .seek-ticker-interactive { width: max-content; min-width: 0; }
     .seek-ticker-single { display: inline-flex; align-items: center; gap: 2.5rem; white-space: nowrap; }
     .seek-community-pulse:focus-within .seek-ticker-track,
     .seek-community-pulse:hover .seek-ticker-track { animation-play-state: paused; }
@@ -501,9 +507,7 @@ const FONTS = (
     @media (max-width: 640px) {
       .seek-ticker-track { gap: 1.5rem; animation-duration: 58s; }
     }
-    @media (prefers-reduced-motion: reduce) {
-      .seek-ticker-track { animation: none; }
-    }
+    /* Community Pulse is an intentional live marquee and remains animated. */
     .seek-live-dot {
       width: 10px;
       height: 10px;
@@ -636,29 +640,36 @@ const FONTS = (
     html.seek-dark :where(.bg-\[var\(--seek-success\)],.bg-\[var\(--seek-accent\)]) :where(span,strong,small) {
       color: #202923 !important;
     }
-    /* Compact, understated appearance switch; avoid the oversized ring treatment. */
+    /* Compact classic appearance switch with guaranteed contrast in both themes. */
     .seek-theme-toggle {
-      width: 40px !important;
-      height: 40px !important;
-      min-width: 40px !important;
-      min-height: 40px !important;
-      border: 1px solid rgba(255,255,255,.28) !important;
-      border-radius: 9999px !important;
+      width: 34px !important;
+      height: 34px !important;
+      min-width: 34px !important;
+      min-height: 34px !important;
+      display: inline-flex !important;
+      align-items: center !important;
+      justify-content: center !important;
+      border: 1px solid rgba(41,75,67,.22) !important;
+      border-radius: 50% !important;
       padding: 0 !important;
       box-shadow: none !important;
-      background: transparent !important;
-      color: inherit !important;
+      background: #FFFFFF !important;
+      color: #294B43 !important;
+      line-height: 1 !important;
     }
-    .seek-theme-toggle svg { width: 19px; height: 19px; stroke-width: 1.8; }
+    .seek-theme-toggle svg { width: 17px !important; height: 17px !important; stroke-width: 1.9 !important; display: block !important; }
     html:not(.seek-dark) .seek-theme-toggle {
-      color: #FFFFFF !important;
-      border-color: rgba(255,255,255,.38) !important;
+      background: #FFFFFF !important;
+      color: #294B43 !important;
+      border-color: rgba(41,75,67,.28) !important;
     }
     html.seek-dark .seek-theme-toggle {
-      color: #F7F7F1 !important;
-      border-color: rgba(247,247,241,.42) !important;
+      background: #2B362E !important;
+      color: #D7F7A0 !important;
+      border-color: rgba(215,247,160,.38) !important;
     }
-    .seek-theme-toggle:hover { background: rgba(255,255,255,.10) !important; }
+    .seek-theme-toggle:hover { background: #F1F5EE !important; }
+    html.seek-dark .seek-theme-toggle:hover { background: #3A493D !important; }
 
     /* Auth actions must remain readable on the green sign-in card in both themes. */
     .seek-auth-form button:not([type="submit"]) {

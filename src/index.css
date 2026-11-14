@@ -2553,3 +2553,38 @@ html.seek-dark .seek-theme-toggle .seek-theme-icon {
   stroke: #CCF88E !important;
 }
 .seek-theme-toggle:focus-visible { outline: 2px solid #78A94B !important; outline-offset: 3px !important; }
+
+
+/* Final overrides: Community Pulse motion and compact theme control. */
+.seek-community-pulse .seek-ticker-track {
+  display: flex !important;
+  width: max-content !important;
+  min-width: 0 !important;
+  flex: 0 0 auto !important;
+  white-space: nowrap !important;
+  will-change: transform;
+  animation: seekTicker 34s linear infinite !important;
+  animation-play-state: running !important;
+}
+.seek-community-pulse:hover .seek-ticker-track,
+.seek-community-pulse:focus-within .seek-ticker-track {
+  animation-play-state: paused !important;
+}
+.seek-theme-toggle {
+  width: 34px !important;
+  height: 34px !important;
+  min-width: 34px !important;
+  min-height: 34px !important;
+  padding: 0 !important;
+  border-radius: 50% !important;
+  display: inline-flex !important;
+  align-items: center !important;
+  justify-content: center !important;
+  background: #FFFFFF !important;
+  color: #294B43 !important;
+  border: 1px solid rgba(41,75,67,.28) !important;
+  box-shadow: none !important;
+}
+.seek-theme-toggle svg { width: 17px !important; height: 17px !important; display: block !important; }
+html:not(.seek-dark) .seek-theme-toggle { background: #FFFFFF !important; color: #294B43 !important; }
+html.seek-dark .seek-theme-toggle { background: #2B362E !important; color: #D7F7A0 !important; border-color: rgba(215,247,160,.38) !important; }
