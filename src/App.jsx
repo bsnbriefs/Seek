@@ -6785,7 +6785,7 @@ useEffect(() => {
   const pages = {
     home: <ForYouPage setPage={setPage} />,
     bsn: <BsnPage setPage={setPage} />,
-    outreach: <BsnPage setPage={setPage} openCampaigns />
+    outreach: <BsnPage setPage={setPage} openCampaigns />,
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
