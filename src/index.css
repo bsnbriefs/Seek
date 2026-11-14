@@ -2324,3 +2324,117 @@ html.seek-dark .seek-offers-search::placeholder {
   }
   .seek-offers-search { width: 100%; }
 }
+
+/* =========================================================
+   SEEK MOBILE OVERLAP + SUPPORT CHAT READABILITY FIX
+   Keeps the existing header, feature navigation and chat flow.
+   ========================================================= */
+.seek-tabs {
+  top: 4rem !important; /* site header is h-16 (64px) */
+  z-index: 108 !important;
+  background: var(--seek-card, #FFFFFF) !important;
+  color: var(--seek-ink, #26332B) !important;
+  border-bottom-color: var(--seek-border, #D7DED5) !important;
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+.seek-tabs > div { background: transparent !important; }
+.seek-tabs button { color: var(--seek-ink, #26332B) !important; }
+.seek-tabs button:hover,
+.seek-tabs button:focus-visible { color: var(--seek-head, #274A34) !important; }
+.seek-tabs button.border-b-2 { border-bottom-color: transparent; }
+.seek-tabs button.border-b-2[class*="border-[var(--seek-success)]"] {
+  border-bottom-color: var(--seek-success, #356747) !important;
+}
+html.seek-dark .seek-tabs {
+  background: #202923 !important;
+  color: #F7F7F1 !important;
+  border-bottom-color: #526457 !important;
+}
+html.seek-dark .seek-tabs button { color: #F7F7F1 !important; }
+html.seek-dark .seek-tabs button:hover,
+html.seek-dark .seek-tabs button:focus-visible { color: #CCF88E !important; }
+html.seek-dark .seek-tabs button.border-b-2[class*="border-[var(--seek-success)]"] {
+  border-bottom-color: #CCF88E !important;
+}
+
+/* Support chat: never pair dark-green text with a dark-green surface. */
+.seek-contact-chat-wrap > div {
+  background: var(--seek-card, #FFFFFF) !important;
+  color: var(--seek-ink, #26332B) !important;
+  border: 1px solid var(--seek-border, #D7DED5) !important;
+  box-shadow: 0 12px 34px rgba(20,45,32,.06);
+}
+.seek-contact-chat-wrap > div h2,
+.seek-contact-chat-wrap > div p {
+  color: var(--seek-ink, #26332B) !important;
+  -webkit-text-fill-color: currentColor !important;
+}
+.seek-contact-chat-wrap > div input {
+  min-width: 0;
+  background: var(--seek-bg, #FAF8F3) !important;
+  color: var(--seek-ink, #26332B) !important;
+  border: 1px solid var(--seek-border, #D7DED5) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: var(--seek-ink, #26332B) !important;
+}
+.seek-contact-chat-wrap > div input::placeholder {
+  color: var(--seek-muted, #58645C) !important;
+  opacity: 1 !important;
+  -webkit-text-fill-color: var(--seek-muted, #58645C) !important;
+}
+.seek-contact-chat-wrap > div form button {
+  flex: 0 0 auto;
+  background: #274A34 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border: 1px solid #274A34 !important;
+  opacity: 1 !important;
+}
+.seek-contact-chat-wrap > div form button:disabled {
+  opacity: .72 !important;
+  cursor: wait;
+}
+.seek-contact-chat-wrap > div [class*="bg-slate-100"],
+.seek-contact-chat-wrap > div [class*="bg-[var(--seek-success)]"] {
+  background: color-mix(in srgb, var(--seek-success, #356747) 10%, var(--seek-card, #FFFFFF)) !important;
+  color: var(--seek-ink, #26332B) !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div {
+  background: #2B362E !important;
+  color: #F7F7F1 !important;
+  border-color: #526457 !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div h2,
+html.seek-dark .seek-contact-chat-wrap > div p {
+  color: #F7F7F1 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div input {
+  background: #202923 !important;
+  color: #F7F7F1 !important;
+  border-color: #718174 !important;
+  -webkit-text-fill-color: #F7F7F1 !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div input::placeholder {
+  color: #C8D4CA !important;
+  -webkit-text-fill-color: #C8D4CA !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div form button {
+  background: #CCF88E !important;
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+  border-color: #CCF88E !important;
+}
+html.seek-dark .seek-contact-chat-wrap > div [class*="bg-slate-100"],
+html.seek-dark .seek-contact-chat-wrap > div [class*="bg-[var(--seek-success)]"] {
+  background: #35463A !important;
+  color: #F7F7F1 !important;
+}
+
+/* Allow the last mobile content row to scroll clear of the fixed bottom bar. */
+@media (max-width: 1023px) {
+  #root { padding-bottom: calc(5.25rem + env(safe-area-inset-bottom)); }
+  .seek-contact-chat-wrap > div form { align-items: stretch; }
+  .seek-contact-chat-wrap > div form input { width: 0; flex: 1 1 0%; }
+}
