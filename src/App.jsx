@@ -116,7 +116,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
+  Handshake, Building2, CheckCircle2, Upload, Mail, MessageCircle, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -3677,40 +3677,53 @@ function MemberPage({ memberId, setPage }) {
 function AboutPage({ setPage }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   return (
-    <div>
-      <section className="py-20 text-center" style={{ background: C.bg }}>
-        <div className="mx-auto max-w-3xl px-5 sm:px-8">
-          <SectionLabel>About Seek</SectionLabel>
-          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)]">Help should be easier to find.</h1>
-          <p className="mt-5 font-body text-lg text-[var(--seek-primary)]/65">
-            Seek is a community assistance platform created to connect people who need help with people willing to provide it.
+    <div className="seek-story-page seek-about-page">
+      <section className="seek-story-hero" style={{ background: C.bg }}>
+        <span className="seek-story-orb seek-story-orb-a" aria-hidden="true" />
+        <span className="seek-story-orb seek-story-orb-b" aria-hidden="true" />
+        <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center relative z-10">
+          <div className="seek-story-kicker"><span className="seek-story-pulse" /> About SEEK</div>
+          <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)]">Help should be <span>easier to find.</span></h1>
+          <p className="seek-story-lead mt-6 font-body text-lg sm:text-xl text-[var(--seek-primary)]/70 max-w-3xl mx-auto">
+            SEEK is a community assistance platform created to connect people who need help with people willing to provide it.
           </p>
+          <div className="seek-story-scroll" aria-hidden="true"><span /> Scroll to explore</div>
         </div>
       </section>
 
-      <section className="bg-white py-16">
-        <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
-          <p className="font-display text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-3">Our mission</p>
-          <p className="font-display font-semibold text-2xl sm:text-3xl text-[var(--seek-primary)] leading-snug">
+      <section className="seek-story-mission py-20 sm:py-24">
+        <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center">
+          <div className="seek-story-icon" aria-hidden="true"><HeartHandshake size={30} /></div>
+          <p className="font-body text-xs font-bold uppercase tracking-[.22em] text-[var(--seek-success)] mb-4">Our mission</p>
+          <p className="seek-story-mission-line font-display font-semibold text-2xl sm:text-4xl text-[var(--seek-primary)] leading-snug">
             To make it easier for people to find help, and easier for people to give it.
           </p>
-          <p className="mt-6 font-body text-[var(--seek-primary)]/60 max-w-xl mx-auto">
-            We all need help sometimes — and we can all help someone. Seek is built on that simple, shared idea, not on pity or charity theatre.
+          <p className="mt-6 font-body text-base sm:text-lg text-[var(--seek-primary)]/65 max-w-2xl mx-auto">
+            We all need help sometimes — and we can all help someone. SEEK is built on that simple, shared idea, not on pity or charity theatre.
           </p>
+          <div className="seek-story-values" aria-label="SEEK values">
+            <span>Ask</span><i /><span>Seek</span><i /><span>Find</span>
+          </div>
         </div>
       </section>
 
-      <section className="py-16" style={{ background: C.bg }}>
-        <div className="mx-auto max-w-5xl px-5 sm:px-8 rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-10 sm:p-14 grid md:grid-cols-[auto_1fr_auto] items-center gap-8">
-          <Building2 size={44} className="text-[var(--seek-success)]" />
-          <div>
-            <p className="font-body text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-2">Powered by BSN Foundation</p>
-            <p className="font-display font-semibold text-xl text-[var(--seek-primary)]">
-              BSN Foundation is the community and volunteering arm behind Seek — reviewing requests, coordinating volunteers, and building trust across the platform.
-            </p>
+      <section className="seek-story-foundation py-16 sm:py-20" style={{ background: C.bg }}>
+        <div className="mx-auto max-w-5xl px-5 sm:px-8">
+          <div className="seek-foundation-card">
+            <div className="seek-foundation-mark"><Building2 size={42} /></div>
+            <div className="seek-foundation-copy">
+              <p className="font-body text-xs font-bold uppercase tracking-[.2em] text-[var(--seek-success)] mb-3">Powered by BSN Foundation</p>
+              <p className="font-display font-semibold text-xl sm:text-2xl text-[var(--seek-primary)]">
+                BSN Foundation is the community and volunteering arm behind SEEK — reviewing requests, coordinating volunteers, and building trust across the platform.
+              </p>
+            </div>
+            <Button variant="secondary" onClick={() => go("volunteer")}>Get involved <ArrowUpRight size={16} /></Button>
           </div>
-          <Button variant="secondary" onClick={() => go("volunteer")}>Get involved <ArrowUpRight size={16} /></Button>
         </div>
+      </section>
+      <section className="seek-story-closing px-5 py-16 text-center">
+        <p className="font-display text-xl sm:text-2xl font-semibold text-[var(--seek-primary)]">Help moves further when we move together.</p>
+        <Button className="mt-5" onClick={() => go("seek-help")}>Explore SEEK <ArrowUpRight size={16} /></Button>
       </section>
     </div>
   );
@@ -4553,19 +4566,23 @@ function SupportChat() {
 
 function ContactPage() {
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
-        <SectionLabel>Contact</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-4">Talk to Seek</h1>
-        <p className="font-body text-[var(--seek-primary)]/70 leading-relaxed">
-          Seek is a project of BSN Foundation. Email us at{" "}
-          <a className="font-semibold text-[var(--seek-success)]" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
+    <div className="seek-story-page seek-contact-page" style={{ background: C.bg }}>
+      <section className="seek-contact-hero mx-auto max-w-4xl px-5 sm:px-8 pt-16 sm:pt-20 pb-20">
+        <div className="seek-story-kicker"><span className="seek-story-pulse" /> Contact & support</div>
+        <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)] mb-5">Talk to <span>SEEK.</span></h1>
+        <p className="font-body text-lg sm:text-xl text-[var(--seek-primary)]/70 leading-relaxed max-w-3xl">
+          SEEK is a project of BSN Foundation. Email us at{" "}
+          <a className="font-semibold text-[var(--seek-success)] seek-contact-email" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
           {" "}or start a chat below. You can also use Report this request on a public request page.
         </p>
-        <p className="mt-3 font-body text-sm text-[var(--seek-primary)]/55">
-          Seek is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
+        <p className="mt-4 font-body text-sm sm:text-base text-[var(--seek-primary)]/60 max-w-2xl">
+          SEEK is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
         </p>
-        <SupportChat />
+        <div className="seek-contact-points mt-8">
+          <div><span className="seek-contact-point-icon"><Mail size={18} /></span><span><b>Email support</b><small>Reach the SEEK team directly</small></span></div>
+          <div><span className="seek-contact-point-icon"><MessageCircle size={18} /></span><span><b>Live support chat</b><small>Report a concern or ask a question</small></span></div>
+        </div>
+        <div className="seek-contact-chat-wrap"><SupportChat /></div>
       </section>
     </div>
   );
@@ -4624,14 +4641,25 @@ function LegalPage({ title }) {
   };
 
   return (
-    <div style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
-        <SectionLabel>Trust & Safety</SectionLabel>
-        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-6">{title}</h1>
-        <div className="space-y-4">
-          {(copy[title] || []).map((para) => (
-            <p key={para} className="font-body text-[var(--seek-primary)]/75 leading-relaxed">{para}</p>
+    <div className="seek-story-page seek-legal-page" style={{ background: C.bg }}>
+      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 sm:pt-20 pb-24">
+        <div className="seek-story-kicker"><span className="seek-story-pulse" /> Trust & Safety</div>
+        <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)] mb-8">{title}</h1>
+        <div className="seek-legal-intro">
+          <ShieldCheck size={26} />
+          <p>Clear principles help keep SEEK useful, safe and trustworthy for everyone.</p>
+        </div>
+        <div className="seek-legal-copy">
+          {(copy[title] || []).map((para, index) => (
+            <article key={para} className="seek-legal-item">
+              <span className="seek-legal-index">{String(index + 1).padStart(2, "0")}</span>
+              <p className="font-body text-[var(--seek-primary)]/80 leading-relaxed">{para}</p>
+            </article>
           ))}
+        </div>
+        <div className="seek-legal-help">
+          <div><b>Need clarification?</b><p>Our team can help explain any part of these {title.toLowerCase()}.</p></div>
+          <a href="mailto:Support@barristerstreet.org">Contact SEEK <ArrowUpRight size={16} /></a>
         </div>
       </section>
     </div>
