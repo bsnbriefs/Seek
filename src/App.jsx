@@ -3259,10 +3259,10 @@ function FundraiserPage({ setPage }) {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-5 py-8">
+    <div className="seek-fundraiser-page mx-auto max-w-lg px-5 py-8 pb-40">
       <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Start a fundraiser</h1>
       <p className="mt-1 text-sm text-[var(--seek-primary)]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
-      <form onSubmit={submit} className="mt-6 space-y-4">
+      <form onSubmit={submit} className="seek-fundraiser-form mt-6 space-y-4">
         <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
         <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
@@ -4678,7 +4678,7 @@ function SupportChat() {
           </div>
         ))}
       </div>
-      <form onSubmit={send} className="seek-support-chat-form flex gap-2">
+      <form onSubmit={send} className="seek-support-chat-form">
         <input
           value={text}
           onChange={(e) => setText(e.target.value)}
@@ -5852,7 +5852,7 @@ function MyRequestsPage({ setPage, userSession }) {
 
   return (
     <div className="seek-my-requests-page" style={{ background: C.bg }}>
-      <section className="mx-auto max-w-3xl px-5 sm:px-6 pt-9 sm:pt-12 pb-24">
+      <section className="mx-auto max-w-3xl px-5 sm:px-6 pt-9 sm:pt-12 pb-40">
         <div className="seek-my-requests-heading">
           <SectionLabel>Your account</SectionLabel>
         <h1 className="font-display font-extrabold text-3xl sm:text-4xl text-[var(--seek-primary)] mb-2">
@@ -5862,7 +5862,7 @@ function MyRequestsPage({ setPage, userSession }) {
         </div>
         <div className="seek-request-account mb-7">
           <div className="relative shrink-0">
-            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
+            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" onError={() => setMyAvatar("")} className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
             <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
           </div>
           <p className="font-body text-sm text-[var(--seek-primary)]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
@@ -5873,11 +5873,21 @@ function MyRequestsPage({ setPage, userSession }) {
         )}
 
         {error && (
-          <div className="rounded-2xl bg-red-50 border border-red-100 p-5 mb-6">
-            <p className="text-sm text-red-700">{error}</p>
-            <p className="mt-2 text-xs text-red-600/80">
-              If this is your first time using tracking, the database function may still need to be created (see setup notes).
-            </p>
+          <div className="seek-service-alert mb-6 rounded-2xl border p-5" role="alert">
+            {String(error).toLowerCase().includes("exceed_cached_egress_quota") ? (
+              <>
+                <p className="font-semibold">Request tracking is temporarily unavailable.</p>
+                <p className="mt-2 text-sm leading-6">The SEEK database service has reached its current data-transfer limit. Your account and submitted requests have not been deleted. Please try again later or contact support if the problem continues.</p>
+                <button type="button" onClick={() => setPage("contact")} className="mt-3 inline-flex min-h-10 items-center rounded-full px-4 text-sm font-bold">Contact SEEK support <ArrowRight size={15} className="ml-2" /></button>
+              </>
+            ) : (
+              <>
+                <p className="font-semibold">We could not load your requests.</p>
+                <p className="mt-2 text-sm leading-6">{error}</p>
+                <p className="mt-2 text-xs">Please try again shortly or contact SEEK support if the problem continues.</p>
+                <button type="button" onClick={() => setPage("contact")} className="mt-3 inline-flex min-h-10 items-center rounded-full px-4 text-sm font-bold">Contact SEEK support <ArrowRight size={15} className="ml-2" /></button>
+              </>
+            )}
           </div>
         )}
 

@@ -2353,3 +2353,176 @@ html.seek-dark .seek-support-chat .max-h-72 > div {
 @media (prefers-reduced-motion: reduce) {
   .seek-contact-page *, .seek-support-chat * { animation-duration: .01ms !important; animation-iteration-count: 1 !important; scroll-behavior: auto !important; }
 }
+
+/* ---------------------------------------------------------
+   Mobile quality pass: messages, forms, campaigns and errors
+   --------------------------------------------------------- */
+
+/* Messages / inbox: intentional surfaces and accessible text in both themes. */
+.seek-messages-page {
+  min-height: 65vh;
+  padding-top: 2rem !important;
+  padding-bottom: max(9rem, calc(7rem + env(safe-area-inset-bottom))) !important;
+  color: #26372D;
+}
+.seek-messages-page > header h1 { color: #26372D !important; line-height: 1.12; }
+.seek-messages-count { color: #58685E !important; }
+.seek-messages-live {
+  display: inline-flex;
+  align-items: center;
+  gap: .4rem;
+  border: 1px solid #C9D8CD;
+  border-radius: 999px;
+  padding: .45rem .65rem;
+  background: #F0F5F0;
+  color: #315B3D !important;
+  font-size: .68rem;
+  font-weight: 800;
+  letter-spacing: .08em;
+  white-space: nowrap;
+}
+.seek-messages-live.is-connected { background: #EAF7E4; border-color: #B9DDA9; color: #285C32 !important; }
+.seek-messages-live.is-checking { background: #F1F3EF; color: #526258 !important; }
+.seek-messages-live-track { height: 3px; overflow: hidden; border-radius: 99px; background: #E3EAE4; }
+.seek-messages-live-track span { display: block; width: 28%; height: 100%; border-radius: inherit; background: #6EAA55; animation: seek-message-progress 2.8s ease-in-out infinite; }
+.seek-message-empty {
+  background: #FFFFFF !important;
+  border-color: #DCE5DE !important;
+  color: #26372D !important;
+  box-shadow: 0 12px 30px rgba(25,55,37,.05);
+}
+.seek-message-empty > span { background: #EAF2EC !important; color: #356B43 !important; }
+.seek-message-empty h2 { color: #26372D !important; }
+.seek-message-empty p { color: #5A695F !important; }
+.seek-message-section-label { color: #42634B !important; }
+.seek-message-card { background: #FFFFFF !important; border-color: #DCE5DE !important; color: #26372D !important; }
+.seek-message-card .seek-message-title { color: #26372D !important; }
+.seek-message-card .seek-message-body { color: #536359 !important; }
+.seek-message-meta { color: #68766D !important; }
+.seek-message-card.is-unread { border-left: 4px solid #76A957 !important; }
+.seek-message-unread-dot { width: .55rem; height: .55rem; border-radius: 50%; background: #6DA64F; }
+.seek-message-new-tag, .seek-message-count-pill { border-radius: 999px; background: #EAF5E5; color: #315E35 !important; padding: .2rem .55rem; font-size: .65rem; font-weight: 800; }
+html.seek-dark .seek-messages-page > header h1 { color: #F4F7F1 !important; }
+html.seek-dark .seek-messages-count { color: #D2DDD3 !important; }
+html.seek-dark .seek-messages-live { background: #31483A; border-color: #587260; color: #E9F4E6 !important; }
+html.seek-dark .seek-messages-live.is-connected { background: #34583B; color: #D9F9B0 !important; }
+html.seek-dark .seek-messages-live.is-checking { background: #303B34; color: #DCE5DC !important; }
+html.seek-dark .seek-messages-live-track { background: #46564A; }
+html.seek-dark .seek-message-empty { background: #2A3A30 !important; border-color: #526657 !important; color: #F3F7F1 !important; }
+html.seek-dark .seek-message-empty > span { background: #3A5841 !important; color: #D7F99B !important; }
+html.seek-dark .seek-message-empty h2 { color: #F4F7F1 !important; }
+html.seek-dark .seek-message-empty p { color: #D2DDD3 !important; }
+html.seek-dark .seek-message-section-label { color: #D7F99B !important; }
+html.seek-dark .seek-message-card { background: #2A3A30 !important; border-color: #526657 !important; color: #F4F7F1 !important; }
+html.seek-dark .seek-message-card .seek-message-title { color: #F4F7F1 !important; }
+html.seek-dark .seek-message-card .seek-message-body,
+html.seek-dark .seek-message-meta { color: #D2DDD3 !important; }
+html.seek-dark .seek-message-card.is-unread { border-left-color: #C8F58B !important; }
+html.seek-dark .seek-message-new-tag,
+html.seek-dark .seek-message-count-pill { background: #405B3D; color: #E2F9C7 !important; }
+
+/* Support chat: use a predictable single-column mobile composer. */
+.seek-support-chat-form {
+  display: grid !important;
+  grid-template-columns: minmax(0, 1fr) !important;
+  gap: .75rem !important;
+  width: 100%;
+  min-width: 0;
+}
+.seek-support-chat-form input {
+  display: block;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 3.4rem !important;
+  flex: none !important;
+  box-sizing: border-box !important;
+}
+.seek-support-chat-form button {
+  display: inline-flex;
+  width: 100% !important;
+  min-width: 0 !important;
+  min-height: 3.4rem !important;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px !important;
+  box-sizing: border-box !important;
+}
+.seek-support-chat { margin-bottom: 1rem; }
+.seek-contact-page .seek-contact-hero { padding-bottom: max(11rem, calc(9rem + env(safe-area-inset-bottom))) !important; }
+
+/* Fundraiser form: readable fields, clear primary action, space above fixed nav. */
+.seek-fundraiser-page {
+  padding-bottom: max(11rem, calc(9rem + env(safe-area-inset-bottom))) !important;
+  color: #26372D;
+}
+.seek-fundraiser-page > h1 { color: #26372D !important; }
+.seek-fundraiser-page > p { color: #59685F !important; }
+.seek-fundraiser-form { display: grid; gap: 1rem; }
+.seek-fundraiser-form > input:not([type="file"]),
+.seek-fundraiser-form > select,
+.seek-fundraiser-form > textarea {
+  display: block;
+  width: 100%;
+  min-width: 0;
+  min-height: 3.5rem;
+  box-sizing: border-box;
+  border: 1px solid #BCC9BF !important;
+  border-radius: 1rem !important;
+  background: #FFFFFF !important;
+  color: #26372D !important;
+  padding: .95rem 1.1rem !important;
+  font-size: 1rem !important;
+}
+.seek-fundraiser-form > textarea { min-height: 9rem; resize: vertical; }
+.seek-fundraiser-form > input::placeholder,
+.seek-fundraiser-form > textarea::placeholder { color: #6D7A71 !important; opacity: 1 !important; }
+.seek-fundraiser-form > input[type="file"] { width: 100%; max-width: 100%; color: #425348 !important; }
+.seek-fundraiser-form > p { color: #5B6A60 !important; }
+.seek-fundraiser-form > button[type="submit"] {
+  min-height: 3.5rem;
+  background: #2D6843 !important;
+  color: #FFFFFF !important;
+  -webkit-text-fill-color: #FFFFFF !important;
+  border: 1px solid #2D6843 !important;
+  box-shadow: 0 8px 18px rgba(31,82,49,.16);
+}
+.seek-fundraiser-form > button[type="submit"]:disabled { opacity: .65; }
+html.seek-dark .seek-fundraiser-page > h1 { color: #F4F7F1 !important; }
+html.seek-dark .seek-fundraiser-page > p { color: #D2DDD3 !important; }
+html.seek-dark .seek-fundraiser-form > p { color: #D2DDD3 !important; }
+html.seek-dark .seek-fundraiser-form > button[type="submit"] { background: #C8F58B !important; color: #1F3A29 !important; -webkit-text-fill-color: #1F3A29 !important; border-color: #B6E77D !important; }
+
+/* Campaign carousel: keep the outreach artwork clear of the sticky category strip. */
+.seek-campaign-page .seek-home-promotions { margin-top: 5.5rem !important; }
+.seek-campaign-page .seek-home-promotions .seek-promo-viewport { border-radius: 1.1rem; }
+.seek-campaign-page .seek-home-promotions .seek-promo-card { min-height: 0; }
+.seek-campaign-page #seek-outreach-campaign-list { scroll-margin-top: 9rem; }
+.seek-campaign-page #seek-outreach-campaign-list > div:first-child > span {
+  background: #EAF2E8 !important;
+  color: #315B3D !important;
+}
+html.seek-dark .seek-campaign-page #seek-outreach-campaign-list > div:first-child > span {
+  background: #3A5841 !important;
+  color: #E0F3D4 !important;
+}
+
+/* The home scroll cue was too faint against the dark hero. */
+html.seek-dark .seek-story-scroll { color: #D7F99B !important; opacity: 1 !important; }
+html:not(.seek-dark) .seek-story-scroll { color: #315B3D !important; opacity: .9 !important; }
+
+/* Explain service quota errors in plain language with readable contrast. */
+.seek-service-alert { background: #FFF1EF !important; border-color: #E7B8B0 !important; color: #71352D !important; }
+.seek-service-alert :is(p,button) { color: #71352D !important; opacity: 1 !important; }
+.seek-service-alert button { background: #71352D !important; color: #FFFFFF !important; padding-left: 1rem; padding-right: 1rem; }
+html.seek-dark .seek-service-alert { background: #3D2928 !important; border-color: #895B54 !important; color: #FFE7E2 !important; }
+html.seek-dark .seek-service-alert :is(p,button) { color: #FFE7E2 !important; }
+html.seek-dark .seek-service-alert button { background: #F0B8A9 !important; color: #35201D !important; }
+
+@keyframes seek-message-progress { 0% { transform: translateX(-110%); } 100% { transform: translateX(390%); } }
+@media (max-width: 700px) {
+  .seek-campaign-page .seek-home-promotions { margin-top: 6.5rem !important; }
+  .seek-messages-page { padding-top: 1.5rem !important; }
+}
+@media (prefers-reduced-motion: reduce) {
+  .seek-messages-live-track span { animation: none !important; }
+}

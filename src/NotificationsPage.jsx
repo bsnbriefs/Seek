@@ -207,8 +207,8 @@ export default function NotificationsPage({ setPage, userSession }) {
               {loading ? "Loading your updates…" : unread.length ? `${unread.length} unread` : items.length ? "All caught up." : "No messages yet."}
             </p>
           </div>
-          <span className={`seek-messages-live ${live ? "is-connected" : "is-checking"}`} title={live ? "Live connection active" : "Checking for new messages"}>
-            <Radio size={13} /> {live ? "LIVE" : "UPDATING"}
+          <span className={`seek-messages-live ${live ? "is-connected" : "is-checking"}`} title={live ? "Live connection active" : loading ? "Checking for new messages" : "Checking periodically for new messages"}>
+            <Radio size={13} /> {live ? "LIVE" : loading ? "CHECKING" : "SYNCING"}
           </span>
         </div>
         <div className="seek-messages-live-track mt-4"><span /></div>
@@ -218,8 +218,8 @@ export default function NotificationsPage({ setPage, userSession }) {
       {!loading && !items.length && !error && (
         <div className="seek-message-empty rounded-3xl border p-8 text-center">
           <span className="mx-auto grid h-12 w-12 place-items-center rounded-full"><Bell size={21} /></span>
-          <h2 className="mt-4 font-semibold">You're all caught up.</h2>
-          <p className="mt-1 text-sm">When something happens on SEEK, your updates will appear here.</p>
+          <h2 className="mt-4 font-semibold">Your inbox is clear.</h2>
+          <p className="mt-1 text-sm">You do not have any messages yet. New replies, updates and activity will appear here.</p>
         </div>
       )}
 
