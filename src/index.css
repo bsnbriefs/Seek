@@ -2238,3 +2238,55 @@ html.seek-dark .seek-story-mission .seek-story-values {
   color: #294B43 !important;
   opacity: 1 !important;
 }
+
+/* Targeted About SEEK contrast correction (light and dark themes). */
+.seek-about-page .seek-story-mission {
+  background: #FFFFFF !important;
+}
+.seek-about-page .seek-story-mission p,
+.seek-about-page .seek-story-mission .seek-story-mission-line,
+.seek-about-page .seek-story-mission .seek-story-values,
+.seek-about-page .seek-story-closing p {
+  color: #294B43 !important;
+  -webkit-text-fill-color: #294B43 !important;
+  opacity: 1 !important;
+}
+.seek-about-page .seek-story-mission .seek-story-icon {
+  color: #648F48 !important;
+  background: #F2F9E9 !important;
+}
+.seek-about-page .seek-story-mission .seek-story-values {
+  background: #FFFFFF !important;
+  border-color: rgba(41, 75, 67, .28) !important;
+}
+.seek-about-page .seek-story-closing {
+  background: #F3F7F1 !important;
+}
+.seek-about-page .seek-story-closing .seek-primary-button,
+.seek-about-page .seek-story-closing button {
+  color: #193524 !important;
+  -webkit-text-fill-color: #193524 !important;
+}
+html.seek-dark .seek-about-page .seek-story-mission,
+html.seek-dark .seek-about-page .seek-story-closing {
+  background: #F7F8F3 !important;
+}
+html.seek-dark .seek-about-page .seek-story-mission p,
+html.seek-dark .seek-about-page .seek-story-closing p {
+  color: #294B43 !important;
+  -webkit-text-fill-color: #294B43 !important;
+  opacity: 1 !important;
+}
+@media (prefers-reduced-motion: reduce) {
+  .seek-about-page .seek-story-orb,
+  .seek-about-page .seek-story-kicker,
+  .seek-about-page .seek-story-title,
+  .seek-about-page .seek-story-lead,
+  .seek-about-page .seek-story-scroll,
+  .seek-about-page .seek-story-icon,
+  .seek-about-page .seek-story-pulse,
+  .seek-about-page .seek-story-scroll span::after {
+    animation: none !important;
+    transition: none !important;
+  }
+}
