@@ -116,7 +116,7 @@ import {
   Utensils, Shirt, Stethoscope, GraduationCap, Home as HomeIcon, Baby,
   Package, Briefcase, Bus, AlertTriangle, Wallet, MoreHorizontal,
   ShieldCheck, BadgeCheck, Check, Clock, MapPin, ChevronRight, Users,
-  Handshake, Building2, CheckCircle2, Upload, Mail, MessageCircle, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
+  Handshake, Building2, CheckCircle2, Upload, Mail, Phone, ArrowUpRight, Sun, Moon, Bell, Plus, User, Sparkles, Eye
 } from "lucide-react";
 
 /* ---------------------------------------------------------
@@ -596,6 +596,16 @@ const IMPACT_STATS = [
 ];
 
 const OUTREACH_CAMPAIGNS = [
+  {
+    id: "end-of-year-outreach-2026",
+    title: "2026 End-of-Year Outreach",
+    blurb: "Help BSN Foundation feed 1,500 people and distribute 300 food boxes to persons with disabilities this December.",
+    amount: 5000,
+    budget: 15000000,
+    story: "This December, BSN Foundation is working to feed 1,500 people and distribute 300 food boxes to persons with disabilities through the Nigerian Paralympic Association. Your contribution will help provide practical support with care, dignity and hope. The total working budget for this outreach is ₦15,000,000.",
+    photos: ["/outreach/bsn-outreach-design-1.jpg", "/outreach/bsn-outreach-design-2.jpg", "/outreach/bsn-outreach-design-3.jpg"],
+    videos: [],
+  },
   { id: "pad-a-girl", title: "Pad a Girl Child", blurb: "A girl should not miss school because of her period.", amount: 5000, budget: 5000000, story: "Some girls stay home when their period comes because a pack of pads is out of reach. BSN has already walked into those classrooms with kits. This year we need ₦5 million to do it again. ₦5,000 puts pads in a girl's bag. Give so she is in class next week, not at home.", photos: ["/outreach/FB_IMG_1789290313295.jpg", "/outreach/FB_IMG_1789290326493.jpg"], videos: ["/outreach/lv_0_20260913121349.mp4", "/outreach/lv_0_20260913160713.mp4"] },
   { id: "back-to-school", title: "Back to School", blurb: "A child should not start term without a bag.", amount: 10000, budget: 4000000, story: "You have seen the children with new bags. That picture is last year's work. This year's bags are not bought yet. ₦4 million covers bags, books and shoes across the school year. Give one bag. Give ten. The next child on that line is waiting on this page.", photos: ["/outreach/FB_IMG_1789290503303.jpg", "/outreach/FB_IMG_1789290509360.jpg", "/outreach/file_00000000cad4824682d5ab15bcc82459.png"], videos: ["/outreach/AQN7O_S0spdsy0cyUq5Z2OZ_g0YOo11XiRxFoVfISX8iHzIl2VGfM9wg27n9vMUJz-PoslRTk7snwc_r30L7xrAG (1).mp4", "/outreach/TWMate.com-96cccfdb09d177ca8d521c0d0252d811.mp4"] },
   { id: "skills", title: "Skill Acquisition / Youth Empowerment", blurb: "A young person with a trade can feed a home.", amount: 15000, budget: 5000000, story: "The last class sat in a small room and left with a skill they can charge for. The next class is unfunded. ₦5 million runs the year: tools, trainers, a place to sit. Your gift keeps a young person in that room instead of on the street.", photos: ["/outreach/GiuXLqBWgAA7uSH.jpg", "/outreach/GiuXM-0W0AAADJ3.jpg", "/outreach/GiuYPAlWwAAQxCC.jpg", "/outreach/GiuYPTLWYAMqhWC.jpg"], videos: ["/outreach/SgdcvYN0JNW6FQTn.mp4"] },
@@ -2349,7 +2359,7 @@ function BsnPage({ setPage }) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OUTREACH_CAMPAIGNS.map((c, i) => {
               const cover = c.photos?.[0];
-              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card seek-campaign-card-content group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
                 <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
                 <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
               </button>;
@@ -2360,6 +2370,7 @@ function BsnPage({ setPage }) {
       </main>
     );
   }
+  const featuredOutreach = OUTREACH_CAMPAIGNS.find((campaign) => campaign.id === "end-of-year-outreach-2026") || OUTREACH_CAMPAIGNS[0];
   return (
     <main className="seek-campaign-page min-h-screen pb-28">
       <section className="seek-campaign-hero relative isolate overflow-hidden px-5 py-12 sm:py-16">
@@ -2367,10 +2378,42 @@ function BsnPage({ setPage }) {
         <div className="relative z-10 mx-auto max-w-5xl">
           <span className="seek-campaign-kicker"><span /> BSN Empowerment Foundation</span>
           <h1 className="mt-6 max-w-3xl font-display text-4xl font-black leading-[1.02] tracking-tight text-white sm:text-6xl">Small acts. <span>Lasting change.</span></h1>
-          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore the programmes moving lives forward and choose where you want to make a difference.</p>
-          <div className="mt-7 flex flex-wrap gap-3"><button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-donate">Explore campaigns <ArrowRight size={17} /></button><button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button></div>
+          <p className="mt-5 max-w-xl text-sm leading-7 text-white/75 sm:text-base">Real people. Practical support. Stronger communities. Explore our ongoing programmes and help turn compassion into practical action.</p>
+          <div className="mt-7 flex flex-wrap gap-3">
+            <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate to an outreach <ArrowRight size={17} /></button>
+            <button type="button" onClick={() => { setShowCampaignList(true); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-outline">Explore all campaigns</button>
+            <button type="button" onClick={() => setPage("impact")} className="seek-campaign-outline">See our impact</button>
+          </div>
           <div className="seek-campaign-stats mt-10 grid max-w-xl grid-cols-3 gap-3"><div><strong>People</strong><span>at the centre</span></div><div><strong>Action</strong><span>over promises</span></div><div><strong>Community</strong><span>powered</span></div></div>
         </div>
+      </section>
+
+      <section className="mx-auto max-w-6xl px-4 pt-8 sm:px-5 sm:pt-12">
+        <div className="mb-4 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Featured outreach</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Help make this December count.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Explore the End-of-Year Outreach and see how your support can reach people with practical help.</p></div>
+          <button type="button" onClick={() => { setSelected(featuredOutreach); setDonating(true); }} className="seek-campaign-donate">Donate now <ArrowRight size={16} /></button>
+        </div>
+        <HomePromotionCarousel setPage={setPage} onOpen={() => { setSelected(featuredOutreach); window.scrollTo({ top: 0, behavior: "smooth" }); }} />
+      </section>
+
+      <section className="mx-auto max-w-6xl px-5 pt-10 sm:pt-14">
+        <div className="mb-6 flex flex-wrap items-end justify-between gap-3">
+          <div><p className="text-[10px] font-extrabold uppercase tracking-[.22em] text-[var(--seek-success)]">Ongoing campaigns</p><h2 className="mt-2 font-display text-2xl font-black text-[var(--seek-primary)] sm:text-3xl">Choose a cause to support.</h2><p className="mt-2 max-w-2xl text-sm leading-6 text-[var(--seek-primary)]/65">Every programme represents people, families and communities who can benefit from collective action.</p></div>
+          <button type="button" onClick={() => setShowCampaignList(true)} className="text-sm font-extrabold text-[var(--seek-success)]">View all campaigns <ArrowRight size={15} className="inline" /></button>
+        </div>
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
+          {OUTREACH_CAMPAIGNS.slice(0, 6).map((campaign, index) => {
+            const cover = campaign.photos?.[0];
+            return <article key={campaign.id} className="seek-campaign-card overflow-hidden">
+              <button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-card-content block w-full text-left">
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{String(index + 1).padStart(2, "0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">{campaign.id === "end-of-year-outreach-2026" ? "Featured annual outreach" : "Foundation programme"}</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{campaign.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{campaign.blurb}</p></div>
+              </button>
+              <div className="flex items-center justify-between gap-3 border-t border-[var(--seek-primary)]/8 px-5 py-3"><button type="button" onClick={() => { setSelected(campaign); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="seek-campaign-view-details text-sm font-bold text-[var(--seek-success)]">View details</button><button type="button" onClick={() => { setSelected(campaign); setDonating(true); }} className="seek-campaign-card-donate rounded-full bg-[var(--seek-success)] px-4 py-2 text-xs font-extrabold text-[var(--seek-primary)]">Donate</button></div>
+            </article>;
+          })}
+        </div>
+        <div className="mt-7 flex justify-center"><button type="button" onClick={() => setShowCampaignList(true)} className="seek-campaign-donate">Browse all {OUTREACH_CAMPAIGNS.length} campaigns <ArrowRight size={17} /></button></div>
       </section>
     </main>
   );
@@ -2663,6 +2706,124 @@ function DiscoverPage({ setPage }) {
   );
 }
 
+function HomePromotionCarousel({ setPage, onOpen }) {
+  const slides = [
+    {
+      id: "outreach-design-one",
+      image: "/outreach/bsn-outreach-design-1.jpg",
+      alt: "BSN Foundation End-of-Year Outreach: 1,500 people to be fed and 300 food boxes to be distributed.",
+    },
+    {
+      id: "outreach-design-two",
+      image: "/outreach/bsn-outreach-design-2.jpg",
+      alt: "BSN Foundation End-of-Year Outreach supporting persons with disabilities.",
+    },
+    {
+      id: "outreach-design-three",
+      image: "/outreach/bsn-outreach-design-3.jpg",
+      alt: "Support the BSN Foundation End-of-Year Outreach this December.",
+    },
+  ];
+  const [active, setActive] = useState(0);
+  const [offset, setOffset] = useState(0);
+  const trackRef = useRef(null);
+  const touchStart = useRef(null);
+  const pauseUntil = useRef(0);
+
+  useEffect(() => {
+    const timer = window.setInterval(() => {
+      if (document.visibilityState === "visible" && Date.now() > pauseUntil.current) {
+        setActive((current) => (current + 1) % slides.length);
+      }
+    }, 5000);
+    return () => window.clearInterval(timer);
+  }, [slides.length]);
+
+  useEffect(() => {
+    const updateOffset = () => {
+      const item = trackRef.current?.children?.[active];
+      setOffset(item ? item.offsetLeft : 0);
+    };
+    updateOffset();
+    window.addEventListener("resize", updateOffset);
+    return () => window.removeEventListener("resize", updateOffset);
+  }, [active]);
+
+  const goTo = (index) => {
+    setActive((index + slides.length) % slides.length);
+    pauseUntil.current = Date.now() + 10000;
+  };
+  const openOutreach = () => {
+    if (typeof onOpen === "function") onOpen();
+    else setPage("bsn");
+    window.scrollTo({ top: 0, behavior: "smooth" });
+  };
+
+  return (
+    <section
+      className="seek-home-promotions mx-auto mt-8 w-full max-w-5xl"
+      aria-label="Featured BSN Foundation outreach promotions"
+      onMouseEnter={() => { pauseUntil.current = Date.now() + 10000; }}
+      onMouseLeave={() => { pauseUntil.current = Date.now(); }}
+      onTouchStart={(event) => { touchStart.current = event.touches?.[0]?.clientX ?? null; pauseUntil.current = Date.now() + 10000; }}
+      onTouchEnd={(event) => {
+        const end = event.changedTouches?.[0]?.clientX;
+        if (touchStart.current != null && end != null && Math.abs(end - touchStart.current) > 40) {
+          goTo(active + (end < touchStart.current ? 1 : -1));
+        }
+        touchStart.current = null;
+      }}
+    >
+      <div className="seek-promo-viewport relative overflow-hidden">
+        <div
+          ref={trackRef}
+          className="seek-promo-track flex items-stretch gap-4 transition-transform duration-700 ease-[cubic-bezier(.22,.8,.25,1)]"
+          style={{ transform: `translate3d(-${offset}px,0,0)` }}
+        >
+          {slides.map((slide, index) => (
+            <article key={slide.id} className="seek-promo-card relative flex shrink-0 overflow-hidden rounded-[16px] bg-[#073d32] shadow-[0_8px_24px_rgba(10,40,30,.16)]">
+              <button
+                type="button"
+                onClick={openOutreach}
+                aria-label={`Open BSN Foundation outreach promotion ${index + 1}`}
+                className="block h-full w-full overflow-hidden focus:outline-none focus-visible:ring-4 focus-visible:ring-[#c9f58a]"
+              >
+                <img
+                  src={slide.image}
+                  alt={slide.alt}
+                  className="block h-full w-full object-cover object-center"
+                  loading={index === 0 ? "eager" : "lazy"}
+                  draggable="false"
+                />
+              </button>
+            </article>
+          ))}
+        </div>
+        <button type="button" aria-label="Previous outreach design" onClick={() => goTo(active - 1)} className="absolute left-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">‹</button>
+        <button type="button" aria-label="Next outreach design" onClick={() => goTo(active + 1)} className="absolute right-2 top-1/2 z-20 flex h-8 w-8 -translate-y-1/2 items-center justify-center rounded-full bg-black/45 text-white backdrop-blur hover:bg-black/65">›</button>
+      </div>
+      <div className="mt-2.5 flex items-center justify-center gap-2" aria-label="Choose outreach design">
+        {slides.map((slide, index) => (
+          <button key={slide.id} type="button" onClick={() => goTo(index)} aria-label={`Show outreach design ${index + 1}`} aria-current={active === index ? "true" : undefined} className={`h-2 rounded-full transition-all ${active === index ? "w-5 bg-[#f59e0b]" : "w-2 bg-[var(--seek-primary)]/25"}`} />
+        ))}
+      </div>
+      <style>{`
+        .seek-home-promotions { padding-left: 1rem; padding-right: 1rem; }
+        .seek-promo-viewport { padding: 0; }
+        .seek-promo-track { will-change: transform; }
+        .seek-promo-card { width: 84%; aspect-ratio: 1.88 / 1; }
+        .seek-promo-card button { cursor: pointer; }
+        .seek-promo-card img { transition: transform .45s ease; }
+        .seek-promo-card button:hover img { transform: scale(1.015); }
+        @media (max-width: 640px) {
+          .seek-home-promotions { margin-top: 1.35rem; padding-left: 1rem; padding-right: 1rem; }
+          .seek-promo-card { width: 88%; aspect-ratio: 1.78 / 1; }
+        }
+      `}</style>
+    </section>
+  );
+}
+
 function ForYouPage({ setPage }) {
   const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
@@ -2701,17 +2862,7 @@ function ForYouPage({ setPage }) {
               <button type="button" onClick={() => { setPage("offer-help"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="rounded-full border border-[var(--seek-primary)]/15 bg-white/80 px-6 py-3 text-sm font-bold text-[var(--seek-primary)] backdrop-blur transition hover:-translate-y-1 hover:border-[var(--seek-success)]">I want to help</button>
             </div>
           </div>
-          <div className="seek-motion-ribbon mt-10" aria-label="SEEK community activity">
-            <div className="seek-motion-ribbon-track">
-              {[0, 1].map((copy) => (
-                <div className="seek-motion-ribbon-group" key={copy} aria-hidden={copy === 1}>
-                  {(liveCases.length ? liveCases.slice(0, 8) : [{ id: "a", title: "Ask for what you need" }, { id: "b", title: "Offer what you can" }, { id: "c", title: "Find your community" }]).map((item, index) => (
-                    <span className="seek-ribbon-item" key={`${copy}-${item.id || index}`}><i />{item.title || item.description || "A new community story"}</span>
-                  ))}
-                </div>
-              ))}
-            </div>
-          </div>
+          <HomePromotionCarousel setPage={setPage} />
         </div>
       </section>
 
@@ -3677,53 +3828,40 @@ function MemberPage({ memberId, setPage }) {
 function AboutPage({ setPage }) {
   const go = (id) => { setPage(id); window.scrollTo(0, 0); };
   return (
-    <div className="seek-story-page seek-about-page">
-      <section className="seek-story-hero" style={{ background: C.bg }}>
-        <span className="seek-story-orb seek-story-orb-a" aria-hidden="true" />
-        <span className="seek-story-orb seek-story-orb-b" aria-hidden="true" />
-        <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center relative z-10">
-          <div className="seek-story-kicker"><span className="seek-story-pulse" /> About SEEK</div>
-          <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)]">Help should be <span>easier to find.</span></h1>
-          <p className="seek-story-lead mt-6 font-body text-lg sm:text-xl text-[var(--seek-primary)]/70 max-w-3xl mx-auto">
-            SEEK is a community assistance platform created to connect people who need help with people willing to provide it.
+    <div>
+      <section className="py-20 text-center" style={{ background: C.bg }}>
+        <div className="mx-auto max-w-3xl px-5 sm:px-8">
+          <SectionLabel>About Seek</SectionLabel>
+          <h1 className="font-display font-extrabold text-4xl sm:text-5xl text-[var(--seek-primary)]">Help should be easier to find.</h1>
+          <p className="mt-5 font-body text-lg text-[var(--seek-primary)]/65">
+            Seek is a community assistance platform created to connect people who need help with people willing to provide it.
           </p>
-          <div className="seek-story-scroll" aria-hidden="true"><span /> Scroll to explore</div>
         </div>
       </section>
 
-      <section className="seek-story-mission py-20 sm:py-24">
-        <div className="mx-auto max-w-4xl px-5 sm:px-8 text-center">
-          <div className="seek-story-icon" aria-hidden="true"><HeartHandshake size={30} /></div>
-          <p className="font-body text-xs font-bold uppercase tracking-[.22em] text-[var(--seek-success)] mb-4">Our mission</p>
-          <p className="seek-story-mission-line font-display font-semibold text-2xl sm:text-4xl text-[var(--seek-primary)] leading-snug">
+      <section className="bg-white py-16">
+        <div className="mx-auto max-w-3xl px-5 sm:px-8 text-center">
+          <p className="font-display text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-3">Our mission</p>
+          <p className="font-display font-semibold text-2xl sm:text-3xl text-[var(--seek-primary)] leading-snug">
             To make it easier for people to find help, and easier for people to give it.
           </p>
-          <p className="mt-6 font-body text-base sm:text-lg text-[var(--seek-primary)]/65 max-w-2xl mx-auto">
-            We all need help sometimes — and we can all help someone. SEEK is built on that simple, shared idea, not on pity or charity theatre.
+          <p className="mt-6 font-body text-[var(--seek-primary)]/60 max-w-xl mx-auto">
+            We all need help sometimes — and we can all help someone. Seek is built on that simple, shared idea, not on pity or charity theatre.
           </p>
-          <div className="seek-story-values" aria-label="SEEK values">
-            <span>Ask</span><i /><span>Seek</span><i /><span>Find</span>
-          </div>
         </div>
       </section>
 
-      <section className="seek-story-foundation py-16 sm:py-20" style={{ background: C.bg }}>
-        <div className="mx-auto max-w-5xl px-5 sm:px-8">
-          <div className="seek-foundation-card">
-            <div className="seek-foundation-mark"><Building2 size={42} /></div>
-            <div className="seek-foundation-copy">
-              <p className="font-body text-xs font-bold uppercase tracking-[.2em] text-[var(--seek-success)] mb-3">Powered by BSN Foundation</p>
-              <p className="font-display font-semibold text-xl sm:text-2xl text-[var(--seek-primary)]">
-                BSN Foundation is the community and volunteering arm behind SEEK — reviewing requests, coordinating volunteers, and building trust across the platform.
-              </p>
-            </div>
-            <Button variant="secondary" onClick={() => go("volunteer")}>Get involved <ArrowUpRight size={16} /></Button>
+      <section className="py-16" style={{ background: C.bg }}>
+        <div className="mx-auto max-w-5xl px-5 sm:px-8 rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-10 sm:p-14 grid md:grid-cols-[auto_1fr_auto] items-center gap-8">
+          <Building2 size={44} className="text-[var(--seek-success)]" />
+          <div>
+            <p className="font-body text-xs font-semibold uppercase tracking-widest text-[var(--seek-success)] mb-2">Powered by BSN Foundation</p>
+            <p className="font-display font-semibold text-xl text-[var(--seek-primary)]">
+              BSN Foundation is the community and volunteering arm behind Seek — reviewing requests, coordinating volunteers, and building trust across the platform.
+            </p>
           </div>
+          <Button variant="secondary" onClick={() => go("volunteer")}>Get involved <ArrowUpRight size={16} /></Button>
         </div>
-      </section>
-      <section className="seek-story-closing px-5 py-16 text-center">
-        <p className="font-display text-xl sm:text-2xl font-semibold text-[var(--seek-primary)]">Help moves further when we move together.</p>
-        <Button className="mt-5" onClick={() => go("seek-help")}>Explore SEEK <ArrowUpRight size={16} /></Button>
       </section>
     </div>
   );
@@ -4566,23 +4704,19 @@ function SupportChat() {
 
 function ContactPage() {
   return (
-    <div className="seek-story-page seek-contact-page" style={{ background: C.bg }}>
-      <section className="seek-contact-hero mx-auto max-w-4xl px-5 sm:px-8 pt-16 sm:pt-20 pb-20">
-        <div className="seek-story-kicker"><span className="seek-story-pulse" /> Contact & support</div>
-        <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)] mb-5">Talk to <span>SEEK.</span></h1>
-        <p className="font-body text-lg sm:text-xl text-[var(--seek-primary)]/70 leading-relaxed max-w-3xl">
-          SEEK is a project of BSN Foundation. Email us at{" "}
-          <a className="font-semibold text-[var(--seek-success)] seek-contact-email" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
+        <SectionLabel>Contact</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-4">Talk to Seek</h1>
+        <p className="font-body text-[var(--seek-primary)]/70 leading-relaxed">
+          Seek is a project of BSN Foundation. Email us at{" "}
+          <a className="font-semibold text-[var(--seek-success)]" href="mailto:Support@barristerstreet.org">Support@barristerstreet.org</a>
           {" "}or start a chat below. You can also use Report this request on a public request page.
         </p>
-        <p className="mt-4 font-body text-sm sm:text-base text-[var(--seek-primary)]/60 max-w-2xl">
-          SEEK is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
+        <p className="mt-3 font-body text-sm text-[var(--seek-primary)]/55">
+          Seek is open to requests and help from anywhere. BSN Foundation’s earlier work includes Enugu, Abuja and Lagos.
         </p>
-        <div className="seek-contact-points mt-8">
-          <div><span className="seek-contact-point-icon"><Mail size={18} /></span><span><b>Email support</b><small>Reach the SEEK team directly</small></span></div>
-          <div><span className="seek-contact-point-icon"><MessageCircle size={18} /></span><span><b>Live support chat</b><small>Report a concern or ask a question</small></span></div>
-        </div>
-        <div className="seek-contact-chat-wrap"><SupportChat /></div>
+        <SupportChat />
       </section>
     </div>
   );
@@ -4641,25 +4775,14 @@ function LegalPage({ title }) {
   };
 
   return (
-    <div className="seek-story-page seek-legal-page" style={{ background: C.bg }}>
-      <section className="mx-auto max-w-4xl px-5 sm:px-8 pt-16 sm:pt-20 pb-24">
-        <div className="seek-story-kicker"><span className="seek-story-pulse" /> Trust & Safety</div>
-        <h1 className="seek-story-title font-display font-extrabold text-4xl sm:text-6xl text-[var(--seek-primary)] mb-8">{title}</h1>
-        <div className="seek-legal-intro">
-          <ShieldCheck size={26} />
-          <p>Clear principles help keep SEEK useful, safe and trustworthy for everyone.</p>
-        </div>
-        <div className="seek-legal-copy">
-          {(copy[title] || []).map((para, index) => (
-            <article key={para} className="seek-legal-item">
-              <span className="seek-legal-index">{String(index + 1).padStart(2, "0")}</span>
-              <p className="font-body text-[var(--seek-primary)]/80 leading-relaxed">{para}</p>
-            </article>
+    <div style={{ background: C.bg }}>
+      <section className="mx-auto max-w-3xl px-5 sm:px-8 pt-16 pb-20">
+        <SectionLabel>Trust & Safety</SectionLabel>
+        <h1 className="font-display font-extrabold text-4xl text-[var(--seek-primary)] mb-6">{title}</h1>
+        <div className="space-y-4">
+          {(copy[title] || []).map((para) => (
+            <p key={para} className="font-body text-[var(--seek-primary)]/75 leading-relaxed">{para}</p>
           ))}
-        </div>
-        <div className="seek-legal-help">
-          <div><b>Need clarification?</b><p>Our team can help explain any part of these {title.toLowerCase()}.</p></div>
-          <a href="mailto:Support@barristerstreet.org">Contact SEEK <ArrowUpRight size={16} /></a>
         </div>
       </section>
     </div>
@@ -4904,6 +5027,7 @@ function AccountAvatar() {
   const [photo, setPhoto] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   useEffect(() => {
     const cached = getCachedAvatarUrl();
     if (cached) setPhoto(cached);
@@ -4915,36 +5039,37 @@ function AccountAvatar() {
     }).catch(() => {});
   }, []);
   return (
-    <div className="seek-profile-photo">
-      <div className="seek-profile-photo-preview">
-        {photo ? <img loading="lazy" decoding="async" src={photo} alt="Your profile" /> : <span aria-hidden="true">👤</span>}
-      </div>
-      <div className="seek-profile-photo-actions">
-        <label className="seek-profile-upload-button">
-          {busy ? "Uploading photo…" : photo ? "Change photo" : "Add profile photo"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setBusy(true); setError("");
-            try {
-              const result = await uploadProfilePhoto(file);
-              const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-              if (result.storage_path) {
-                const url = `${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/");
-                cacheAvatarUrl(url);
-                setPhoto(url);
-              }
-            } catch (err) {
-              setError(err.message || "Could not upload photo.");
-            } finally {
-              setBusy(false);
-              e.target.value = "";
+    <div className="mt-6 text-left">
+      {photo ? (
+        <img loading="lazy" decoding="async" src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
+      ) : (
+        <div className="h-24 w-24 rounded-full bg-[var(--seek-primary)]/10 mb-3" />
+      )}
+      <p className="font-display font-semibold text-sm mb-2">Profile photo</p>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setBusy(true); setError("");
+          try {
+            const result = await uploadProfilePhoto(file);
+            const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+            if (result.storage_path) {
+              const url = `${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/");
+              cacheAvatarUrl(url);
+              setPhoto(url);
             }
-          }} />
-        </label>
-        <p className="seek-profile-helper">Optional. Use a clear photo so people can recognise you.</p>
-        {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-      </div>
+          } catch (err) {
+            setError(err.message || "Could not upload photo.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <p className="mt-1 text-xs text-[var(--seek-primary)]/50">{busy ? "Uploading…" : "A simple face photo helps people recognise you."}</p>
+      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
     </div>
   );
 }
@@ -4983,7 +5108,7 @@ function AccountUsernameForm({ onSaved } = {}) {
 
   return (
     <form
-      className="seek-profile-form text-left space-y-4"
+      className="mt-6 text-left space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
         if (loading || saving) return;
@@ -5034,11 +5159,12 @@ function AccountUsernameForm({ onSaved } = {}) {
       }}
     >
       <div className="flex items-center justify-between gap-3">
-        <div><p className="font-display font-semibold text-base">Public profile</p><p className="seek-profile-helper mt-1">These details appear on your public SEEK page.</p></div>
+        <p className="font-display font-semibold text-sm">Public profile</p>
+        <span className="text-xs font-medium" style={{ color: "#d7f99b" }}>Visible to everyone</span>
       </div>
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">Display name</span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Display name</span>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -5052,7 +5178,7 @@ function AccountUsernameForm({ onSaved } = {}) {
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">Username</span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Username</span>
         <div className="flex items-center rounded-xl border bg-white px-3" style={{ borderColor: "#cbd5ce" }}>
           <span className="text-base" style={{ color: "#587064" }}>@</span>
           <input
@@ -5076,17 +5202,17 @@ function AccountUsernameForm({ onSaved } = {}) {
         </div>
       </label>
 
-      <p className="text-xs leading-relaxed seek-profile-helper">
+      <p className="text-xs leading-relaxed" style={{ color: "#d0ddd3" }}>
         3–24 characters. Use lowercase letters, numbers and underscores. No spaces; username cannot start or end with an underscore.
       </p>
       {usernameTouched && usernameChanged && (
-        <p className="text-xs seek-profile-public-url">
+        <p className="text-xs" style={{ color: "#d7f99b" }}>
           Your new public address will be /member/{username.trim().toLowerCase() || "username"}.
         </p>
       )}
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">About you <span className="font-normal opacity-75">(optional)</span></span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>About you <span className="font-normal opacity-75">(optional)</span></span>
         <textarea
           value={bio}
           onChange={(e) => setBio(e.target.value)}
@@ -5097,7 +5223,7 @@ function AccountUsernameForm({ onSaved } = {}) {
           style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
           disabled={loading || saving}
         />
-        <span className="block text-right text-xs seek-profile-helper">{bio.length}/280</span>
+        <span className="block text-right text-xs" style={{ color: "#d0ddd3" }}>{bio.length}/280</span>
       </label>
 
       <button
@@ -5124,8 +5250,8 @@ function AccountUsernameForm({ onSaved } = {}) {
       )}
 
       {!loading && loadedUsername && (
-        <p className="text-xs seek-profile-helper">
-          Your public profile: <span className="font-semibold seek-profile-public-url">/member/{loadedUsername}</span>
+        <p className="text-xs" style={{ color: "#d0ddd3" }}>
+          Your public profile: <span className="font-semibold" style={{ color: "#d7f99b" }}>/member/{loadedUsername}</span>
         </p>
       )}
     </form>
@@ -5163,22 +5289,24 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "A neighbour";
     const username = profile?.username ? `@${profile.username}` : "Username not set";
     return (
-      <div style={{ background: C.bg }} className="seek-account-page min-h-[70vh]">
-        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-8 sm:py-12">
-          <header className="mb-6">
-            <SectionLabel>My account</SectionLabel>
-            <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl" style={{ color: "var(--seek-ink)" }}>Edit your profile</h1>
-            <p className="mt-2 text-sm sm:text-base seek-profile-helper">Keep your public details up to date. Your email, phone and account activity remain private.</p>
-          </header>
-          <div className="seek-profile-editor rounded-3xl p-5 sm:p-7">
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-              <AccountAvatar />
+      <div style={{ background: C.bg }} className="min-h-[70vh]">
+        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
+          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
-                <h2 className="font-display font-bold text-xl seek-profile-heading truncate">{displayName} <SeekVerifiedCheck /></h2>
-                <p className="mt-1 text-sm seek-profile-helper truncate">{username}</p>
+                <SectionLabel>Profile</SectionLabel>
+                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <SeekVerifiedCheck /></h1>
+                <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
               </div>
             </div>
-            <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
+            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
+              <strong className="text-white">Your public profile</strong><br />
+              Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
+            </div>
+            <div className="mt-5 rounded-2xl bg-white p-5 text-[var(--seek-primary)]">
+              <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
+            </div>
           </div>
 
           <div className="mt-5 grid sm:grid-cols-2 gap-3">
