@@ -522,6 +522,124 @@ const FONTS = (
     @media (prefers-reduced-motion: reduce) {
       .seek-connector path { animation: none; }
     }
+
+    /* =========================================================
+       SEEK GLOBAL THEME / CONTRAST NORMALISATION
+       Keep this block last: it resolves legacy colour overrides
+       consistently across every route without changing behaviour.
+       ========================================================= */
+    html:not(.seek-dark) {
+      color-scheme: light;
+      --seek-page: #FAF8F3;
+      --seek-bg: #FAF8F3;
+      --seek-card: #FFFFFF;
+      --seek-copy: #26332B;
+      --seek-copy-muted: #58645C;
+      --seek-head: #274A34;
+    }
+    html:not(.seek-dark) body {
+      background: #FAF8F3 !important;
+      color: #26332B !important;
+    }
+    html:not(.seek-dark) :where(p, li, label, small, .font-body) {
+      color: inherit;
+    }
+    html:not(.seek-dark) :where(input, textarea, select) {
+      color: #26332B;
+      background-color: #FFFFFF;
+      border-color: #C9D2C8;
+    }
+    html:not(.seek-dark) :where(input, textarea, select)::placeholder {
+      color: #58645C;
+      opacity: 1;
+    }
+
+    html.seek-dark {
+      color-scheme: dark;
+      --seek-page: #202923;
+      --seek-bg: #202923;
+      --seek-card: #2B362E;
+      --seek-copy: #F7F7F1;
+      --seek-copy-muted: #D5DED5;
+      --seek-head: #F7F7F1;
+    }
+    html.seek-dark body {
+      background: #202923 !important;
+      color: #F7F7F1 !important;
+    }
+    /* Dark surfaces: cards and panels use one consistent surface tone. */
+    html.seek-dark .bg-white,
+    html.seek-dark .bg-\[var\(--seek-white\)\],
+    html.seek-dark .rounded-2xl.bg-white,
+    html.seek-dark .rounded-3xl.bg-white,
+    html.seek-dark [class*="bg-white/"],
+    html.seek-dark .seek-auth-form,
+    html.seek-dark .seek-discover-toolbar {
+      background-color: #2B362E !important;
+      border-color: rgba(213, 222, 213, .18) !important;
+    }
+    /* Text on dark cards: avoid global paragraph rules that wash out buttons. */
+    html.seek-dark .bg-white :where(h1,h2,h3,h4,strong,b),
+    html.seek-dark .bg-\[var\(--seek-white\)\] :where(h1,h2,h3,h4,strong,b),
+    html.seek-dark .rounded-2xl.bg-white :where(h1,h2,h3,h4,strong,b),
+    html.seek-dark .rounded-3xl.bg-white :where(h1,h2,h3,h4,strong,b) {
+      color: #F7F7F1 !important;
+    }
+    html.seek-dark .bg-white :where(p,li,label,small,span),
+    html.seek-dark .bg-\[var\(--seek-white\)\] :where(p,li,label,small,span),
+    html.seek-dark .rounded-2xl.bg-white :where(p,li,label,small,span),
+    html.seek-dark .rounded-3xl.bg-white :where(p,li,label,small,span) {
+      color: #D5DED5 !important;
+    }
+    html.seek-dark :where(h1,h2,h3,h4) { color: #F7F7F1; }
+    html.seek-dark :where(p,li,label,small,.font-body) { color: #D5DED5; }
+    html.seek-dark .text-\[var\(--seek-primary\)\],
+    html.seek-dark [class*="text-[var(--seek-primary)]/"] {
+      color: #F1F5EE !important;
+    }
+    html.seek-dark :where(a:not([class*="bg-"]),button:not([class*="bg-"])) {
+      text-decoration-color: currentColor;
+    }
+    /* Explicit white controls remain light with dark readable text. */
+    html.seek-dark :where(button,a).bg-white,
+    html.seek-dark :where(button,a)[class~="bg-white"] {
+      background-color: #F7F7F1 !important;
+      color: #202923 !important;
+    }
+    html.seek-dark :where(input:not([type="checkbox"]):not([type="radio"]),textarea,select) {
+      background: #F7F7F1 !important;
+      color: #202923 !important;
+      border-color: #AAB8AA !important;
+      caret-color: #202923;
+    }
+    html.seek-dark :where(input,textarea,select)::placeholder {
+      color: #58645C !important;
+      opacity: 1;
+    }
+    html.seek-dark :where(input[type="checkbox"],input[type="radio"]) {
+      accent-color: #CCF88E;
+    }
+    html.seek-dark :where(button:disabled,[aria-disabled="true"]) {
+      opacity: .68;
+    }
+    /* Preserve high-contrast text on branded/dark hero and navigation areas. */
+    html.seek-dark :where(header,.seek-community-pulse,.seek-campaign-hero,.seek-campaign-detail-hero,.seek-profile-hero,.seek-mobile-nav) {
+      color: #FFFFFF;
+    }
+    html.seek-dark .seek-community-pulse :where(span,p,strong) { color: #FFFFFF !important; }
+    html.seek-dark :where(.bg-\[var\(--seek-primary\)\],.bg-\[var\(--seek-dark\)]) :where(h1,h2,h3,p,span,label,small) {
+      color: #F7F7F1;
+    }
+    html.seek-dark :where(.bg-\[var\(--seek-success\)],.bg-\[var\(--seek-accent\)]) {
+      color: #202923 !important;
+    }
+    html.seek-dark :where(.bg-\[var\(--seek-success\)],.bg-\[var\(--seek-accent\)]) :where(span,strong,small) {
+      color: #202923 !important;
+    }
+    :where(button,a,input,textarea,select):focus-visible {
+      outline: 3px solid #CCF88E !important;
+      outline-offset: 2px;
+    }
   `}</style>
 );
 
