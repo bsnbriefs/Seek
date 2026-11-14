@@ -2781,7 +2781,7 @@ function HomePromotionCarousel({ setPage, onOpen }) {
   );
 }
 
-\nfunction ForYouPage({ setPage }) {
+function ForYouPage({ setPage }) {
   const [liveCases, setLiveCases] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
@@ -5023,6 +5023,7 @@ function AccountAvatar() {
   const [photo, setPhoto] = useState("");
   const [busy, setBusy] = useState(false);
   const [error, setError] = useState("");
+  const [deletingId, setDeletingId] = useState("");
   useEffect(() => {
     const cached = getCachedAvatarUrl();
     if (cached) setPhoto(cached);
@@ -5034,36 +5035,37 @@ function AccountAvatar() {
     }).catch(() => {});
   }, []);
   return (
-    <div className="seek-profile-photo">
-      <div className="seek-profile-photo-preview">
-        {photo ? <img loading="lazy" decoding="async" src={photo} alt="Your profile" /> : <span aria-hidden="true">👤</span>}
-      </div>
-      <div className="seek-profile-photo-actions">
-        <label className="seek-profile-upload-button">
-          {busy ? "Uploading photo…" : photo ? "Change photo" : "Add profile photo"}
-          <input type="file" accept="image/jpeg,image/png,image/webp" disabled={busy} onChange={async (e) => {
-            const file = e.target.files?.[0];
-            if (!file) return;
-            setBusy(true); setError("");
-            try {
-              const result = await uploadProfilePhoto(file);
-              const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
-              if (result.storage_path) {
-                const url = `${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/");
-                cacheAvatarUrl(url);
-                setPhoto(url);
-              }
-            } catch (err) {
-              setError(err.message || "Could not upload photo.");
-            } finally {
-              setBusy(false);
-              e.target.value = "";
+    <div className="mt-6 text-left">
+      {photo ? (
+        <img loading="lazy" decoding="async" src={photo} alt="" className="h-24 w-24 rounded-full object-cover border mb-3" />
+      ) : (
+        <div className="h-24 w-24 rounded-full bg-[var(--seek-primary)]/10 mb-3" />
+      )}
+      <p className="font-display font-semibold text-sm mb-2">Profile photo</p>
+      <input
+        type="file"
+        accept="image/jpeg,image/png,image/webp"
+        onChange={async (e) => {
+          const file = e.target.files?.[0];
+          if (!file) return;
+          setBusy(true); setError("");
+          try {
+            const result = await uploadProfilePhoto(file);
+            const base = (import.meta.env.VITE_SUPABASE_URL || "").replace(/\/$/, "");
+            if (result.storage_path) {
+              const url = `${base}/storage/v1/object/public/seek-impact/` + String(result.storage_path).split("/").map(encodeURIComponent).join("/");
+              cacheAvatarUrl(url);
+              setPhoto(url);
             }
-          }} />
-        </label>
-        <p className="seek-profile-helper">Optional. Use a clear photo so people can recognise you.</p>
-        {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
-      </div>
+          } catch (err) {
+            setError(err.message || "Could not upload photo.");
+          } finally {
+            setBusy(false);
+          }
+        }}
+      />
+      <p className="mt-1 text-xs text-[var(--seek-primary)]/50">{busy ? "Uploading…" : "A simple face photo helps people recognise you."}</p>
+      {error && <p className="text-sm text-red-600 mt-1">{error}</p>}
     </div>
   );
 }
@@ -5102,7 +5104,7 @@ function AccountUsernameForm({ onSaved } = {}) {
 
   return (
     <form
-      className="seek-profile-form text-left space-y-4"
+      className="mt-6 text-left space-y-3"
       onSubmit={async (e) => {
         e.preventDefault();
         if (loading || saving) return;
@@ -5153,11 +5155,12 @@ function AccountUsernameForm({ onSaved } = {}) {
       }}
     >
       <div className="flex items-center justify-between gap-3">
-        <div><p className="font-display font-semibold text-base">Public profile</p><p className="seek-profile-helper mt-1">These details appear on your public SEEK page.</p></div>
+        <p className="font-display font-semibold text-sm">Public profile</p>
+        <span className="text-xs font-medium" style={{ color: "#d7f99b" }}>Visible to everyone</span>
       </div>
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">Display name</span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Display name</span>
         <input
           value={name}
           onChange={(e) => setName(e.target.value)}
@@ -5171,7 +5174,7 @@ function AccountUsernameForm({ onSaved } = {}) {
       </label>
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">Username</span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>Username</span>
         <div className="flex items-center rounded-xl border bg-white px-3" style={{ borderColor: "#cbd5ce" }}>
           <span className="text-base" style={{ color: "#587064" }}>@</span>
           <input
@@ -5195,17 +5198,17 @@ function AccountUsernameForm({ onSaved } = {}) {
         </div>
       </label>
 
-      <p className="text-xs leading-relaxed seek-profile-helper">
+      <p className="text-xs leading-relaxed" style={{ color: "#d0ddd3" }}>
         3–24 characters. Use lowercase letters, numbers and underscores. No spaces; username cannot start or end with an underscore.
       </p>
       {usernameTouched && usernameChanged && (
-        <p className="text-xs seek-profile-public-url">
+        <p className="text-xs" style={{ color: "#d7f99b" }}>
           Your new public address will be /member/{username.trim().toLowerCase() || "username"}.
         </p>
       )}
 
       <label className="block space-y-1">
-        <span className="block text-sm font-medium seek-profile-label">About you <span className="font-normal opacity-75">(optional)</span></span>
+        <span className="block text-sm font-medium" style={{ color: "var(--seek-ink, #e8f1e9)" }}>About you <span className="font-normal opacity-75">(optional)</span></span>
         <textarea
           value={bio}
           onChange={(e) => setBio(e.target.value)}
@@ -5216,7 +5219,7 @@ function AccountUsernameForm({ onSaved } = {}) {
           style={{ background: "#fff", color: "#20392d", borderColor: "#cbd5ce" }}
           disabled={loading || saving}
         />
-        <span className="block text-right text-xs seek-profile-helper">{bio.length}/280</span>
+        <span className="block text-right text-xs" style={{ color: "#d0ddd3" }}>{bio.length}/280</span>
       </label>
 
       <button
@@ -5243,8 +5246,8 @@ function AccountUsernameForm({ onSaved } = {}) {
       )}
 
       {!loading && loadedUsername && (
-        <p className="text-xs seek-profile-helper">
-          Your public profile: <span className="font-semibold seek-profile-public-url">/member/{loadedUsername}</span>
+        <p className="text-xs" style={{ color: "#d0ddd3" }}>
+          Your public profile: <span className="font-semibold" style={{ color: "#d7f99b" }}>/member/{loadedUsername}</span>
         </p>
       )}
     </form>
@@ -5282,22 +5285,24 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     const displayName = profile?.full_name || userSession.user?.user_metadata?.full_name || userSession.user?.email?.split("@")[0] || "A neighbour";
     const username = profile?.username ? `@${profile.username}` : "Username not set";
     return (
-      <div style={{ background: C.bg }} className="seek-account-page min-h-[70vh]">
-        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-8 sm:py-12">
-          <header className="mb-6">
-            <SectionLabel>My account</SectionLabel>
-            <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl" style={{ color: "var(--seek-ink)" }}>Edit your profile</h1>
-            <p className="mt-2 text-sm sm:text-base seek-profile-helper">Keep your public details up to date. Your email, phone and account activity remain private.</p>
-          </header>
-          <div className="seek-profile-editor rounded-3xl p-5 sm:p-7">
-            <div className="mb-6 flex flex-col sm:flex-row sm:items-center gap-4">
-              <AccountAvatar />
+      <div style={{ background: C.bg }} className="min-h-[70vh]">
+        <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
+          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
+            <div className="flex flex-col sm:flex-row sm:items-center gap-5">
+              <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
-                <h2 className="font-display font-bold text-xl seek-profile-heading truncate">{displayName} <SeekVerifiedCheck /></h2>
-                <p className="mt-1 text-sm seek-profile-helper truncate">{username}</p>
+                <SectionLabel>Profile</SectionLabel>
+                <h1 className="mt-1 font-display font-extrabold text-2xl sm:text-3xl truncate">{displayName} <SeekVerifiedCheck /></h1>
+                <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
               </div>
             </div>
-            <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
+            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
+              <strong className="text-white">Your public profile</strong><br />
+              Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
+            </div>
+            <div className="mt-5 rounded-2xl bg-white p-5 text-[var(--seek-primary)]">
+              <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
+            </div>
           </div>
 
           <div className="mt-5 grid sm:grid-cols-2 gap-3">
