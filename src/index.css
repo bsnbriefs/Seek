@@ -2238,3 +2238,89 @@ html.seek-dark .seek-story-mission .seek-story-values {
   color: #294B43 !important;
   opacity: 1 !important;
 }
+
+
+/* =========================================================
+   GIVEAWAYS FILTERS — accessible contrast in both themes
+   These selectors are used by the updated Offers toolbar.
+   ========================================================= */
+.seek-offers-toolbar {
+  background: var(--seek-card, #FFFFFF);
+  border-color: var(--seek-border, #D7DED5);
+  color: var(--seek-ink, #26332B);
+}
+.seek-offers-filters {
+  min-width: 0;
+  max-width: 100%;
+  scrollbar-width: thin;
+  scrollbar-color: var(--seek-muted, #58645C) transparent;
+  overscroll-behavior-x: contain;
+}
+.seek-offers-filters::-webkit-scrollbar { height: 4px; }
+.seek-offers-filters::-webkit-scrollbar-thumb {
+  background: var(--seek-muted, #58645C);
+  border-radius: 999px;
+}
+.seek-offer-filter {
+  flex: 0 0 auto;
+  min-height: 40px;
+  border: 1px solid var(--seek-border, #D7DED5);
+  background: var(--seek-page, #FAF8F3);
+  color: var(--seek-copy, #35463A);
+  -webkit-tap-highlight-color: transparent;
+}
+.seek-offer-filter:hover {
+  border-color: var(--seek-success, #356747);
+  background: color-mix(in srgb, var(--seek-success, #356747) 10%, var(--seek-card, #FFFFFF));
+}
+.seek-offer-filter.is-active {
+  border-color: var(--seek-primary, #274A34);
+  background: var(--seek-primary, #274A34);
+  color: #FFFFFF;
+}
+.seek-offer-filter:focus-visible,
+.seek-offers-search:focus-visible {
+  outline: 2px solid var(--seek-success, #356747);
+  outline-offset: 2px;
+}
+.seek-offers-search {
+  min-height: 42px;
+  border: 1px solid var(--seek-border, #D7DED5);
+  background: var(--seek-page, #FAF8F3);
+  color: var(--seek-ink, #26332B);
+}
+.seek-offers-search::placeholder {
+  color: var(--seek-muted, #58645C);
+  opacity: 1;
+}
+.seek-offers-search:focus {
+  border-color: var(--seek-success, #356747);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--seek-success, #356747) 18%, transparent);
+}
+html.seek-dark .seek-offer-filter.is-active {
+  background: #CCF88E;
+  border-color: #CCF88E;
+  color: #193524;
+}
+html.seek-dark .seek-offer-filter:hover {
+  background: #39483D;
+  color: #FFFFFF;
+}
+html.seek-dark .seek-offers-search,
+html.seek-dark .seek-offer-filter:not(.is-active) {
+  background: #202923;
+  border-color: #526457;
+  color: #F7F7F1;
+}
+html.seek-dark .seek-offers-search::placeholder {
+  color: #D5DED5;
+}
+@media (max-width: 640px) {
+  .seek-offers-toolbar { padding: 12px !important; }
+  .seek-offers-filters {
+    width: 100%;
+    padding-bottom: 7px;
+    margin-bottom: 2px;
+  }
+  .seek-offers-search { width: 100%; }
+}
