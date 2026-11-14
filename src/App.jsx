@@ -12,21 +12,14 @@ class ErrorBoundary extends React.Component {
   static getDerivedStateFromError(err) {
     return { err };
   }
-  componentDidCatch(err, info) {
-    // Keep technical details in the developer console, never in the public UI.
-    console.error("SEEK page rendering error:", err, info);
-  }
   render() {
     if (this.state.err) {
       return (
-        <div className="min-h-[50vh] flex items-center justify-center px-5 py-16" role="alert">
+        <div className="min-h-[50vh] flex items-center justify-center px-5">
           <div className="max-w-md text-center">
-            <p className="font-display font-bold text-xl text-[var(--seek-primary)]">We could not load this page</p>
-            <p className="mt-2 font-body text-sm leading-relaxed text-[var(--seek-muted)]">Something interrupted this page. Your account and saved information have not been changed. Please try again.</p>
-            <div className="mt-5 flex flex-wrap items-center justify-center gap-3">
-              <button type="button" className="rounded-full bg-[var(--seek-primary)] text-white px-5 py-2.5 text-sm font-semibold" onClick={() => window.location.reload()}>Try again</button>
-              <button type="button" className="rounded-full border border-[var(--seek-border)] px-5 py-2.5 text-sm font-semibold text-[var(--seek-primary)]" onClick={() => { window.location.href = "/"; }}>Go home</button>
-            </div>
+            <p className="font-display font-bold text-xl text-[var(--seek-primary)]">Something went wrong</p>
+            <p className="mt-2 font-body text-sm text-[var(--seek-primary)]/60">{String(this.state.err.message || this.state.err)}</p>
+            <button type="button" className="mt-4 rounded-full bg-[var(--seek-primary)] text-white px-5 py-2 text-sm font-semibold" onClick={() => { this.setState({ err: null }); window.location.href = "/"; }}>Go home</button>
           </div>
         </div>
       );
@@ -2358,15 +2351,6 @@ function BsnPage({ setPage, openCampaigns = false }) {
             setPage={setPage}
             onOpen={() => document.getElementById("seek-outreach-campaign-list")?.scrollIntoView({ behavior: "smooth", block: "start" })}
           />
-          <div className="mt-5 flex justify-center">
-            <button
-              type="button"
-              onClick={() => document.getElementById("seek-outreach-campaign-list")?.scrollIntoView({ behavior: "smooth", block: "start" })}
-              className="inline-flex min-h-12 items-center justify-center gap-2 rounded-full bg-[var(--seek-accent)] px-7 py-3 text-sm font-extrabold text-[#193524] shadow-lg shadow-black/10 transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-accent)]"
-            >
-              Donate to an ongoing campaign <ArrowRight size={17} />
-            </button>
-          </div>
         </section>
         <section id="seek-outreach-campaign-list" className="mx-auto max-w-6xl scroll-mt-6 px-5 py-8 sm:py-12">
           <div className="mb-7 flex flex-wrap items-end justify-between gap-3">
@@ -2376,17 +2360,10 @@ function BsnPage({ setPage, openCampaigns = false }) {
           <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
             {OUTREACH_CAMPAIGNS.map((c, i) => {
               const cover = c.photos?.[0];
-              return <article key={c.id} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
-                <button type="button" onClick={() => setSelected(c)} className="block w-full text-left focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-[-3px] focus-visible:outline-[var(--seek-success)]" aria-label={`View ${c.title} campaign`}>
-                  <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
-                  <div className="px-5 pt-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-copy)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
-                </button>
-                <div className="px-5 pb-5 pt-3">
-                  <button type="button" onClick={() => { setSelected(c); setDonating(true); }} className="inline-flex min-h-11 w-full items-center justify-center gap-2 rounded-full bg-[var(--seek-accent)] px-5 py-3 text-sm font-extrabold text-[#193524] transition hover:-translate-y-0.5 focus-visible:outline focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-[var(--seek-success)]">
-                    Donate to this campaign <ArrowRight size={16} />
-                  </button>
-                </div>
-              </article>;
+              return <button key={c.id} type="button" onClick={() => setSelected(c)} className="seek-campaign-card group text-left" style={{ "--campaign-delay": `${i * 65}ms` }}>
+                <div className="seek-campaign-card-media">{cover ? <img src={cover} alt="" loading="lazy" /> : <div className="seek-campaign-card-placeholder"><span>{c.id === "pad-a-girl" ? "01" : c.id === "back-to-school" ? "02" : String(i + 1).padStart(2,"0")}</span></div>}<span className="seek-campaign-card-arrow"><ArrowUpRight size={19} /></span></div>
+                <div className="p-5"><p className="text-[10px] font-extrabold uppercase tracking-[.18em] text-[var(--seek-success)]">Foundation programme</p><h3 className="mt-2 font-display text-xl font-extrabold text-[var(--seek-primary)]">{c.title}</h3><p className="mt-2 line-clamp-2 text-sm leading-6 text-[var(--seek-primary)]">{c.blurb}</p><span className="mt-4 inline-flex items-center gap-2 text-sm font-extrabold text-[var(--seek-success)]">View campaign <ArrowRight size={15} /></span></div>
+              </button>;
             })}
           </div>
           {OUTREACH_CAMPAIGNS.length === 0 && <div className="rounded-3xl border border-[var(--seek-light)] bg-white p-8 text-center"><h3 className="font-display text-xl font-bold text-[var(--seek-primary)]">No campaigns available yet</h3><p className="mt-2 text-sm text-[var(--seek-accent)]">Please check back soon for new community programmes.</p></div>}
@@ -2952,19 +2929,19 @@ function OffersPage({ setPage }) {
       </section>
 
       <section className="mx-auto max-w-5xl px-5 sm:px-8 pb-20">
-        <div className="seek-offers-toolbar rounded-3xl border p-4 sm:p-5">
+        <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/8 p-4 sm:p-5">
           <div className="flex flex-col sm:flex-row gap-3 sm:items-center sm:justify-between">
-            <div className="seek-offers-filters flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
+            <div className="flex gap-2 overflow-x-auto pb-1" aria-label="Giveaway categories">
               {tabs.map(([value, label]) => {
                 const active = offerFilter === value;
                 return (
-                  <button key={value} type="button" onClick={() => selectFilter(value)} aria-pressed={active} className={"seek-offer-filter shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "is-active" : "")}>
+                  <button key={value} type="button" onClick={() => selectFilter(value)} className={"shrink-0 rounded-full px-4 py-2 text-sm font-semibold transition " + (active ? "bg-[var(--seek-success)] text-white" : "bg-[var(--seek-white)] text-[var(--seek-primary)]/70 hover:bg-[var(--seek-light)]")}>
                     {label}
                   </button>
                 );
               })}
             </div>
-            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="seek-offers-search w-full sm:w-56 rounded-full px-4 py-2.5 text-sm outline-none" />
+            <input value={q} onChange={(e) => setQ(e.target.value)} placeholder="Search giveaways" aria-label="Search giveaways" className="w-full sm:w-56 rounded-full border border-[var(--seek-primary)]/10 bg-[var(--seek-white)] px-4 py-2.5 text-sm outline-none focus:border-[var(--seek-success)]" />
           </div>
         </div>
 
@@ -3414,7 +3391,6 @@ function SeekHelpPage({ setPage }) {
 function SeekHelpRequestPage() {
   const [submitted, setSubmitted] = useState(false);
   const [error, setError] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
   const [deletingId, setDeletingId] = useState("");
   const [loading, setLoading] = useState(false);
   const [uploadProgress, setUploadProgress] = useState("");
@@ -4811,9 +4787,24 @@ function LegalPage({ title }) {
             </article>
           ))}
         </div>
+        <div className="mt-7 rounded-2xl border border-[var(--seek-primary)]/12 bg-[var(--seek-card)] p-5 sm:p-6 flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+          <div className="min-w-0">
+            <p className="font-display font-bold text-base text-[var(--seek-primary)]">Want to review the supporting documents?</p>
+            <p className="mt-1 text-sm leading-relaxed text-[var(--seek-ink)]/70">
+              Download the supplementary agreements, consent forms and compliance procedures in one PDF.
+            </p>
+          </div>
+          <a
+            href="/legal/SEEK-Supplementary-Legal-and-Compliance-Documents.pdf"
+            download="SEEK-Supplementary-Legal-and-Compliance-Documents.pdf"
+            className="inline-flex shrink-0 items-center justify-center gap-2 rounded-xl bg-[var(--seek-primary)] px-4 py-3 text-sm font-bold text-white hover:opacity-90"
+          >
+            Download documents <ArrowUpRight size={16} />
+          </a>
+        </div>
         <div className="seek-legal-help">
           <div><b>Need clarification?</b><p>Our team can help explain any part of these {title.toLowerCase()}.</p></div>
-          <a href="mailto:Support@barristerstreet.org">Contact SEEK <ArrowUpRight size={16} /></a>
+          <a href="mailto:support@barristerstreet.org">Contact SEEK <ArrowUpRight size={16} /></a>
         </div>
       </section>
     </div>
@@ -4988,8 +4979,8 @@ function ImpactPage({ setPage }) {
           setThanks(appreciation || []);
           setLiveStats(live || null);
         }
-      } catch (_err) {
-        if (!cancelled) setError("Community stories are temporarily unavailable. You can still support the Foundation’s ongoing outreach campaigns.");
+      } catch (err) {
+        if (!cancelled) setError(err.message || "Could not load impact stories.");
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -5035,17 +5026,10 @@ function ImpactPage({ setPage }) {
       <section className="seek-reels-section pb-16 pt-3 sm:pt-6">
         <div className="seek-reels-heading mx-auto mb-4 flex max-w-[520px] items-center justify-between px-5">
           <div><p className="text-[10px] font-extrabold uppercase tracking-[.2em] text-[var(--seek-success)]">Community stories</p><h2 className="mt-1 font-display text-xl font-extrabold tracking-tight text-[var(--seek-primary)]">Watch the impact. Feel the difference.</h2></div>
-          <span className="text-xs font-semibold text-[var(--seek-primary)]/60">{loading ? "Loading…" : error ? "Temporarily unavailable" : `${impactReels.length} stories`}</span>
+          <span className="text-xs font-semibold text-[var(--seek-primary)]/50">{loading ? "Loading…" : `${impactReels.length} stories`}</span>
         </div>
         {loading && <div className="seek-feed-skeleton mx-auto h-[62svh] max-w-[420px] rounded-[28px]" />}
-        {error && (
-          <div className="mx-auto max-w-md rounded-3xl border border-[var(--seek-primary)]/10 bg-[var(--seek-card)] p-6 text-center shadow-sm">
-            <p className="text-sm leading-6 text-[var(--seek-copy)]">{error}</p>
-            <button type="button" onClick={() => { setPage("outreach"); window.scrollTo({ top: 0, behavior: "smooth" }); }} className="mt-5 inline-flex min-h-11 items-center justify-center gap-2 rounded-full bg-[var(--seek-accent)] px-5 py-3 text-sm font-extrabold text-[#193524]">
-              Donate to ongoing campaigns <ArrowRight size={16} />
-            </button>
-          </div>
-        )}
+        {error && <p className="mx-auto max-w-md rounded-2xl bg-white p-4 text-sm text-red-700">{error}</p>}
         {!loading && !error && impactReels.length === 0 && <div className="mx-auto max-w-md px-5 py-12 text-center"><div className="mx-auto flex h-14 w-14 items-center justify-center rounded-2xl bg-[var(--seek-light)] text-[var(--seek-success)]"><Sparkles size={24} /></div><h3 className="mt-4 font-display text-lg font-bold text-[var(--seek-primary)]">Stories are on their way.</h3><p className="mt-2 text-sm leading-6 text-[var(--seek-primary)]/60">Photos and videos from community work will appear here.</p></div>}
         <div className="seek-reels-feed" aria-label="Swipe through SEEK community impact stories">
           {impactReels.map((request) => <LiveSupportCard key={request.id} request={request} setPage={setPage} />)}
@@ -5329,7 +5313,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
-          <div className="seek-account-profile-shell rounded-[2rem] p-6 sm:p-8">
+          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
@@ -5338,16 +5322,40 @@ function AccountPage({ setPage, userSession, setUserSession }) {
                 <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
               </div>
             </div>
-            <div className="mt-5 rounded-2xl p-5 seek-account-form-card">
+            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
+              <strong className="text-white">Your public profile</strong><br />
+              Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
+            </div>
+            <div className="mt-5 rounded-2xl bg-white p-5 text-[var(--seek-primary)]">
               <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
             </div>
           </div>
 
-          <div className="seek-account-shortcuts mt-4 overflow-hidden rounded-2xl border divide-y">
-            <button type="button" onClick={() => setPage("my-seek")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>My SEEK dashboard</span><ArrowRight size={17} /></button>
-            <button type="button" onClick={() => setPage("my-requests")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>My requests</span><ArrowRight size={17} /></button>
-            <button type="button" onClick={() => setPage("notifications")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>Notifications</span><ArrowRight size={17} /></button>
-            <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>Sign out</span><ArrowRight size={17} /></button>
+          <div className="mt-5 grid sm:grid-cols-2 gap-3">
+            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Your space</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My SEEK</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">See your requests, giving, giveaways, interests and activity.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open My SEEK <ArrowRight size={15} /></span>
+            </button>
+            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Requests</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My requests</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">View and manage requests connected to your account.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">View requests <ArrowRight size={15} /></span>
+            </button>
+            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Updates</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Notifications</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Keep up with responses, interests and other SEEK updates.</p>
+              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open notifications <ArrowRight size={15} /></span>
+            </button>
+            <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5">
+              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Account</p>
+              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Keep your account secure</h2>
+              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Your email is used for account activity and private updates.</p>
+              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[var(--seek-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--seek-primary)] hover:bg-[var(--seek-white)]">Sign out</button>
+            </div>
           </div>
         </section>
       </div>
@@ -5812,7 +5820,6 @@ function MyRequestsPage({ setPage, userSession }) {
   const [items, setItems] = useState([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState("");
-  const [retryCount, setRetryCount] = useState(0);
   const [deletingId, setDeletingId] = useState("");
   const [q, setQ] = useState("");
   const [statusFilter, setStatusFilter] = useState("all");
@@ -5838,7 +5845,7 @@ function MyRequestsPage({ setPage, userSession }) {
     return () => {
       cancelled = true;
     };
-  }, [userSession, retryCount]);
+  }, [userSession]);
 
   if (!userSession?.access_token) {
     return (
@@ -5870,7 +5877,7 @@ function MyRequestsPage({ setPage, userSession }) {
         </div>
         <div className="seek-request-account mb-7">
           <div className="relative shrink-0">
-            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" onError={() => setMyAvatar("")} className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
+            {myAvatar ? <img loading="lazy" decoding="async" src={myAvatar} alt="" className="h-12 w-12 rounded-full object-cover" /> : <div className="h-12 w-12 rounded-full bg-[var(--seek-primary)]/10" />}
             <span className="absolute -right-1 -bottom-1"><SeekVerifiedCheck /></span>
           </div>
           <p className="font-body text-sm text-[var(--seek-primary)]/60 flex items-center gap-1.5">Signed in as {userSession.user?.email} <SeekVerifiedCheck /></p>
@@ -5880,34 +5887,14 @@ function MyRequestsPage({ setPage, userSession }) {
           <p className="font-body text-sm text-[var(--seek-primary)]/50">Loading your requests…</p>
         )}
 
-        {error && (() => {
-          const quotaBlocked = /exceed_cached_egress_quota|restricted due to the following violations|egress.?quota/i.test(String(error));
-          return (
-            <div
-              className="seek-request-load-error mb-6 rounded-2xl p-5 sm:p-6"
-              role="alert"
-              aria-live="polite"
-              style={{ background: "#FFF4F1", border: "1px solid #E9B8AA", color: "#713B31" }}
-            >
-              <p className="text-sm font-bold" style={{ color: "#713B31" }}>
-                {quotaBlocked ? "Request tracking is temporarily unavailable." : "We could not load your requests."}
-              </p>
-              <p className="mt-2 text-sm leading-6" style={{ color: "#713B31" }}>
-                {quotaBlocked
-                  ? "Your requests are safe. The service that loads them is temporarily restricted. Please try again later, or contact SEEK support if the problem continues."
-                  : "Please check your connection and try again. If the problem continues, contact SEEK support."}
-              </p>
-              <button
-                type="button"
-                onClick={() => setRetryCount((count) => count + 1)}
-                className="mt-4 inline-flex min-h-10 items-center justify-center rounded-full px-5 py-2 text-sm font-bold"
-                style={{ background: "#274A34", color: "#FFFFFF" }}
-              >
-                Try again
-              </button>
-            </div>
-          );
-        })()}
+        {error && (
+          <div className="rounded-2xl bg-red-50 border border-red-100 p-5 mb-6">
+            <p className="text-sm text-red-700">{error}</p>
+            <p className="mt-2 text-xs text-red-600/80">
+              If this is your first time using tracking, the database function may still need to be created (see setup notes).
+            </p>
+          </div>
+        )}
 
         {!loading && !error && items.length === 0 && (
           <div className="rounded-3xl bg-white border border-[var(--seek-primary)]/08 p-8 text-center">
@@ -6234,13 +6221,11 @@ function LiveTicker() {
       if (inFlight || document.visibilityState === "hidden") return;
       inFlight = true;
       try {
-        // Keep the live rail lightweight: avoid downloading aggregate donation
-        // history (up to 2,000 rows) on every refresh. These compact feeds are
-        // sufficient to show recent public activity without unnecessary egress.
-        const [reqRows, offerRows, gifts] = await Promise.all([
-          listPublishedRequests(5).catch(() => []),
+        const [reqRows, offerRows, stats, gifts] = await Promise.all([
+          listPublishedRequests(8).catch(() => []),
           listPublicOffers().catch(() => []),
-          listRecentGifts(5).catch(() => []),
+          getSeekLiveStats().catch(() => null),
+          listRecentGifts(10).catch(() => []),
         ]);
 
         const giftBits = (Array.isArray(gifts) ? gifts : [])
@@ -6274,6 +6259,7 @@ function LiveTicker() {
         });
 
         const activity = [
+          ...(stats?.raised > 0 ? [{ key: "stats-" + Math.round(stats.raised) + "-" + (stats.donationCount || 0), label: "COMMUNITY IMPACT", text: "₦" + Math.round(stats.raised).toLocaleString() + " raised through " + (stats.donationCount || 0) + " gifts", icon: "💚" }] : []),
           ...giftBits,
           ...requestBits,
           ...offerBits,
@@ -6301,19 +6287,12 @@ function LiveTicker() {
     const start = () => {
       if (intervalId) window.clearInterval(intervalId);
       load();
-      intervalId = window.setInterval(load, 180000);
+      intervalId = window.setInterval(load, 45000);
     };
-    let lastRefreshAt = 0;
-    const refreshIfDue = () => {
-      const now = Date.now();
-      if (document.visibilityState === "visible" && now - lastRefreshAt >= 120000) {
-        lastRefreshAt = now;
-        load();
-      }
+    const onVisibility = () => {
+      if (document.visibilityState === "visible") load();
     };
-    const onVisibility = refreshIfDue;
-    const onFocus = refreshIfDue;
-    lastRefreshAt = Date.now();
+    const onFocus = () => load();
     start();
     document.addEventListener("visibilitychange", onVisibility);
     window.addEventListener("focus", onFocus);
@@ -6325,16 +6304,12 @@ function LiveTicker() {
     };
   }, []);
 
-  const displayItems = items.length ? items : [
-    { key: "community-awaiting-activity", label: "SEEK COMMUNITY", text: "New requests, offers and community support will appear here.", icon: "💚" },
-    { key: "community-share-support", label: "GET INVOLVED", text: "Ask for what you need. Offer what you can.", icon: "🤝" },
-  ];
-  // Duplicate the feed for a seamless continuous ticker, including fallback mode.
-  const motionItems = [...displayItems, ...displayItems];
+  if (!items.length) return loading ? <div className="h-0" aria-hidden="true" /> : <div className="h-0" aria-hidden="true" />;
+  const motionItems = items.length > 1 ? [...items, ...items] : items;
 
   return (
     <>
-      <section className="seek-community-pulse relative z-[80] w-full overflow-hidden text-white" aria-label="SEEK community activity">
+      <section className="seek-community-pulse fixed top-16 inset-x-0 z-[105] overflow-hidden text-white" aria-label="SEEK community activity">
         <div className="flex min-h-9 items-center gap-3 px-3 sm:px-5">
           <div className="flex shrink-0 items-center gap-2 border-r border-white/15 pr-3">
             <span className="relative flex h-2.5 w-2.5 items-center justify-center" aria-hidden="true">
@@ -6344,7 +6319,7 @@ function LiveTicker() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className="seek-ticker-track seek-ticker-interactive">
+            <div className={(items.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>
@@ -6358,6 +6333,7 @@ function LiveTicker() {
           <span className="hidden shrink-0 text-[9px] text-white/45 sm:block" title={updatedAt ? "Updated " + updatedAt.toLocaleTimeString() : "Updating"}>UPDATING</span>
         </div>
       </section>
+      <div className="h-9" aria-hidden="true" />
     </>
   );
 }
@@ -6824,7 +6800,7 @@ useEffect(() => {
   const pages = {
     home: <ForYouPage setPage={setPage} />,
     bsn: <BsnPage setPage={setPage} />,
-    outreach: <BsnPage setPage={setPage} openCampaigns />,
+    outreach: <BsnPage setPage={setPage} openCampaigns />
     wallet: <WalletPage setPage={setPage} userSession={userSession} />,
     discover: <DiscoverPage setPage={setPage} />,
     offers: <OffersPage setPage={setPage} />,
@@ -6883,10 +6859,10 @@ useEffect(() => {
     <div className="font-body min-h-screen pb-36 lg:pb-0" style={{ background: C.white, color: C.ink }}>
       {FONTS}
       <Navbar page={page} setPage={setPage} userSession={userSession} />
-      <LiveTicker />
       <FeatureStrip page={page} setPage={setPage} />
       <CookieBanner />
       <InstallSeekPrompt />
+      <LiveTicker />
 
       <link rel="preconnect" href={import.meta.env.VITE_SUPABASE_URL || ""} />
       <link rel="dns-prefetch" href={import.meta.env.VITE_SUPABASE_URL || ""} />
