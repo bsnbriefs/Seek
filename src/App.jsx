@@ -5329,7 +5329,7 @@ function AccountPage({ setPage, userSession, setUserSession }) {
     return (
       <div style={{ background: C.bg }} className="min-h-[70vh]">
         <section className="mx-auto max-w-3xl px-5 sm:px-8 py-10 sm:py-14">
-          <div className="rounded-[2rem] bg-[var(--seek-primary)] text-white p-6 sm:p-8">
+          <div className="seek-account-profile-shell rounded-[2rem] p-6 sm:p-8">
             <div className="flex flex-col sm:flex-row sm:items-center gap-5">
               <div className="shrink-0"><AccountAvatar /></div>
               <div className="min-w-0">
@@ -5338,40 +5338,16 @@ function AccountPage({ setPage, userSession, setUserSession }) {
                 <p className="mt-1 text-sm text-[var(--seek-mint)] font-semibold truncate">{username}</p>
               </div>
             </div>
-            <div className="mt-5 rounded-2xl bg-white/10 p-4 text-sm text-white/75">
-              <strong className="text-white">Your public profile</strong><br />
-              Your name, photo, username and bio can be public. Your email, phone, gifts, requests and notifications stay private to your account.
-            </div>
-            <div className="mt-5 rounded-2xl bg-white p-5 text-[var(--seek-primary)]">
+            <div className="mt-5 rounded-2xl p-5 seek-account-form-card">
               <AccountUsernameForm onSaved={(saved) => setProfile((prev) => ({ ...(prev || {}), ...(saved || {}) }))} />
             </div>
           </div>
 
-          <div className="mt-5 grid sm:grid-cols-2 gap-3">
-            <button type="button" onClick={() => setPage("my-seek")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Your space</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My SEEK</h2>
-              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">See your requests, giving, giveaways, interests and activity.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open My SEEK <ArrowRight size={15} /></span>
-            </button>
-            <button type="button" onClick={() => setPage("my-requests")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Requests</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">My requests</h2>
-              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">View and manage requests connected to your account.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">View requests <ArrowRight size={15} /></span>
-            </button>
-            <button type="button" onClick={() => setPage("notifications")} className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5 text-left hover:shadow-md transition">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Updates</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Notifications</h2>
-              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Keep up with responses, interests and other SEEK updates.</p>
-              <span className="mt-4 inline-flex items-center gap-1 text-sm font-semibold text-[var(--seek-success)]">Open notifications <ArrowRight size={15} /></span>
-            </button>
-            <div className="rounded-2xl bg-white border border-[var(--seek-primary)]/10 p-5">
-              <p className="text-[10px] uppercase tracking-widest font-bold text-[var(--seek-success)]">Account</p>
-              <h2 className="mt-1 font-display font-bold text-lg text-[var(--seek-primary)]">Keep your account secure</h2>
-              <p className="mt-1 text-sm text-[var(--seek-primary)]/55">Your email is used for account activity and private updates.</p>
-              <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="mt-4 rounded-full border border-[var(--seek-primary)]/15 px-4 py-2 text-sm font-semibold text-[var(--seek-primary)] hover:bg-[var(--seek-white)]">Sign out</button>
-            </div>
+          <div className="seek-account-shortcuts mt-4 overflow-hidden rounded-2xl border divide-y">
+            <button type="button" onClick={() => setPage("my-seek")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>My SEEK dashboard</span><ArrowRight size={17} /></button>
+            <button type="button" onClick={() => setPage("my-requests")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>My requests</span><ArrowRight size={17} /></button>
+            <button type="button" onClick={() => setPage("notifications")} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>Notifications</span><ArrowRight size={17} /></button>
+            <button type="button" onClick={() => { userLogout(); setUserSession(null); }} className="w-full flex items-center justify-between px-5 py-4 text-left"><span>Sign out</span><ArrowRight size={17} /></button>
           </div>
         </section>
       </div>
