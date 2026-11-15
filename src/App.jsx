@@ -488,18 +488,12 @@ const FONTS = (
       100% { transform: translateX(-50%); }
     }
     .seek-ticker-track {
-      display: flex;
-      width: max-content;
-      min-width: 0;
-      flex: 0 0 auto;
+      display: inline-flex;
       gap: 2.5rem;
-      animation: seekTicker 34s linear infinite !important;
-      animation-play-state: running !important;
+      animation: seekTicker 80s linear infinite;
       white-space: nowrap;
-      will-change: transform;
-      transform: translate3d(0,0,0);
     }
-    .seek-ticker-interactive { width: max-content; min-width: 0; }
+    .seek-ticker-interactive { width: max-content; min-width: 100%; }
     .seek-ticker-single { display: inline-flex; align-items: center; gap: 2.5rem; white-space: nowrap; }
     .seek-community-pulse:focus-within .seek-ticker-track,
     .seek-community-pulse:hover .seek-ticker-track { animation-play-state: paused; }
@@ -507,7 +501,9 @@ const FONTS = (
     @media (max-width: 640px) {
       .seek-ticker-track { gap: 1.5rem; animation-duration: 58s; }
     }
-    /* Community Pulse is an intentional live marquee and remains animated. */
+    @media (prefers-reduced-motion: reduce) {
+      .seek-ticker-track { animation: none; }
+    }
     .seek-live-dot {
       width: 10px;
       height: 10px;
@@ -640,36 +636,29 @@ const FONTS = (
     html.seek-dark :where(.bg-\[var\(--seek-success\)],.bg-\[var\(--seek-accent\)]) :where(span,strong,small) {
       color: #202923 !important;
     }
-    /* Compact classic appearance switch with guaranteed contrast in both themes. */
+    /* Compact, understated appearance switch; avoid the oversized ring treatment. */
     .seek-theme-toggle {
-      width: 34px !important;
-      height: 34px !important;
-      min-width: 34px !important;
-      min-height: 34px !important;
-      display: inline-flex !important;
-      align-items: center !important;
-      justify-content: center !important;
-      border: 1px solid rgba(41,75,67,.22) !important;
-      border-radius: 50% !important;
+      width: 40px !important;
+      height: 40px !important;
+      min-width: 40px !important;
+      min-height: 40px !important;
+      border: 1px solid rgba(255,255,255,.28) !important;
+      border-radius: 9999px !important;
       padding: 0 !important;
       box-shadow: none !important;
-      background: #FFFFFF !important;
-      color: #294B43 !important;
-      line-height: 1 !important;
+      background: transparent !important;
+      color: inherit !important;
     }
-    .seek-theme-toggle svg { width: 17px !important; height: 17px !important; stroke-width: 1.9 !important; display: block !important; }
+    .seek-theme-toggle svg { width: 19px; height: 19px; stroke-width: 1.8; }
     html:not(.seek-dark) .seek-theme-toggle {
-      background: #FFFFFF !important;
-      color: #294B43 !important;
-      border-color: rgba(41,75,67,.28) !important;
+      color: #FFFFFF !important;
+      border-color: rgba(255,255,255,.38) !important;
     }
     html.seek-dark .seek-theme-toggle {
-      background: #2B362E !important;
-      color: #D7F7A0 !important;
-      border-color: rgba(215,247,160,.38) !important;
+      color: #F7F7F1 !important;
+      border-color: rgba(247,247,241,.42) !important;
     }
-    .seek-theme-toggle:hover { background: #F1F5EE !important; }
-    html.seek-dark .seek-theme-toggle:hover { background: #3A493D !important; }
+    .seek-theme-toggle:hover { background: rgba(255,255,255,.10) !important; }
 
     /* Auth actions must remain readable on the green sign-in card in both themes. */
     .seek-auth-form button:not([type="submit"]) {
@@ -3428,22 +3417,29 @@ function FundraiserPage({ setPage }) {
   }
 
   return (
-    <div className="mx-auto max-w-lg px-5 py-8">
-      <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Start a fundraiser</h1>
-      <p className="mt-1 text-sm text-[var(--seek-primary)]/60">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
-      <form onSubmit={submit} className="mt-6 space-y-4">
-        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <select value={category} onChange={(e) => setCategory(e.target.value)} className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm">
+    <div className="seek-fundraiser-page mx-auto max-w-lg px-5 py-8">
+      <div className="seek-fundraiser-intro">
+        <span className="seek-fundraiser-kicker">YOUR STORY CAN MAKE A DIFFERENCE</span>
+        <h1 className="font-display font-bold text-2xl text-[var(--seek-primary)]">Start a fundraiser</h1>
+        <p className="mt-1 text-sm text-[var(--seek-primary)]/70">Raise money for a cause. SEEK admin reviews every fundraiser before it goes public.</p>
+      </div>
+      <form onSubmit={submit} className="seek-fundraiser-form mt-6 space-y-4">
+        <input value={title} onChange={(e) => setTitle(e.target.value)} placeholder="Fundraiser title" aria-label="Fundraiser title" required className="seek-fundraiser-field" />
+        <select value={category} onChange={(e) => setCategory(e.target.value)} aria-label="Fundraiser category" className="seek-fundraiser-field">
           {categories.map((c) => <option key={c} value={c}>{c}</option>)}
         </select>
-        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" type="number" required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." rows={5} required className="w-full rounded-xl border border-[var(--seek-primary)]/15 p-4 text-sm" />
-        <input type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} className="w-full text-sm" />
-        <p className="text-xs text-[var(--seek-primary)]/50">Add a photo or video (up to 3)</p>
-        {error && <p className="text-sm text-red-600">{error}</p>}
-        <button type="submit" disabled={loading} className="w-full rounded-full bg-[var(--seek-success)] text-white py-3 text-sm font-bold">
+        <input value={goal} onChange={(e) => setGoal(e.target.value)} placeholder="Goal amount (₦)" aria-label="Goal amount" type="number" min="1" required className="seek-fundraiser-field" />
+        <input value={location} onChange={(e) => setLocation(e.target.value)} placeholder="Location" aria-label="Location" className="seek-fundraiser-field" />
+        <textarea value={story} onChange={(e) => setStory(e.target.value)} placeholder="Tell your story..." aria-label="Tell your story" rows={5} required className="seek-fundraiser-field seek-fundraiser-story" />
+        <div className="seek-fundraiser-upload">
+          <label htmlFor="seek-fundraiser-media">Add photos or video</label>
+          <input id="seek-fundraiser-media" type="file" accept="image/*,video/*" multiple onChange={(e) => setFiles(Array.from(e.target.files || []).slice(0, 3))} />
+          <p>{files.length ? `${files.length} file${files.length === 1 ? "" : "s"} selected` : "You can add up to 3 supporting files."}</p>
+        </div>
+        {error && <p className="text-sm text-red-600" role="alert">{error}</p>}
+        <button type="submit" disabled={loading} className="seek-fundraiser-submit">
           {loading ? "Submitting..." : "Start fundraiser"}
+          {!loading && <span aria-hidden="true">→</span>}
         </button>
       </form>
     </div>
@@ -6478,8 +6474,7 @@ function LiveTicker() {
   const displayItems = items.length
     ? items
     : [{ key: "community-pulse-welcome", label: "SEEK COMMUNITY", text: "Ask for what you need. Offer what you can.", icon: "💚" }];
-  // Duplicate even the fallback item so the ticker always has a continuous moving track.
-  const motionItems = [...displayItems, ...displayItems];
+  const motionItems = displayItems.length > 1 ? [...displayItems, ...displayItems] : displayItems;
 
   return (
     <>
@@ -6494,7 +6489,7 @@ function LiveTicker() {
             <span className="text-[9px] font-extrabold uppercase tracking-[0.16em] text-[var(--seek-light)]">Community pulse</span>
           </div>
           <div className="min-w-0 flex-1 overflow-hidden" tabIndex={0} aria-label="Recent public SEEK activity. Pause animation by hovering or focusing.">
-            <div className={"seek-ticker-track seek-ticker-interactive"}>
+            <div className={(displayItems.length > 1 ? "seek-ticker-track" : "seek-ticker-single") + " seek-ticker-interactive"}>
               {motionItems.map((item, index) => (
                 <span key={item.key + "-" + index} className="inline-flex items-center gap-2 text-[11px] sm:text-xs text-white/85">
                   <span aria-hidden="true">{item.icon}</span>

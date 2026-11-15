@@ -2493,98 +2493,45 @@ html.seek-dark .seek-theme-toggle {
   color: #CCF88E !important; box-shadow: 0 2px 12px rgba(0,0,0,.35) !important;
 }
 
-
-/* Final correction: Community Pulse must move even when only the fallback item exists. */
-.seek-community-pulse .seek-ticker-track {
-  display: inline-flex !important;
-  width: max-content !important;
-  min-width: max-content !important;
-  white-space: nowrap !important;
-  animation: seekTicker 30s linear infinite !important;
-  animation-play-state: running !important;
-  will-change: transform;
-}
-.seek-community-pulse:hover .seek-ticker-track,
-.seek-community-pulse:focus-within .seek-ticker-track { animation-play-state: paused !important; }
-@media (prefers-reduced-motion: reduce) {
-  .seek-community-pulse .seek-ticker-track { animation: none !important; }
-}
-
-/* Final appearance-toggle fix: preserve a visible control and icon in both themes. */
-.seek-theme-toggle {
-  width: 36px !important;
-  height: 36px !important;
-  min-width: 36px !important;
-  min-height: 36px !important;
-  flex: 0 0 36px !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  border: 1px solid #B8C9BC !important;
-  background: #FFFFFF !important;
-  color: #244B37 !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-  box-shadow: 0 1px 4px rgba(0,0,0,.12) !important;
-}
-.seek-theme-toggle svg,
-.seek-theme-toggle .seek-theme-icon {
-  display: block !important;
-  width: 18px !important;
-  height: 18px !important;
-  min-width: 18px !important;
-  min-height: 18px !important;
-  color: #244B37 !important;
-  stroke: #244B37 !important;
-  fill: none !important;
-  opacity: 1 !important;
-  visibility: visible !important;
-}
-html.seek-dark .seek-theme-toggle {
-  background: #2B362E !important;
-  color: #CCF88E !important;
-  border-color: #819A87 !important;
-}
-html.seek-dark .seek-theme-toggle svg,
-html.seek-dark .seek-theme-toggle .seek-theme-icon {
-  color: #CCF88E !important;
-  stroke: #CCF88E !important;
-}
-.seek-theme-toggle:focus-visible { outline: 2px solid #78A94B !important; outline-offset: 3px !important; }
-
-
-/* Final overrides: Community Pulse motion and compact theme control. */
-.seek-community-pulse .seek-ticker-track {
-  display: flex !important;
-  width: max-content !important;
-  min-width: 0 !important;
-  flex: 0 0 auto !important;
-  white-space: nowrap !important;
-  will-change: transform;
-  animation: seekTicker 34s linear infinite !important;
-  animation-play-state: running !important;
-}
-.seek-community-pulse:hover .seek-ticker-track,
-.seek-community-pulse:focus-within .seek-ticker-track {
-  animation-play-state: paused !important;
-}
-.seek-theme-toggle {
-  width: 34px !important;
-  height: 34px !important;
-  min-width: 34px !important;
-  min-height: 34px !important;
-  padding: 0 !important;
-  border-radius: 50% !important;
-  display: inline-flex !important;
-  align-items: center !important;
-  justify-content: center !important;
-  background: #FFFFFF !important;
-  color: #294B43 !important;
-  border: 1px solid rgba(41,75,67,.28) !important;
-  box-shadow: none !important;
-}
-.seek-theme-toggle svg { width: 17px !important; height: 17px !important; display: block !important; }
-html:not(.seek-dark) .seek-theme-toggle { background: #FFFFFF !important; color: #294B43 !important; }
-html.seek-dark .seek-theme-toggle { background: #2B362E !important; color: #D7F7A0 !important; border-color: rgba(215,247,160,.38) !important; }
+/* Fundraiser form: clear hierarchy, subtle entrance motion, and reliable theme contrast. */
+.seek-fundraiser-page { position: relative; isolation: isolate; }
+.seek-fundraiser-intro { animation: seek-fundraiser-enter .55s cubic-bezier(.2,.8,.2,1) both; }
+.seek-fundraiser-kicker { display:inline-block; margin-bottom:.55rem; color:#426B50; font-size:.66rem; font-weight:800; letter-spacing:.16em; }
+.seek-fundraiser-form { padding:1rem; border:1px solid rgba(39,74,52,.16); border-radius:1.35rem; background:#FFFFFF; box-shadow:0 12px 34px rgba(24,55,37,.07); }
+.seek-fundraiser-field { display:block; width:100%; min-height:3.65rem; padding:.95rem 1rem; border:1px solid #AAB8AE; border-radius:1rem; background:#FFFFFF; color:#20392D; font:inherit; font-size:.95rem; outline:none; transition:border-color .2s ease, box-shadow .2s ease, transform .2s ease, background .2s ease; }
+.seek-fundraiser-field::placeholder { color:#68766D; opacity:1; }
+.seek-fundraiser-field:focus { border-color:#4C875E; box-shadow:0 0 0 3px rgba(151,210,78,.25); transform:translateY(-1px); }
+.seek-fundraiser-form > * { animation:seek-fundraiser-enter .5s cubic-bezier(.2,.8,.2,1) both; }
+.seek-fundraiser-form > *:nth-child(2) { animation-delay:60ms; }
+.seek-fundraiser-form > *:nth-child(3) { animation-delay:120ms; }
+.seek-fundraiser-form > *:nth-child(4) { animation-delay:180ms; }
+.seek-fundraiser-form > *:nth-child(5) { animation-delay:240ms; }
+.seek-fundraiser-form > *:nth-child(6) { animation-delay:300ms; }
+.seek-fundraiser-form > *:nth-child(7) { animation-delay:360ms; }
+.seek-fundraiser-story { min-height:9rem; resize:vertical; }
+.seek-fundraiser-upload { padding:1rem; border:1px dashed #8DA797; border-radius:1rem; background:#F5F8F4; color:#294B35; }
+.seek-fundraiser-upload label { display:block; margin-bottom:.55rem; font-weight:750; font-size:.9rem; }
+.seek-fundraiser-upload input { width:100%; max-width:100%; color:#294B35; font-size:.82rem; }
+.seek-fundraiser-upload p { margin-top:.45rem; color:#53645A; font-size:.75rem; }
+.seek-fundraiser-submit { display:flex; width:100%; min-height:3.35rem; align-items:center; justify-content:center; gap:.7rem; border:1px solid #A6D36B; border-radius:999px; background:#CCF88E; color:#193524; font-weight:800; box-shadow:0 8px 20px rgba(87,137,54,.16); transition:transform .2s ease, box-shadow .2s ease, filter .2s ease; }
+.seek-fundraiser-submit:hover:not(:disabled) { transform:translateY(-2px); box-shadow:0 12px 24px rgba(87,137,54,.22); filter:saturate(1.06); }
+.seek-fundraiser-submit:active:not(:disabled) { transform:scale(.985); }
+.seek-fundraiser-submit:disabled { opacity:.7; cursor:wait; }
+@keyframes seek-fundraiser-enter { from { opacity:0; transform:translateY(14px); } to { opacity:1; transform:translateY(0); } }
+html.seek-dark .seek-fundraiser-page { color:#F3F7F1; }
+html.seek-dark .seek-fundraiser-intro h1 { color:#F3F7F1 !important; }
+html.seek-dark .seek-fundraiser-intro p { color:#D4DED6 !important; }
+html.seek-dark .seek-fundraiser-kicker { color:#D7F99B; }
+html.seek-dark .seek-fundraiser-form { background:#243C30; border-color:#526F5B; box-shadow:0 14px 34px rgba(0,0,0,.2); }
+html.seek-dark .seek-fundraiser-field { background:#FFFFFF !important; color:#20392D !important; border-color:#AAB8AE !important; }
+html.seek-dark .seek-fundraiser-field::placeholder { color:#68766D !important; opacity:1; }
+html.seek-dark .seek-fundraiser-upload { background:#1B3024; border-color:#77947F; color:#F3F7F1; }
+html.seek-dark .seek-fundraiser-upload label { color:#F3F7F1; }
+html.seek-dark .seek-fundraiser-upload input { color:#F3F7F1; }
+html.seek-dark .seek-fundraiser-upload p { color:#D4DED6; }
+/* Account recovery links must remain readable against the dark account card. */
+html.seek-dark .seek-account-form-card form > button:not([type="submit"]),
+html.seek-dark .seek-account-form-card form p button { color:#D7F99B !important; -webkit-text-fill-color:#D7F99B !important; text-decoration:underline; text-underline-offset:3px; }
+html.seek-dark .seek-account-form-card form > button:not([type="submit"]):hover,
+html.seek-dark .seek-account-form-card form p button:hover { color:#FFFFFF !important; -webkit-text-fill-color:#FFFFFF !important; }
+@media (prefers-reduced-motion: reduce) { .seek-fundraiser-intro, .seek-fundraiser-form > * { animation:none !important; } .seek-fundraiser-field, .seek-fundraiser-submit { transition:none !important; } }
